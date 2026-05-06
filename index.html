@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidyaPlus | Premium Learning</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* CSS Variables & Premium Color Palette */
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text-gray: #64748b;
+        }
+        
+        /* Reset & Base Spacing */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--light); color: var(--dark); overflow-x: hidden; }
+        html { scroll-behavior: smooth; }
+
+        /* Premium Navbar with Glass Effect */
+        nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 1.25rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.5px; }
+        .logo span { background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; }
+        .nav-btn { background: var(--dark); color: white; padding: 0.75rem 1.75rem; border-radius: 50px; font-weight: 600; text-decoration: none; transition: 0.3s ease; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15); }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(15, 23, 42, 0.3); background: #000; }
+
+        /* Luxurious Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 5% 4rem;
+            background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.08), transparent 40%), 
+                        radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.08), transparent 40%);
+        }
+        .badge { background: rgba(79, 70, 229, 0.1); color: var(--primary); padding: 0.6rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1.5rem; letter-spacing: 1.5px; text-transform: uppercase; }
+        .hero h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -1px; }
+        .hero p { font-size: 1.15rem; color: var(--text-gray); max-width: 650px; margin-bottom: 2.5rem; line-height: 1.8; }
+        
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 1.1rem 2.8rem; border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 1.1rem; transition: 0.4s ease; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35); }
+        .btn-primary:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(236, 72, 153, 0.4); }
+
+        /* Advanced Courses Grid with Perfect Spacing */
+        .courses { padding: 6rem 5%; max-width: 1400px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: var(--dark); }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; }
+        
+        /* Premium Cards */
+        .card { background: white; border-radius: 24px; padding: 2.5rem; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 10px 30px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; }
+        .card:hover { transform: translateY(-12px); box-shadow: 0 20px 40px rgba(79, 70, 229, 0.1); border-color: rgba(79, 70, 229, 0.2); }
+        
+        .card-icon { width: 65px; height: 65px; background: rgba(79, 70, 229, 0.08); border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.6rem; color: var(--primary); margin-bottom: 1.8rem; transition: 0.3s ease; }
+        .card:hover .card-icon { background: var(--primary); color: white; transform: scale(1.1) rotate(-5deg); }
+        
+        .card h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 1rem; color: var(--dark); }
+        .card p { color: var(--text-gray); line-height: 1.7; margin-bottom: 2rem; font-size: 0.95rem; }
+        
+        .card-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 700; text-decoration: none; transition: 0.3s; margin-top: auto; }
+        .card-link:hover { gap: 0.8rem; color: var(--secondary); }
+
+        /* Responsive Fixes */
+        @media (max-width: 768px) {
+            .hero { padding-top: 7rem; }
+            .card { padding: 2rem; }
+            .grid { gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Vidya<span>Plus</span></div>
+        <a href="#" class="nav-btn">Sign In</a>
+    </nav>
+
+    <section class="hero">
+        <div class="badge">Next-Gen Education Portal</div>
+        <h1>Master Your Future,<br><span>Zero Fees Required.</span></h1>
+        <p>A luxurious, interactive learning experience. Access high-quality syllabus dashboards, structured content, and deep-dive conceptual mastery.</p>
+        <a href="#batches" class="btn-primary">Explore Syllabus Dashboard</a>
+    </section>
+
+    <section class="courses" id="batches">
+        <div class="section-header">
+            <h2>Premium Batches</h2>
+            <p style="color: var(--text-gray); font-size: 1.1rem;">Curated content strictly focused on your core objectives.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div>
+                    <div class="card-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>JEE Target Program</h3>
+                    <p>Advanced problem-solving techniques for Physics, Chemistry, and Mathematics. Structured specifically for top percentiles.</p>
+                </div>
+                <a href="#" class="card-link">Enter Dashboard <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <div class="card-icon"><i class="fas fa-book-open"></i></div>
+                    <h3>Class 12 UP Board (PCM)</h3>
+                    <p>Complete Board exam strategy. Interactive syllabus dashboard featuring previous year questions and precision notes.</p>
+                </div>
+                <a href="#" class="card-link">Enter Dashboard <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <div class="card-icon"><i class="fas fa-infinity"></i></div>
+                    <h3>Calculus Masterclass</h3>
+                    <p>Step-by-step mathematical proofs. Conquer Continuity, Differentiability, and deep Integration techniques easily.</p>
+                </div>
+                <a href="#" class="card-link">Enter Dashboard <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <div class="card-icon"><i class="fas fa-atom"></i></div>
+                    <h3>Physics Practicals</h3>
+                    <p>Detailed objective analysis and interactive principles, specifically focused on strict Meter Bridge applications.</p>
+                </div>
+                <a href="#" class="card-link">Enter Dashboard <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>
