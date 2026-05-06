@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | VidyaPlus</title>
+    <title>Sign Up | VidyaPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; }
@@ -23,16 +23,18 @@
         .btn-submit:hover { background: #1d4ed8; }
         
         .toggle-text { margin-top: 1.5rem; font-size: 0.9rem; color: #64748b; }
-        .toggle-text span { color: var(--primary); font-weight: 600; cursor: pointer; }
+        .toggle-text span { color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: underline; }
+        
+        #error-message { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
     <div class="auth-container">
         <div class="logo">VidyaPlus</div>
-        <div class="subtitle" id="form-subtitle">Welcome back! Please enter your details.</div>
+        <div class="subtitle" id="form-subtitle">Create a new account to get started.</div>
 
-        <form id="auth-form" onsubmit="event.preventDefault();">
+        <form id="auth-form">
             <div class="input-group">
                 <label>Email Address</label>
                 <input type="email" id="email" placeholder="student@example.com" required>
@@ -43,13 +45,96 @@
                 <input type="password" id="password" placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="btn-submit" id="submit-btn">Log In</button>
+            <button type="submit" class="btn-submit" id="submit-btn">Sign Up</button>
+            <div id="error-message"></div>
         </form>
 
         <div class="toggle-text" id="toggle-form">
-            Don't have an account? <span>Sign Up</span>
+            Already have an account? <span id="toggle-btn">Log In</span>
         </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Aapki Tijori ki Chabi
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6s4SQloHdaPU8EVvkrYpYvUdahsOtI4",
+            authDomain: "vidyaplus-d9c3b.firebaseapp.com",
+            projectId: "vidyaplus-d9c3b",
+            storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
+            messagingSenderId: "492916889178",
+            appId: "1:492916889178:web:a3d3f3737b1236167caa63",
+            measurementId: "G-Q9XL40W67"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // UI Variables
+        let isLoginMode = false; // Isko false kar diya taaki default Sign Up rahe
+        const toggleBtn = document.getElementById('toggle-btn');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleFormText = document.getElementById('toggle-form');
+        const authForm = document.getElementById('auth-form');
+        const errorMsg = document.getElementById('error-message');
+
+        // Toggle Logic (Login aur Signup ke beech switch karna)
+        function setupToggle() {
+            document.getElementById('toggle-btn').addEventListener('click', () => {
+                isLoginMode = !isLoginMode;
+                if(isLoginMode) {
+                    document.title = "Log In | VidyaPlus";
+                    formSubtitle.innerText = "Welcome back! Please log in.";
+                    submitBtn.innerText = "Log In";
+                    toggleFormText.innerHTML = `Don't have an account? <span id="toggle-btn" style="color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;">Sign Up</span>`;
+                } else {
+                    document.title = "Sign Up | VidyaPlus";
+                    formSubtitle.innerText = "Create a new account to get started.";
+                    submitBtn.innerText = "Sign Up";
+                    toggleFormText.innerHTML = `Already have an account? <span id="toggle-btn" style="color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;">Log In</span>`;
+                }
+                setupToggle(); // Naye button par event wapas lagane ke liye
+            });
+        }
+        setupToggle();
+
+        // Form Submit Logic (Database mein bhejna)
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault(); 
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = "Processing...";
+            errorMsg.style.display = "none";
+
+            if(isLoginMode) {
+                // Asli Login System
+                signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    window.location.href = "dashboard.html"; 
+                })
+                .catch((error) => {
+                    submitBtn.innerText = originalBtnText;
+                    errorMsg.innerText = error.message.replace("Firebase:", "");
+                    errorMsg.style.display = "block";
+                });
+            } else {
+                // Asli Sign-Up System
+                createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    window.location.href = "dashboard.html";
+                })
+                .catch((error) => {
+                    submitBtn.innerText = originalBtnText;
+                    errorMsg.innerText = error.message.replace("Firebase:", "");
+                    errorMsg.style.display = "block";
+                });
+            }
+        });
+    </script>
 </body>
 </html>
