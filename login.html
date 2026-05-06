@@ -25,7 +25,7 @@
         .toggle-text { margin-top: 1.5rem; font-size: 0.9rem; color: #64748b; }
         .toggle-text span { color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: underline; }
         
-        #error-message { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; }
+        #error-message { color: #ef4444; font-size: 0.9rem; font-weight: 500; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -55,11 +55,9 @@
     </div>
 
     <script type="module">
-        // Browser wale Links (kyunki hum npm use nahi kar rahe)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // AAPKI EXACT COPY-PASTE KIYI HUI KEYS!
         const firebaseConfig = {
             apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrrYpYvUdahsOtI4",
             authDomain: "vidyaplus-d9c3b.firebaseapp.com",
@@ -81,9 +79,28 @@
         const authForm = document.getElementById('auth-form');
         const errorMsg = document.getElementById('error-message');
 
+        // Smart Error Message Function
+        function getFriendlyError(errorCode) {
+            switch(errorCode) {
+                case 'auth/invalid-credential':
+                    return "Email ya Password galat hai. Kripya dobara check karein.";
+                case 'auth/email-already-in-use':
+                    return "Is email se pehle hi account ban chuka hai. Kripya Log In karein.";
+                case 'auth/weak-password':
+                    return "Password kam se kam 6 characters ka hona chahiye.";
+                case 'auth/invalid-email':
+                    return "Kripya ek sahi Email ID daalein.";
+                case 'auth/network-request-failed':
+                    return "Internet connection check karein.";
+                default:
+                    return "Kuch galat ho gaya. Kripya thodi der baad try karein.";
+            }
+        }
+
         function setupToggle() {
             document.getElementById('toggle-btn').addEventListener('click', () => {
                 isLoginMode = !isLoginMode;
+                errorMsg.style.display = "none"; // Switch karte waqt error chupa do
                 if(isLoginMode) {
                     document.title = "Log In | VidyaPlus";
                     formSubtitle.innerText = "Welcome back! Please log in.";
@@ -117,7 +134,7 @@
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
-                    errorMsg.innerText = error.message.replace("Firebase:", "");
+                    errorMsg.innerText = getFriendlyError(error.code); // Yahan user-friendly error aayega
                     errorMsg.style.display = "block";
                 });
             } else {
@@ -128,7 +145,7 @@
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
-                    errorMsg.innerText = error.message.replace("Firebase:", "");
+                    errorMsg.innerText = getFriendlyError(error.code); // Yahan user-friendly error aayega
                     errorMsg.style.display = "block";
                 });
             }
