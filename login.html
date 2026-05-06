@@ -58,9 +58,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Aapki Tijori ki Chabi
+        // Yahan maine aapki API Key THEEK kar di hai!
         const firebaseConfig = {
-            apiKey: "AIzaSyC6s4SQloHdaPU8EVvkrYpYvUdahsOtI4",
+            apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrYpYvUdahsOtI4",
             authDomain: "vidyaplus-d9c3b.firebaseapp.com",
             projectId: "vidyaplus-d9c3b",
             storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
@@ -72,8 +72,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // UI Variables
-        let isLoginMode = false; // Isko false kar diya taaki default Sign Up rahe
+        let isLoginMode = false; 
         const toggleBtn = document.getElementById('toggle-btn');
         const formSubtitle = document.getElementById('form-subtitle');
         const submitBtn = document.getElementById('submit-btn');
@@ -81,7 +80,6 @@
         const authForm = document.getElementById('auth-form');
         const errorMsg = document.getElementById('error-message');
 
-        // Toggle Logic (Login aur Signup ke beech switch karna)
         function setupToggle() {
             document.getElementById('toggle-btn').addEventListener('click', () => {
                 isLoginMode = !isLoginMode;
@@ -96,12 +94,11 @@
                     submitBtn.innerText = "Sign Up";
                     toggleFormText.innerHTML = `Already have an account? <span id="toggle-btn" style="color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;">Log In</span>`;
                 }
-                setupToggle(); // Naye button par event wapas lagane ke liye
+                setupToggle(); 
             });
         }
         setupToggle();
 
-        // Form Submit Logic (Database mein bhejna)
         authForm.addEventListener('submit', (e) => {
             e.preventDefault(); 
             const email = document.getElementById('email').value;
@@ -112,10 +109,10 @@
             errorMsg.style.display = "none";
 
             if(isLoginMode) {
-                // Asli Login System
                 signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    window.location.href = "dashboard.html"; 
+                    alert("Login Successful! Dashboard coming soon 🚀");
+                    window.location.href = "index.html"; 
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
@@ -123,10 +120,10 @@
                     errorMsg.style.display = "block";
                 });
             } else {
-                // Asli Sign-Up System
                 createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    window.location.href = "dashboard.html";
+                    alert("Account Successfully Created! Dashboard coming soon 🚀");
+                    window.location.href = "index.html";
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
