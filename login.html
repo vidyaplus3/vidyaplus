@@ -78,25 +78,24 @@
         const toggleFormText = document.getElementById('toggle-form');
         const authForm = document.getElementById('auth-form');
         const errorMsg = document.getElementById('error-message');
-
-        // Smart Error Message Function
+        // Professional Error Message Function
         function getFriendlyError(errorCode) {
             switch(errorCode) {
                 case 'auth/invalid-credential':
-                    return "Email ya Password galat hai. Kripya dobara check karein.";
+                    return "Invalid email or password. Please try again.";
                 case 'auth/email-already-in-use':
-                    return "Is email se pehle hi account ban chuka hai. Kripya Log In karein.";
+                    return "This email is already registered. Please log in.";
                 case 'auth/weak-password':
-                    return "Password kam se kam 6 characters ka hona chahiye.";
+                    return "Password must be at least 6 characters long.";
                 case 'auth/invalid-email':
-                    return "Kripya ek sahi Email ID daalein.";
+                    return "Please enter a valid email address.";
                 case 'auth/network-request-failed':
-                    return "Internet connection check karein.";
+                    return "Network error. Please check your internet connection.";
                 default:
-                    return "Kuch galat ho gaya. Kripya thodi der baad try karein.";
+                    return "An unexpected error occurred. Please try again later.";
             }
         }
-
+        
         function setupToggle() {
             document.getElementById('toggle-btn').addEventListener('click', () => {
                 isLoginMode = !isLoginMode;
