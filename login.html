@@ -54,26 +54,84 @@
         </div>
     </div>
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrrYpYvUdahsOtI4",
-  authDomain: "vidyaplus-d9c3b.firebaseapp.com",
-  projectId: "vidyaplus-d9c3b",
-  storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
-  messagingSenderId: "492916889178",
-  appId: "1:492916889178:web:a3d3f3737b1236167caa63",
-  measurementId: "G-Q9XL40BW87"
-};
+        // Yahan maine aapki API Key THEEK kar di hai!
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrYpYvUdahsOtI4",
+            authDomain: "vidyaplus-d9c3b.firebaseapp.com",
+            projectId: "vidyaplus-d9c3b",
+            storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
+            messagingSenderId: "492916889178",
+            appId: "1:492916889178:web:a3d3f3737b1236167caa63",
+            measurementId: "G-Q9XL40W67"
+        };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let isLoginMode = false; 
+        const toggleBtn = document.getElementById('toggle-btn');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleFormText = document.getElementById('toggle-form');
+        const authForm = document.getElementById('auth-form');
+        const errorMsg = document.getElementById('error-message');
+
+        function setupToggle() {
+            document.getElementById('toggle-btn').addEventListener('click', () => {
+                isLoginMode = !isLoginMode;
+                if(isLoginMode) {
+                    document.title = "Log In | VidyaPlus";
+                    formSubtitle.innerText = "Welcome back! Please log in.";
+                    submitBtn.innerText = "Log In";
+                    toggleFormText.innerHTML = `Don't have an account? <span id="toggle-btn" style="color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;">Sign Up</span>`;
+                } else {
+                    document.title = "Sign Up | VidyaPlus";
+                    formSubtitle.innerText = "Create a new account to get started.";
+                    submitBtn.innerText = "Sign Up";
+                    toggleFormText.innerHTML = `Already have an account? <span id="toggle-btn" style="color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;">Log In</span>`;
+                }
+                setupToggle(); 
+            });
+        }
+        setupToggle();
+
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault(); 
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = "Processing...";
+            errorMsg.style.display = "none";
+
+            if(isLoginMode) {
+                signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    alert("Login Successful! Dashboard coming soon 🚀");
+                    window.location.href = "index.html"; 
+                })
+                .catch((error) => {
+                    submitBtn.innerText = originalBtnText;
+                    errorMsg.innerText = error.message.replace("Firebase:", "");
+                    errorMsg.style.display = "block";
+                });
+            } else {
+                createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    alert("Account Successfully Created! Dashboard coming soon 🚀");
+                    window.location.href = "index.html";
+                })
+                .catch((error) => {
+                    submitBtn.innerText = originalBtnText;
+                    errorMsg.innerText = error.message.replace("Firebase:", "");
+                    errorMsg.style.display = "block";
+                });
+            }
+        });
+    </script>
 </body>
 </html>
