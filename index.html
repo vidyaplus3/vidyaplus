@@ -231,29 +231,9 @@
         overlay.addEventListener('click', toggleMenu);
     </script>
         <script type="module">
-        // Master file se seedha auth import kiya
-        import { auth } from './firebase-init.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // Security Guard: Check if user is logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in.
-                document.getElementById('user-email-display').innerText = user.email;
-            } else {
-                // User is NOT signed in. Kick them to login page.
-                window.location.replace("login.html");
-            }
-        });
-
-        // Logout Button Logic
-        document.getElementById('logout-action').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.replace("index.html");
-            }).catch((error) => {
-                alert("Error logging out. Please try again.");
-            });
-        });
+        // Yahan hum sirf app ko initialize kar rahe hain, koi 'Security Guard' nahi lagayenge
+        import { app } from './firebase-init.js';
+        console.log("VidyaPlus Home Page Connected!");
         </script>
     
 </body>
