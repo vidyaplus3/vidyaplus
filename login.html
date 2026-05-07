@@ -110,7 +110,7 @@
             if(isLoginMode) {
                 signInWithEmailAndPassword(auth, email, password)
                 .then(() => {
-                    window.location.replace("dashboard.html"); 
+                    window.location.replace("explore.html"); 
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
@@ -120,7 +120,7 @@
             } else {
                 createUserWithEmailAndPassword(auth, email, password)
                 .then(() => {
-                    window.location.replace("dashboard.html");
+                    window.location.replace("explore.html");
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
