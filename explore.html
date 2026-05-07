@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Explore Batches | VidyaPlus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CORE VARIABLES (Matched with your index.html) */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow-x: hidden; min-height: 100vh; }
+
+        /* --- 1. SUPER SLIM TOP BAR DESIGN --- */
+        .header {
+            background: #ffffff;
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50; /* Changed to 50 so Bottom Sheet can overlay */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header-left { display: flex; align-items: center; }
+        .menu-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; margin-right: 15px; }
+        .logo { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+
+        /* User Avatar instead of login button */
+        .user-avatar {
+            width: 35px; height: 35px; background: var(--primary); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.1rem;
+        }
+
+        /* --- 2. SLIM & PROFESSIONAL SIDEBAR --- */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            top: 0;
+            left: -240px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s ease;
+            z-index: 1002;
+        }
+
+        .brand-sidebar {
+            padding: 1.2rem; font-size: 1.3rem; font-weight: 800; color: var(--primary);
+            border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .close-btn { background: none; border: none; font-size: 1.3rem; color: var(--text-main); cursor: pointer; }
+        .nav-menu { list-style: none; padding: 1.2rem 1rem; flex-grow: 1; }
+        .nav-item { margin-bottom: 0.4rem; }
+        .nav-link {
+            display: flex; align-items: center; padding: 0.7rem 0.9rem; color: var(--text-muted);
+            text-decoration: none; font-weight: 600; border-radius: 8px; transition: 0.2s ease; font-size: 0.95rem;
+        }
+        .nav-link i { margin-right: 12px; font-size: 1.1rem; width: 22px; text-align: center; }
+        .nav-link:hover, .nav-link.active { background-color: #eff6ff; color: var(--primary); }
+        .sidebar.show { left: 0; }
+
+        .overlay { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 998; transition: 0.3s; }
+        .overlay.show { display: block; }
+
+        /* --- 3. BATCH GRID SYSTEM --- */
+        .page-header { padding: 1.5rem 1.5rem 0.5rem; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+        
+        .batch-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem; padding: 1rem 1.5rem 3rem;
+        }
+
+        .batch-card {
+            background: var(--white); border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .batch-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+
+        .card-img-container { width: 100%; height: 150px; position: relative; background: #e2e8f0; }
+        .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .status-badge {
+            position: absolute; top: 10px; right: 10px; background: var(--success);
+            color: white; font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 700;
+        }
+
+        .card-details { padding: 1rem; }
+        .card-subject { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 5px; }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
+        
+        .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .card-price { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
+        .btn-view { background: #eff6ff; color: var(--primary); border: none; padding: 5px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+        /* --- 4. BOTTOM SHEET MODAL --- */
+        .bottom-sheet-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4);
+            z-index: 2000; opacity: 0; pointer-events: none; transition: 0.3s ease; backdrop-filter: blur(2px);
+        }
+        .bottom-sheet-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--white);
+            border-radius: 20px 20px 0 0; z-index: 2001; padding: 1.5rem; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
+            max-height: 80vh; overflow-y: auto; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        .bottom-sheet.active { bottom: 0; }
+
+        .sheet-handle { width: 40px; height: 5px; background: #cbd5e1; border-radius: 10px; margin: 0 auto 1.5rem; }
+        .sheet-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+        .sheet-subject { color: var(--primary); font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; }
+        .sheet-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
+        
+        .price-box { background: #f8fafc; padding: 1rem; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .price-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; }
+        .price-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+
+        .btn-enroll {
+            width: 100%; background: var(--primary); color: white; border: none; padding: 12px;
+            border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-enroll:active { transform: scale(0.98); }
+
+        .loader { text-align: center; padding: 2rem; color: var(--text-muted); font-weight: 600; grid-column: 1/-1; }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="brand-sidebar">
+            VidyaPlus
+            <button class="close-btn" id="close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="explore.html" class="nav-link active"><i class="fas fa-compass"></i> Explore Batches</a></li>
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-book-open"></i> My Batches</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-play-circle"></i> Study</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-robot"></i> AI Guru</a></li>
+        </ul>
+    </nav>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+            <div class="logo">VidyaPlus</div>
+        </div>
+        <div class="user-avatar" id="userIcon">S</div>
+    </header>
+
+    <div class="page-header">
+        <h1>Explore Premium Batches</h1>
+    </div>
+
+    <main class="batch-grid" id="batchGrid">
+        <div class="loader" id="loader"><i class="fas fa-spinner fa-spin"></i> Loading Batches...</div>
+    </main>
+
+    <div class="bottom-sheet-overlay" id="sheetOverlay"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-subject" id="sheetSubject">Subject</div>
+        <h2 class="sheet-title" id="sheetTitle">Batch Title</h2>
+        <p class="sheet-desc" id="sheetDesc">Description</p>
+        
+        <div class="price-box">
+            <span class="price-label">Enrollment Fee</span>
+            <span class="price-value" id="sheetPrice">₹0</span>
+        </div>
+        
+        <button class="btn-enroll" id="btnEnroll">Enroll Now</button>
+    </div>
+
+    <script>
+        // Sidebar Logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeBtn = document.getElementById('close-btn');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        menuToggle.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Bottom Sheet Logic
+        const sheetOverlay = document.getElementById('sheetOverlay');
+        const bottomSheet = document.getElementById('bottomSheet');
+        let selectedBatchId = null;
+
+        function closeBottomSheet() {
+            sheetOverlay.classList.remove('active');
+            bottomSheet.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Re-enable scroll
+        }
+        sheetOverlay.addEventListener('click', closeBottomSheet);
+    </script>
+
+    <script type="module">
+        // 🔥 Dekho Bhai! Yahan tumhare file se direct 'db' import ho raha hai
+        import { db } from './firebase-init.js';
+        import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const batchGrid = document.getElementById('batchGrid');
+        const loader = document.getElementById('loader');
+
+        async function fetchBatches() {
+            try {
+                // Sirf wahi batches layega jinka status 'Active' hai (Tumhare screenshot ke hisab se)
+                const q = query(collection(db, "batches"), where("status", "==", "Active"));
+                const querySnapshot = await getDocs(q);
+                
+                loader.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    batchGrid.innerHTML = '<p style="text-align:center; width:100%; color:gray;">No active batches available.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    renderBatch(doc.id, data);
+                });
+
+            } catch (error) {
+                console.error("Error fetching batches:", error);
+                loader.innerHTML = '<p style="color:red;">Error loading data.</p>';
+            }
+        }
+
+        function renderBatch(id, data) {
+            const card = document.createElement('div');
+            card.className = 'batch-card';
+            
+            // Image handle (Agar image URL empty hai to placeholder dalega)
+            const imgUrl = data.imageUrl ? data.imageUrl : 'https://via.placeholder.com/300x150?text=VidyaPlus';
+            
+            // Price handle (Tumhare DB me price as string store ho rahi hai "1", isliye check lagaya)
+            let displayPrice = "Free";
+            if(data.price && data.price !== "0" && data.price !== "") {
+                displayPrice = `₹${data.price}`;
+            }
+
+            card.innerHTML = `
+                <div class="card-img-container">
+                    <span class="status-badge">Live</span>
+                    <img src="${imgUrl}" alt="Batch Image">
+                </div>
+                <div class="card-details">
+                    <div class="card-subject">${data.subject || 'All Subjects'}</div>
+                    <div class="card-title">${data.title}</div>
+                    <div class="card-bottom">
+                        <div class="card-price">${displayPrice}</div>
+                        <button class="btn-view">View</button>
+                    </div>
+                </div>
+            `;
+
+            // Card click karne pe modal open hoga
+            card.addEventListener('click', () => {
+                document.getElementById('sheetTitle').innerText = data.title;
+                document.getElementById('sheetSubject').innerText = data.subject || 'All Subjects';
+                document.getElementById('sheetDesc').innerText = data.description || 'No description available.';
+                document.getElementById('sheetPrice').innerText = displayPrice;
+                
+                selectedBatchId = id;
+                
+                // Show modal
+                document.getElementById('sheetOverlay').classList.add('active');
+                document.getElementById('bottomSheet').classList.add('active');
+                document.body.style.overflow = 'hidden'; // Stop background scrolling
+            });
+
+            batchGrid.appendChild(card);
+        }
+
+        // On page load, run the fetch function
+        document.addEventListener('DOMContentLoaded', fetchBatches);
+
+        // Enroll Button Logic Placeholder
+        document.getElementById('btnEnroll').addEventListener('click', () => {
+            alert(`Payment Gateway Integration pending for Batch ID: ${selectedBatchId}`);
+            // Future step: Redirect to checkout or add to user's enrolled batches
+        });
+
+    </script>
+</body>
+</html>
