@@ -3,146 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VidyaPlus | Premium Learning Introductions</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>VidyaPlus | Master Your Future, Zero Fees Required</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* CSS Variables for Premium Minimalism */
         :root {
-            --primary: #4f46e5; /* Indigo */
-            --secondary: #ec4899; /* Pink */
-            --dark: #0f172a; /* Near-Black */
-            --light: #f8fafc; /* Slate */
-            --text-gray: #64748b;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
         }
-        
-        /* Reset & Base Spacing */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--light); color: var(--dark); overflow-x: hidden; }
-        html { scroll-behavior: smooth; }
 
-        /* Premium Navbar with Glass Effect */
-        nav {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            padding: 1rem 5%;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow-x: hidden; min-height: 100vh; }
+
+        /* --- 1. SUPER SLIM TOP BAR DESIGN --- */
+        .header {
+            background: #ffffff;
+            padding: 0.8rem 1rem; /* Super Slim padding */
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1001; /* Above everything */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow */
+            border-bottom: 1px solid #e2e8f0;
         }
-        .logo { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.5px; margin-right: auto; }
-        .logo span { background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; }
-        
-        .nav-actions { display: flex; align-items: center; gap: 1rem; }
-        
-        /* Minimalist Menu Button to the left of Login */
-        .nav-menu-btn {
-            background: transparent;
-            border: none;
-            color: var(--dark);
-            font-size: 1.25rem;
-            cursor: pointer;
+
+        .header-left { display: flex; align-items: center; }
+        .menu-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; margin-right: 15px; }
+        .logo { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+
+        .header-btn {
+            background: #000000;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
             transition: 0.3s;
         }
-        .nav-menu-btn:hover { color: var(--primary); }
-        
-        .nav-btn {
-            background: var(--dark);
-            color: white;
-            padding: 0.6rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: 0.3s ease;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
-        }
-        .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(15, 23, 42, 0.2); background: #000; }
+        .header-btn:hover { background: #333333; }
 
-        /* Luxurious Minimalist Hero Section (Full Screen Introductory) */
-        .hero {
-            min-height: 100vh;
+        /* --- 2. SLIM & PROFESSIONAL SIDEBAR --- */
+        .sidebar {
+            width: 240px; /* Slimmer width */
+            height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            top: 0;
+            left: -240px; /* Hidden default */
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
+            transition: 0.3s ease;
+            z-index: 1002; /* Purely above content and header */
+        }
+
+        .brand-sidebar {
+            padding: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .close-btn { background: none; border: none; font-size: 1.3rem; color: var(--text-main); cursor: pointer; }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1.2rem 1rem;
+            flex-grow: 1;
+        }
+
+        .nav-item { margin-bottom: 0.4rem; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 0.9rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: 0.2s ease;
+            font-size: 0.95rem; /* Slimmer Font */
+        }
+
+        .nav-link i { margin-right: 12px; font-size: 1.1rem; width: 22px; text-align: center; }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: #eff6ff;
+            color: var(--primary);
+        }
+
+        .sidebar.show { left: 0; }
+
+        /* Overlay for mobile */
+        .overlay { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 998; transition: 0.3s; }
+        .overlay.show { display: block; }
+
+        /* --- 3. MAIN CONTENT (From image_11.png) --- */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
             justify-content: center;
             align-items: center;
+            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+            padding: 2rem;
             text-align: center;
-            padding: 10rem 5% 6rem; /* Vertical alignment fix */
-            background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.08), transparent 45%), 
-                        radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.08), transparent 45%);
         }
-        .badge { background: rgba(79, 70, 229, 0.1); color: var(--primary); padding: 0.5rem 1.2rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; margin-bottom: 2rem; letter-spacing: 1px; text-transform: uppercase; }
-        .hero h1 { font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 900; line-height: 1.1; margin-bottom: 2rem; letter-spacing: -1.5px; max-width: 900px; }
-        .hero h1 span { color: var(--primary); }
-        .hero p { font-size: 1.2rem; color: var(--text-gray); max-width: 700px; margin-bottom: 3.5rem; line-height: 1.8; }
-        
-        /* Single, Impactful Call-to-Action Button */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 1.2rem 3rem;
-            border-radius: 12px; /* Square premium look */
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 1.15rem;
-            transition: 0.4s ease;
-            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.35);
-        }
-        .btn-primary:hover { transform: translateY(-4px); box-shadow: 0 15px 45px rgba(236, 72, 153, 0.45); }
 
-        /* Minimalist Footer */
-        footer {
-            text-align: center;
-            padding: 2.5rem 5%;
-            color: var(--text-gray);
-            border-top: 1px solid rgba(0,0,0,0.03);
-            background: var(--light);
-            position: relative;
-            z-index: 100;
+        .badge-main {
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: inline-block;
         }
-        
-        /* Responsive Fixes */
-        @media (max-width: 768px) {
-            nav { padding: 1rem 5%; }
-            .logo { font-size: 1.5rem; }
-            .hero { padding-top: 9rem; padding-bottom: 5rem; }
-            .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); }
-            .hero p { font-size: 1.1rem; }
+
+        .hero-h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            color: var(--text-main);
+        }
+        .hero-h1 span { color: var(--primary); }
+
+        .hero-p {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2.5rem auto;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(45deg, var(--primary) 0%, #db2777 100%);
+            color: #ffffff;
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+        .btn-gradient:hover { transform: translateY(-3px); }
+
+        @media (max-width: 600px) {
+            .hero-h1 { font-size: 1.8rem; }
+            .hero-p { font-size: 0.95rem; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">Vidya<span>Plus</span></div>
-        <div class="nav-actions">
-            <button class="nav-menu-btn"><i class="fas fa-bars"></i></button>
-            <a href="login.html" class="nav-btn">Signup/login</a>
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="brand-sidebar">
+            VidyaPlus
+            <button class="close-btn" id="close-btn"><i class="fas fa-times"></i></button>
         </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active"><i class="fas fa-compass"></i> Explore Batches</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-book-open"></i> My Batches</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-play-circle"></i> Study</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-robot"></i> AI Guru</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-headset"></i> Support</a>
+            </li>
+        </ul>
     </nav>
 
-    <section class="hero">
-        <div class="badge">Next-Gen Education Portal</div>
-        <h1>Master Your Future,<br><span>Zero Fees Required.</span></h1>
-        <p>A luxurious, interactive learning experience strictly focused on structured syllabus dashboards and deep-dive conceptual mastery. Welcome to the introductory interface of future educational access.</p>
-        
-        <a href="#batches" class="btn-primary">Explore Batches</a>
-    </section>
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+            <div class="logo">VidyaPlus</div>
+        </div>
+        <a href="login.html" class="header-btn">Signup/login</a>
+    </header>
 
-    <footer>
-        VidyaPlus &copy; 2026. A Minimalist Introduction Platform.
-    </footer>
+    <main class="main-container">
+        <div>
+            <div class="badge-main">NEXT-GEN EDUCATION PORTAL</div>
+            <h1 class="hero-h1">Master Your Future,<br><span>Zero Fees Required.</span></h1>
+            <p class="hero-p">
+                A luxurious, interactive learning experience strictly focused on structured syllabus dashboards and deep-dive conceptual mastery. Welcome to the introductory interface of future educational access.
+            </p>
+            <a href="login.html" class="btn-gradient">Explore Batches</a>
+        </div>
+    </main>
 
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeBtn = document.getElementById('close-btn');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    </script>
         <script type="module">
-        // Sirf master file ko import kar rahe hain
-        import { app } from './firebase-init.js';
-        
-        // Agar future mein yahan Analytics ya koi aur feature chahiye hoga,
-        // toh hum isi script ke andar use karenge.
-        console.log("VidyaPlus Firebase Connected Successfully!");
+        // Master file se seedha auth import kiya
+        import { auth } from './firebase-init.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Security Guard: Check if user is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in.
+                document.getElementById('user-email-display').innerText = user.email;
+            } else {
+                // User is NOT signed in. Kick them to login page.
+                window.location.replace("login.html");
+            }
+        });
+
+        // Logout Button Logic
+        document.getElementById('logout-action').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.replace("index.html");
+            }).catch((error) => {
+                alert("Error logging out. Please try again.");
+            });
+        });
         </script>
     
 </body>
