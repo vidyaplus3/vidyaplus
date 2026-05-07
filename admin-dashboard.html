@@ -49,9 +49,14 @@
         .modal-title { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
         
         .input-group { margin-bottom: 1.2rem; }
-        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; }
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--primary); outline: none; }
+        .input-group label.main-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+        .input-group input[type="text"], .input-group input[type="url"] { width: 100%; padding: 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; }
+        .input-group input:focus { border-color: var(--primary); outline: none; }
+        
+        /* CHECKBOX STYLES */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .check-label { font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; color: #475569; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; transition: 0.2s; }
+        .check-label:hover { background: #eff6ff; border-color: #bfdbfe; }
         
         .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
@@ -61,6 +66,7 @@
             .sidebar { display: none; }
             .main-content { margin-left: 0; width: 100%; padding: 1rem; }
             .modal-content { width: 90%; padding: 1.5rem; }
+            .checkbox-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -95,20 +101,24 @@
             
             <form id="add-batch-form">
                 <div class="input-group">
-                    <label>Batch Name</label>
+                    <label class="main-label">Batch Name</label>
                     <input type="text" id="batch-name" placeholder="e.g. Target JEE 2026" required>
                 </div>
+                
                 <div class="input-group">
-                    <label>Subject Category</label>
-                    <select id="batch-subject">
-                        <option value="PCM">PCM (Physics, Chem, Math)</option>
-                        <option value="Physics">Physics Only</option>
-                        <option value="Chemistry">Chemistry Only</option>
-                        <option value="Maths">Mathematics Only</option>
-                    </select>
+                    <label class="main-label">Select Subjects</label>
+                    <div class="checkbox-grid" id="batch-subjects">
+                        <label class="check-label"><input type="checkbox" value="Physics"> Physics</label>
+                        <label class="check-label"><input type="checkbox" value="Chemistry"> Chemistry</label>
+                        <label class="check-label"><input type="checkbox" value="Maths"> Maths</label>
+                        <label class="check-label"><input type="checkbox" value="Biology"> Biology</label>
+                        <label class="check-label"><input type="checkbox" value="English"> English</label>
+                        <label class="check-label"><input type="checkbox" value="Hindi"> Hindi</label>
+                    </div>
                 </div>
+
                 <div class="input-group">
-                    <label>Thumbnail Image URL</label>
+                    <label class="main-label">Thumbnail Image URL</label>
                     <input type="url" id="batch-image" placeholder="https://example.com/image.jpg" required>
                 </div>
                 <button type="submit" class="btn-submit" id="submit-btn">Save Batch</button>
@@ -125,44 +135,47 @@
         const form = document.getElementById('add-batch-form');
         const submitBtn = document.getElementById('submit-btn');
 
-        // Modal Open/Close Logic
         document.getElementById('open-modal-btn').addEventListener('click', () => modal.classList.add('active'));
         document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.remove('active'));
         
-        // Form Submit Logic (Saving to Firebase)
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Checkboxes se selected data nikalna
+            let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked'))
+                                        .map(cb => cb.value)
+                                        .join(', ');
+            
+            if(!selectedSubjects) {
+                alert("Please select at least one subject!");
+                return;
+            }
+
             const originalText = submitBtn.innerText;
             submitBtn.innerText = "Saving...";
             submitBtn.disabled = true;
 
             const batchData = {
                 title: document.getElementById('batch-name').value,
-                subject: document.getElementById('batch-subject').value,
+                subject: selectedSubjects, // Yahan ab "Physics, English" aayega
                 imageUrl: document.getElementById('batch-image').value,
-                createdAt: serverTimestamp() // Google server ka exact time
+                createdAt: serverTimestamp()
             };
 
             try {
-                // Database mein add karna
                 await addDoc(collection(db, "batches"), batchData);
-                
-                // Form reset aur modal close
                 form.reset();
                 modal.classList.remove('active');
-                
-                // Turant naye batches screen par load karna
                 loadBatches();
             } catch (error) {
                 console.error("Error adding document: ", error);
-                alert("Error saving batch! Check console.");
+                alert("Error saving batch!");
             } finally {
                 submitBtn.innerText = originalText;
                 submitBtn.disabled = false;
             }
         });
 
-        // Load Batches from Firebase
         async function loadBatches() {
             try {
                 const q = query(collection(db, "batches"), orderBy("createdAt", "desc"));
@@ -179,11 +192,14 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    // Substring lagaya taaki bahut saare subjects hone par card design na toote
+                    let displaySubject = data.subject.length > 25 ? data.subject.substring(0, 25) + '...' : data.subject;
+                    
                     const card = `
                         <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
                             <img src="${data.imageUrl}" class="batch-thumb" alt="thumbnail" onerror="this.src='https://via.placeholder.com/300x160'">
                             <div class="batch-info">
-                                <span class="batch-tag">${data.subject}</span>
+                                <span class="batch-tag" title="${data.subject}">${displaySubject}</span>
                                 <h3 class="batch-title">${data.title}</h3>
                                 <div class="batch-stats">
                                     <span><i class="fas fa-video"></i> 0 Lectures</span>
@@ -196,11 +212,10 @@
                 });
             } catch (error) {
                 console.error("Error loading batches:", error);
-                container.innerHTML = '<p style="color: #ef4444;">Error loading batches. Please check console.</p>';
+                container.innerHTML = '<p style="color: #ef4444;">Error loading batches.</p>';
             }
         }
 
-        // Pehli baar page khulte hi load karna
         loadBatches();
     </script>
 </body>
