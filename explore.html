@@ -220,9 +220,10 @@
         sheetOverlay.addEventListener('click', closeBottomSheet);
     </script>
     
-    <script type="module">
+        <script type="module">
         import { db, auth } from './firebase-init.js';
-        import { collection, query, where, getDocs, doc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // NAYA: getDoc import kiya hai user ka data read karne ke liye
+        import { collection, query, where, getDocs, doc, setDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const batchGrid = document.getElementById('batchGrid');
@@ -230,11 +231,25 @@
         
         let currentUser = null;
         let selectedBatchId = null;
-        let selectedBatchPrice = "0"; // Default 0
+        let selectedBatchPrice = "0"; 
+        let userEnrolledBatches = []; // NAYA: User ke kharide hue batches store karne ke liye
 
-        // Check if user is logged in
-        onAuthStateChanged(auth, (user) => {
+        // Check if user is logged in & Fetch their enrolled batches
+        onAuthStateChanged(auth, async (user) => {
             currentUser = user;
+            if (user) {
+                // UI update for Avatar (Optional, to match dashboard)
+                document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
+
+                // Firestore se user ka data fetch karo
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    // Array me save kar lo taaki baad me match kar sakein
+                    userEnrolledBatches = userSnap.data().enrolledBatches || [];
+                }
+            }
         });
 
         async function fetchBatches() {
@@ -285,7 +300,7 @@
                 </div>
             `;
 
-            // Card click event
+            // Card click event - MODIFIED FOR DYNAMIC BUTTON
             card.addEventListener('click', () => {
                 document.getElementById('sheetTitle').innerText = data.title;
                 document.getElementById('sheetSubject').innerText = data.subject || 'All Subjects';
@@ -295,6 +310,19 @@
                 // Set data for Enrollment Logic
                 selectedBatchId = id;
                 selectedBatchPrice = data.price || "0";
+                
+                const btnEnroll = document.getElementById('btnEnroll');
+
+                // 🔥 SMART CHECK: Kya user already enrolled hai?
+                if (userEnrolledBatches.includes(selectedBatchId)) {
+                    btnEnroll.innerText = "Let's Study 🚀";
+                    btnEnroll.style.background = "#10b981"; // Success green color for visual feedback
+                    btnEnroll.setAttribute('data-action', 'study'); // Custom attribute
+                } else {
+                    btnEnroll.innerText = "Enroll Now";
+                    btnEnroll.style.background = "var(--primary)"; // Reset to primary blue
+                    btnEnroll.setAttribute('data-action', 'enroll'); // Custom attribute
+                }
                 
                 document.getElementById('sheetOverlay').classList.add('active');
                 document.getElementById('bottomSheet').classList.add('active');
@@ -306,32 +334,41 @@
 
         document.addEventListener('DOMContentLoaded', fetchBatches);
 
-        // 🔥 THE MAGIC LOGIC: ENROLL BUTTON 🔥
+        // 🔥 ENROLL / STUDY BUTTON LOGIC 🔥
         document.getElementById('btnEnroll').addEventListener('click', async () => {
             if (!currentUser) {
-                alert("Please login to enroll!");
+                alert("Please login to enroll or study!");
                 window.location.replace("login.html");
                 return;
             }
 
             const btn = document.getElementById('btnEnroll');
+            const action = btn.getAttribute('data-action');
+
+            // Agar already kharida hua hai, to seedha Dashboard pe bhejo
+            if (action === 'study') {
+                window.location.href = "dashboard.html";
+                return;
+            }
             
-            // Check if FREE
+            // Naya Enrollment Process
             if (selectedBatchPrice === "0" || selectedBatchPrice === "" || selectedBatchPrice.toLowerCase() === "free") {
                 
                 const originalText = btn.innerText;
-                btn.innerText = "Enrolling...";
+                btn.innerText = "Processing...";
                 
                 try {
-                    // Update user's document in Firestore (create if not exists)
                     const userRef = doc(db, "users", currentUser.uid);
                     await setDoc(userRef, {
                         enrolledBatches: arrayUnion(selectedBatchId),
                         email: currentUser.email
                     }, { merge: true });
 
+                    // Local array ko bhi turant update kar do bina refresh kiye
+                    userEnrolledBatches.push(selectedBatchId);
+
                     alert("Successfully Enrolled! Welcome to the batch.");
-                    window.location.replace("dashboard.html"); // Redirect to My Study
+                    window.location.replace("dashboard.html"); 
 
                 } catch (error) {
                     console.error("Enrollment failed:", error);
@@ -345,6 +382,6 @@
             }
         });
 
-    </script>
+        </script>
 </body>
 </html>
