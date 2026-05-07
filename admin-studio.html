@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batch Studio Pro | VidyaPlus</title>
+    <title>Batch Studio Ultra | VidyaPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --white: #ffffff; --gray-100: #f1f5f9; --gray-500: #64748b; }
@@ -13,7 +13,8 @@
         /* Top Navbar */
         .top-nav { background: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
         .nav-left { display: flex; align-items: center; gap: 20px; }
-        .btn-back { background: var(--gray-100); color: var(--gray-500); padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-back { background: var(--gray-100); color: var(--gray-500); padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-back:hover { background: #e2e8f0; color: var(--primary); }
         .batch-title { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin: 0; display: flex; align-items: center; gap: 10px; }
         .batch-badge { font-size: 0.7rem; background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; }
 
@@ -21,68 +22,103 @@
         .studio-layout { display: flex; flex-grow: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 2rem; gap: 2rem; }
         .studio-sidebar { width: 260px; flex-shrink: 0; }
         .tab-menu { list-style: none; background: var(--white); border-radius: 16px; padding: 12px; border: 1px solid #e2e8f0; }
-        .tab-item { padding: 14px 15px; margin-bottom: 5px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--gray-500); display: flex; align-items: center; gap: 12px; }
-        .tab-item.active { background: var(--primary); color: var(--white); }
+        .tab-item { padding: 14px 15px; margin-bottom: 5px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--gray-500); display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .tab-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+        .tab-item:hover { background: var(--gray-100); color: var(--primary); }
+        .tab-item.active { background: var(--primary); color: var(--white); box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
+        .tab-item.active i { color: var(--white); }
 
         /* Main Content */
         .content-area { flex-grow: 1; background: var(--white); border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; min-height: 600px; }
-        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--gray-100); }
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--gray-100); flex-wrap: wrap; gap: 15px; }
         .content-header h3 { font-size: 1.6rem; font-weight: 800; }
         .stats-badge { background: #f0fdf4; color: #16a34a; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; border: 1px solid #bbf7d0; display: inline-block; margin-top: 5px; }
         
-        .header-actions { display: flex; gap: 15px; align-items: center; }
-        .btn-action-main { background: var(--primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .header-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        
+        /* 🔥 NAYA: Filter Dropdown */
+        .filter-select { padding: 0.7rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; font-weight: 600; color: var(--text); cursor: pointer; background: #f8fafc; }
+        
+        .search-box { position: relative; width: 250px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box input { width: 100%; padding: 0.7rem 1rem 0.7rem 2.5rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: 0.3s; }
+        .search-box input:focus { border-color: var(--primary); }
+        
+        .btn-action-main { background: var(--primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
+        .btn-action-main:hover { background: #1d4ed8; transform: translateY(-2px); }
 
         /* Chapter Grouping & Cards */
         .chapter-group { margin-bottom: 2rem; background: var(--white); border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
-        .chapter-header { background: #f8fafc; padding: 1rem 1.5rem; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e2e8f0; }
+        .chapter-header { background: #f8fafc; padding: 1rem 1.5rem; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e2e8f0; color: var(--text); }
+        .chapter-header i { color: var(--primary); }
         .lecture-list { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
-        .lecture-row { display: flex; align-items: center; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; }
-        .lec-thumb { width: 140px; height: 80px; border-radius: 8px; object-fit: cover; background: #e2e8f0; margin-right: 15px; }
+        
+        .lecture-row { display: flex; align-items: center; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; transition: 0.2s; background: var(--white); }
+        .lecture-row:hover { border-color: #cbd5e1; box-shadow: 0 4px 10px rgba(0,0,0,0.04); transform: translateX(5px); }
+        .lec-thumb { width: 140px; height: 80px; border-radius: 8px; object-fit: cover; background: #e2e8f0; margin-right: 15px; border: 1px solid #f1f5f9; }
         .lec-details { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
         .lec-title { font-size: 1.15rem; font-weight: 800; color: var(--text); }
         .lec-meta { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 10px; }
+        
         .status-badge { padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
         .status-active { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
         .status-draft { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+        .size-badge { background: #eff6ff; color: #2563eb; padding: 3px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #bfdbfe; }
+        
         .lec-actions { display: flex; gap: 8px; }
-        .icon-btn { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #e2e8f0; background: var(--white); color: var(--gray-500); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .icon-btn { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #e2e8f0; background: var(--white); color: var(--gray-500); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; text-decoration: none; }
+        .icon-btn:hover { background: #f1f5f9; color: var(--primary); border-color: #cbd5e1; }
+        .icon-btn.edit:hover { color: #059669; background: #ecfdf5; border-color: #a7f3d0; }
+        .icon-btn.delete:hover { background: #fee2e2; color: #ef4444; border-color: #fecaca; }
 
         /* Slide-over Form Panel */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; justify-content: flex-end; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; justify-content: flex-end; backdrop-filter: blur(4px); }
         .modal-overlay.active { display: flex; }
-        .slide-panel { background: var(--white); width: 100%; max-width: 550px; height: 100%; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; }
+        .slide-panel { background: var(--white); width: 100%; max-width: 550px; height: 100%; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; animation: slideLeft 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: -10px 0 25px rgba(0,0,0,0.1); }
+        @keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
         
-        .panel-header-modal { display: flex; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
-        .close-panel { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .panel-header-modal { display: flex; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; align-items: center; }
+        .panel-header-modal h3 { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+        .close-panel { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-500); transition: 0.2s; }
+        .close-panel:hover { color: #ef4444; transform: rotate(90deg); }
         
         .input-group { margin-bottom: 1.2rem; }
         .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px; }
-        .input-group input, .input-group select { width: 100%; padding: 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; }
+        .input-group input[type="text"], .input-group input[type="url"], .input-group select { width: 100%; padding: 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; background: #f8fafc; transition: 0.2s; }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); outline: none; background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         
-        /* 🔥 NEW: Toggle Switch for Upload vs Link */
-        .upload-toggle { display: flex; background: #f1f5f9; border-radius: 8px; padding: 4px; margin-bottom: 10px; }
-        .toggle-btn { flex: 1; padding: 8px; text-align: center; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; color: #64748b; border: none; background: transparent; }
+        /* Toggle Switch & Premium File Input */
+        .upload-toggle { display: flex; background: #e2e8f0; border-radius: 8px; padding: 4px; margin-bottom: 10px; }
+        .toggle-btn { flex: 1; padding: 8px; text-align: center; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; color: #64748b; border: none; background: transparent; transition: 0.2s; }
         .toggle-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .file-input-box { width: 100%; padding: 1rem; border: 2px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; color: var(--gray-500); font-weight: 600; text-align: center; transition: 0.2s; cursor: pointer; }
+        .file-input-box:hover { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+        .file-input-box input[type="file"] { width: 100%; cursor: pointer; }
 
-        /* 🔥 NEW: Progress Bar */
+        /* Progress Bar */
         .progress-container { display: none; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .progress-text { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
         .progress-bg { width: 100%; background: #e2e8f0; height: 8px; border-radius: 10px; overflow: hidden; }
         .progress-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
 
-        .btn-submit { width: 100%; padding: 1.1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: auto; }
+        .btn-submit { width: 100%; padding: 1.1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: auto; transition: 0.3s; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
+        .btn-submit:hover { background: #1d4ed8; }
 
         /* Toast */
         .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 250px; background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; font-weight: 700; border-left: 5px solid; }
+        .toast { min-width: 250px; background: white; padding: 1rem 1.5rem; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; font-weight: 700; border-left: 5px solid; animation: slideUpToast 0.3s ease; }
         .toast.success { border-color: #10b981; color: #10b981; }
         .toast.error { border-color: #ef4444; color: #ef4444; }
+        @keyframes slideUpToast { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         @media (max-width: 900px) {
             .studio-layout { flex-direction: column; padding: 1rem; }
             .studio-sidebar { width: 100%; }
-            .header-actions { flex-direction: column; width: 100%; }
+            .tab-menu { display: flex; overflow-x: auto; }
+            .tab-item { white-space: nowrap; }
+            .header-actions { flex-direction: column; width: 100%; align-items: stretch; }
+            .filter-select, .search-box { width: 100%; }
         }
     </style>
 </head>
@@ -101,16 +137,31 @@
         <aside class="studio-sidebar">
             <ul class="tab-menu">
                 <li class="tab-item active"><i class="fas fa-video"></i> Lectures & PDFs</li>
+                <li class="tab-item" onclick="showToast('DPP Engine coming in Phase 6!', 'success')"><i class="fas fa-tasks"></i> Quizzes / DPPs</li>
+                <li class="tab-item" onclick="showToast('Live Class integration coming soon!', 'success')"><i class="fas fa-satellite-dish"></i> Live Classes</li>
+                <li class="tab-item" onclick="showToast('Community feature coming soon!', 'success')"><i class="fas fa-users"></i> Community Chat</li>
+                <li class="tab-item" onclick="showToast('Analytics dashboard locked for now!', 'error')"><i class="fas fa-chart-pie"></i> Analytics</li>
+                <li class="tab-item" onclick="showToast('Settings coming soon!', 'success')"><i class="fas fa-cog"></i> Settings</li>
             </ul>
         </aside>
 
         <main class="content-area">
             <div class="content-header">
                 <div>
-                    <h3>Course Content</h3>
+                    <h3>Course Curriculum</h3>
                     <div class="stats-badge" id="lecture-count">0 Lectures Total</div>
                 </div>
                 <div class="header-actions">
+                    <select id="filter-status" class="filter-select">
+                        <option value="All">All Status</option>
+                        <option value="Active">🟢 Active Only</option>
+                        <option value="Draft">🔴 Drafts Only</option>
+                    </select>
+
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Search title or chapter...">
+                    </div>
                     <button class="btn-action-main" onclick="openModal('upload-panel')">
                         <i class="fas fa-plus"></i> Add Lecture
                     </button>
@@ -153,30 +204,34 @@
                 <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 1rem 0 1.5rem 0;">
 
                 <div class="input-group">
-                    <label><i class="fas fa-play-circle" style="color:#ef4444;"></i> Lecture Video</label>
+                    <label><i class="fas fa-play-circle" style="color:#ef4444;"></i> Lecture Video (Max 100MB)</label>
                     <div class="upload-toggle">
                         <button type="button" class="toggle-btn active" onclick="switchMode('video', 'upload')">Upload File</button>
                         <button type="button" class="toggle-btn" onclick="switchMode('video', 'link')">Paste Link</button>
                     </div>
-                    <input type="file" id="mat-video-file" accept="video/mp4,video/mkv,video/webm" style="display:block;">
+                    <div class="file-input-box" id="video-file-box">
+                        <input type="file" id="mat-video-file" accept="video/mp4,video/mkv,video/webm">
+                    </div>
                     <input type="url" id="mat-video-link" placeholder="https://youtube.com/..." style="display:none;">
                 </div>
 
                 <div class="input-group">
-                    <label><i class="fas fa-file-pdf" style="color:#2563eb;"></i> Class Notes PDF</label>
+                    <label><i class="fas fa-file-pdf" style="color:#2563eb;"></i> Class Notes PDF (Max 50MB)</label>
                     <div class="upload-toggle">
                         <button type="button" class="toggle-btn active" onclick="switchMode('pdf', 'upload')">Upload File</button>
                         <button type="button" class="toggle-btn" onclick="switchMode('pdf', 'link')">Paste Link</button>
                     </div>
-                    <input type="file" id="mat-pdf-file" accept="application/pdf" style="display:block;">
+                    <div class="file-input-box" id="pdf-file-box">
+                        <input type="file" id="mat-pdf-file" accept="application/pdf">
+                    </div>
                     <input type="url" id="mat-pdf-link" placeholder="https://drive.google.com/..." style="display:none;">
                 </div>
 
                 <div class="input-group">
                     <label>Visibility Status</label>
                     <select id="mat-status">
-                        <option value="Active">🟢 Publish Immediately</option>
-                        <option value="Draft">🔴 Save as Draft</option>
+                        <option value="Active">🟢 Publish Immediately (Active)</option>
+                        <option value="Draft">🔴 Save as Draft (Hidden)</option>
                     </select>
                 </div>
 
@@ -195,7 +250,6 @@
         <script type="module">
         import { db, storage } from './firebase-init.js';
         import { doc, getDoc, collection, addDoc, updateDoc, query, orderBy, onSnapshot, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        // 🔥 NAYA: deleteObject ko import kiya gaya hai storage cleanup ke liye
         import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -211,6 +265,8 @@
         const materialsList = document.getElementById('materials-list');
         const toastContainer = document.getElementById('toast-container');
         const form = document.getElementById('material-form');
+        const searchInput = document.getElementById('search-input');
+        const filterSelect = document.getElementById('filter-status');
 
         let videoMode = 'upload'; 
         let pdfMode = 'upload';   
@@ -226,26 +282,37 @@
         };
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
+        
+        // 🔥 SMART MEMORY: Custom Modal Close (Doesn't erase subject/chapter)
         window.closeModal = (id) => {
             document.getElementById(id).classList.remove('active');
-            form.reset();
+            // Hum form.reset() use nahi kar rahe taaki Subject aur Chapter wahi rahen. Sirf baaki cheezein clear karenge:
+            document.getElementById('mat-title').value = '';
+            document.getElementById('mat-thumb').value = '';
+            document.getElementById('mat-video-file').value = '';
+            document.getElementById('mat-pdf-file').value = '';
+            document.getElementById('mat-video-link').value = '';
+            document.getElementById('mat-pdf-link').value = '';
+            
             document.getElementById('edit-mat-id').value = '';
             document.getElementById('upload-progress-box').style.display = 'none';
+            document.getElementById('form-modal-title').innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:var(--primary);"></i> Add New Lecture';
+            document.getElementById('submit-btn').innerText = "Save Lecture";
         };
 
         window.switchMode = (type, mode) => {
             if (type === 'video') {
                 videoMode = mode;
-                document.getElementById('mat-video-file').style.display = mode === 'upload' ? 'block' : 'none';
+                document.getElementById('video-file-box').style.display = mode === 'upload' ? 'block' : 'none';
                 document.getElementById('mat-video-link').style.display = mode === 'link' ? 'block' : 'none';
-                const btns = document.getElementById('mat-video-file').parentElement.querySelectorAll('.toggle-btn');
+                const btns = document.getElementById('video-file-box').parentElement.querySelectorAll('.toggle-btn');
                 btns[0].classList.toggle('active', mode === 'upload');
                 btns[1].classList.toggle('active', mode === 'link');
             } else if (type === 'pdf') {
                 pdfMode = mode;
-                document.getElementById('mat-pdf-file').style.display = mode === 'upload' ? 'block' : 'none';
+                document.getElementById('pdf-file-box').style.display = mode === 'upload' ? 'block' : 'none';
                 document.getElementById('mat-pdf-link').style.display = mode === 'link' ? 'block' : 'none';
-                const btns = document.getElementById('mat-pdf-file').parentElement.querySelectorAll('.toggle-btn');
+                const btns = document.getElementById('pdf-file-box').parentElement.querySelectorAll('.toggle-btn');
                 btns[0].classList.toggle('active', mode === 'upload');
                 btns[1].classList.toggle('active', mode === 'link');
             }
@@ -273,7 +340,7 @@
         async function uploadFileToStorage(file, folderName) {
             return new Promise((resolve, reject) => {
                 const uniqueFileName = `${Date.now()}_${file.name}`;
-                const storagePath = `batches/${batchId}/${folderName}/${uniqueFileName}`; // 🔥 Path save karenge taaki baad me delete kar sakein
+                const storagePath = `batches/${batchId}/${folderName}/${uniqueFileName}`; 
                 const storageRef = ref(storage, storagePath);
                 
                 const uploadTask = uploadBytesResumable(storageRef, file);
@@ -294,7 +361,6 @@
                     (error) => { reject(error); }, 
                     async () => {
                         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        // 🔥 Path return kar rahe hain delete karne ke liye
                         resolve({ url: downloadURL, size: (file.size / (1024*1024)).toFixed(1) + ' MB', path: storagePath });
                     }
                 );
@@ -303,6 +369,20 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // 🔥 NAYA: FILE SIZE GUARDIAN (100MB Limit for Video, 50MB for PDF)
+            const videoFile = document.getElementById('mat-video-file').files[0];
+            const pdfFile = document.getElementById('mat-pdf-file').files[0];
+            
+            if (videoMode === 'upload' && videoFile && videoFile.size > 100 * 1024 * 1024) {
+                showToast("Video file is too large! Maximum 100MB allowed.", "error");
+                return;
+            }
+            if (pdfMode === 'upload' && pdfFile && pdfFile.size > 50 * 1024 * 1024) {
+                showToast("PDF file is too large! Maximum 50MB allowed.", "error");
+                return;
+            }
+
             const btn = document.getElementById('submit-btn');
             btn.innerText = "Processing...";
             btn.disabled = true;
@@ -313,24 +393,22 @@
                 let finalSize = "N/A";
 
                 if (videoMode === 'upload') {
-                    const videoFile = document.getElementById('mat-video-file').files[0];
                     if (videoFile) {
                         const uploadResult = await uploadFileToStorage(videoFile, "videos");
                         finalVideoUrl = uploadResult.url;
-                        finalVideoPath = uploadResult.path; // Save path
+                        finalVideoPath = uploadResult.path;
                     } else if (!document.getElementById('edit-mat-id').value) {
-                        alert("Please select a video file or switch to Paste Link!");
+                        showToast("Please select a video file or switch to Paste Link!", "error");
                         throw new Error("No video");
                     }
                 } else { finalVideoUrl = document.getElementById('mat-video-link').value; }
 
                 if (pdfMode === 'upload') {
-                    const pdfFile = document.getElementById('mat-pdf-file').files[0];
                     if (pdfFile) {
                         const uploadResult = await uploadFileToStorage(pdfFile, "notes");
                         finalPdfUrl = uploadResult.url;
                         finalSize = uploadResult.size;
-                        finalPdfPath = uploadResult.path; // Save path
+                        finalPdfPath = uploadResult.path;
                     }
                 } else { finalPdfUrl = document.getElementById('mat-pdf-link').value; }
 
@@ -363,10 +441,27 @@
             }
         });
 
+        // 🔥 NAYA: Search and Filter Logic combinely handled
+        function filterAndRenderMaterials() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterValue = filterSelect.value; // "All", "Active", "Draft"
+
+            const filteredData = allMaterialsData.filter(m => {
+                const matchesSearch = m.title.toLowerCase().includes(searchTerm) || m.chapter.toLowerCase().includes(searchTerm);
+                const matchesStatus = filterValue === "All" || (m.status || "Active") === filterValue;
+                return matchesSearch && matchesStatus;
+            });
+            
+            renderMaterials(filteredData);
+        }
+
+        searchInput.addEventListener('input', filterAndRenderMaterials);
+        filterSelect.addEventListener('change', filterAndRenderMaterials);
+
         function renderMaterials(dataArray) {
             materialsList.innerHTML = '';
             if (dataArray.length === 0) {
-                materialsList.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--gray-500);"><i class="fas fa-folder-open fa-3x"></i><p>No lectures found.</p></div>`;
+                materialsList.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--gray-500);"><i class="fas fa-folder-open fa-3x" style="color:#cbd5e1; margin-bottom:10px;"></i><p>No lectures found.</p></div>`;
                 return;
             }
 
@@ -381,11 +476,11 @@
                 let lecturesHtml = '';
                 lectures.forEach(m => {
                     const statusClass = m.status === 'Active' ? 'status-active' : 'status-draft';
-                    const sizeHtml = (m.size && m.size !== 'N/A') ? `<span style="background:#eff6ff; color:#2563eb; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;"><i class="fas fa-file-download"></i> ${m.size}</span>` : '';
+                    const sizeHtml = (m.size && m.size !== 'N/A') ? `<span class="size-badge"><i class="fas fa-file-download"></i> ${m.size}</span>` : '';
                     
                     lecturesHtml += `
                         <div class="lecture-row">
-                            <img src="${m.thumbUrl}" class="lec-thumb" onerror="this.src='https://via.placeholder.com/150'">
+                            <img src="${m.thumbUrl}" class="lec-thumb" onerror="this.src='https://images.unsplash.com/photo-1610484826967-09c5720778c7?w=500'">
                             <div class="lec-details">
                                 <div class="lec-title">${m.title}</div>
                                 <div class="lec-meta"><span class="status-badge ${statusClass}">${m.status || 'Active'}</span>${sizeHtml}</div>
@@ -393,6 +488,7 @@
                             <div class="lec-actions">
                                 ${m.videoUrl ? `<a href="${m.videoUrl}" target="_blank" class="icon-btn" title="Watch Video"><i class="fas fa-play" style="color:#ef4444;"></i></a>` : ''}
                                 ${m.pdfUrl ? `<a href="${m.pdfUrl}" target="_blank" class="icon-btn" title="View PDF"><i class="fas fa-file-pdf" style="color:#2563eb;"></i></a>` : ''}
+                                <button class="icon-btn edit" onclick="triggerEdit('${m.id}')" title="Edit Lecture"><i class="fas fa-pen"></i></button>
                                 <button class="icon-btn delete" onclick="deleteMaterial('${m.id}')" title="Delete & Clean Storage"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>`;
@@ -407,31 +503,45 @@
                 allMaterialsData = [];
                 snapshot.forEach(docSnap => { let data = docSnap.data(); data.id = docSnap.id; allMaterialsData.push(data); });
                 document.getElementById('lecture-count').innerText = `${allMaterialsData.length} Lectures Total`;
-                renderMaterials(allMaterialsData);
+                filterAndRenderMaterials(); // Initial render with filters applied
             });
         }
 
-        // 🔥 SMART STORAGE CLEANER
+        // Edit Data Filler
+        window.triggerEdit = (matId) => {
+            const material = allMaterialsData.find(m => m.id === matId);
+            if(material) {
+                document.getElementById('edit-mat-id').value = material.id;
+                document.getElementById('mat-subject').value = material.subject;
+                document.getElementById('mat-chapter').value = material.chapter;
+                document.getElementById('mat-title').value = material.title;
+                document.getElementById('mat-thumb').value = material.thumbUrl || '';
+                document.getElementById('mat-video-link').value = material.videoUrl || '';
+                document.getElementById('mat-pdf-link').value = material.pdfUrl || '';
+                document.getElementById('mat-status').value = material.status || 'Active';
+                
+                // Switch to link mode visually when editing
+                switchMode('video', 'link');
+                switchMode('pdf', 'link');
+
+                document.getElementById('form-modal-title').innerHTML = '<i class="fas fa-pen" style="color:var(--primary);"></i> Edit Lecture';
+                document.getElementById('submit-btn').innerText = "Update Lecture";
+                openModal('upload-panel');
+            }
+        };
+
+        // Smart Storage Cleaner
         window.deleteMaterial = async (matId) => {
-            if(confirm("Are you sure? This will delete the lecture AND permanently remove files from Firebase Storage to save space.")) {
+            if(confirm("Delete this lecture AND permanently remove files from Storage?")) {
                 try {
-                    // 1. Data fetch karo taaki file path pata chale
                     const docSnap = await getDoc(doc(db, "batches", batchId, "materials", matId));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        
-                        // 2. Storage se files delete karo agar unka path exist karta hai
-                        if (data.videoPath) {
-                            await deleteObject(ref(storage, data.videoPath)).catch(e => console.log("Video not found in storage"));
-                        }
-                        if (data.pdfPath) {
-                            await deleteObject(ref(storage, data.pdfPath)).catch(e => console.log("PDF not found in storage"));
-                        }
+                        if (data.videoPath) await deleteObject(ref(storage, data.videoPath)).catch(e => console.log("Video not found"));
+                        if (data.pdfPath) await deleteObject(ref(storage, data.pdfPath)).catch(e => console.log("PDF not found"));
                     }
-                    
-                    // 3. Database se lecture record uda do
                     await deleteDoc(doc(db, "batches", batchId, "materials", matId));
-                    showToast("Lecture & files cleaned successfully.", "success");
+                    showToast("Lecture & files cleaned.", "success");
                 } catch (error) {
                     console.error(error);
                     showToast("Error deleting material.", "error");
