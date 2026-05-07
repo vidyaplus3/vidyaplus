@@ -12,7 +12,7 @@
         body { background: var(--bg); display: flex; min-height: 100vh; }
 
         /* --- SLIM SIDEBAR --- */
-        .sidebar { width: 240px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .sidebar { width: 240px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 10; }
         .sidebar-brand { padding: 1.5rem; font-size: 1.3rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #f1f5f9; }
         .nav-links { list-style: none; padding: 1rem; flex-grow: 1; }
         .nav-item { margin-bottom: 0.5rem; }
@@ -25,7 +25,8 @@
         .header-slim { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .header-slim h2 { font-size: 1.5rem; font-weight: 700; color: var(--text); }
 
-        .btn-add { background: var(--primary); color: white; padding: 0.7rem 1.5rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; border: none; cursor: pointer; }
+        .btn-add { background: var(--primary); color: white; padding: 0.7rem 1.5rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-add:hover { background: #1d4ed8; }
         .btn-add i { margin-right: 8px; }
 
         /* --- BATCH CARDS GRID --- */
@@ -38,10 +39,28 @@
         .batch-title { font-size: 1.1rem; font-weight: 700; margin: 0.8rem 0 0.4rem 0; color: var(--text); }
         .batch-stats { font-size: 0.85rem; color: #64748b; display: flex; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
 
+        /* --- MODAL (POPUP FORM) STYLES --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--white); padding: 2rem; border-radius: 15px; width: 100%; max-width: 500px; position: relative; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .close-modal { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
+        .modal-title { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
+        
+        .input-group { margin-bottom: 1.2rem; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--primary); outline: none; }
+        
+        .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
         /* Mobile Adjustments */
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; width: 100%; padding: 1rem; }
+            .modal-content { width: 90%; padding: 1.5rem; }
         }
     </style>
 </head>
@@ -53,34 +72,102 @@
             <li class="nav-item"><a href="#" class="nav-link active"><i class="fas fa-layer-group"></i> Batches</a></li>
             <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-users"></i> Students</a></li>
             <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Analytics</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <header class="header-slim">
             <h2>Your Batches</h2>
-            <button class="btn-add" onclick="alert('Batch adding form coming in next step!')">
+            <button class="btn-add" id="open-modal-btn">
                 <i class="fas fa-plus"></i> Create New Batch
             </button>
         </header>
 
         <div class="batch-grid" id="batches-container">
-            <p style="color: #64748b;">Loading batches from Delhi server...</p>
+            <p style="color: #64748b;">Loading batches from server...</p>
         </div>
     </main>
 
+    <div class="modal-overlay" id="batch-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal-btn"><i class="fas fa-times"></i></button>
+            <h3 class="modal-title">Launch New Batch</h3>
+            
+            <form id="add-batch-form">
+                <div class="input-group">
+                    <label>Batch Name</label>
+                    <input type="text" id="batch-name" placeholder="e.g. Target JEE 2026" required>
+                </div>
+                <div class="input-group">
+                    <label>Subject Category</label>
+                    <select id="batch-subject">
+                        <option value="PCM">PCM (Physics, Chem, Math)</option>
+                        <option value="Physics">Physics Only</option>
+                        <option value="Chemistry">Chemistry Only</option>
+                        <option value="Maths">Mathematics Only</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Thumbnail Image URL</label>
+                    <input type="url" id="batch-image" placeholder="https://example.com/image.jpg" required>
+                </div>
+                <button type="submit" class="btn-submit" id="submit-btn">Save Batch</button>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { db } from './firebase-init.js';
-        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const container = document.getElementById('batches-container');
+        const modal = document.getElementById('batch-modal');
+        const form = document.getElementById('add-batch-form');
+        const submitBtn = document.getElementById('submit-btn');
 
+        // Modal Open/Close Logic
+        document.getElementById('open-modal-btn').addEventListener('click', () => modal.classList.add('active'));
+        document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.remove('active'));
+        
+        // Form Submit Logic (Saving to Firebase)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Saving...";
+            submitBtn.disabled = true;
+
+            const batchData = {
+                title: document.getElementById('batch-name').value,
+                subject: document.getElementById('batch-subject').value,
+                imageUrl: document.getElementById('batch-image').value,
+                createdAt: serverTimestamp() // Google server ka exact time
+            };
+
+            try {
+                // Database mein add karna
+                await addDoc(collection(db, "batches"), batchData);
+                
+                // Form reset aur modal close
+                form.reset();
+                modal.classList.remove('active');
+                
+                // Turant naye batches screen par load karna
+                loadBatches();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Error saving batch! Check console.");
+            } finally {
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Load Batches from Firebase
         async function loadBatches() {
             try {
                 const q = query(collection(db, "batches"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
-                container.innerHTML = ''; // Clear loading text
+                container.innerHTML = ''; 
 
                 if (querySnapshot.empty) {
                     container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #64748b;">
@@ -94,13 +181,13 @@
                     const data = doc.data();
                     const card = `
                         <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
-                            <img src="${data.imageUrl || 'https://via.placeholder.com/300x160'}" class="batch-thumb" alt="thumbnail">
+                            <img src="${data.imageUrl}" class="batch-thumb" alt="thumbnail" onerror="this.src='https://via.placeholder.com/300x160'">
                             <div class="batch-info">
                                 <span class="batch-tag">${data.subject}</span>
                                 <h3 class="batch-title">${data.title}</h3>
                                 <div class="batch-stats">
                                     <span><i class="fas fa-video"></i> 0 Lectures</span>
-                                    <span><i class="fas fa-user-graduate"></i> 0 Active</span>
+                                    <span><i class="fas fa-tasks"></i> 0 DPPs</span>
                                 </div>
                             </div>
                         </div>
@@ -113,8 +200,8 @@
             }
         }
 
+        // Pehli baar page khulte hi load karna
         loadBatches();
     </script>
 </body>
 </html>
-
