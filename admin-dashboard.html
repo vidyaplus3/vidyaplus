@@ -6,13 +6,12 @@
     <title>Admin Dashboard | VidyaPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #2563eb; --bg: #f1f5f9; --text: #1e293b; --white: #ffffff; }
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --white: #ffffff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
         body { background: var(--bg); display: flex; min-height: 100vh; }
 
-        /* --- SLIM SIDEBAR --- */
-        .sidebar { width: 240px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 10; }
+        /* Sidebar */
+        .sidebar { width: 240px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
         .sidebar-brand { padding: 1.5rem; font-size: 1.3rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #f1f5f9; }
         .nav-links { list-style: none; padding: 1rem; flex-grow: 1; }
         .nav-item { margin-bottom: 0.5rem; }
@@ -20,93 +19,129 @@
         .nav-link i { margin-right: 12px; width: 20px; text-align: center; }
         .nav-link.active, .nav-link:hover { background: #eff6ff; color: var(--primary); }
 
-        /* --- MAIN CONTENT --- */
-        .main-content { margin-left: 240px; width: calc(100% - 240px); padding: 2rem; }
-        .header-slim { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .header-slim h2 { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+        /* Content Area */
+        .main-content { margin-left: 240px; width: calc(100% - 240px); padding: 2.5rem; }
+        .header-slim { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 15px; }
+        .header-slim h2 { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+        
+        .header-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .search-box { position: relative; width: 320px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box input { width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; outline: none; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        
+        .btn-add { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; white-space: nowrap; transition: 0.3s; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
+        .btn-add:hover { background: #1d4ed8; transform: translateY(-2px); }
 
-        .btn-add { background: var(--primary); color: white; padding: 0.7rem 1.5rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; border: none; cursor: pointer; transition: 0.3s; }
-        .btn-add:hover { background: #1d4ed8; }
-        .btn-add i { margin-right: 8px; }
+        /* Grid & Cards */
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.8rem; }
+        .batch-card { position: relative; background: var(--white); border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+        .batch-card:hover { transform: translateY(-6px); box-shadow: 0 12px 20px rgba(0,0,0,0.06); }
+        
+        /* Actions (Edit & Delete) */
+        .card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 2; opacity: 0; transition: 0.3s; }
+        .batch-card:hover .card-actions { opacity: 1; } /* Hover par dikhenge */
+        .btn-action { background: rgba(255,255,255,0.9); border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-action.edit { color: var(--primary); }
+        .btn-action.delete { color: #ef4444; }
+        .btn-action:hover { transform: scale(1.1); background: white; }
 
-        /* --- BATCH CARDS GRID --- */
-        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .batch-card { background: var(--white); border-radius: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; transition: 0.3s; cursor: pointer; }
-        .batch-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
-        .batch-thumb { width: 100%; height: 160px; background: #e2e8f0; object-fit: cover; }
-        .batch-info { padding: 1.2rem; }
-        .batch-tag { font-size: 0.7rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 0.3rem 0.7rem; border-radius: 20px; text-transform: uppercase; }
-        .batch-title { font-size: 1.1rem; font-weight: 700; margin: 0.8rem 0 0.4rem 0; color: var(--text); }
-        .batch-stats { font-size: 0.85rem; color: #64748b; display: flex; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
+        .batch-thumb { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; cursor: pointer; }
+        .batch-info { padding: 1.5rem; cursor: pointer; flex-grow: 1; display: flex; flex-direction: column; }
+        .batch-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+        .batch-tag { font-size: 0.7rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 0.4rem 0.8rem; border-radius: 20px; text-transform: uppercase; }
+        .status-badge { font-size: 0.7rem; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 4px; }
+        .status-badge::before { content: ''; width: 6px; height: 6px; background: #10b981; border-radius: 50%; }
+        
+        .batch-title { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; line-height: 1.3; }
+        .batch-price { font-size: 1.1rem; font-weight: 800; color: #10b981; margin-top: auto; margin-bottom: 1rem; }
+        .batch-stats { font-size: 0.85rem; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 1rem; display: flex; justify-content: space-between; font-weight: 500; }
 
-        /* --- MODAL (POPUP FORM) STYLES --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        /* Modals (Forms & Warnings) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); overflow-y: auto; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--white); padding: 2rem; border-radius: 15px; width: 100%; max-width: 500px; position: relative; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-content { background: var(--white); padding: 2rem; border-radius: 20px; width: 100%; max-width: 550px; position: relative; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .close-modal { position: absolute; top: 1.2rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; transition: 0.2s; }
+        .close-modal:hover { color: #ef4444; transform: rotate(90deg); }
         
-        .close-modal { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
-        .modal-title { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
-        
-        .input-group { margin-bottom: 1.2rem; }
-        .input-group label.main-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-        .input-group input[type="text"], .input-group input[type="url"] { width: 100%; padding: 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; }
-        .input-group input:focus { border-color: var(--primary); outline: none; }
-        
-        /* CHECKBOX STYLES */
-        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .check-label { font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; color: #475569; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; transition: 0.2s; }
-        .check-label:hover { background: #eff6ff; border-color: #bfdbfe; }
-        
-        .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+        /* Warning Modal Specifics */
+        .warning-content { text-align: center; max-width: 400px; padding: 2.5rem 2rem; }
+        .warning-icon { font-size: 3.5rem; color: #ef4444; margin-bottom: 1rem; }
+        .warning-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; }
+        .warning-text { color: #64748b; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5; }
+        .warning-actions { display: flex; gap: 10px; }
+        .btn-cancel { flex: 1; padding: 0.8rem; background: #f1f5f9; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-cancel:hover { background: #e2e8f0; }
+        .btn-confirm-delete { flex: 1; padding: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.2); }
+        .btn-confirm-delete:hover { background: #dc2626; transform: translateY(-2px); }
 
-        /* Mobile Adjustments */
+        /* Form Inputs */
+        .input-group { margin-bottom: 1.2rem; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .input-group input, .input-group textarea { width: 100%; padding: 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; transition: 0.2s; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); outline: none; }
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .check-label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px 10px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
+        .check-label:hover { background: #eff6ff; border-color: #bfdbfe; }
+        .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+
+        /* Toast Notifications */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 250px; background: white; padding: 1rem 1.5rem; border-radius: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; animation: slideInRight 0.3s ease forwards; border-left: 5px solid; }
+        .toast.success { border-color: #10b981; color: #10b981; }
+        .toast.error { border-color: #ef4444; color: #ef4444; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; width: 100%; padding: 1rem; }
-            .modal-content { width: 90%; padding: 1.5rem; }
             .checkbox-grid { grid-template-columns: 1fr 1fr; }
+            .search-box { width: 100%; }
+            .header-actions { width: 100%; flex-direction: column; align-items: stretch; }
+            .card-actions { opacity: 1; } /* Mobile par hamesha dikhenge actions */
         }
     </style>
 </head>
 <body>
 
+    <div class="toast-container" id="toast-container"></div>
+
     <aside class="sidebar">
-        <div class="sidebar-brand">Admin Panel</div>
+        <div class="sidebar-brand">VidyaPlus Pro</div>
         <ul class="nav-links">
             <li class="nav-item"><a href="#" class="nav-link active"><i class="fas fa-layer-group"></i> Batches</a></li>
             <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-users"></i> Students</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Analytics</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <header class="header-slim">
-            <h2>Your Batches</h2>
-            <button class="btn-add" id="open-modal-btn">
-                <i class="fas fa-plus"></i> Create New Batch
-            </button>
+            <h2>Batch Management</h2>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search batches by name...">
+                </div>
+                <button class="btn-add" id="open-add-modal"><i class="fas fa-plus"></i> Create New Batch</button>
+            </div>
         </header>
-
         <div class="batch-grid" id="batches-container">
-            <p style="color: #64748b;">Loading batches from server...</p>
+            <div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 3rem;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
         </div>
     </main>
 
-    <div class="modal-overlay" id="batch-modal">
+    <div class="modal-overlay" id="add-modal">
         <div class="modal-content">
-            <button class="close-modal" id="close-modal-btn"><i class="fas fa-times"></i></button>
-            <h3 class="modal-title">Launch New Batch</h3>
-            
+            <button class="close-modal" onclick="closeModal('add-modal')"><i class="fas fa-times"></i></button>
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.4rem; color: var(--text);">Launch New Batch</h3>
             <form id="add-batch-form">
                 <div class="input-group">
-                    <label class="main-label">Batch Name</label>
-                    <input type="text" id="batch-name" placeholder="e.g. Target JEE 2026" required>
+                    <label>Batch Name</label>
+                    <input type="text" id="batch-name" placeholder="e.g. JEE Rankers 2026" required>
                 </div>
-                
                 <div class="input-group">
-                    <label class="main-label">Select Subjects</label>
+                    <label>Select Subjects</label>
                     <div class="checkbox-grid" id="batch-subjects">
                         <label class="check-label"><input type="checkbox" value="Physics"> Physics</label>
                         <label class="check-label"><input type="checkbox" value="Chemistry"> Chemistry</label>
@@ -116,107 +151,164 @@
                         <label class="check-label"><input type="checkbox" value="Hindi"> Hindi</label>
                     </div>
                 </div>
-
-                <div class="input-group">
-                    <label class="main-label">Thumbnail Image URL</label>
-                    <input type="url" id="batch-image" placeholder="https://example.com/image.jpg" required>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Price (₹)</label>
+                        <input type="number" id="batch-price" placeholder="0 for Free" required>
+                    </div>
+                    <div class="input-group" style="flex: 2;">
+                        <label>Thumbnail URL</label>
+                        <input type="url" id="batch-image" placeholder="https://..." required>
+                    </div>
                 </div>
-                <button type="submit" class="btn-submit" id="submit-btn">Save Batch</button>
+                <div class="input-group">
+                    <label>Full Batch Description</label>
+                    <textarea id="batch-desc" rows="3" placeholder="What students will get in this batch..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit" id="submit-btn">Launch Batch 🚀</button>
             </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content warning-content">
+            <i class="fas fa-exclamation-triangle warning-icon"></i>
+            <h3 class="warning-title">Delete this Batch?</h3>
+            <p class="warning-text">You are about to permanently delete this batch. This action cannot be undone and all inside data will be lost.</p>
+            <div class="warning-actions">
+                <button class="btn-cancel" onclick="closeModal('delete-modal')">Cancel</button>
+                <button class="btn-confirm-delete" id="confirm-delete-btn">Yes, Delete it</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase-init.js';
-        import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Global Elements
         const container = document.getElementById('batches-container');
-        const modal = document.getElementById('batch-modal');
-        const form = document.getElementById('add-batch-form');
-        const submitBtn = document.getElementById('submit-btn');
-
-        document.getElementById('open-modal-btn').addEventListener('click', () => modal.classList.add('active'));
-        document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.remove('active'));
+        const searchInput = document.getElementById('search-input');
+        const toastContainer = document.getElementById('toast-container');
         
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Checkboxes se selected data nikalna
-            let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked'))
-                                        .map(cb => cb.value)
-                                        .join(', ');
-            
-            if(!selectedSubjects) {
-                alert("Please select at least one subject!");
-                return;
-            }
+        let batchToDeleteId = null; // Store ID temporarily for deletion
 
-            const originalText = submitBtn.innerText;
-            submitBtn.innerText = "Saving...";
+        // === PRO TOAST NOTIFICATION SYSTEM ===
+        window.showToast = (message, type = "success") => {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>';
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = '0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
+        // === MODAL CONTROLS ===
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        
+        document.getElementById('open-add-modal').addEventListener('click', () => openModal('add-modal'));
+
+        // === LIVE SEARCH ===
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.batch-card').forEach(card => {
+                const title = card.querySelector('.batch-title').innerText.toLowerCase();
+                card.style.display = title.includes(term) ? 'flex' : 'none';
+            });
+        });
+
+        // === ADD BATCH LOGIC ===
+        document.getElementById('add-batch-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked')).map(cb => cb.value).join(', ');
+            if(!selectedSubjects) { showToast("Please select a subject!", "error"); return; }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerText = "Processing...";
             submitBtn.disabled = true;
 
-            const batchData = {
-                title: document.getElementById('batch-name').value,
-                subject: selectedSubjects, // Yahan ab "Physics, English" aayega
-                imageUrl: document.getElementById('batch-image').value,
-                createdAt: serverTimestamp()
-            };
-
             try {
-                await addDoc(collection(db, "batches"), batchData);
-                form.reset();
-                modal.classList.remove('active');
+                await addDoc(collection(db, "batches"), {
+                    title: document.getElementById('batch-name').value,
+                    subject: selectedSubjects,
+                    price: document.getElementById('batch-price').value,
+                    description: document.getElementById('batch-desc').value,
+                    imageUrl: document.getElementById('batch-image').value,
+                    status: "Active",
+                    createdAt: serverTimestamp()
+                });
+                document.getElementById('add-batch-form').reset();
+                closeModal('add-modal');
+                showToast("New Batch Launched Successfully!", "success");
+                loadBatches();
+            } catch (err) { showToast("Error saving batch!", "error"); console.error(err); }
+            finally { submitBtn.innerText = "Launch Batch 🚀"; submitBtn.disabled = false; }
+        });
+
+        // === DELETE BATCH LOGIC (Premium) ===
+        // 1. Trash icon click -> Open Warning Modal
+        window.triggerDelete = (event, batchId) => {
+            event.stopPropagation(); // Prevent clicking the card
+            batchToDeleteId = batchId;
+            openModal('delete-modal');
+        };
+
+        // 2. Warning Modal "Yes" Click -> Actually Delete
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if(!batchToDeleteId) return;
+            
+            const btn = document.getElementById('confirm-delete-btn');
+            btn.innerText = "Deleting...";
+            
+            try {
+                await deleteDoc(doc(db, "batches", batchToDeleteId));
+                closeModal('delete-modal');
+                showToast("Batch permanently deleted.", "success");
                 loadBatches();
             } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("Error saving batch!");
+                showToast("Failed to delete batch.", "error");
             } finally {
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
+                btn.innerText = "Yes, Delete it";
+                batchToDeleteId = null;
             }
         });
 
-        async function loadBatches() {
-            try {
-                const q = query(collection(db, "batches"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                container.innerHTML = ''; 
-
-                if (querySnapshot.empty) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #64748b;">
-                        <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <p>No batches found. Create your first batch to get started!</p>
-                    </div>`;
-                    return;
-                }
-
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    // Substring lagaya taaki bahut saare subjects hone par card design na toote
-                    let displaySubject = data.subject.length > 25 ? data.subject.substring(0, 25) + '...' : data.subject;
-                    
-                    const card = `
-                        <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
-                            <img src="${data.imageUrl}" class="batch-thumb" alt="thumbnail" onerror="this.src='https://via.placeholder.com/300x160'">
-                            <div class="batch-info">
-                                <span class="batch-tag" title="${data.subject}">${displaySubject}</span>
-                                <h3 class="batch-title">${data.title}</h3>
-                                <div class="batch-stats">
-                                    <span><i class="fas fa-video"></i> 0 Lectures</span>
-                                    <span><i class="fas fa-tasks"></i> 0 DPPs</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    container.innerHTML += card;
-                });
-            } catch (error) {
-                console.error("Error loading batches:", error);
-                container.innerHTML = '<p style="color: #ef4444;">Error loading batches.</p>';
-            }
+        // Dummy Edit Function (Link later)
+        window.triggerEdit = (event) => {
+            event.stopPropagation();
+            showToast("Edit feature coming in next update!", "success");
         }
 
-        loadBatches();
-    </script>
-</body>
-</html>
+        // === LOAD BATCHES FROM FIREBASE ===
+        async function loadBatches() {
+            const q = query(collection(db, "batches"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            container.innerHTML = '';
+            
+            if (snap.empty) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: var(--white); border-radius: 15px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" style="width: 100px; opacity: 0.5; margin-bottom: 1rem;">
+                    <h3 style="color: var(--text);">No Batches Yet</h3>
+                    <p style="color: #64748b;">Click 'Create New Batch' to start your journey.</p>
+                </div>`;
+                return;
+            }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                let displaySubject = d.subject.length > 20 ? d.subject.substring(0, 20) + '...' : d.subject;
+                
+                container.innerHTML += `
+                    <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
+                        <div class="card-actions">
+                            <button class="btn-action edit" onclick="triggerEdit(event)" title="Edit Batch"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action delete" onclick="triggerDelete(event, '${doc.id}')" title="Delete Batch"><i class="fas fa-trash"></i></button>
+ 
