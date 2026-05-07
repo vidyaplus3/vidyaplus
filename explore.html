@@ -219,18 +219,26 @@
         }
         sheetOverlay.addEventListener('click', closeBottomSheet);
     </script>
-
+    
     <script type="module">
-        // 🔥 Dekho Bhai! Yahan tumhare file se direct 'db' import ho raha hai
-        import { db } from './firebase-init.js';
-        import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { db, auth } from './firebase-init.js';
+        import { collection, query, where, getDocs, doc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const batchGrid = document.getElementById('batchGrid');
         const loader = document.getElementById('loader');
+        
+        let currentUser = null;
+        let selectedBatchId = null;
+        let selectedBatchPrice = "0"; // Default 0
+
+        // Check if user is logged in
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+        });
 
         async function fetchBatches() {
             try {
-                // Sirf wahi batches layega jinka status 'Active' hai (Tumhare screenshot ke hisab se)
                 const q = query(collection(db, "batches"), where("status", "==", "Active"));
                 const querySnapshot = await getDocs(q);
                 
@@ -242,8 +250,7 @@
                 }
 
                 querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    renderBatch(doc.id, data);
+                    renderBatch(doc.id, doc.data());
                 });
 
             } catch (error) {
@@ -256,12 +263,10 @@
             const card = document.createElement('div');
             card.className = 'batch-card';
             
-            // Image handle (Agar image URL empty hai to placeholder dalega)
             const imgUrl = data.imageUrl ? data.imageUrl : 'https://via.placeholder.com/300x150?text=VidyaPlus';
             
-            // Price handle (Tumhare DB me price as string store ho rahi hai "1", isliye check lagaya)
             let displayPrice = "Free";
-            if(data.price && data.price !== "0" && data.price !== "") {
+            if(data.price && data.price !== "0" && data.price !== "" && data.price.toLowerCase() !== "free") {
                 displayPrice = `₹${data.price}`;
             }
 
@@ -280,31 +285,64 @@
                 </div>
             `;
 
-            // Card click karne pe modal open hoga
+            // Card click event
             card.addEventListener('click', () => {
                 document.getElementById('sheetTitle').innerText = data.title;
                 document.getElementById('sheetSubject').innerText = data.subject || 'All Subjects';
                 document.getElementById('sheetDesc').innerText = data.description || 'No description available.';
                 document.getElementById('sheetPrice').innerText = displayPrice;
                 
+                // Set data for Enrollment Logic
                 selectedBatchId = id;
+                selectedBatchPrice = data.price || "0";
                 
-                // Show modal
                 document.getElementById('sheetOverlay').classList.add('active');
                 document.getElementById('bottomSheet').classList.add('active');
-                document.body.style.overflow = 'hidden'; // Stop background scrolling
+                document.body.style.overflow = 'hidden'; 
             });
 
             batchGrid.appendChild(card);
         }
 
-        // On page load, run the fetch function
         document.addEventListener('DOMContentLoaded', fetchBatches);
 
-        // Enroll Button Logic Placeholder
-        document.getElementById('btnEnroll').addEventListener('click', () => {
-            alert(`Payment Gateway Integration pending for Batch ID: ${selectedBatchId}`);
-            // Future step: Redirect to checkout or add to user's enrolled batches
+        // 🔥 THE MAGIC LOGIC: ENROLL BUTTON 🔥
+        document.getElementById('btnEnroll').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert("Please login to enroll!");
+                window.location.replace("login.html");
+                return;
+            }
+
+            const btn = document.getElementById('btnEnroll');
+            
+            // Check if FREE
+            if (selectedBatchPrice === "0" || selectedBatchPrice === "" || selectedBatchPrice.toLowerCase() === "free") {
+                
+                const originalText = btn.innerText;
+                btn.innerText = "Enrolling...";
+                
+                try {
+                    // Update user's document in Firestore (create if not exists)
+                    const userRef = doc(db, "users", currentUser.uid);
+                    await setDoc(userRef, {
+                        enrolledBatches: arrayUnion(selectedBatchId),
+                        email: currentUser.email
+                    }, { merge: true });
+
+                    alert("Successfully Enrolled! Welcome to the batch.");
+                    window.location.replace("dashboard.html"); // Redirect to My Study
+
+                } catch (error) {
+                    console.error("Enrollment failed:", error);
+                    alert("Something went wrong. Please try again.");
+                    btn.innerText = originalText;
+                }
+
+            } else {
+                // Check if PAID
+                alert(`Payment Gateway Integration pending for Paid Batch ID: ${selectedBatchId}`);
+            }
         });
 
     </script>
