@@ -54,22 +54,10 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrrYpYvUdahsOtI4",
-            authDomain: "vidyaplus-d9c3b.firebaseapp.com",
-            projectId: "vidyaplus-d9c3b",
-            storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
-            messagingSenderId: "492916889178",
-            appId: "1:492916889178:web:a3d3f3737b1236167caa63",
-            measurementId: "G-Q9XL40BW87"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        <script type="module">
+        // Sirf ek line mein central file se import!
+        import { auth } from './firebase-init.js';
+        import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         let isLoginMode = false; 
         const toggleBtn = document.getElementById('toggle-btn');
@@ -78,28 +66,22 @@
         const toggleFormText = document.getElementById('toggle-form');
         const authForm = document.getElementById('auth-form');
         const errorMsg = document.getElementById('error-message');
-        // Professional Error Message Function
+
         function getFriendlyError(errorCode) {
             switch(errorCode) {
-                case 'auth/invalid-credential':
-                    return "Invalid email or password. Please try again.";
-                case 'auth/email-already-in-use':
-                    return "This email is already registered. Please log in.";
-                case 'auth/weak-password':
-                    return "Password must be at least 6 characters long.";
-                case 'auth/invalid-email':
-                    return "Please enter a valid email address.";
-                case 'auth/network-request-failed':
-                    return "Network error. Please check your internet connection.";
-                default:
-                    return "An unexpected error occurred. Please try again later.";
+                case 'auth/invalid-credential': return "Invalid email or password. Please try again.";
+                case 'auth/email-already-in-use': return "This email is already registered. Please log in.";
+                case 'auth/weak-password': return "Password must be at least 6 characters long.";
+                case 'auth/invalid-email': return "Please enter a valid email address.";
+                case 'auth/network-request-failed': return "Network error. Please check your internet connection.";
+                default: return "An unexpected error occurred. Please try again later.";
             }
         }
-        
+
         function setupToggle() {
             document.getElementById('toggle-btn').addEventListener('click', () => {
                 isLoginMode = !isLoginMode;
-                errorMsg.style.display = "none"; // Switch karte waqt error chupa do
+                errorMsg.style.display = "none";
                 if(isLoginMode) {
                     document.title = "Log In | VidyaPlus";
                     formSubtitle.innerText = "Welcome back! Please log in.";
@@ -127,28 +109,27 @@
 
             if(isLoginMode) {
                 signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    alert("Login Successful! Dashboard coming soon 🚀");
-                    window.location.href = "index.html"; 
+                .then(() => {
+                    window.location.replace("dashboard.html"); 
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
-                    errorMsg.innerText = getFriendlyError(error.code); // Yahan user-friendly error aayega
+                    errorMsg.innerText = getFriendlyError(error.code);
                     errorMsg.style.display = "block";
                 });
             } else {
                 createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    alert("Account Successfully Created! Dashboard coming soon 🚀");
-                    window.location.href = "index.html";
+                .then(() => {
+                    window.location.replace("dashboard.html");
                 })
                 .catch((error) => {
                     submitBtn.innerText = originalBtnText;
-                    errorMsg.innerText = getFriendlyError(error.code); // Yahan user-friendly error aayega
+                    errorMsg.innerText = getFriendlyError(error.code);
                     errorMsg.style.display = "block";
                 });
             }
         });
-    </script>
+        </script>
+    
 </body>
 </html>
