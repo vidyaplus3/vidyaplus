@@ -38,9 +38,9 @@
         .batch-card { position: relative; background: var(--white); border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
         .batch-card:hover { transform: translateY(-6px); box-shadow: 0 12px 20px rgba(0,0,0,0.06); }
         
-        /* Actions (Edit & Delete) */
+        /* Actions */
         .card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 2; opacity: 0; transition: 0.3s; }
-        .batch-card:hover .card-actions { opacity: 1; } /* Hover par dikhenge */
+        .batch-card:hover .card-actions { opacity: 1; } 
         .btn-action { background: rgba(255,255,255,0.9); border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn-action.edit { color: var(--primary); }
         .btn-action.delete { color: #ef4444; }
@@ -57,7 +57,7 @@
         .batch-price { font-size: 1.1rem; font-weight: 800; color: #10b981; margin-top: auto; margin-bottom: 1rem; }
         .batch-stats { font-size: 0.85rem; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 1rem; display: flex; justify-content: space-between; font-weight: 500; }
 
-        /* Modals (Forms & Warnings) */
+        /* Modals */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); overflow-y: auto; padding: 20px; }
         .modal-overlay.active { display: flex; }
         .modal-content { background: var(--white); padding: 2rem; border-radius: 20px; width: 100%; max-width: 550px; position: relative; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
@@ -65,25 +65,23 @@
         .close-modal { position: absolute; top: 1.2rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; transition: 0.2s; }
         .close-modal:hover { color: #ef4444; transform: rotate(90deg); }
         
-        /* Warning Modal Specifics */
         .warning-content { text-align: center; max-width: 400px; padding: 2.5rem 2rem; }
         .warning-icon { font-size: 3.5rem; color: #ef4444; margin-bottom: 1rem; }
         .warning-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; }
         .warning-text { color: #64748b; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5; }
         .warning-actions { display: flex; gap: 10px; }
-        .btn-cancel { flex: 1; padding: 0.8rem; background: #f1f5f9; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-cancel, .btn-confirm-delete { flex: 1; padding: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
         .btn-cancel:hover { background: #e2e8f0; }
-        .btn-confirm-delete { flex: 1; padding: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.2); }
+        .btn-confirm-delete { background: #ef4444; color: white; box-shadow: 0 4px 6px rgba(239,68,68,0.2); }
         .btn-confirm-delete:hover { background: #dc2626; transform: translateY(-2px); }
 
-        /* Form Inputs */
         .input-group { margin-bottom: 1.2rem; }
         .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
         .input-group input, .input-group textarea { width: 100%; padding: 0.8rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; transition: 0.2s; }
-        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); outline: none; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); outline: none; }
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
-        .check-label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px 10px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
-        .check-label:hover { background: #eff6ff; border-color: #bfdbfe; }
+        .check-label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px 10px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; }
         .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: 0.3s; }
 
         /* Toast Notifications */
@@ -99,7 +97,7 @@
             .checkbox-grid { grid-template-columns: 1fr 1fr; }
             .search-box { width: 100%; }
             .header-actions { width: 100%; flex-direction: column; align-items: stretch; }
-            .card-actions { opacity: 1; } /* Mobile par hamesha dikhenge actions */
+            .card-actions { opacity: 1; }
         }
     </style>
 </head>
@@ -174,49 +172,40 @@
         <div class="modal-content warning-content">
             <i class="fas fa-exclamation-triangle warning-icon"></i>
             <h3 class="warning-title">Delete this Batch?</h3>
-            <p class="warning-text">You are about to permanently delete this batch. This action cannot be undone and all inside data will be lost.</p>
+            <p class="warning-text">You are about to permanently delete this batch. This action cannot be undone.</p>
             <div class="warning-actions">
                 <button class="btn-cancel" onclick="closeModal('delete-modal')">Cancel</button>
                 <button class="btn-confirm-delete" id="confirm-delete-btn">Yes, Delete it</button>
             </div>
         </div>
     </div>
-
-    <script type="module">
+        <script type="module">
         import { db } from './firebase-init.js';
-        import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, addDoc, query, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Global Elements
         const container = document.getElementById('batches-container');
         const searchInput = document.getElementById('search-input');
         const toastContainer = document.getElementById('toast-container');
-        
-        let batchToDeleteId = null; // Store ID temporarily for deletion
+        let batchToDeleteId = null; 
 
-        // === PRO TOAST NOTIFICATION SYSTEM ===
+        // Toast System
         window.showToast = (message, type = "success") => {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>';
             toast.innerHTML = `${icon} <span>${message}</span>`;
             toastContainer.appendChild(toast);
-            
-            // Remove after 3 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(100%)';
-                toast.style.transition = '0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         };
 
-        // === MODAL CONTROLS ===
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        
         document.getElementById('open-add-modal').addEventListener('click', () => openModal('add-modal'));
 
-        // === LIVE SEARCH ===
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('.batch-card').forEach(card => {
@@ -225,7 +214,7 @@
             });
         });
 
-        // === ADD BATCH LOGIC ===
+        // Add Batch
         document.getElementById('add-batch-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked')).map(cb => cb.value).join(', ');
@@ -247,68 +236,90 @@
                 });
                 document.getElementById('add-batch-form').reset();
                 closeModal('add-modal');
-                showToast("New Batch Launched Successfully!", "success");
+                showToast("Batch Launched Successfully!", "success");
                 loadBatches();
             } catch (err) { showToast("Error saving batch!", "error"); console.error(err); }
             finally { submitBtn.innerText = "Launch Batch 🚀"; submitBtn.disabled = false; }
         });
 
-        // === DELETE BATCH LOGIC (Premium) ===
-        // 1. Trash icon click -> Open Warning Modal
+        // Delete Batch
         window.triggerDelete = (event, batchId) => {
-            event.stopPropagation(); // Prevent clicking the card
+            event.stopPropagation(); 
             batchToDeleteId = batchId;
             openModal('delete-modal');
         };
 
-        // 2. Warning Modal "Yes" Click -> Actually Delete
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
             if(!batchToDeleteId) return;
-            
             const btn = document.getElementById('confirm-delete-btn');
             btn.innerText = "Deleting...";
-            
             try {
                 await deleteDoc(doc(db, "batches", batchToDeleteId));
                 closeModal('delete-modal');
-                showToast("Batch permanently deleted.", "success");
+                showToast("Batch deleted.", "success");
                 loadBatches();
-            } catch (error) {
-                showToast("Failed to delete batch.", "error");
-            } finally {
-                btn.innerText = "Yes, Delete it";
-                batchToDeleteId = null;
-            }
+            } catch (error) { showToast("Failed to delete.", "error"); } 
+            finally { btn.innerText = "Yes, Delete it"; batchToDeleteId = null; }
         });
 
-        // Dummy Edit Function (Link later)
         window.triggerEdit = (event) => {
             event.stopPropagation();
             showToast("Edit feature coming in next update!", "success");
         }
 
-        // === LOAD BATCHES FROM FIREBASE ===
+        // Bulletproof Load
         async function loadBatches() {
-            const q = query(collection(db, "batches"), orderBy("createdAt", "desc"));
-            const snap = await getDocs(q);
-            container.innerHTML = '';
-            
-            if (snap.empty) {
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: var(--white); border-radius: 15px;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" style="width: 100px; opacity: 0.5; margin-bottom: 1rem;">
-                    <h3 style="color: var(--text);">No Batches Yet</h3>
-                    <p style="color: #64748b;">Click 'Create New Batch' to start your journey.</p>
-                </div>`;
-                return;
-            }
-
-            snap.forEach(doc => {
-                const d = doc.data();
-                let displaySubject = d.subject.length > 20 ? d.subject.substring(0, 20) + '...' : d.subject;
+            try {
+                const q = query(collection(db, "batches"));
+                const snap = await getDocs(q);
+                container.innerHTML = '';
                 
-                container.innerHTML += `
-                    <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
-                        <div class="card-actions">
-                            <button class="btn-action edit" onclick="triggerEdit(event)" title="Edit Batch"><i class="fas fa-pen"></i></button>
-                            <button class="btn-action delete" onclick="triggerDelete(event, '${doc.id}')" title="Delete Batch"><i class="fas fa-trash"></i></button>
- 
+                if (snap.empty) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: var(--white); border-radius: 15px;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" style="width: 100px; opacity: 0.5; margin-bottom: 1rem;">
+                        <h3 style="color: var(--text);">No Batches Yet</h3>
+                        <p style="color: #64748b;">Click 'Create New Batch' to start.</p>
+                    </div>`;
+                    return;
+                }
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    let displaySubject = (d.subject && d.subject.length > 20) ? d.subject.substring(0, 20) + '...' : (d.subject || 'N/A');
+                    let displayPrice = (d.price === undefined || d.price === "" || d.price == 0) ? 'FREE' : '₹' + d.price;
+                    let displayImage = d.imageUrl || 'https://images.unsplash.com/photo-1632516643738-4e892c5fc5e7';
+                    
+                    container.innerHTML += `
+                        <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
+                            <div class="card-actions">
+                                <button class="btn-action edit" onclick="triggerEdit(event)" title="Edit Batch"><i class="fas fa-pen"></i></button>
+                                <button class="btn-action delete" onclick="triggerDelete(event, '${doc.id}')" title="Delete Batch"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <img src="${displayImage}" class="batch-thumb" onerror="this.src='https://images.unsplash.com/photo-1632516643738-4e892c5fc5e7'">
+                            <div class="batch-info">
+                                <div class="batch-header-info">
+                                    <span class="batch-tag" title="${d.subject || ''}">${displaySubject}</span>
+                                    <span class="status-badge">Active</span>
+                                </div>
+                                <h3 class="batch-title">${d.title || 'Untitled Batch'}</h3>
+                                <p class="batch-price">${displayPrice}</p>
+                                <div class="batch-stats">
+                                    <span><i class="fas fa-video" style="color: var(--primary);"></i> 0 Lectures</span>
+                                    <span><i class="fas fa-tasks" style="color: var(--primary);"></i> 0 DPPs</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 2rem;">
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    <p>Error loading batches! Check your internet connection.</p>
+                </div>`;
+            }
+        }
+        
+        loadBatches();
+    </script>
+</body>
+</html>
