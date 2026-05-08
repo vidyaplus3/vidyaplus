@@ -258,14 +258,14 @@
         </div>
 
     </div>
-        <script type="module">
+            <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- GLOBAL STATE ---
-        window.currentSubject = null;
-        window.currentChapter = null;
+        // --- GLOBAL STATE (Now with LocalStorage Memory) ---
+        window.currentSubject = localStorage.getItem('vp_subject') || null;
+        window.currentChapter = localStorage.getItem('vp_chapter') || null;
         window.materialsTree = {}; 
 
         // ==========================================
@@ -301,32 +301,34 @@
         });
 
         // ==========================================
-        // 2. BACK-BUTTON FIX: HASH ROUTING ENGINE
+        // 2. BACK-BUTTON FIX & NAVIGATION ENGINE
         // ==========================================
         
-        // Ye function sirf UI badalta hai
         const showScreen = (screenId) => {
             closeModals();
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(screenId);
             if (target) target.classList.add('active');
 
-            // Data Renderers trigger
             if (screenId === 'subjects') renderSubjects();
             if (screenId === 'chapters' && window.currentSubject) renderChapters(window.currentSubject);
             if (screenId === 'classroom' && window.currentChapter) filterClassroom('all');
         };
 
-        // Ye function URL badalta hai (Browser history entry banata hai)
         window.navigate = (screenId, payload = {}) => {
-            if (payload.subject) window.currentSubject = payload.subject;
-            if (payload.chapter) window.currentChapter = payload.chapter;
+            // Save to LocalStorage so data survives a refresh! 👇
+            if (payload.subject) {
+                window.currentSubject = payload.subject;
+                localStorage.setItem('vp_subject', payload.subject);
+            }
+            if (payload.chapter) {
+                window.currentChapter = payload.chapter;
+                localStorage.setItem('vp_chapter', payload.chapter);
+            }
             
-            // URL badlega -> ye hashchange event trigger karega
             window.location.hash = screenId;
         };
 
-        // System Back Button / Browser Back detect karne wala listener
         window.addEventListener('hashchange', () => {
             const screenId = window.location.hash.replace('#', '') || 'dashboard';
             showScreen(screenId);
@@ -401,7 +403,6 @@
                     window.materialsTree[subject][chapter].push(data);
                 });
 
-                // Initial Screen Load based on URL or Default Dashboard
                 const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
                 showScreen(initialScreen);
 
@@ -418,18 +419,16 @@
         // ==========================================
         // 4. DATA RENDERERS
         // ==========================================
-                window.switchTab = (btnElement, listId) => {
+        window.switchTab = (btnElement, listId) => {
             const tabs = btnElement.parentElement.children;
             for(let t of tabs) { t.classList.remove('active'); }
             btnElement.classList.add('active');
 
-            // Subjects Screen Tabs
             if (listId === 'resource-list') {
                 document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources yet</h4></div>`;
             } else if (listId === 'subject-list') {
                 renderSubjects();
             } 
-            // Chapters Screen Tabs
             else if (listId === 'chapter-material') {
                 document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No subject material yet</h4></div>`;
             } else if (listId === 'chapter-list') {
@@ -437,7 +436,6 @@
             }
         };
 
-            
         const renderSubjects = () => {
             const container = document.getElementById('subject-list');
             if(!container) return;
@@ -504,7 +502,7 @@
             document.getElementById('dyn-chapter-title').innerText = window.currentChapter;
             container.innerHTML = '';
             
-            const allMaterials = window.materialsTree[window.currentSubject][window.currentChapter];
+            const allMaterials = window.materialsTree[window.currentSubject]?.[window.currentChapter];
             if (!allMaterials) return;
 
             let items = allMaterials;
@@ -540,6 +538,6 @@
 
         initApp();
 
-        </script>
+                </script>
 </body>
 </html>
