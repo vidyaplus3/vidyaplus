@@ -10,31 +10,20 @@
            1. VIDYAPLUS ULTRA: DESIGN SYSTEM & CSS VARIABLES
            ========================================================== */
         :root {
-            /* Brand Identity (Navy & Gradient) */
             --brand-navy: #0f172a;
             --brand-navy-light: #1e293b;
             --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #db2777 100%);
             --primary-accent: #6366f1;
-            
-            /* Backgrounds & Surfaces */
             --bg-root: #f1f5f9;
             --bg-surface: #ffffff;
             --bg-surface-glass: rgba(255, 255, 255, 0.85);
-            
-            /* Typography Colors */
             --text-primary: #0f172a;
             --text-secondary: #475569;
             --text-tertiary: #94a3b8;
-            
-            /* Borders & Dividers */
             --border-subtle: rgba(148, 163, 184, 0.15);
             --border-strong: rgba(148, 163, 184, 0.3);
-            
-            /* Elevation & Shadows (Smooth Apple-like physics) */
             --elevation-1: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.06);
             --elevation-2: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-            
-            /* Animation Curves */
             --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -52,22 +41,17 @@
             width: 100vw; height: 100vh;
             background-color: var(--bg-root);
             color: var(--text-primary);
-            overflow: hidden; /* Strict Native App Constraint */
-            overscroll-behavior-y: none; /* Disables browser pull-to-refresh */
+            overflow: hidden; 
+            overscroll-behavior-y: none; 
             display: flex; justify-content: center;
         }
 
         .app-container {
-            width: 100%;
-            max-width: 480px; /* Mobile App Aspect Ratio limit for Desktop view */
-            height: 100%;
-            background: var(--bg-surface);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,0,0,0.05);
+            width: 100%; max-width: 480px; height: 100%;
+            background: var(--bg-surface); position: relative;
+            overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.05);
         }
 
-        /* Modern Scrollbar Engine */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 10px; }
@@ -77,183 +61,114 @@
            ========================================================== */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-root);
-            display: flex; flex-direction: column;
-            will-change: transform, opacity; /* GPU Hinting */
-            /* Using translate3d for hardware acceleration */
+            background: var(--bg-root); display: flex; flex-direction: column;
+            will-change: transform, opacity; 
             transform: translate3d(100%, 0, 0); 
             transition: transform 0.4s var(--ease-out-expo), opacity 0.4s var(--ease-out-expo);
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
+            z-index: 10; opacity: 0; pointer-events: none;
         }
 
         .screen.active {
-            transform: translate3d(0, 0, 0);
-            z-index: 20;
-            opacity: 1;
-            pointer-events: all;
+            transform: translate3d(0, 0, 0); z-index: 20; opacity: 1; pointer-events: all;
         }
 
-        /* Parallax depth effect for background screens */
         .screen.background {
-            transform: translate3d(-20%, 0, 0);
-            opacity: 0.5;
-            z-index: 10;
+            transform: translate3d(-20%, 0, 0); opacity: 0.5; z-index: 10;
         }
 
         .screen-content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-bottom: env(safe-area-inset-bottom, 20px);
-            scroll-behavior: smooth;
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding-bottom: env(safe-area-inset-bottom, 20px); scroll-behavior: smooth;
         }
 
         /* ==========================================================
            4. GLOBAL PREMIUM UI COMPONENTS
            ========================================================== */
-        
-        /* Glassmorphic Header */
         .premium-header {
-            background: var(--bg-surface-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 1rem 1.25rem;
-            display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border-subtle);
-            position: sticky; top: 0; z-index: 100;
+            background: var(--bg-surface-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-subtle); position: sticky; top: 0; z-index: 100;
         }
 
         .header-left { display: flex; align-items: center; gap: 12px; }
         
         .btn-icon {
-            width: 38px; height: 38px;
-            border-radius: 50%; border: none;
-            background: transparent; color: var(--text-primary);
-            font-size: 1.1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s ease;
+            width: 38px; height: 38px; border-radius: 50%; border: none;
+            background: transparent; color: var(--text-primary); font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s ease;
         }
         .btn-icon:active { background: var(--border-subtle); transform: scale(0.95); }
 
         .header-title {
-            font-size: clamp(1rem, 4vw, 1.15rem);
-            font-weight: 700; color: var(--brand-navy);
-            letter-spacing: -0.3px;
+            font-size: clamp(1rem, 4vw, 1.15rem); font-weight: 700; color: var(--brand-navy); letter-spacing: -0.3px;
         }
-
-        /* Shimmer Loading Skeleton (Professional state management) */
-        .skeleton {
-            background: #e2e8f0;
-            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite linear;
-            border-radius: 8px;
-        }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-              /* ==========================================================
-           5. VIDYAPLUS ULTRA: COMPONENT STYLES (PART 2)
+                /* ==========================================================
+           5. VIDYAPLUS ULTRA: COMPONENT STYLES
            ========================================================== */
-        
-        /* Dashboard Custom Header (Dark Theme as per Screenshot) */
         .dash-hero {
-            background: var(--brand-navy);
-            padding: 1.5rem 1.25rem 2rem;
-            color: var(--bg-surface);
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            position: relative;
-            z-index: 1;
-            box-shadow: var(--elevation-2);
+            background: var(--brand-navy); padding: 1.5rem 1.25rem 2rem; color: var(--bg-surface);
+            border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; position: relative;
+            z-index: 1; box-shadow: var(--elevation-2);
         }
         .batch-selector-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: transparent; border: none; color: white;
-            font-size: 1.25rem; font-weight: 800; cursor: pointer;
-            margin-top: 5px;
+            display: inline-flex; align-items: center; gap: 8px; background: transparent; border: none; color: white;
+            font-size: 1.25rem; font-weight: 800; cursor: pointer; margin-top: 5px;
         }
         
-        /* App Grid Menu (All Classes, Tests, etc.) */
         .app-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px 10px;
-            padding: 1.5rem;
-            margin-top: -15px; /* Overlapping effect */
-            position: relative; z-index: 5;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 10px; padding: 1.5rem;
+            margin-top: -15px; position: relative; z-index: 5;
         }
         .grid-item {
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-            text-decoration: none; color: var(--text-primary); cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); cursor: pointer;
         }
         .grid-icon-box {
-            width: 55px; height: 55px;
-            background: var(--bg-surface);
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: var(--primary-accent);
-            box-shadow: var(--elevation-1);
-            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+            width: 55px; height: 55px; background: var(--bg-surface); border-radius: 16px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary-accent);
+            box-shadow: var(--elevation-1); transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
         }
         .grid-item:active .grid-icon-box { transform: scale(0.9); }
         .grid-text { font-size: 0.75rem; font-weight: 600; text-align: center; }
 
-        /* Search Bar */
         .search-container { padding: 1rem 1.25rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); }
         .search-box {
-            display: flex; align-items: center; gap: 10px;
-            background: var(--bg-root); padding: 10px 15px;
+            display: flex; align-items: center; gap: 10px; background: var(--bg-root); padding: 10px 15px;
             border-radius: 12px; border: 1px solid var(--border-subtle);
         }
         .search-box input { border: none; background: transparent; outline: none; flex: 1; font-size: 0.95rem; font-weight: 500; }
 
-        /* Tabs UI */
         .app-tabs {
-            display: flex; gap: 20px; padding: 0 1.25rem;
-            background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);
-            overflow-x: auto;
+            display: flex; gap: 20px; padding: 0 1.25rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); overflow-x: auto;
         }
         .app-tab {
-            padding: 12px 0; font-weight: 700; font-size: 0.95rem;
-            color: var(--text-tertiary); cursor: pointer;
+            padding: 12px 0; font-weight: 700; font-size: 0.95rem; color: var(--text-tertiary); cursor: pointer;
             border-bottom: 3px solid transparent; transition: 0.2s;
         }
         .app-tab.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
 
-        /* List Cards (Subjects & Chapters) */
         .list-container { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 12px; }
         .data-card {
-            background: var(--bg-surface); border-radius: 16px;
-            padding: 1rem; display: flex; align-items: center; gap: 15px;
-            box-shadow: var(--elevation-1); border: 1px solid var(--border-subtle);
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--bg-surface); border-radius: 16px; padding: 1rem; display: flex; align-items: center; gap: 15px;
+            box-shadow: var(--elevation-1); border: 1px solid var(--border-subtle); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
         }
         .data-card:active { transform: scale(0.98); background: var(--bg-root); }
         
-        /* Subject Icon (e.g., 'Ph' for Physics) */
         .subject-icon {
-            width: 45px; height: 45px; border-radius: 12px;
-            background: #eff6ff; color: #2563eb;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 1.1rem;
+            width: 45px; height: 45px; border-radius: 12px; background: #eff6ff; color: #2563eb;
+            display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;
         }
         
         .card-content { flex: 1; }
         .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
         .card-subtitle { font-size: 0.8rem; font-weight: 500; color: var(--text-tertiary); }
         
-        /* Mini Progress Bar */
         .mini-progress { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
         .mini-progress span { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
         .mini-progress-bar { width: 40px; height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
         .mini-progress-fill { height: 100%; background: var(--primary-accent); border-radius: 4px; }
 
-        /* Lecture Card (Inside Chapter) */
         .lecture-card {
-            background: var(--bg-surface); border-radius: 16px; padding: 1rem;
-            box-shadow: var(--elevation-1); border: 1px solid var(--border-subtle); margin-bottom: 15px;
+            background: var(--bg-surface); border-radius: 16px; padding: 1rem; box-shadow: var(--elevation-1); border: 1px solid var(--border-subtle); margin-bottom: 15px;
         }
         .lec-card-top { display: flex; gap: 12px; margin-bottom: 12px; }
         .lec-thumb { width: 100px; height: 60px; border-radius: 8px; background: var(--bg-root); position: relative; overflow: hidden; flex-shrink: 0; }
@@ -264,7 +179,17 @@
         .lec-actions { display: flex; gap: 10px; }
         .btn-outline { flex: 1; padding: 8px; border: 1.5px solid var(--border-light); background: transparent; border-radius: 10px; font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .btn-outline:active { background: var(--bg-root); }
-                <div class="screen active" id="view-dashboard">
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app-root">
+        
+        <div id="boot-screen" style="position:absolute; inset:0; background:var(--bg-surface); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <i class="fas fa-bolt fa-3x" style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:1rem;"></i>
+            <h3 style="color:var(--brand-navy); font-weight:800; letter-spacing:1px;">VIDYAPLUS ENGINE</h3>
+        </div>
+
+        <div class="screen active" id="view-dashboard">
             <div class="dash-hero">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <i class="fas fa-bars" style="font-size: 1.2rem; cursor: pointer;"></i>
@@ -274,8 +199,8 @@
                     </div>
                 </div>
                 <p style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;">YOUR BATCH</p>
-                <button class="batch-selector-btn" onclick="alert('Batch Switcher API connected in Phase 3!')">
-                    <span id="current-batch-name">VidyaPlus JEE 2026</span>
+                <button class="batch-selector-btn">
+                    <span id="current-batch-name">Loading...</span>
                     <i class="fas fa-caret-down"></i>
                 </button>
             </div>
@@ -304,7 +229,7 @@
                     <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">Upcoming Events (0)</h3>
                     <div style="background: var(--bg-surface); border-radius: 16px; padding: 2rem 1rem; text-align: center; border: 1px solid var(--border-subtle); box-shadow: var(--elevation-1);">
                         <i class="fas fa-clock fa-3x" style="color: #cbd5e1; margin-bottom: 10px;"></i>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">No upcoming events.<br>Perfect time to catch up on pending work!</p>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">No upcoming events.<br>Perfect time to catch up!</p>
                     </div>
                 </div>
             </div>
@@ -332,42 +257,7 @@
             </div>
 
             <div class="screen-content list-container" id="subject-list-container">
-                <div class="data-card" onclick="navigateTo('view-chapters', {title: 'Physics'})">
-                    <div class="subject-icon">Ph</div>
-                    <div class="card-content">
-                        <div class="card-title">Physics</div>
-                    </div>
-                    <div class="mini-progress">
-                        <span>0%</span>
-                        <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: 0%;"></div></div>
-                    </div>
-                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
                 </div>
-
-                <div class="data-card" onclick="navigateTo('view-chapters', {title: 'Chemistry'})">
-                    <div class="subject-icon" style="background:#fce7f3; color:#db2777;">Ch</div>
-                    <div class="card-content">
-                        <div class="card-title">Chemistry</div>
-                    </div>
-                    <div class="mini-progress">
-                        <span>5%</span>
-                        <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: 5%;"></div></div>
-                    </div>
-                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
-                </div>
-                
-                <div class="data-card" onclick="navigateTo('view-chapters', {title: 'Maths'})">
-                    <div class="subject-icon" style="background:#f3e8ff; color:#9333ea;">Ma</div>
-                    <div class="card-content">
-                        <div class="card-title">Maths</div>
-                    </div>
-                    <div class="mini-progress">
-                        <span>12%</span>
-                        <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: 12%;"></div></div>
-                    </div>
-                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
-                </div>
-            </div>
         </div>
 
         <div class="screen" id="view-chapters">
@@ -384,24 +274,7 @@
             </div>
 
             <div class="screen-content list-container" id="chapter-list-container">
-                <div class="data-card" style="align-items: flex-start;" onclick="navigateTo('view-classroom', {title: 'Ch- 01 : Mathematical Tools'})">
-                    <div class="card-content">
-                        <span style="font-size:0.7rem; font-weight:800; color:var(--primary-accent); background:#e0e7ff; padding:3px 8px; border-radius:6px;">CH - 01</span>
-                        <div class="card-title" style="margin-top:8px;">Ch- 01 : Mathematical Tools</div>
-                        <div class="card-subtitle">Lectures : 0/8 • DPP : 0/4</div>
-                    </div>
-                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); align-self: center;"></i>
                 </div>
-
-                <div class="data-card" style="align-items: flex-start;" onclick="navigateTo('view-classroom', {title: 'Ch- 02 : Motion in a Straight Line'})">
-                    <div class="card-content">
-                        <span style="font-size:0.7rem; font-weight:800; color:var(--primary-accent); background:#e0e7ff; padding:3px 8px; border-radius:6px;">CH - 02</span>
-                        <div class="card-title" style="margin-top:8px;">Ch- 02 : Motion in a Straight Line</div>
-                        <div class="card-subtitle">Lectures : 0/7 • DPP : 0/8</div>
-                    </div>
-                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); align-self: center;"></i>
-                </div>
-            </div>
         </div>
 
         <div class="screen" id="view-classroom">
@@ -415,88 +288,35 @@
             <div class="app-tabs" style="gap: 10px; padding: 10px 1.25rem;">
                 <div class="app-tab active" style="background:var(--text-primary); color:white; padding:6px 15px; border-radius:20px; border:none;">All</div>
                 <div class="app-tab" style="border:1px solid var(--border-subtle); padding:6px 15px; border-radius:20px; color:var(--text-primary);">Lectures</div>
-                <div class="app-tab" style="border:1px solid var(--border-subtle); padding:6px 15px; border-radius:20px; color:var(--text-primary);">DPPs</div>
                 <div class="app-tab" style="border:1px solid var(--border-subtle); padding:6px 15px; border-radius:20px; color:var(--text-primary);">Notes</div>
             </div>
 
             <div class="screen-content list-container" style="background: #f8fafc;" id="lecture-list-container">
-                
-                <div class="lecture-card">
-                    <div class="lec-card-top">
-                        <div class="lec-thumb">
-                            <img src="https://via.placeholder.com/150x90" alt="thumbnail">
-                            <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
-                        </div>
-                        <div class="lec-info">
-                            <div class="lec-meta">Lecture • 28 Apr 2026</div>
-                            <h4>Mathematical Tools 07 : Dot Product of Vectors || Percentage...</h4>
-                            <div class="lec-meta" style="margin-top:5px;">2h 21m</div>
-                        </div>
-                    </div>
-                    <div class="lec-actions">
-                        <button class="btn-outline" style="width: 45px; flex:none;"><i class="fas fa-download"></i></button>
-                        <button class="btn-outline">Notes, DPP & more</button>
-                        <button class="btn-outline" style="color:var(--text-primary); border-color:var(--text-tertiary);" onclick="alert('Custom Video Player triggering in Part 3!')"><i class="fas fa-play"></i> Watch</button>
-                    </div>
-                </div>
-
-                 <div class="lecture-card">
-                    <div class="lec-card-top">
-                        <div class="lec-thumb">
-                            <img src="https://via.placeholder.com/150x90" alt="thumbnail">
-                            <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
-                        </div>
-                        <div class="lec-info">
-                            <div class="lec-meta">Lecture • 27 Apr 2026</div>
-                            <h4>Mathematical Tools : Doubt Session || NO DPP || Extra Lecture</h4>
-                            <div class="lec-meta" style="margin-top:5px;">1h 42m</div>
-                        </div>
-                    </div>
-                    <div class="lec-actions">
-                        <button class="btn-outline" style="width: 45px; flex:none;"><i class="fas fa-download"></i></button>
-                        <button class="btn-outline" style="color:var(--text-primary); border-color:var(--text-tertiary);" onclick="alert('Custom Video Player triggering in Part 3!')"><i class="fas fa-play"></i> Watch</button>
-                    </div>
-                </div>
-
-            </div>
+                 </div>
         </div>
-             
-    </style>
-</head>
-<body>
-    <div class="app-container" id="app-root">
-        
-        <div id="boot-screen" style="position:absolute; inset:0; background:var(--bg-surface); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <i class="fas fa-bolt fa-3x" style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:1rem; animation: pulse 1.5s infinite;"></i>
-            <h3 style="color:var(--brand-navy); font-weight:800; letter-spacing:1px;">VIDYAPLUS ENGINE</h3>
-        </div>
-
-        <div class="screen active" id="view-dashboard"></div>
-        <div class="screen" id="view-subjects"></div>
-        <div class="screen" id="view-chapters"></div>
-        <div class="screen" id="view-classroom"></div>
 
     </div>
-    
-    <script>
-        // Micro-bootloader for visual effect
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const boot = document.getElementById('boot-screen');
-                boot.style.transition = "opacity 0.4s ease";
-                boot.style.opacity = "0";
-                setTimeout(() => boot.remove(), 400);
-            }, 800);
-        });
-            <script type="module">
+        <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        /* --- THE SPA ROUTER (Hardware Accelerated) --- */
+        // Micro-bootloader visual
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const boot = document.getElementById('boot-screen');
+                if(boot) {
+                    boot.style.transition = "opacity 0.4s ease";
+                    boot.style.opacity = "0";
+                    setTimeout(() => boot.remove(), 400);
+                }
+            }, 800);
+        });
+
+        /* --- THE SPA ROUTER --- */
         class VidyaRouter {
             constructor() {
-                this.history = ['view-dashboard']; // Tracking screen navigation
+                this.history = ['view-dashboard'];
             }
 
             navigate(screenId, payload = null) {
@@ -505,26 +325,20 @@
                 
                 if (!nextScreen) return;
 
-                // Push to history
                 this.history.push(screenId);
-
-                // Slide current screen slightly back (Depth effect)
                 currentScreen.classList.remove('active');
                 currentScreen.classList.add('background');
-
-                // Bring next screen forward
                 nextScreen.classList.remove('background');
                 nextScreen.classList.add('active');
 
-                // Process Payload (Dynamic Titles)
                 if (payload) {
                     if (screenId === 'view-chapters') {
                         document.getElementById('dynamic-subject-title').innerText = payload.title;
-                        VidyaApp.renderChapters(payload.title); // Trigger UI update
+                        VidyaApp.renderChapters(payload.title);
                     }
                     if (screenId === 'view-classroom') {
                         document.getElementById('dynamic-chapter-title').innerText = payload.title;
-                        VidyaApp.renderLectures(payload.title); // Trigger UI update
+                        VidyaApp.renderLectures(payload.title);
                     }
                 }
             }
@@ -538,36 +352,26 @@
                 const currentScreen = document.getElementById(currentScreenId);
                 const previousScreen = document.getElementById(previousScreenId);
 
-                // Slide current screen out to right
                 currentScreen.classList.remove('active');
-
-                // Bring previous screen back to center
                 previousScreen.classList.remove('background');
                 previousScreen.classList.add('active');
             }
         }
 
-        /* Global Hooks for HTML inline onclick */
         window.router = new VidyaRouter();
         window.navigateTo = (screenId, payload) => window.router.navigate(screenId, payload);
         window.navigateBack = () => window.router.goBack();
 
-
-        /* --- THE STATE MANAGER (Data Engine) --- */
+        /* --- THE STATE MANAGER --- */
         const VidyaApp = {
             currentUser: null,
-            enrolledBatchesData: [], 
             currentBatchId: null,
-            materialsTree: {}, // The ultimate fast-access tree: { 'Physics': { 'Ch-1': [lectures], 'Ch-2': [] } }
+            materialsTree: {}, 
 
             async init() {
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         this.currentUser = user;
-                        // Set Avatar
-                        const initials = user.email.charAt(0).toUpperCase();
-                        document.querySelectorAll('#userIcon').forEach(el => el.innerText = initials);
-                        
                         await this.fetchUserBatches();
                     } else {
                         window.location.replace("login.html");
@@ -583,14 +387,10 @@
                     if (userSnap.exists()) {
                         const batchIds = userSnap.data().enrolledBatches || [];
                         if (batchIds.length > 0) {
-                            // Automatically select the most recently enrolled batch (Last item in array)
                             this.currentBatchId = batchIds[batchIds.length - 1];
                             await this.fetchBatchData(this.currentBatchId);
                         } else {
-                            // No batches
                             document.getElementById('current-batch-name').innerText = "No Batches Found";
-                            alert("Bhai, pehle Explore Batches se koi batch kharid lo!");
-                            window.location.replace('explore.html');
                         }
                     }
                 } catch (error) {
@@ -600,13 +400,11 @@
 
             async fetchBatchData(batchId) {
                 try {
-                    // Fetch Batch Name
                     const batchSnap = await getDoc(doc(db, "batches", batchId));
                     if (batchSnap.exists()) {
                         document.getElementById('current-batch-name').innerText = batchSnap.data().title;
                     }
 
-                    // Fetch All Materials for this batch (One big query, massive speed boost)
                     const matRef = collection(db, "batches", batchId, "materials");
                     const q = query(matRef, where("status", "==", "Active"));
                     const matSnap = await getDocs(q);
@@ -620,14 +418,12 @@
                         const subject = data.subject || "General";
                         const chapter = data.chapter || "Uncategorized";
 
-                        // Build the deeply nested tree
                         if (!this.materialsTree[subject]) this.materialsTree[subject] = {};
                         if (!this.materialsTree[subject][chapter]) this.materialsTree[subject][chapter] = [];
                         
                         this.materialsTree[subject][chapter].push(data);
                     });
 
-                    console.log("God-Mode Tree Built:", this.materialsTree);
                     this.renderSubjects();
 
                 } catch (error) {
@@ -635,10 +431,9 @@
                 }
             },
 
-            // Renders Screen 2 (Subjects)
             renderSubjects() {
                 const container = document.getElementById('subject-list-container');
-                container.innerHTML = ''; // Clear skeleton
+                container.innerHTML = ''; 
 
                 const subjects = Object.keys(this.materialsTree);
                 if (subjects.length === 0) {
@@ -648,7 +443,6 @@
 
                 subjects.forEach(subject => {
                     const initial = subject.substring(0, 2).charAt(0).toUpperCase() + subject.substring(1, 2).toLowerCase();
-                    // Fake progress for visual appeal, can be mapped to real DB later
                     const fakeProgress = Math.floor(Math.random() * 20); 
 
                     container.innerHTML += `
@@ -667,7 +461,6 @@
                 });
             },
 
-            // Renders Screen 3 (Chapters)
             renderChapters(subjectName) {
                 const container = document.getElementById('chapter-list-container');
                 container.innerHTML = '';
@@ -677,7 +470,6 @@
 
                 let index = 1;
                 for (const [chapter, lectures] of Object.entries(chaptersObj)) {
-                    // Extracting only PDFs vs Videos
                     const videoCount = lectures.filter(l => l.videoUrl).length;
                     const pdfCount = lectures.filter(l => l.pdfUrl).length;
                     const chLabel = index < 10 ? `0${index}` : index;
@@ -696,12 +488,10 @@
                 }
             },
 
-            // Renders Screen 4 (Lectures list inside classroom view)
             renderLectures(chapterName) {
                 const container = document.getElementById('lecture-list-container');
                 container.innerHTML = '';
 
-                // We need to find which subject this chapter belongs to by checking current DOM title or state
                 const currentSubject = document.getElementById('dynamic-subject-title').innerText;
                 const lectures = this.materialsTree[currentSubject][chapterName];
 
@@ -742,21 +532,13 @@
             }
         };
 
-        // Initialize Engine
         document.addEventListener('DOMContentLoaded', () => {
             VidyaApp.init();
         });
 
-        /* --- THE CUSTOM PLAYER ENGINE (Foundation) --- */
         window.launchCustomPlayer = (url) => {
             alert("Bhai! Custom player screen aayegi ab idhar! URL: " + url + "\n\nIske liye ek overlay Modal banayenge next step me!");
-            // Implementation mapping for future:
-            // 1. Open a full-screen overlay over Screen 4.
-            // 2. If YT: Append ?controls=0&modestbranding=1
-            // 3. Render our custom HTML controls below it.
         };
-
-    </script>
 
     </script>
 </body>
