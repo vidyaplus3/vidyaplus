@@ -7,227 +7,424 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* CORE VARIABLES */
-        :root {
-            --primary: #2563eb;
-            --bg-color: #f1f5f9;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --white: #ffffff;
-            --border: #e2e8f0;
-        }
+        :root { --primary: #2563eb; --bg-color: #f1f5f9; --text-main: #1e293b; --text-muted: #64748b; --white: #ffffff; --border: #e2e8f0; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* Custom Sleek Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         /* --- HEADER --- */
-        .header {
-            background: #ffffff; padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border);
-        }
+        .header { background: var(--white); padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 50; }
         .header-left { display: flex; align-items: center; gap: 15px; }
-        .back-btn { background: var(--bg-color); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; color: var(--text-main); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; }
-        .back-btn:hover { background: #e2e8f0; }
+        .back-btn { background: var(--bg-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; color: var(--text-main); font-weight: 600; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
+        .back-btn:hover { background: #e2e8f0; color: var(--primary); }
         .logo { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-        .header-right { display: flex; align-items: center; }
-        .user-avatar { width: 35px; height: 35px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .user-avatar { width: 35px; height: 35px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
 
         /* --- STUDY LAYOUT GRID --- */
-        .study-container {
-            display: grid;
-            grid-template-columns: 1fr 350px; /* Left: Player, Right: Playlist */
-            gap: 1.5rem; padding: 1.5rem; max-width: 1400px; margin: 0 auto; width: 100%;
-            align-items: start;
-        }
+        .study-container { display: flex; flex-grow: 1; overflow: hidden; max-width: 1600px; margin: 0 auto; width: 100%; }
 
         /* --- LEFT SIDE: PLAYER & TABS --- */
-        .player-section { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .player-section { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 1.5rem; gap: 1.5rem; }
         
-        /* 16:9 Aspect Ratio Container for Video */
-        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
-        .video-container iframe, .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .video-wrapper { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #0f172a; }
+        .video-container iframe, .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; outline: none; }
 
-        .lecture-details { padding: 1.5rem; border-bottom: 1px solid var(--border); }
-        .lecture-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
-        .lecture-meta { font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 15px; }
+        .lecture-details { padding: 1.5rem; }
+        .lecture-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; color: var(--text-main); line-height: 1.3; }
+        .lecture-meta { font-size: 0.9rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 15px; font-weight: 500; }
 
-        /* Action Tabs (Notes, Doubt, etc.) */
+        /* Action Tabs */
+        .tabs-wrapper { background: var(--white); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .tab-menu { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; }
-        .tab-btn { flex: 1; padding: 12px; background: none; border: none; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; }
-        .tab-btn:hover { color: var(--primary); }
+        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; font-size: 0.95rem; }
+        .tab-btn:hover { color: var(--primary); background: rgba(37,99,235,0.05); }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--white); }
-
-        .tab-content { padding: 1.5rem; display: none; background: var(--white); min-height: 250px; }
+        .tab-content { display: none; padding: 1.5rem; min-height: 350px; }
         .tab-content.active { display: block; }
 
         /* PDF Tab UI */
-        .pdf-box { background: var(--bg-color); padding: 1.5rem; border-radius: 10px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: space-between; }
-        .pdf-info { display: flex; align-items: center; gap: 15px; }
-        .pdf-info i { font-size: 2rem; color: #ef4444; }
-        .btn-download { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .pdf-box { background: #f8fafc; padding: 1.5rem; border-radius: 10px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; transition: 0.2s; }
+        .pdf-box:hover { border-color: var(--primary); background: #eff6ff; }
+        .btn-download { background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .btn-download:hover { background: #1d4ed8; transform: translateY(-2px); }
 
-        /* AI Guru Chat UI */
-        .ai-chat-box { display: flex; flex-direction: column; height: 300px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-        .chat-messages { flex-grow: 1; padding: 1rem; overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 0.95rem; }
-        .msg.bot { background: #eff6ff; color: #1e3a8a; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .chat-input-area { display: flex; padding: 10px; background: var(--white); border-top: 1px solid var(--border); }
-        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
-        .chat-input-area button { background: var(--primary); color: white; border: none; padding: 0 15px; margin-left: 10px; border-radius: 8px; cursor: pointer; }
+        /* LIVE COMMENTS UI */
+        .comment-section { display: flex; flex-direction: column; height: 400px; }
+        .comments-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .comment-item { display: flex; gap: 12px; background: #f8fafc; padding: 12px 15px; border-radius: 10px; transition: 0.2s; border: 1px solid transparent; }
+        .comment-item:hover { border-color: #e2e8f0; }
+        .comment-avatar { width: 38px; height: 38px; background: #cbd5e1; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; flex-shrink: 0; font-size: 1.1rem; }
+        .comment-body { flex-grow: 1; }
+        .comment-body h5 { font-size: 0.95rem; color: var(--text-main); margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; }
+        .comment-body h5 span { font-size: 0.75rem; color: var(--text-muted); font-weight: normal; }
+        .comment-body p { font-size: 0.95rem; color: #334155; line-height: 1.5; word-break: break-word; }
+        .btn-delete-comment { background: none; border: none; color: #ef4444; cursor: pointer; padding: 5px; border-radius: 5px; transition: 0.2s; opacity: 0.7; }
+        .btn-delete-comment:hover { opacity: 1; background: #fee2e2; }
+        
+        .comment-input-box { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; }
+        .comment-input-box input { flex-grow: 1; padding: 12px 15px; border: 1.5px solid var(--border); border-radius: 10px; outline: none; font-size: 0.95rem; transition: 0.2s; background: #f8fafc; }
+        .comment-input-box input:focus { border-color: var(--primary); background: var(--white); }
+        .comment-input-box button { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .comment-input-box button:hover { background: #1d4ed8; }
+        .comment-input-box button:disabled { background: #94a3b8; cursor: not-allowed; }
 
         /* --- RIGHT SIDE: PLAYLIST --- */
-        .playlist-section { background: var(--white); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 100px); position: sticky; top: 80px; }
-        .playlist-header { padding: 1.2rem; background: #f8fafc; border-bottom: 1px solid var(--border); }
-        .playlist-title { font-weight: 800; font-size: 1.1rem; }
-        .chapter-name { color: var(--primary); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        .playlist-section { width: 380px; flex-shrink: 0; background: var(--white); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        .playlist-header { padding: 1.5rem; background: var(--white); border-bottom: 1px solid var(--border); }
+        .playlist-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
         
-        .lecture-list { overflow-y: auto; flex-grow: 1; }
-        .lecture-item { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 12px; transition: 0.2s; }
-        .lecture-item:hover { background: #f1f5f9; }
-        .lecture-item.active { background: #eff6ff; border-left: 4px solid var(--primary); }
-        .lec-thumb { width: 100px; height: 60px; background: #cbd5e1; border-radius: 6px; flex-shrink: 0; position: relative; overflow: hidden; }
-        .lec-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .lec-thumb .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; font-size: 0.65rem; padding: 2px 4px; border-radius: 4px; }
-        .lec-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .lecture-list { overflow-y: auto; flex-grow: 1; padding-bottom: 2rem; }
+        .chapter-heading { background: var(--bg-color); padding: 10px 1.5rem; font-size: 0.85rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+        .lecture-item { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 12px; transition: 0.2s; }
+        .lecture-item:hover { background: #f8fafc; }
+        .lecture-item.active { background: #eff6ff; border-left: 4px solid var(--primary); padding-left: calc(1.5rem - 4px); }
+        .lec-thumb { width: 110px; height: 65px; background: #e2e8f0; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+        .lec-info { display: flex; flex-direction: column; justify-content: center; }
+        .lec-info h4 { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .study-container { grid-template-columns: 1fr; padding: 0; gap: 0; }
-            .player-section { border-radius: 0; border-left: none; border-right: none; }
-            .playlist-section { height: auto; position: static; border-radius: 0; border: none; border-top: 1px solid var(--border); }
+        @media (max-width: 1024px) {
+            .study-container { flex-direction: column; overflow-y: auto; }
+            .player-section { padding: 0; overflow: visible; gap: 0; }
+            .video-wrapper { border-radius: 0; border: none; border-bottom: 1px solid var(--border); }
+            .tabs-wrapper { border-radius: 0; border: none; border-bottom: 1px solid var(--border); }
+            .playlist-section { width: 100%; height: auto; border-left: none; }
+            .lecture-list { overflow: visible; }
         }
     </style>
 </head>
-<body>
+    <body>
 
     <header class="header">
         <div class="header-left">
-            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
-            <div class="logo">VidyaPlus</div>
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> My Study</a>
+            <div class="logo">VidyaPlus Classroom</div>
         </div>
-        <div class="header-right">
-            <div class="user-avatar" id="userIcon">S</div>
-        </div>
+        <div class="user-avatar" id="userIcon">?</div>
     </header>
 
     <main class="study-container">
         
         <div class="player-section">
-            <div class="video-container" id="videoContainer">
-                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0" allowfullscreen></iframe>
-            </div>
-
-            <div class="lecture-details">
-                <h1 class="lecture-title" id="lecTitle">L-01: Introduction to Physics</h1>
-                <div class="lecture-meta">
-                    <span><i class="fas fa-calendar-alt"></i> 10 May 2026</span>
-                    <span><i class="fas fa-book"></i> Chapter 1</span>
+            <div class="video-wrapper">
+                <div class="video-container" id="videoContainer">
+                    <div style="color:white; display:flex; justify-content:center; align-items:center; height:100%; font-weight:600;">
+                        <i class="fas fa-spinner fa-spin" style="margin-right:10px;"></i> Initializing Player...
+                    </div>
+                </div>
+                <div class="lecture-details">
+                    <h1 class="lecture-title" id="lecTitle">Loading Lecture Details...</h1>
+                    <div class="lecture-meta">
+                        <span id="lecSubject"><i class="fas fa-book"></i> Fetching Subject</span>
+                        <span id="lecChapter"><i class="fas fa-folder"></i> Fetching Chapter</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-menu">
-                <button class="tab-btn active" onclick="switchTab('pdfTab')"><i class="fas fa-file-pdf"></i> Class Notes PDF</button>
-                <button class="tab-btn" onclick="switchTab('aiTab')"><i class="fas fa-robot"></i> AI Guru Doubt Chat</button>
-            </div>
+            <div class="tabs-wrapper">
+                <div class="tab-menu">
+                    <button class="tab-btn active" onclick="switchTab('commentsTab')"><i class="fas fa-comments"></i> Live Doubts</button>
+                    <button class="tab-btn" onclick="switchTab('pdfTab')"><i class="fas fa-file-pdf"></i> Class Notes PDF</button>
+                </div>
 
-            <div id="pdfTab" class="tab-content active">
-                <div class="pdf-box">
-                    <div class="pdf-info">
-                        <i class="fas fa-file-pdf"></i>
-                        <div>
-                            <h4 style="margin-bottom: 3px;">Class Notes: L-01</h4>
-                            <p style="font-size: 0.85rem; color: var(--text-muted);">Size: 2.4 MB</p>
+                <div id="commentsTab" class="tab-content active">
+                    <div class="comment-section">
+                        <div class="comments-list" id="commentsArea">
+                            <div style="text-align:center; color:var(--text-muted); padding-top:2rem;">
+                                <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading doubts...
+                            </div>
+                        </div>
+                        <div class="comment-input-box">
+                            <input type="text" id="commentInput" placeholder="Ask a doubt or write a comment..." autocomplete="off">
+                            <button id="sendBtn" onclick="postComment()"><i class="fas fa-paper-plane"></i></button>
                         </div>
                     </div>
-                    <a href="#" class="btn-download" id="btnDownloadPdf"><i class="fas fa-download"></i> View / Download</a>
                 </div>
-            </div>
 
-            <div id="aiTab" class="tab-content">
-                <div class="ai-chat-box">
-                    <div class="chat-messages" id="chatArea">
-                        <div class="msg bot">Hello Bhai! Main tumhara AI Guru hoon. Is video lecture me koi concept samajh nahi aaya? Mujhse pucho!</div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="doubtInput" placeholder="Type your doubt here...">
-                        <button onclick="sendDoubt()"><i class="fas fa-paper-plane"></i></button>
+                <div id="pdfTab" class="tab-content">
+                    <div class="pdf-box" id="pdfContainer">
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <i class="fas fa-file-pdf" style="font-size:2.5rem; color:#ef4444;"></i>
+                            <div>
+                                <h4 style="font-size: 1.1rem; margin-bottom: 4px;">Class Notes</h4>
+                                <p id="pdfSize" style="font-size:0.9rem; color:var(--text-muted); font-weight:600;">Size: N/A</p>
+                            </div>
+                        </div>
+                        <a href="#" target="_blank" class="btn-download" id="btnDownloadPdf"><i class="fas fa-download"></i> Download</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="playlist-section">
+        <aside class="playlist-section">
             <div class="playlist-header">
-                <div class="chapter-name" id="plChapterName">Physics • Electrostatics</div>
-                <div class="playlist-title">All Classes</div>
+                <div class="playlist-title"><i class="fas fa-list-ul" style="color:var(--primary); margin-right:8px;"></i> Course Content</div>
             </div>
-            
             <div class="lecture-list" id="playlistContainer">
-                <div class="lecture-item active">
-                    <div class="lec-thumb"><img src="https://via.placeholder.com/150x90" alt=""><span class="duration">45:20</span></div>
-                    <div class="lec-info"><h4>L-01: Introduction to Physics</h4></div>
-                </div>
-                <div class="lecture-item">
-                    <div class="lec-thumb"><img src="https://via.placeholder.com/150x90" alt=""><span class="duration">50:10</span></div>
-                    <div class="lec-info"><h4>L-02: Coulomb's Law & Applications</h4></div>
-                </div>
-                <div class="lecture-item">
-                    <div class="lec-thumb"><img src="https://via.placeholder.com/150x90" alt=""><span class="duration">38:05</span></div>
-                    <div class="lec-info"><h4>L-03: Electric Field Lines</h4></div>
+                <div style="text-align:center; padding: 3rem 1rem; color:var(--text-muted);">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Fetching your classes...
                 </div>
             </div>
-        </div>
+        </aside>
 
     </main>
 
     <script>
-        // Tab Switching Logic
         function switchTab(tabId) {
-            // Remove active classes
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked
             event.currentTarget.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
+    </script>
+            <script type="module">
+        import { db, auth } from './firebase-init.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, getDocs, onSnapshot, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Simple Dummy AI Chat Logic (For visual testing)
-        function sendDoubt() {
-            const input = document.getElementById('doubtInput');
-            const chatArea = document.getElementById('chatArea');
-            if(input.value.trim() === '') return;
+        let currentUser = null;
+        let currentBatchId = new URLSearchParams(window.location.search).get('batch');
+        let currentMaterialId = null;
+        let allLectures = [];
+        let commentsUnsubscribe = null; 
 
-            // User Message
-            chatArea.innerHTML += `<div class="msg user">${input.value}</div>`;
-            input.value = '';
-            chatArea.scrollTop = chatArea.scrollHeight;
-
-            // Bot Reply Simulation
-            setTimeout(() => {
-                chatArea.innerHTML += `<div class="msg bot">Main abhi API se connect nahi hoon, par jab hounga toh is concept ko mast Hinglish me samjha dunga! 🚀</div>`;
-                chatArea.scrollTop = chatArea.scrollHeight;
-            }, 1000);
+        if(!currentBatchId) {
+            alert("Security Alert: No batch selected!");
+            window.location.replace("dashboard.html");
         }
 
-        // Enter key to send message
-        document.getElementById('doubtInput').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') sendDoubt();
-        });
-    </script>
-
-    <script type="module">
-        import { auth } from './firebase-init.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
+        // Security Check
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                currentUser = user;
                 document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
+                fetchCurriculum();
             } else {
                 window.location.replace("login.html");
             }
         });
+
+        // 1. Fetch Curriculum
+        async function fetchCurriculum() {
+            try {
+                const q = query(collection(db, "batches", currentBatchId, "materials"), where("status", "==", "Active"));
+                const querySnapshot = await getDocs(q);
+                
+                allLectures = [];
+                querySnapshot.forEach(docSnap => {
+                    let data = docSnap.data();
+                    data.id = docSnap.id;
+                    allLectures.push(data);
+                });
+
+                const grouped = {};
+                allLectures.forEach(lec => {
+                    if(!grouped[lec.chapter]) grouped[lec.chapter] = [];
+                    grouped[lec.chapter].push(lec);
+                });
+
+                renderPlaylist(grouped);
+
+                if(allLectures.length > 0) {
+                    loadLecture(allLectures[0].id);
+                } else {
+                    document.getElementById('videoContainer').innerHTML = `<div style="color:#94a3b8; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;"><i class="fas fa-video-slash fa-3x" style="margin-bottom:10px;"></i><p>No active lectures uploaded yet.</p></div>`;
+                    document.getElementById('playlistContainer').innerHTML = `<div style="text-align:center; padding: 2rem; color:gray;">No classes found in this batch.</div>`;
+                }
+            } catch(e) {
+                console.error("Error fetching curriculum:", e);
+                alert("Network error. Could not load classes.");
+            }
+        }
+
+        // 2. Playlist Renderer
+        function renderPlaylist(groupedData) {
+            const container = document.getElementById('playlistContainer');
+            container.innerHTML = '';
+
+            for(const [chapterName, lectures] of Object.entries(groupedData)) {
+                container.innerHTML += `<div class="chapter-heading">${chapterName}</div>`;
+                
+                lectures.forEach((lec, index) => {
+                    const thumb = lec.thumbUrl || 'https://via.placeholder.com/150x90?text=VidyaPlus';
+                    container.innerHTML += `
+                        <div class="lecture-item" id="lec-card-${lec.id}" onclick="window.loadLectureFromUI('${lec.id}')">
+                            <img src="${thumb}" class="lec-thumb" onerror="this.src='https://via.placeholder.com/150x90'">
+                            <div class="lec-info">
+                                <h4>L-${index+1}: ${lec.title}</h4>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        window.loadLectureFromUI = (id) => loadLecture(id);
+
+        // 3. Load Lecture to Player
+        function loadLecture(id) {
+            currentMaterialId = id;
+            const lec = allLectures.find(l => l.id === id);
+            if(!lec) return;
+
+            // Highlight Active
+            document.querySelectorAll('.lecture-item').forEach(el => el.classList.remove('active'));
+            const activeCard = document.getElementById(`lec-card-${id}`);
+            if(activeCard) {
+                activeCard.classList.add('active');
+                // Auto scroll playlist to active item on desktop
+                if(window.innerWidth > 1024) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            document.getElementById('lecTitle').innerText = lec.title;
+            document.getElementById('lecSubject').innerHTML = `<i class="fas fa-book" style="color:var(--primary);"></i> ${lec.subject}`;
+            document.getElementById('lecChapter').innerHTML = `<i class="fas fa-folder" style="color:var(--primary);"></i> ${lec.chapter}`;
+
+            renderSmartPlayer(lec.videoUrl);
+
+            const pdfBtn = document.getElementById('btnDownloadPdf');
+            const pdfSize = document.getElementById('pdfSize');
+            if(lec.pdfUrl) {
+                pdfBtn.style.display = 'flex';
+                pdfBtn.href = lec.pdfUrl;
+                pdfSize.innerText = `Size: ${lec.size || 'Auto'}`;
+            } else {
+                pdfBtn.style.display = 'none';
+                pdfSize.innerText = 'No PDF Attached for this class';
+            }
+
+            listenToComments(currentMaterialId);
+        }
+
+        function renderSmartPlayer(url) {
+            const container = document.getElementById('videoContainer');
+            if(!url) {
+                container.innerHTML = `<div style="color:#94a3b8; display:flex; justify-content:center; align-items:center; height:100%;"><i class="fas fa-video-slash" style="margin-right:10px;"></i> Video Link Not Available</div>`;
+                return;
+            }
+
+            if(url.includes('youtube.com') || url.includes('youtu.be')) {
+                let embedUrl = url;
+                if(url.includes('watch?v=')) embedUrl = url.replace('watch?v=', 'embed/');
+                else if(url.includes('youtu.be/')) embedUrl = url.replace('youtu.be/', 'www.youtube.com/embed/');
+                
+                container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            } else {
+                container.innerHTML = `<video src="${url}" controls controlsList="nodownload"></video>`;
+            }
+        }
+
+        // 4. Real-time Comments with Delete Logic
+        function listenToComments(matId) {
+            const commentsArea = document.getElementById('commentsArea');
+            commentsArea.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding-top:2rem;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading doubts...</div>`;
+
+            if(commentsUnsubscribe) commentsUnsubscribe();
+
+            const commentsRef = collection(db, "batches", currentBatchId, "materials", matId, "comments");
+            const q = query(commentsRef, orderBy("timestamp", "asc"));
+
+            commentsUnsubscribe = onSnapshot(q, (snapshot) => {
+                commentsArea.innerHTML = '';
+                if(snapshot.empty) {
+                    commentsArea.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding-top:2rem; font-weight:600;">No doubts yet. Be the first to ask!</div>`;
+                    return;
+                }
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const commentId = docSnap.id; 
+                    const initial = data.userName ? data.userName.charAt(0).toUpperCase() : '?';
+                    
+                    let timeString = 'Just now';
+                    if (data.timestamp) {
+                        const dateObj = data.timestamp.toDate();
+                        timeString = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                    
+                    const isMe = data.email === currentUser.email;
+                    const bgColor = isMe ? '#eff6ff' : '#f8fafc';
+                    const borderStr = isMe ? 'border-left: 4px solid var(--primary);' : 'border-left: 4px solid transparent;';
+
+                    const deleteBtnHtml = isMe ? 
+                        `<button class="btn-delete-comment" onclick="window.deleteComment('${commentId}')" title="Delete your comment"><i class="fas fa-trash-alt"></i></button>` 
+                        : '';
+
+                    commentsArea.innerHTML += `
+                        <div class="comment-item" style="background:${bgColor}; ${borderStr}">
+                            <div class="comment-avatar" style="background: ${isMe ? 'var(--primary)' : '#64748b'};">${initial}</div>
+                            <div class="comment-body">
+                                <h5>
+                                    <div>${data.userName} <span style="margin-left:8px;">${timeString}</span></div>
+                                    ${deleteBtnHtml}
+                                </h5>
+                                <p>${data.text}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                commentsArea.scrollTop = commentsArea.scrollHeight;
+            });
+        }
+
+        // Delete Comment Engine
+        window.deleteComment = async (commentId) => {
+            if(confirm("Are you sure you want to delete this comment?")) {
+                try {
+                    const commentRef = doc(db, "batches", currentBatchId, "materials", currentMaterialId, "comments", commentId);
+                    await deleteDoc(commentRef);
+                } catch(error) {
+                    console.error("Error deleting comment:", error);
+                    alert("Network error. Failed to delete comment.");
+                }
+            }
+        };
+
+        // Post Comment Engine
+        window.postComment = async () => {
+            const input = document.getElementById('commentInput');
+            const btn = document.getElementById('sendBtn');
+            const text = input.value.trim();
+            
+            if(!text || !currentMaterialId) return;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            input.disabled = true;
+
+            try {
+                const nameParts = currentUser.email.split('@')[0];
+                const commentsRef = collection(db, "batches", currentBatchId, "materials", currentMaterialId, "comments");
+                
+                await addDoc(commentsRef, {
+                    text: text,
+                    email: currentUser.email,
+                    userName: nameParts,
+                    timestamp: serverTimestamp()
+                });
+                
+                input.value = '';
+            } catch(error) {
+                console.error("Error posting comment:", error);
+                alert("Failed to post comment. Check your connection.");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                btn.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+        }
+
+        document.getElementById('commentInput').addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') window.postComment();
+        });
+
     </script>
 </body>
 </html>
