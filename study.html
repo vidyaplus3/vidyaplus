@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classroom | VidyaPlus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CORE VARIABLES */
+        :root {
+            --primary: #2563eb;
+            --bg-color: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+        /* --- HEADER --- */
+        .header {
+            background: #ffffff; padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border);
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .back-btn { background: var(--bg-color); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; color: var(--text-main); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+        .back-btn:hover { background: #e2e8f0; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+        .header-right { display: flex; align-items: center; }
+        .user-avatar { width: 35px; height: 35px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* --- STUDY LAYOUT GRID --- */
+        .study-container {
+            display: grid;
+            grid-template-columns: 1fr 350px; /* Left: Player, Right: Playlist */
+            gap: 1.5rem; padding: 1.5rem; max-width: 1400px; margin: 0 auto; width: 100%;
+            align-items: start;
+        }
+
+        /* --- LEFT SIDE: PLAYER & TABS --- */
+        .player-section { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        
+        /* 16:9 Aspect Ratio Container for Video */
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
+        .video-container iframe, .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        .lecture-details { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+        .lecture-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+        .lecture-meta { font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 15px; }
+
+        /* Action Tabs (Notes, Doubt, etc.) */
+        .tab-menu { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; }
+        .tab-btn { flex: 1; padding: 12px; background: none; border: none; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; }
+        .tab-btn:hover { color: var(--primary); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--white); }
+
+        .tab-content { padding: 1.5rem; display: none; background: var(--white); min-height: 250px; }
+        .tab-content.active { display: block; }
+
+        /* PDF Tab UI */
+        .pdf-box { background: var(--bg-color); padding: 1.5rem; border-radius: 10px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: space-between; }
+        .pdf-info { display: flex; align-items: center; gap: 15px; }
+        .pdf-info i { font-size: 2rem; color: #ef4444; }
+        .btn-download { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; }
+
+        /* AI Guru Chat UI */
+        .ai-chat-box { display: flex; flex-direction: column; height: 300px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .chat-messages { flex-grow: 1; padding: 1rem; overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 0.95rem; }
+        .msg.bot { background: #eff6ff; color: #1e3a8a; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-input-area { display: flex; padding: 10px; background: var(--white); border-top: 1px solid var(--border); }
+        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+        .chat-input-area button { background: var(--primary); color: white; border: none; padding: 0 15px; margin-left: 10px; border-radius: 8px; cursor: pointer; }
+
+        /* --- RIGHT SIDE: PLAYLIST --- */
+        .playlist-section { background: var(--white); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 100px); position: sticky; top: 80px; }
+        .playlist-header { padding: 1.2rem; background: #f8fafc; border-bottom: 1px solid var(--border); }
+        .playlist-title { font-weight: 800; font-size: 1.1rem; }
+        .chapter-name { color: var(--primary); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        
+        .lecture-list { overflow-y: auto; flex-grow: 1; }
+        .lecture-item { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 12px; transition: 0.2s; }
+        .lecture-item:hover { background: #f1f5f9; }
+        .lecture-item.active { background: #eff6ff; border-left: 4px solid var(--primary); }
+        .lec-thumb { width: 100px; height: 60px; background: #cbd5e1; border-radius: 6px; flex-shrink: 0; position: relative; overflow: hidden; }
+        .lec-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .lec-thumb .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; font-size: 0.65rem; padding: 2px 4px; border-radius: 4px; }
+        .lec-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .study-container { grid-template-columns: 1fr; padding: 0; gap: 0; }
+            .player-section { border-radius: 0; border-left: none; border-right: none; }
+            .playlist-section { height: auto; position: static; border-radius: 0; border: none; border-top: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <div class="logo">VidyaPlus</div>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar" id="userIcon">S</div>
+        </div>
+    </header>
+
+    <main class="study-container">
+        
+        <div class="player-section">
+            <div class="video-container" id="videoContainer">
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0" allowfullscreen></iframe>
+            </div>
+
+            <div class="lecture-details">
+                <h1 class="lecture-title" id="lecTitle">L-01: Introduction to Physics</h1>
+                <div class="lecture-meta">
+                    <span><i class="fas fa-calendar-alt"></i> 10 May 2026</span>
+                    <span><i class="fas fa-book"></i> Chapter 1</span>
+                </div>
+            </div>
+
+            <div class="tab-menu">
+                <button class="tab-btn active" onclick="switchTab('pdfTab')"><i class="fas fa-file-pdf"></i> Class Notes PDF</button>
+                <button class="tab-btn" onclick="switchTab('aiTab')"><i class="fas fa-robot"></i> AI Guru Doubt Chat</button>
+            </div>
+
+            <div id="pdfTab" class="tab-content active">
+                <div class="pdf-box">
+                    <div class="pdf-info">
+                        <i class="fas fa-file-pdf"></i>
+                        <div>
+                            <h4 style="margin-bottom: 3px;">Class Notes: L-01</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Size: 2.4 MB</p>
+                        </div>
+                    </div>
+                    <a href="#" class="btn-download" id="btnDownloadPdf"><i class="fas fa-download"></i> View / Download</a>
+                </div>
+            </div>
+
+            <div id="aiTab" class="tab-content">
+                <div class="ai-chat-box">
+                    <div class="chat-messages" id="chatArea">
+                        <div class="msg bot">Hello Bhai! Main tumhara AI Guru hoon. Is video lecture me koi concept samajh nahi aaya? Mujhse pucho!</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="doubtInput" placeholder="Type your doubt here...">
+                        <button onclick="sendDoubt()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="playlist-section">
+            <div class="playlist-header">
+                <div class="chapter-name" id="plChapterName">Physics • Electrostatics</div>
+                <div class="playlist-title">All Classes</div>
+            </div>
+            
+            <div class="lecture-list" id="playlistContainer">
+                <div class="lecture-item active">
+                    <div class="lec-thumb"><img src="https://via.placeholder.com/150x90" alt=""><span class="duration">45:20</span></div>
+                    <div class="lec-info"><h4>L-01: Introduction to Physics</h4></div>
+                </div>
+                <div class="lecture-item">
+                    <div class="lec-thumb"><img src="https://via.placeholder.com/150x90" alt=""><span class="duration">50:10</span></div>
+                    <div class="lec-info"><h4>L-02: Coulomb's Law & Applications</h4></div>
+                </div>
+                <div class="lecture-item">
+                    <div class="lec-thumb"><img src="https://via.placeholder.com/150x90" alt=""><span class="duration">38:05</span></div>
+                    <div class="lec-info"><h4>L-03: Electric Field Lines</h4></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Remove active classes
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Simple Dummy AI Chat Logic (For visual testing)
+        function sendDoubt() {
+            const input = document.getElementById('doubtInput');
+            const chatArea = document.getElementById('chatArea');
+            if(input.value.trim() === '') return;
+
+            // User Message
+            chatArea.innerHTML += `<div class="msg user">${input.value}</div>`;
+            input.value = '';
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // Bot Reply Simulation
+            setTimeout(() => {
+                chatArea.innerHTML += `<div class="msg bot">Main abhi API se connect nahi hoon, par jab hounga toh is concept ko mast Hinglish me samjha dunga! 🚀</div>`;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 1000);
+        }
+
+        // Enter key to send message
+        document.getElementById('doubtInput').addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') sendDoubt();
+        });
+    </script>
+
+    <script type="module">
+        import { auth } from './firebase-init.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
+            } else {
+                window.location.replace("login.html");
+            }
+        });
+    </script>
+</body>
+</html>
