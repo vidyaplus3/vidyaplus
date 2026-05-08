@@ -258,12 +258,13 @@
         </div>
 
     </div>
-            <script type="module">
+                <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- GLOBAL STATE (Now with LocalStorage Memory) ---
+        // --- GLOBAL STATE (With Batch Memory) ---
+        window.currentBatchId = localStorage.getItem('vp_batch') || null;
         window.currentSubject = localStorage.getItem('vp_subject') || null;
         window.currentChapter = localStorage.getItem('vp_chapter') || null;
         window.materialsTree = {}; 
@@ -316,7 +317,7 @@
         };
 
         window.navigate = (screenId, payload = {}) => {
-            // Save to LocalStorage so data survives a refresh! 👇
+            // Save to LocalStorage so data survives a refresh!
             if (payload.subject) {
                 window.currentSubject = payload.subject;
                 localStorage.setItem('vp_subject', payload.subject);
@@ -373,7 +374,16 @@
                         }
                     }
 
-                    await switchBatch(batchIds[batchIds.length - 1]);
+                    // 🚨 THE FIX IS HERE 🚨 Check if a batch was saved in memory
+                    let batchToLoad = batchIds[batchIds.length - 1]; // Fallback to default
+                    const savedBatch = localStorage.getItem('vp_batch');
+                    
+                    // Verify if the saved batch is still in the user's enrolled list
+                    if (savedBatch && batchIds.includes(savedBatch)) {
+                        batchToLoad = savedBatch;
+                    }
+
+                    await switchBatch(batchToLoad);
                 }
             } catch (error) {
                 window.location.replace("login.html");
@@ -382,6 +392,10 @@
 
         window.switchBatch = async (batchId) => {
             document.getElementById('current-batch-name').innerText = "Loading...";
+            
+            // 🚨 THE FIX IS HERE 🚨 Save selected batch to memory
+            localStorage.setItem('vp_batch', batchId);
+            window.currentBatchId = batchId;
             
             try {
                 const batchSnap = await getDoc(doc(db, "batches", batchId));
