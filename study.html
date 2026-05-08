@@ -228,19 +228,20 @@
             <div class="screen-content list-container" id="subject-list">
                 </div>
         </div>
-
-        <div class="screen" id="chapters">
+        
+                <div class="screen" id="chapters">
             <div class="page-header">
                 <button class="back-btn" onclick="navigate('subjects')"><i class="fas fa-arrow-left"></i></button>
                 <div class="page-title" id="dyn-subject-title">Subject</div>
             </div>
-            <div class="tabs">
-                <button class="tab-btn active">Chapters</button>
-                <button class="tab-btn">Material</button>
+                    
+        <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'chapter-list')">Chapters</button>
+                <button class="tab-btn" onclick="switchTab(this, 'chapter-material')">Material</button>
             </div>
             <div class="screen-content list-container" id="chapter-list">
                 </div>
-        </div>
+                </div>
 
         <div class="screen" id="classroom">
             <div class="page-header">
@@ -417,18 +418,26 @@
         // ==========================================
         // 4. DATA RENDERERS
         // ==========================================
-        window.switchTab = (btnElement, listId) => {
+                window.switchTab = (btnElement, listId) => {
             const tabs = btnElement.parentElement.children;
             for(let t of tabs) { t.classList.remove('active'); }
             btnElement.classList.add('active');
 
+            // Subjects Screen Tabs
             if (listId === 'resource-list') {
                 document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources yet</h4></div>`;
-            } else {
+            } else if (listId === 'subject-list') {
                 renderSubjects();
+            } 
+            // Chapters Screen Tabs
+            else if (listId === 'chapter-material') {
+                document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No subject material yet</h4></div>`;
+            } else if (listId === 'chapter-list') {
+                renderChapters(window.currentSubject);
             }
         };
 
+            
         const renderSubjects = () => {
             const container = document.getElementById('subject-list');
             if(!container) return;
