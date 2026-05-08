@@ -253,13 +253,11 @@
             `;
             myBatchGrid.appendChild(card);
         }
-
-        // Temporary function for "Start Learning" button
+                // REAL function for "Start Learning" button
         window.startStudying = function(batchId) {
-            alert("Bhai ispe click karne par chapter select wala page khulega! Flowchart yaad hai na? Next module me banayenge isko!");
-            // window.location.href = "study.html?batch=" + batchId;
+            // Ye code bache ko seedha Classroom me bhej dega
+            window.location.href = "study.html?batch=" + batchId;
         };
-
         // Logout Button Logic
         document.getElementById('logout-action').addEventListener('click', () => {
             signOut(auth).then(() => {
