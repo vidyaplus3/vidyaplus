@@ -268,7 +268,7 @@
         window.materialsTree = {}; 
 
         // ==========================================
-        // 1. SIMPLE MODALS & DROPDOWNS
+        // 1. MODALS & DROPDOWNS (STRICT LOGIC)
         // ==========================================
         window.openMenu = () => {
             document.getElementById('global-overlay').style.display = 'block';
@@ -292,7 +292,6 @@
             document.getElementById('batch-dropdown').classList.toggle('show');
         };
 
-        // Click outside dropdown to close
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('batch-dropdown');
             if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.batch-selector')) {
@@ -301,28 +300,36 @@
         });
 
         // ==========================================
-        // 2. FOOLPROOF NAVIGATION (NO URL HASH BUGS)
+        // 2. BACK-BUTTON FIX: HASH ROUTING ENGINE
         // ==========================================
-        window.navigate = (screenId, payload = {}) => {
-            // Close any open menus first
+        
+        // Ye function sirf UI badalta hai
+        const showScreen = (screenId) => {
             closeModals();
-
-            // Hide all screens
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
-            // Show the requested screen
             const target = document.getElementById(screenId);
             if (target) target.classList.add('active');
 
-            // Handle data passing (Payloads)
+            // Data Renderers trigger
+            if (screenId === 'subjects') renderSubjects();
+            if (screenId === 'chapters' && window.currentSubject) renderChapters(window.currentSubject);
+            if (screenId === 'classroom' && window.currentChapter) filterClassroom('all');
+        };
+
+        // Ye function URL badalta hai (Browser history entry banata hai)
+        window.navigate = (screenId, payload = {}) => {
             if (payload.subject) window.currentSubject = payload.subject;
             if (payload.chapter) window.currentChapter = payload.chapter;
-
-            // Trigger data rendering
-            if (screenId === 'subjects') renderSubjects();
-            if (screenId === 'chapters') renderChapters(window.currentSubject);
-            if (screenId === 'classroom') filterClassroom('all');
+            
+            // URL badlega -> ye hashchange event trigger karega
+            window.location.hash = screenId;
         };
+
+        // System Back Button / Browser Back detect karne wala listener
+        window.addEventListener('hashchange', () => {
+            const screenId = window.location.hash.replace('#', '') || 'dashboard';
+            showScreen(screenId);
+        });
 
         // ==========================================
         // 3. FIREBASE AUTH & SECURITY BOUNCER
@@ -330,7 +337,6 @@
         const initApp = () => {
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    // Set User UI
                     const name = user.displayName || user.email.split('@')[0];
                     document.getElementById('userName').innerText = name;
                     document.getElementById('userIcon').innerText = name.charAt(0).toUpperCase();
@@ -348,14 +354,12 @@
                 if (userSnap.exists()) {
                     const batchIds = userSnap.data().enrolledBatches || [];
                     
-                    // 🛡️ SECURITY BOUNCER: Block users without batches
                     if (batchIds.length === 0) {
-                        alert("Access Denied: Please enroll in a batch first!");
+                        alert("Security Alert: Please enroll in a batch first!");
                         window.location.replace('explore.html');
                         return;
                     }
 
-                    // Populate Dropdown
                     const dropdown = document.getElementById('batch-dropdown');
                     dropdown.innerHTML = '';
                     for (let bId of batchIds) {
@@ -366,30 +370,22 @@
                         }
                     }
 
-                    // Load Latest Batch
                     await switchBatch(batchIds[batchIds.length - 1]);
-                } else {
-                    window.location.replace("login.html");
                 }
             } catch (error) {
-                console.error("Auth Error:", error);
                 window.location.replace("login.html");
             }
         };
 
         window.switchBatch = async (batchId) => {
             document.getElementById('current-batch-name').innerText = "Loading...";
-            closeModals();
-            window.navigate('dashboard'); // Return to main screen safely
-
+            
             try {
-                // Get Batch Title
                 const batchSnap = await getDoc(doc(db, "batches", batchId));
                 if (batchSnap.exists()) {
                     document.getElementById('current-batch-name').innerText = batchSnap.data().title;
                 }
 
-                // Fetch Materials
                 const matRef = collection(db, "batches", batchId, "materials");
                 const q = query(matRef, where("status", "==", "Active"));
                 const matSnap = await getDocs(q);
@@ -399,27 +395,27 @@
                     const data = docSnap.data();
                     const subject = data.subject || "General";
                     const chapter = data.chapter || "Uncategorized";
-                    
                     if (!window.materialsTree[subject]) window.materialsTree[subject] = {};
                     if (!window.materialsTree[subject][chapter]) window.materialsTree[subject][chapter] = [];
-                    
                     window.materialsTree[subject][chapter].push(data);
                 });
 
-                // Remove Boot Screen
+                // Initial Screen Load based on URL or Default Dashboard
+                const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
+                showScreen(initialScreen);
+
                 const boot = document.getElementById('boot-screen');
                 if (boot) {
                     boot.style.opacity = '0';
                     setTimeout(() => boot.style.display = 'none', 300);
                 }
             } catch (error) {
-                console.error("Data Load Error:", error);
-                alert("Error loading batch data!");
+                alert("Error loading batch!");
             }
         };
 
         // ==========================================
-        // 4. DATA RENDERERS (DOM INJECTION)
+        // 4. DATA RENDERERS
         // ==========================================
         window.switchTab = (btnElement, listId) => {
             const tabs = btnElement.parentElement.children;
@@ -435,6 +431,7 @@
 
         const renderSubjects = () => {
             const container = document.getElementById('subject-list');
+            if(!container) return;
             container.innerHTML = ''; 
             const subjects = Object.keys(window.materialsTree);
             
@@ -457,8 +454,9 @@
         };
 
         const renderChapters = (subjectName) => {
-            document.getElementById('dyn-subject-title').innerText = subjectName;
             const container = document.getElementById('chapter-list');
+            if(!container) return;
+            document.getElementById('dyn-subject-title').innerText = subjectName;
             container.innerHTML = '';
             
             const chaptersObj = window.materialsTree[subjectName];
@@ -486,6 +484,8 @@
         };
 
         window.filterClassroom = (filterType, btnElement = null) => {
+            const container = document.getElementById('lecture-list');
+            if(!container) return;
             if(btnElement) {
                 const tabs = btnElement.parentElement.children;
                 for(let t of tabs) { t.classList.remove('active'); }
@@ -493,15 +493,10 @@
             }
             
             document.getElementById('dyn-chapter-title').innerText = window.currentChapter;
-            const container = document.getElementById('lecture-list');
             container.innerHTML = '';
             
             const allMaterials = window.materialsTree[window.currentSubject][window.currentChapter];
-
-            if (!allMaterials || allMaterials.length === 0) {
-                container.innerHTML = `<div class="empty-box"><i class="fas fa-box-open"></i><h4>Nothing uploaded yet</h4></div>`;
-                return;
-            }
+            if (!allMaterials) return;
 
             let items = allMaterials;
             if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
@@ -534,9 +529,8 @@
             });
         };
 
-        // Start App Immediately
         initApp();
 
-    </script>
+        </script>
 </body>
 </html>
