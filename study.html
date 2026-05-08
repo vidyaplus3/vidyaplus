@@ -153,34 +153,7 @@
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-    </style>
-</head>
-<body>
-    <div class="app-container" id="app-root">
-        
-        <div id="boot-screen" style="position:absolute; inset:0; background:var(--bg-surface); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <i class="fas fa-bolt fa-3x" style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:1rem; animation: pulse 1.5s infinite;"></i>
-            <h3 style="color:var(--brand-navy); font-weight:800; letter-spacing:1px;">VIDYAPLUS ENGINE</h3>
-        </div>
-
-        <div class="screen active" id="view-dashboard"></div>
-        <div class="screen" id="view-subjects"></div>
-        <div class="screen" id="view-chapters"></div>
-        <div class="screen" id="view-classroom"></div>
-
-    </div>
-    
-    <script>
-        // Micro-bootloader for visual effect
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const boot = document.getElementById('boot-screen');
-                boot.style.transition = "opacity 0.4s ease";
-                boot.style.opacity = "0";
-                setTimeout(() => boot.remove(), 400);
-            }, 800);
-        });
-            /* ==========================================================
+              /* ==========================================================
            5. VIDYAPLUS ULTRA: COMPONENT STYLES (PART 2)
            ========================================================== */
         
@@ -291,7 +264,7 @@
         .lec-actions { display: flex; gap: 10px; }
         .btn-outline { flex: 1; padding: 8px; border: 1.5px solid var(--border-light); background: transparent; border-radius: 10px; font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .btn-outline:active { background: var(--bg-root); }
-            <div class="screen active" id="view-dashboard">
+                <div class="screen active" id="view-dashboard">
             <div class="dash-hero">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <i class="fas fa-bars" style="font-size: 1.2rem; cursor: pointer;"></i>
@@ -487,7 +460,35 @@
 
             </div>
         </div>
-        <script type="module">
+             
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app-root">
+        
+        <div id="boot-screen" style="position:absolute; inset:0; background:var(--bg-surface); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <i class="fas fa-bolt fa-3x" style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:1rem; animation: pulse 1.5s infinite;"></i>
+            <h3 style="color:var(--brand-navy); font-weight:800; letter-spacing:1px;">VIDYAPLUS ENGINE</h3>
+        </div>
+
+        <div class="screen active" id="view-dashboard"></div>
+        <div class="screen" id="view-subjects"></div>
+        <div class="screen" id="view-chapters"></div>
+        <div class="screen" id="view-classroom"></div>
+
+    </div>
+    
+    <script>
+        // Micro-bootloader for visual effect
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const boot = document.getElementById('boot-screen');
+                boot.style.transition = "opacity 0.4s ease";
+                boot.style.opacity = "0";
+                setTimeout(() => boot.remove(), 400);
+            }, 800);
+        });
+            <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -755,6 +756,8 @@
             // 3. Render our custom HTML controls below it.
         };
 
-                    </script>
+    </script>
+
+    </script>
 </body>
 </html>
