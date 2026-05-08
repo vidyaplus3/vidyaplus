@@ -2,429 +2,761 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Classroom | VidyaPlus</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VidyaPlus Study Zone</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CORE VARIABLES */
-        :root { --primary: #2563eb; --bg-color: #f1f5f9; --text-main: #1e293b; --text-muted: #64748b; --white: #ffffff; --border: #e2e8f0; }
+        /* ==========================================================
+           1. VIDYAPLUS ULTRA: DESIGN SYSTEM & CSS VARIABLES
+           ========================================================== */
+        :root {
+            /* Brand Identity (Navy & Gradient) */
+            --brand-navy: #0f172a;
+            --brand-navy-light: #1e293b;
+            --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #db2777 100%);
+            --primary-accent: #6366f1;
+            
+            /* Backgrounds & Surfaces */
+            --bg-root: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-surface-glass: rgba(255, 255, 255, 0.85);
+            
+            /* Typography Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+            
+            /* Borders & Dividers */
+            --border-subtle: rgba(148, 163, 184, 0.15);
+            --border-strong: rgba(148, 163, 184, 0.3);
+            
+            /* Elevation & Shadows (Smooth Apple-like physics) */
+            --elevation-1: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.06);
+            --elevation-2: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+            
+            /* Animation Curves */
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        /* ==========================================================
+           2. APP SHELL RESET & FLUID TYPOGRAPHY
+           ========================================================== */
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-        /* Custom Sleek Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        html, body {
+            width: 100vw; height: 100vh;
+            background-color: var(--bg-root);
+            color: var(--text-primary);
+            overflow: hidden; /* Strict Native App Constraint */
+            overscroll-behavior-y: none; /* Disables browser pull-to-refresh */
+            display: flex; justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Mobile App Aspect Ratio limit for Desktop view */
+            height: 100%;
+            background: var(--bg-surface);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.05);
+        }
+
+        /* Modern Scrollbar Engine */
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 10px; }
 
-        /* --- HEADER --- */
-        .header { background: var(--white); padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 50; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .back-btn { background: var(--bg-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; color: var(--text-main); font-weight: 600; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
-        .back-btn:hover { background: #e2e8f0; color: var(--primary); }
-        .logo { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-        .user-avatar { width: 35px; height: 35px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
-
-        /* --- STUDY LAYOUT GRID --- */
-        .study-container { display: flex; flex-grow: 1; overflow: hidden; max-width: 1600px; margin: 0 auto; width: 100%; }
-
-        /* --- LEFT SIDE: PLAYER & TABS --- */
-        .player-section { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 1.5rem; gap: 1.5rem; }
-        
-        .video-wrapper { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #0f172a; }
-        .video-container iframe, .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; outline: none; }
-
-        .lecture-details { padding: 1.5rem; }
-        .lecture-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; color: var(--text-main); line-height: 1.3; }
-        .lecture-meta { font-size: 0.9rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 15px; font-weight: 500; }
-
-        /* Action Tabs */
-        .tabs-wrapper { background: var(--white); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .tab-menu { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; }
-        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; font-size: 0.95rem; }
-        .tab-btn:hover { color: var(--primary); background: rgba(37,99,235,0.05); }
-        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--white); }
-        .tab-content { display: none; padding: 1.5rem; min-height: 350px; }
-        .tab-content.active { display: block; }
-
-        /* PDF Tab UI */
-        .pdf-box { background: #f8fafc; padding: 1.5rem; border-radius: 10px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; transition: 0.2s; }
-        .pdf-box:hover { border-color: var(--primary); background: #eff6ff; }
-        .btn-download { background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
-        .btn-download:hover { background: #1d4ed8; transform: translateY(-2px); }
-
-        /* LIVE COMMENTS UI */
-        .comment-section { display: flex; flex-direction: column; height: 400px; }
-        .comments-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .comment-item { display: flex; gap: 12px; background: #f8fafc; padding: 12px 15px; border-radius: 10px; transition: 0.2s; border: 1px solid transparent; }
-        .comment-item:hover { border-color: #e2e8f0; }
-        .comment-avatar { width: 38px; height: 38px; background: #cbd5e1; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; flex-shrink: 0; font-size: 1.1rem; }
-        .comment-body { flex-grow: 1; }
-        .comment-body h5 { font-size: 0.95rem; color: var(--text-main); margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; }
-        .comment-body h5 span { font-size: 0.75rem; color: var(--text-muted); font-weight: normal; }
-        .comment-body p { font-size: 0.95rem; color: #334155; line-height: 1.5; word-break: break-word; }
-        .btn-delete-comment { background: none; border: none; color: #ef4444; cursor: pointer; padding: 5px; border-radius: 5px; transition: 0.2s; opacity: 0.7; }
-        .btn-delete-comment:hover { opacity: 1; background: #fee2e2; }
-        
-        .comment-input-box { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; }
-        .comment-input-box input { flex-grow: 1; padding: 12px 15px; border: 1.5px solid var(--border); border-radius: 10px; outline: none; font-size: 0.95rem; transition: 0.2s; background: #f8fafc; }
-        .comment-input-box input:focus { border-color: var(--primary); background: var(--white); }
-        .comment-input-box button { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .comment-input-box button:hover { background: #1d4ed8; }
-        .comment-input-box button:disabled { background: #94a3b8; cursor: not-allowed; }
-
-        /* --- RIGHT SIDE: PLAYLIST --- */
-        .playlist-section { width: 380px; flex-shrink: 0; background: var(--white); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-        .playlist-header { padding: 1.5rem; background: var(--white); border-bottom: 1px solid var(--border); }
-        .playlist-title { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
-        
-        .lecture-list { overflow-y: auto; flex-grow: 1; padding-bottom: 2rem; }
-        .chapter-heading { background: var(--bg-color); padding: 10px 1.5rem; font-size: 0.85rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
-        .lecture-item { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 12px; transition: 0.2s; }
-        .lecture-item:hover { background: #f8fafc; }
-        .lecture-item.active { background: #eff6ff; border-left: 4px solid var(--primary); padding-left: calc(1.5rem - 4px); }
-        .lec-thumb { width: 110px; height: 65px; background: #e2e8f0; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
-        .lec-info { display: flex; flex-direction: column; justify-content: center; }
-        .lec-info h4 { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-
-        @media (max-width: 1024px) {
-            .study-container { flex-direction: column; overflow-y: auto; }
-            .player-section { padding: 0; overflow: visible; gap: 0; }
-            .video-wrapper { border-radius: 0; border: none; border-bottom: 1px solid var(--border); }
-            .tabs-wrapper { border-radius: 0; border: none; border-bottom: 1px solid var(--border); }
-            .playlist-section { width: 100%; height: auto; border-left: none; }
-            .lecture-list { overflow: visible; }
+        /* ==========================================================
+           3. ADVANCED SPA ROUTING & HARDWARE ACCELERATION
+           ========================================================== */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-root);
+            display: flex; flex-direction: column;
+            will-change: transform, opacity; /* GPU Hinting */
+            /* Using translate3d for hardware acceleration */
+            transform: translate3d(100%, 0, 0); 
+            transition: transform 0.4s var(--ease-out-expo), opacity 0.4s var(--ease-out-expo);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
         }
-    </style>
-</head>
-    <body>
 
-    <header class="header">
-        <div class="header-left">
-            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> My Study</a>
-            <div class="logo">VidyaPlus Classroom</div>
-        </div>
-        <div class="user-avatar" id="userIcon">?</div>
-    </header>
-
-    <main class="study-container">
-        
-        <div class="player-section">
-            <div class="video-wrapper">
-                <div class="video-container" id="videoContainer">
-                    <div style="color:white; display:flex; justify-content:center; align-items:center; height:100%; font-weight:600;">
-                        <i class="fas fa-spinner fa-spin" style="margin-right:10px;"></i> Initializing Player...
-                    </div>
-                </div>
-                <div class="lecture-details">
-                    <h1 class="lecture-title" id="lecTitle">Loading Lecture Details...</h1>
-                    <div class="lecture-meta">
-                        <span id="lecSubject"><i class="fas fa-book"></i> Fetching Subject</span>
-                        <span id="lecChapter"><i class="fas fa-folder"></i> Fetching Chapter</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tabs-wrapper">
-                <div class="tab-menu">
-                    <button class="tab-btn active" onclick="switchTab('commentsTab')"><i class="fas fa-comments"></i> Live Doubts</button>
-                    <button class="tab-btn" onclick="switchTab('pdfTab')"><i class="fas fa-file-pdf"></i> Class Notes PDF</button>
-                </div>
-
-                <div id="commentsTab" class="tab-content active">
-                    <div class="comment-section">
-                        <div class="comments-list" id="commentsArea">
-                            <div style="text-align:center; color:var(--text-muted); padding-top:2rem;">
-                                <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading doubts...
-                            </div>
-                        </div>
-                        <div class="comment-input-box">
-                            <input type="text" id="commentInput" placeholder="Ask a doubt or write a comment..." autocomplete="off">
-                            <button id="sendBtn" onclick="postComment()"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="pdfTab" class="tab-content">
-                    <div class="pdf-box" id="pdfContainer">
-                        <div style="display:flex; gap:15px; align-items:center;">
-                            <i class="fas fa-file-pdf" style="font-size:2.5rem; color:#ef4444;"></i>
-                            <div>
-                                <h4 style="font-size: 1.1rem; margin-bottom: 4px;">Class Notes</h4>
-                                <p id="pdfSize" style="font-size:0.9rem; color:var(--text-muted); font-weight:600;">Size: N/A</p>
-                            </div>
-                        </div>
-                        <a href="#" target="_blank" class="btn-download" id="btnDownloadPdf"><i class="fas fa-download"></i> Download</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <aside class="playlist-section">
-            <div class="playlist-header">
-                <div class="playlist-title"><i class="fas fa-list-ul" style="color:var(--primary); margin-right:8px;"></i> Course Content</div>
-            </div>
-            <div class="lecture-list" id="playlistContainer">
-                <div style="text-align:center; padding: 3rem 1rem; color:var(--text-muted);">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Fetching your classes...
-                </div>
-            </div>
-        </aside>
-
-    </main>
-
-    <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+        .screen.active {
+            transform: translate3d(0, 0, 0);
+            z-index: 20;
+            opacity: 1;
+            pointer-events: all;
         }
-    </script>
+
+        /* Parallax depth effect for background screens */
+        .screen.background {
+            transform: translate3d(-20%, 0, 0);
+            opacity: 0.5;
+            z-index: 10;
+        }
+
+        .screen-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+            scroll-behavior: smooth;
+        }
+
+        /* ==========================================================
+           4. GLOBAL PREMIUM UI COMPONENTS
+           ========================================================== */
+        
+        /* Glassmorphic Header */
+        .premium-header {
+            background: var(--bg-surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 1rem 1.25rem;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        
+        .btn-icon {
+            width: 38px; height: 38px;
+            border-radius: 50%; border: none;
+            background: transparent; color: var(--text-primary);
+            font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s ease;
+        }
+        .btn-icon:active { background: var(--border-subtle); transform: scale(0.95); }
+
+        .header-title {
+            font-size: clamp(1rem, 4vw, 1.15rem);
+            font-weight: 700; color: var(--brand-navy);
+            letter-spacing: -0.3px;
+        }
+
+        /* Shimmer Loading Skeleton (Professional state management) */
+        .skeleton {
+            background: #e2e8f0;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+         /* ==========================================================
+           5. VIDYAPLUS ULTRA: COMPONENT STYLES (PART 2)
+           ========================================================== */
+        
+        /* Dashboard Custom Header (Dark Theme as per Screenshot) */
+        .dash-hero {
+            background: var(--brand-navy);
+            padding: 1.5rem 1.25rem 2rem;
+            color: var(--bg-surface);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: relative;
+            z-index: 1;
+            box-shadow: var(--elevation-2);
+        }
+        .batch-selector-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: transparent; border: none; color: white;
+            font-size: 1.25rem; font-weight: 800; cursor: pointer;
+            margin-top: 5px;
+        }
+        
+        /* App Grid Menu (All Classes, Tests, etc.) */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px 10px;
+            padding: 1.5rem;
+            margin-top: -15px; /* Overlapping effect */
+            position: relative; z-index: 5;
+        }
+        .grid-item {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            text-decoration: none; color: var(--text-primary); cursor: pointer;
+        }
+        .grid-icon-box {
+            width: 55px; height: 55px;
+            background: var(--bg-surface);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--primary-accent);
+            box-shadow: var(--elevation-1);
+            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+        }
+        .grid-item:active .grid-icon-box { transform: scale(0.9); }
+        .grid-text { font-size: 0.75rem; font-weight: 600; text-align: center; }
+
+        /* Search Bar */
+        .search-container { padding: 1rem 1.25rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); }
+        .search-box {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--bg-root); padding: 10px 15px;
+            border-radius: 12px; border: 1px solid var(--border-subtle);
+        }
+        .search-box input { border: none; background: transparent; outline: none; flex: 1; font-size: 0.95rem; font-weight: 500; }
+
+        /* Tabs UI */
+        .app-tabs {
+            display: flex; gap: 20px; padding: 0 1.25rem;
+            background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);
+            overflow-x: auto;
+        }
+        .app-tab {
+            padding: 12px 0; font-weight: 700; font-size: 0.95rem;
+            color: var(--text-tertiary); cursor: pointer;
+            border-bottom: 3px solid transparent; transition: 0.2s;
+        }
+        .app-tab.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
+
+        /* List Cards (Subjects & Chapters) */
+        .list-container { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 12px; }
+        .data-card {
+            background: var(--bg-surface); border-radius: 16px;
+            padding: 1rem; display: flex; align-items: center; gap: 15px;
+            box-shadow: var(--elevation-1); border: 1px solid var(--border-subtle);
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .data-card:active { transform: scale(0.98); background: var(--bg-root); }
+        
+        /* Subject Icon (e.g., 'Ph' for Physics) */
+        .subject-icon {
+            width: 45px; height: 45px; border-radius: 12px;
+            background: #eff6ff; color: #2563eb;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.1rem;
+        }
+        
+        .card-content { flex: 1; }
+        .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .card-subtitle { font-size: 0.8rem; font-weight: 500; color: var(--text-tertiary); }
+        
+        /* Mini Progress Bar */
+        .mini-progress { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+        .mini-progress span { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
+        .mini-progress-bar { width: 40px; height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .mini-progress-fill { height: 100%; background: var(--primary-accent); border-radius: 4px; }
+
+        /* Lecture Card (Inside Chapter) */
+        .lecture-card {
+            background: var(--bg-surface); border-radius: 16px; padding: 1rem;
+            box-shadow: var(--elevation-1); border: 1px solid var(--border-subtle); margin-bottom: 15px;
+        }
+        .lec-card-top { display: flex; gap: 12px; margin-bottom: 12px; }
+        .lec-thumb { width: 100px; height: 60px; border-radius: 8px; background: var(--bg-root); position: relative; overflow: hidden; flex-shrink: 0; }
+        .lec-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .play-overlay { position: absolute; bottom: -8px; right: -8px; color: #ef4444; background: white; border-radius: 50%; font-size: 1.2rem; border: 2px solid white; }
+        .lec-info h4 { font-size: 0.95rem; font-weight: 700; line-height: 1.3; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .lec-meta { font-size: 0.75rem; color: var(--text-tertiary); font-weight: 600; }
+        .lec-actions { display: flex; gap: 10px; }
+        .btn-outline { flex: 1; padding: 8px; border: 1.5px solid var(--border-light); background: transparent; border-radius: 10px; font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .btn-outline:active { background: var(--bg-root); }
+                <div class="screen active" id="view-dashboard">
+            <div class="dash-hero">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <i class="fas fa-bars" style="font-size: 1.2rem; cursor: pointer;"></i>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <span style="background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-gem" style="color:#60a5fa;"></i> 225 XP</span>
+                        <i class="fas fa-bell" style="font-size: 1.1rem;"></i>
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;">YOUR BATCH</p>
+                <button class="batch-selector-btn" onclick="alert('Batch Switcher API connected in Phase 3!')">
+                    <span id="current-batch-name">VidyaPlus JEE 2026</span>
+                    <i class="fas fa-caret-down"></i>
+                </button>
+            </div>
+
+            <div class="screen-content">
+                <div class="app-grid">
+                    <div class="grid-item" onclick="navigateTo('view-subjects')">
+                        <div class="grid-icon-box"><i class="fas fa-play-circle" style="color: #4f46e5;"></i></div>
+                        <span class="grid-text">All Classes</span>
+                    </div>
+                    <div class="grid-item" onclick="alert('Test Engine Coming Soon!')">
+                        <div class="grid-icon-box"><i class="fas fa-file-alt" style="color: #0ea5e9;"></i></div>
+                        <span class="grid-text">All Tests</span>
+                    </div>
+                    <div class="grid-item" onclick="alert('AI Guru Doubts Coming Soon!')">
+                        <div class="grid-icon-box"><i class="fas fa-question-circle" style="color: #db2777;"></i></div>
+                        <span class="grid-text">My Doubts</span>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon-box"><i class="fas fa-users" style="color: #8b5cf6;"></i></div>
+                        <span class="grid-text">Community</span>
+                    </div>
+                </div>
+
+                <div style="padding: 1.5rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">Upcoming Events (0)</h3>
+                    <div style="background: var(--bg-surface); border-radius: 16px; padding: 2rem 1rem; text-align: center; border: 1px solid var(--border-subtle); box-shadow: var(--elevation-1);">
+                        <i class="fas fa-clock fa-3x" style="color: #cbd5e1; margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">No upcoming events.<br>Perfect time to catch up on pending work!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="view-subjects">
+            <div class="premium-header">
+                <div class="header-left">
+                    <button class="btn-icon" onclick="navigateBack()"><i class="fas fa-arrow-left"></i></button>
+                    <div class="header-title">All Classes</div>
+                </div>
+                <div style="background: var(--bg-root); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);"><i class="fas fa-gem" style="color:#60a5fa;"></i> 225</div>
+            </div>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search" style="color: var(--text-tertiary);"></i>
+                    <input type="text" placeholder="Search for Lectures...">
+                </div>
+            </div>
+
+            <div class="app-tabs">
+                <div class="app-tab active">Subjects</div>
+                <div class="app-tab">Resources</div>
+            </div>
+
+            <div class="screen-content list-container" id="subject-list-container">
+                <div class="data-card" onclick="navigateTo('view-chapters', {title: 'Physics'})">
+                    <div class="subject-icon">Ph</div>
+                    <div class="card-content">
+                        <div class="card-title">Physics</div>
+                    </div>
+                    <div class="mini-progress">
+                        <span>0%</span>
+                        <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: 0%;"></div></div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
+                </div>
+
+                <div class="data-card" onclick="navigateTo('view-chapters', {title: 'Chemistry'})">
+                    <div class="subject-icon" style="background:#fce7f3; color:#db2777;">Ch</div>
+                    <div class="card-content">
+                        <div class="card-title">Chemistry</div>
+                    </div>
+                    <div class="mini-progress">
+                        <span>5%</span>
+                        <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: 5%;"></div></div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
+                </div>
+                
+                <div class="data-card" onclick="navigateTo('view-chapters', {title: 'Maths'})">
+                    <div class="subject-icon" style="background:#f3e8ff; color:#9333ea;">Ma</div>
+                    <div class="card-content">
+                        <div class="card-title">Maths</div>
+                    </div>
+                    <div class="mini-progress">
+                        <span>12%</span>
+                        <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: 12%;"></div></div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="view-chapters">
+            <div class="premium-header">
+                <div class="header-left">
+                    <button class="btn-icon" onclick="navigateBack()"><i class="fas fa-arrow-left"></i></button>
+                    <div class="header-title" id="dynamic-subject-title">Subject</div>
+                </div>
+            </div>
+
+            <div class="app-tabs">
+                <div class="app-tab active">Chapters</div>
+                <div class="app-tab">Study Material</div>
+            </div>
+
+            <div class="screen-content list-container" id="chapter-list-container">
+                <div class="data-card" style="align-items: flex-start;" onclick="navigateTo('view-classroom', {title: 'Ch- 01 : Mathematical Tools'})">
+                    <div class="card-content">
+                        <span style="font-size:0.7rem; font-weight:800; color:var(--primary-accent); background:#e0e7ff; padding:3px 8px; border-radius:6px;">CH - 01</span>
+                        <div class="card-title" style="margin-top:8px;">Ch- 01 : Mathematical Tools</div>
+                        <div class="card-subtitle">Lectures : 0/8 • DPP : 0/4</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); align-self: center;"></i>
+                </div>
+
+                <div class="data-card" style="align-items: flex-start;" onclick="navigateTo('view-classroom', {title: 'Ch- 02 : Motion in a Straight Line'})">
+                    <div class="card-content">
+                        <span style="font-size:0.7rem; font-weight:800; color:var(--primary-accent); background:#e0e7ff; padding:3px 8px; border-radius:6px;">CH - 02</span>
+                        <div class="card-title" style="margin-top:8px;">Ch- 02 : Motion in a Straight Line</div>
+                        <div class="card-subtitle">Lectures : 0/7 • DPP : 0/8</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-tertiary); align-self: center;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="view-classroom">
+            <div class="premium-header">
+                <div class="header-left">
+                    <button class="btn-icon" onclick="navigateBack()"><i class="fas fa-arrow-left"></i></button>
+                    <div class="header-title" id="dynamic-chapter-title">Chapter Details</div>
+                </div>
+            </div>
+
+            <div class="app-tabs" style="gap: 10px; padding: 10px 1.25rem;">
+                <div class="app-tab active" style="background:var(--text-primary); color:white; padding:6px 15px; border-radius:20px; border:none;">All</div>
+                <div class="app-tab" style="border:1px solid var(--border-subtle); padding:6px 15px; border-radius:20px; color:var(--text-primary);">Lectures</div>
+                <div class="app-tab" style="border:1px solid var(--border-subtle); padding:6px 15px; border-radius:20px; color:var(--text-primary);">DPPs</div>
+                <div class="app-tab" style="border:1px solid var(--border-subtle); padding:6px 15px; border-radius:20px; color:var(--text-primary);">Notes</div>
+            </div>
+
+            <div class="screen-content list-container" style="background: #f8fafc;" id="lecture-list-container">
+                
+                <div class="lecture-card">
+                    <div class="lec-card-top">
+                        <div class="lec-thumb">
+                            <img src="https://via.placeholder.com/150x90" alt="thumbnail">
+                            <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
+                        </div>
+                        <div class="lec-info">
+                            <div class="lec-meta">Lecture • 28 Apr 2026</div>
+                            <h4>Mathematical Tools 07 : Dot Product of Vectors || Percentage...</h4>
+                            <div class="lec-meta" style="margin-top:5px;">2h 21m</div>
+                        </div>
+                    </div>
+                    <div class="lec-actions">
+                        <button class="btn-outline" style="width: 45px; flex:none;"><i class="fas fa-download"></i></button>
+                        <button class="btn-outline">Notes, DPP & more</button>
+                        <button class="btn-outline" style="color:var(--text-primary); border-color:var(--text-tertiary);" onclick="alert('Custom Video Player triggering in Part 3!')"><i class="fas fa-play"></i> Watch</button>
+                    </div>
+                </div>
+
+                 <div class="lecture-card">
+                    <div class="lec-card-top">
+                        <div class="lec-thumb">
+                            <img src="https://via.placeholder.com/150x90" alt="thumbnail">
+                            <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
+                        </div>
+                        <div class="lec-info">
+                            <div class="lec-meta">Lecture • 27 Apr 2026</div>
+                            <h4>Mathematical Tools : Doubt Session || NO DPP || Extra Lecture</h4>
+                            <div class="lec-meta" style="margin-top:5px;">1h 42m</div>
+                        </div>
+                    </div>
+                    <div class="lec-actions">
+                        <button class="btn-outline" style="width: 45px; flex:none;"><i class="fas fa-download"></i></button>
+                        <button class="btn-outline" style="color:var(--text-primary); border-color:var(--text-tertiary);" onclick="alert('Custom Video Player triggering in Part 3!')"><i class="fas fa-play"></i> Watch</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
             <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { collection, query, where, getDocs, onSnapshot, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let currentUser = null;
-        let currentBatchId = new URLSearchParams(window.location.search).get('batch');
-        let currentMaterialId = null;
-        let allLectures = [];
-        let commentsUnsubscribe = null; 
-
-        if(!currentBatchId) {
-            alert("Security Alert: No batch selected!");
-            window.location.replace("dashboard.html");
-        }
-
-        // Security Check
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
-                fetchCurriculum();
-            } else {
-                window.location.replace("login.html");
+        /* --- THE SPA ROUTER (Hardware Accelerated) --- */
+        class VidyaRouter {
+            constructor() {
+                this.history = ['view-dashboard']; // Tracking screen navigation
             }
-        });
 
-        // 1. Fetch Curriculum
-        async function fetchCurriculum() {
-            try {
-                const q = query(collection(db, "batches", currentBatchId, "materials"), where("status", "==", "Active"));
-                const querySnapshot = await getDocs(q);
+            navigate(screenId, payload = null) {
+                const currentScreen = document.getElementById(this.history[this.history.length - 1]);
+                const nextScreen = document.getElementById(screenId);
                 
-                allLectures = [];
-                querySnapshot.forEach(docSnap => {
-                    let data = docSnap.data();
-                    data.id = docSnap.id;
-                    allLectures.push(data);
-                });
+                if (!nextScreen) return;
 
-                const grouped = {};
-                allLectures.forEach(lec => {
-                    if(!grouped[lec.chapter]) grouped[lec.chapter] = [];
-                    grouped[lec.chapter].push(lec);
-                });
+                // Push to history
+                this.history.push(screenId);
 
-                renderPlaylist(grouped);
+                // Slide current screen slightly back (Depth effect)
+                currentScreen.classList.remove('active');
+                currentScreen.classList.add('background');
 
-                if(allLectures.length > 0) {
-                    loadLecture(allLectures[0].id);
-                } else {
-                    document.getElementById('videoContainer').innerHTML = `<div style="color:#94a3b8; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;"><i class="fas fa-video-slash fa-3x" style="margin-bottom:10px;"></i><p>No active lectures uploaded yet.</p></div>`;
-                    document.getElementById('playlistContainer').innerHTML = `<div style="text-align:center; padding: 2rem; color:gray;">No classes found in this batch.</div>`;
+                // Bring next screen forward
+                nextScreen.classList.remove('background');
+                nextScreen.classList.add('active');
+
+                // Process Payload (Dynamic Titles)
+                if (payload) {
+                    if (screenId === 'view-chapters') {
+                        document.getElementById('dynamic-subject-title').innerText = payload.title;
+                        VidyaApp.renderChapters(payload.title); // Trigger UI update
+                    }
+                    if (screenId === 'view-classroom') {
+                        document.getElementById('dynamic-chapter-title').innerText = payload.title;
+                        VidyaApp.renderLectures(payload.title); // Trigger UI update
+                    }
                 }
-            } catch(e) {
-                console.error("Error fetching curriculum:", e);
-                alert("Network error. Could not load classes.");
+            }
+
+            goBack() {
+                if (this.history.length <= 1) return;
+
+                const currentScreenId = this.history.pop();
+                const previousScreenId = this.history[this.history.length - 1];
+
+                const currentScreen = document.getElementById(currentScreenId);
+                const previousScreen = document.getElementById(previousScreenId);
+
+                // Slide current screen out to right
+                currentScreen.classList.remove('active');
+
+                // Bring previous screen back to center
+                previousScreen.classList.remove('background');
+                previousScreen.classList.add('active');
             }
         }
 
-        // 2. Playlist Renderer
-        function renderPlaylist(groupedData) {
-            const container = document.getElementById('playlistContainer');
-            container.innerHTML = '';
+        /* Global Hooks for HTML inline onclick */
+        window.router = new VidyaRouter();
+        window.navigateTo = (screenId, payload) => window.router.navigate(screenId, payload);
+        window.navigateBack = () => window.router.goBack();
 
-            for(const [chapterName, lectures] of Object.entries(groupedData)) {
-                container.innerHTML += `<div class="chapter-heading">${chapterName}</div>`;
-                
-                lectures.forEach((lec, index) => {
-                    const thumb = lec.thumbUrl || 'https://via.placeholder.com/150x90?text=VidyaPlus';
-                    container.innerHTML += `
-                        <div class="lecture-item" id="lec-card-${lec.id}" onclick="window.loadLectureFromUI('${lec.id}')">
-                            <img src="${thumb}" class="lec-thumb" onerror="this.src='https://via.placeholder.com/150x90'">
-                            <div class="lec-info">
-                                <h4>L-${index+1}: ${lec.title}</h4>
-                            </div>
-                        </div>
-                    `;
+
+        /* --- THE STATE MANAGER (Data Engine) --- */
+        const VidyaApp = {
+            currentUser: null,
+            enrolledBatchesData: [], 
+            currentBatchId: null,
+            materialsTree: {}, // The ultimate fast-access tree: { 'Physics': { 'Ch-1': [lectures], 'Ch-2': [] } }
+
+            async init() {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        this.currentUser = user;
+                        // Set Avatar
+                        const initials = user.email.charAt(0).toUpperCase();
+                        document.querySelectorAll('#userIcon').forEach(el => el.innerText = initials);
+                        
+                        await this.fetchUserBatches();
+                    } else {
+                        window.location.replace("login.html");
+                    }
                 });
-            }
-        }
+            },
 
-        window.loadLectureFromUI = (id) => loadLecture(id);
+            async fetchUserBatches() {
+                try {
+                    const userRef = doc(db, "users", this.currentUser.uid);
+                    const userSnap = await getDoc(userRef);
 
-        // 3. Load Lecture to Player
-        function loadLecture(id) {
-            currentMaterialId = id;
-            const lec = allLectures.find(l => l.id === id);
-            if(!lec) return;
+                    if (userSnap.exists()) {
+                        const batchIds = userSnap.data().enrolledBatches || [];
+                        if (batchIds.length > 0) {
+                            // Automatically select the most recently enrolled batch (Last item in array)
+                            this.currentBatchId = batchIds[batchIds.length - 1];
+                            await this.fetchBatchData(this.currentBatchId);
+                        } else {
+                            // No batches
+                            document.getElementById('current-batch-name').innerText = "No Batches Found";
+                            alert("Bhai, pehle Explore Batches se koi batch kharid lo!");
+                            window.location.replace('explore.html');
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            },
 
-            // Highlight Active
-            document.querySelectorAll('.lecture-item').forEach(el => el.classList.remove('active'));
-            const activeCard = document.getElementById(`lec-card-${id}`);
-            if(activeCard) {
-                activeCard.classList.add('active');
-                // Auto scroll playlist to active item on desktop
-                if(window.innerWidth > 1024) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
+            async fetchBatchData(batchId) {
+                try {
+                    // Fetch Batch Name
+                    const batchSnap = await getDoc(doc(db, "batches", batchId));
+                    if (batchSnap.exists()) {
+                        document.getElementById('current-batch-name').innerText = batchSnap.data().title;
+                    }
 
-            document.getElementById('lecTitle').innerText = lec.title;
-            document.getElementById('lecSubject').innerHTML = `<i class="fas fa-book" style="color:var(--primary);"></i> ${lec.subject}`;
-            document.getElementById('lecChapter').innerHTML = `<i class="fas fa-folder" style="color:var(--primary);"></i> ${lec.chapter}`;
+                    // Fetch All Materials for this batch (One big query, massive speed boost)
+                    const matRef = collection(db, "batches", batchId, "materials");
+                    const q = query(matRef, where("status", "==", "Active"));
+                    const matSnap = await getDocs(q);
 
-            renderSmartPlayer(lec.videoUrl);
+                    this.materialsTree = {};
 
-            const pdfBtn = document.getElementById('btnDownloadPdf');
-            const pdfSize = document.getElementById('pdfSize');
-            if(lec.pdfUrl) {
-                pdfBtn.style.display = 'flex';
-                pdfBtn.href = lec.pdfUrl;
-                pdfSize.innerText = `Size: ${lec.size || 'Auto'}`;
-            } else {
-                pdfBtn.style.display = 'none';
-                pdfSize.innerText = 'No PDF Attached for this class';
-            }
+                    matSnap.forEach(docSnap => {
+                        const data = docSnap.data();
+                        data.id = docSnap.id;
+                        
+                        const subject = data.subject || "General";
+                        const chapter = data.chapter || "Uncategorized";
 
-            listenToComments(currentMaterialId);
-        }
+                        // Build the deeply nested tree
+                        if (!this.materialsTree[subject]) this.materialsTree[subject] = {};
+                        if (!this.materialsTree[subject][chapter]) this.materialsTree[subject][chapter] = [];
+                        
+                        this.materialsTree[subject][chapter].push(data);
+                    });
 
-        function renderSmartPlayer(url) {
-            const container = document.getElementById('videoContainer');
-            if(!url) {
-                container.innerHTML = `<div style="color:#94a3b8; display:flex; justify-content:center; align-items:center; height:100%;"><i class="fas fa-video-slash" style="margin-right:10px;"></i> Video Link Not Available</div>`;
-                return;
-            }
+                    console.log("God-Mode Tree Built:", this.materialsTree);
+                    this.renderSubjects();
 
-            if(url.includes('youtube.com') || url.includes('youtu.be')) {
-                let embedUrl = url;
-                if(url.includes('watch?v=')) embedUrl = url.replace('watch?v=', 'embed/');
-                else if(url.includes('youtu.be/')) embedUrl = url.replace('youtu.be/', 'www.youtube.com/embed/');
-                
-                container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-            } else {
-                container.innerHTML = `<video src="${url}" controls controlsList="nodownload"></video>`;
-            }
-        }
+                } catch (error) {
+                    console.error("Error fetching materials:", error);
+                }
+            },
 
-        // 4. Real-time Comments with Delete Logic
-        function listenToComments(matId) {
-            const commentsArea = document.getElementById('commentsArea');
-            commentsArea.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding-top:2rem;"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading doubts...</div>`;
+            // Renders Screen 2 (Subjects)
+            renderSubjects() {
+                const container = document.getElementById('subject-list-container');
+                container.innerHTML = ''; // Clear skeleton
 
-            if(commentsUnsubscribe) commentsUnsubscribe();
-
-            const commentsRef = collection(db, "batches", currentBatchId, "materials", matId, "comments");
-            const q = query(commentsRef, orderBy("timestamp", "asc"));
-
-            commentsUnsubscribe = onSnapshot(q, (snapshot) => {
-                commentsArea.innerHTML = '';
-                if(snapshot.empty) {
-                    commentsArea.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding-top:2rem; font-weight:600;">No doubts yet. Be the first to ask!</div>`;
+                const subjects = Object.keys(this.materialsTree);
+                if (subjects.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-tertiary);">No subjects available.</div>`;
                     return;
                 }
 
-                snapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const commentId = docSnap.id; 
-                    const initial = data.userName ? data.userName.charAt(0).toUpperCase() : '?';
+                subjects.forEach(subject => {
+                    const initial = subject.substring(0, 2).charAt(0).toUpperCase() + subject.substring(1, 2).toLowerCase();
+                    // Fake progress for visual appeal, can be mapped to real DB later
+                    const fakeProgress = Math.floor(Math.random() * 20); 
+
+                    container.innerHTML += `
+                        <div class="data-card" onclick="navigateTo('view-chapters', {title: '${subject}'})">
+                            <div class="subject-icon">${initial}</div>
+                            <div class="card-content">
+                                <div class="card-title">${subject}</div>
+                            </div>
+                            <div class="mini-progress">
+                                <span>${fakeProgress}%</span>
+                                <div class="mini-progress-bar"><div class="mini-progress-fill" style="width: ${fakeProgress}%;"></div></div>
+                            </div>
+                            <i class="fas fa-chevron-right" style="color: var(--text-tertiary); margin-left: 5px;"></i>
+                        </div>
+                    `;
+                });
+            },
+
+            // Renders Screen 3 (Chapters)
+            renderChapters(subjectName) {
+                const container = document.getElementById('chapter-list-container');
+                container.innerHTML = '';
+                
+                const chaptersObj = this.materialsTree[subjectName];
+                if (!chaptersObj) return;
+
+                let index = 1;
+                for (const [chapter, lectures] of Object.entries(chaptersObj)) {
+                    // Extracting only PDFs vs Videos
+                    const videoCount = lectures.filter(l => l.videoUrl).length;
+                    const pdfCount = lectures.filter(l => l.pdfUrl).length;
+                    const chLabel = index < 10 ? `0${index}` : index;
+
+                    container.innerHTML += `
+                        <div class="data-card" style="align-items: flex-start;" onclick="navigateTo('view-classroom', {title: '${chapter}', subject: '${subjectName}'})">
+                            <div class="card-content">
+                                <span style="font-size:0.7rem; font-weight:800; color:var(--primary-accent); background:#e0e7ff; padding:3px 8px; border-radius:6px;">CH - ${chLabel}</span>
+                                <div class="card-title" style="margin-top:8px;">${chapter}</div>
+                                <div class="card-subtitle">Lectures : ${videoCount} • PDFs : ${pdfCount}</div>
+                            </div>
+                            <i class="fas fa-chevron-right" style="color: var(--text-tertiary); align-self: center;"></i>
+                        </div>
+                    `;
+                    index++;
+                }
+            },
+
+            // Renders Screen 4 (Lectures list inside classroom view)
+            renderLectures(chapterName) {
+                const container = document.getElementById('lecture-list-container');
+                container.innerHTML = '';
+
+                // We need to find which subject this chapter belongs to by checking current DOM title or state
+                const currentSubject = document.getElementById('dynamic-subject-title').innerText;
+                const lectures = this.materialsTree[currentSubject][chapterName];
+
+                if (!lectures || lectures.length === 0) {
+                    container.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--text-tertiary);">No lectures uploaded yet.</div>`;
+                    return;
+                }
+
+                lectures.forEach(lec => {
+                    const thumb = lec.thumbUrl || 'https://via.placeholder.com/150x90?text=VidyaPlus';
+                    let actionButtons = '';
                     
-                    let timeString = 'Just now';
-                    if (data.timestamp) {
-                        const dateObj = data.timestamp.toDate();
-                        timeString = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    if (lec.pdfUrl) {
+                        actionButtons += `<a href="${lec.pdfUrl}" target="_blank" class="btn-outline" style="text-decoration:none;"><i class="fas fa-file-pdf" style="color:#ef4444;"></i> Notes</a>`;
                     }
-                    
-                    const isMe = data.email === currentUser.email;
-                    const bgColor = isMe ? '#eff6ff' : '#f8fafc';
-                    const borderStr = isMe ? 'border-left: 4px solid var(--primary);' : 'border-left: 4px solid transparent;';
+                    if (lec.videoUrl) {
+                        actionButtons += `<button class="btn-outline" style="color:var(--bg-surface); background:var(--brand-navy); border-color:var(--brand-navy);" onclick="window.launchCustomPlayer('${lec.videoUrl}')"><i class="fas fa-play"></i> Watch</button>`;
+                    }
 
-                    const deleteBtnHtml = isMe ? 
-                        `<button class="btn-delete-comment" onclick="window.deleteComment('${commentId}')" title="Delete your comment"><i class="fas fa-trash-alt"></i></button>` 
-                        : '';
-
-                    commentsArea.innerHTML += `
-                        <div class="comment-item" style="background:${bgColor}; ${borderStr}">
-                            <div class="comment-avatar" style="background: ${isMe ? 'var(--primary)' : '#64748b'};">${initial}</div>
-                            <div class="comment-body">
-                                <h5>
-                                    <div>${data.userName} <span style="margin-left:8px;">${timeString}</span></div>
-                                    ${deleteBtnHtml}
-                                </h5>
-                                <p>${data.text}</p>
+                    container.innerHTML += `
+                        <div class="lecture-card">
+                            <div class="lec-card-top">
+                                <div class="lec-thumb">
+                                    <img src="${thumb}" alt="thumbnail" onerror="this.src='https://via.placeholder.com/150x90'">
+                                    ${lec.videoUrl ? `<div class="play-overlay"><i class="fas fa-play-circle"></i></div>` : ''}
+                                </div>
+                                <div class="lec-info">
+                                    <div class="lec-meta"><i class="fas fa-video"></i> Master Class</div>
+                                    <h4>${lec.title}</h4>
+                                </div>
+                            </div>
+                            <div class="lec-actions">
+                                ${actionButtons}
                             </div>
                         </div>
                     `;
                 });
-                commentsArea.scrollTop = commentsArea.scrollHeight;
-            });
-        }
-
-        // Delete Comment Engine
-        window.deleteComment = async (commentId) => {
-            if(confirm("Are you sure you want to delete this comment?")) {
-                try {
-                    const commentRef = doc(db, "batches", currentBatchId, "materials", currentMaterialId, "comments", commentId);
-                    await deleteDoc(commentRef);
-                } catch(error) {
-                    console.error("Error deleting comment:", error);
-                    alert("Network error. Failed to delete comment.");
-                }
             }
         };
 
-        // Post Comment Engine
-        window.postComment = async () => {
-            const input = document.getElementById('commentInput');
-            const btn = document.getElementById('sendBtn');
-            const text = input.value.trim();
-            
-            if(!text || !currentMaterialId) return;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-            input.disabled = true;
-
-            try {
-                const nameParts = currentUser.email.split('@')[0];
-                const commentsRef = collection(db, "batches", currentBatchId, "materials", currentMaterialId, "comments");
-                
-                await addDoc(commentsRef, {
-                    text: text,
-                    email: currentUser.email,
-                    userName: nameParts,
-                    timestamp: serverTimestamp()
-                });
-                
-                input.value = '';
-            } catch(error) {
-                console.error("Error posting comment:", error);
-                alert("Failed to post comment. Check your connection.");
-            } finally {
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-                btn.disabled = false;
-                input.disabled = false;
-                input.focus();
-            }
-        }
-
-        document.getElementById('commentInput').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') window.postComment();
+        // Initialize Engine
+        document.addEventListener('DOMContentLoaded', () => {
+            VidyaApp.init();
         });
 
+        /* --- THE CUSTOM PLAYER ENGINE (Foundation) --- */
+        window.launchCustomPlayer = (url) => {
+            alert("Bhai! Custom player screen aayegi ab idhar! URL: " + url + "\n\nIske liye ek overlay Modal banayenge next step me!");
+            // Implementation mapping for future:
+            // 1. Open a full-screen overlay over Screen 4.
+            // 2. If YT: Append ?controls=0&modestbranding=1
+            // 3. Render our custom HTML controls below it.
+        };
+
+    </script>
+                
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app-root">
+        
+        <div id="boot-screen" style="position:absolute; inset:0; background:var(--bg-surface); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <i class="fas fa-bolt fa-3x" style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:1rem; animation: pulse 1.5s infinite;"></i>
+            <h3 style="color:var(--brand-navy); font-weight:800; letter-spacing:1px;">VIDYAPLUS ENGINE</h3>
+        </div>
+
+        <div class="screen active" id="view-dashboard"></div>
+        <div class="screen" id="view-subjects"></div>
+        <div class="screen" id="view-chapters"></div>
+        <div class="screen" id="view-classroom"></div>
+
+    </div>
+    
+    <script>
+        // Micro-bootloader for visual effect
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const boot = document.getElementById('boot-screen');
+                boot.style.transition = "opacity 0.4s ease";
+                boot.style.opacity = "0";
+                setTimeout(() => boot.remove(), 400);
+            }, 800);
+        });
     </script>
 </body>
 </html>
