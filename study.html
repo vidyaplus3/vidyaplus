@@ -2,896 +2,541 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
-    <title>VidyaPlus | Study Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VidyaPlus Study Zone</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* ==========================================================================
-           1. CORE DESIGN SYSTEM (THEME VARIABLES)
-           ========================================================================== */
+        /* 1. SIMPLE VARIABLES */
         :root {
-            /* Brand Identity */
-            --vp-navy: #0B1120;
-            --vp-navy-light: #1E293B;
-            --vp-primary: #4F46E5;
-            --vp-primary-hover: #4338CA;
-            --vp-accent: #EC4899;
-            --vp-gradient: linear-gradient(135deg, #4F46E5 0%, #EC4899 100%);
-            
-            /* Status Colors */
-            --vp-success: #10B981;
-            --vp-success-bg: #D1FAE5;
-            --vp-warning: #F59E0B;
-            --vp-warning-bg: #FEF3C7;
-            --vp-danger: #EF4444;
-            --vp-danger-bg: #FEE2E2;
-            
-            /* Surface & Backgrounds */
-            --bg-body: #E2E8F0; /* Outside app container on Desktop */
-            --bg-app: #F8FAFC; /* Main app background */
-            --bg-surface: #FFFFFF;
-            --bg-surface-glass: rgba(255, 255, 255, 0.85);
-            
-            /* Typography & Borders */
-            --text-h1: #0F172A;
-            --text-body: #334155;
-            --text-muted: #64748B;
-            --border-light: rgba(203, 213, 225, 0.5);
-            --border-strong: rgba(148, 163, 184, 0.3);
-            
-            /* Elevation (Shadows mapped to Apple HIG) */
-            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            
-            /* Animation Curves */
-            --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-            --transition-fast: 0.2s ease;
-            --transition-layout: 0.4s var(--ease-out-expo);
+            --primary: #4F46E5;
+            --navy: #0B1120;
+            --bg-color: #F1F5F9;
+            --surface: #FFFFFF;
+            --text-main: #0F172A;
+            --text-light: #64748B;
+            --border: #E2E8F0;
         }
 
-        /* ==========================================================================
-           2. ADVANCED RESET & BASE TYPOGRAPHY
-           ========================================================================== */
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background: var(--bg-color); color: var(--text-main); }
 
-        html, body {
-            width: 100vw; height: 100vh;
-            background-color: var(--bg-body);
-            color: var(--text-body);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow: hidden; /* Prevent native pull-to-refresh */
-            overscroll-behavior-y: none; 
-            display: flex; justify-content: center; align-items: flex-start;
-        }
-
-        /* High-End Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 20px; border: 2px solid transparent; background-clip: content-box; }
-        ::-webkit-scrollbar-thumb:hover { background-color: #94A3B8; }
-
-        /* ==========================================================================
-           3. MASTER APP CONTAINER & HARDWARE ACCELERATED ROUTING
-           ========================================================================== */
+        /* 2. MAIN APP CONTAINER */
         .app-container {
-            width: 100%; max-width: 1440px; /* Ultra-wide support */
-            height: 100dvh; /* Dynamic viewport height for modern mobile browsers */
-            background: var(--bg-app);
-            position: relative; overflow: hidden;
+            max-width: 800px; /* Tablet/Desktop friendly */
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
             display: flex; flex-direction: column;
-            box-shadow: var(--shadow-xl);
         }
 
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-app); display: flex; flex-direction: column;
-            /* GPU Accelerated Slide Logic */
-            transform: translate3d(100%, 0, 0); 
-            opacity: 0; z-index: 10;
-            transition: transform var(--transition-layout), opacity var(--transition-layout);
-            pointer-events: none; visibility: hidden;
-        }
+        /* 3. SIMPLE SCREENS (No complex slide animations that cause bugs) */
+        .screen { display: none; flex-direction: column; min-height: 100vh; }
+        .screen.active { display: flex; }
 
-        .screen.active {
-            transform: translate3d(0, 0, 0); opacity: 1; z-index: 20;
-            pointer-events: all; visibility: visible;
-        }
+        .screen-content { flex: 1; overflow-y: auto; padding-bottom: 30px; }
 
-        .screen.background {
-            /* Depth effect for the screen behind */
-            transform: translate3d(-10%, 0, 0); opacity: 0; z-index: 10;
-            pointer-events: none;
+        /* 4. HEADER & BATCH DROPDOWN (Z-Index Fixed) */
+        .header-dark {
+            background: var(--navy); color: white;
+            padding: 1.5rem; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            position: relative; z-index: 100; /* Highest priority */
         }
-
-        .screen-scroll-area {
-            flex: 1; overflow-y: auto; overflow-x: hidden;
-            padding-bottom: env(safe-area-inset-bottom, 40px);
-            scroll-behavior: smooth;
-        }
-
-        /* ==========================================================================
-           4. GLOBAL ANIMATIONS & UTILITIES
-           ========================================================================== */
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-
-        .skeleton {
-            background: #e2e8f0;
-            background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite linear forwards;
-            border-radius: 8px;
-        }
-
-        .glass-panel {
-            background: var(--bg-surface-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-light);
-        }
-                /* ==========================================================================
-           5. ADVANCED MODALS & OVERLAYS (Z-INDEX MASTERY)
-           ========================================================================== */
-        /* Global Blur Overlay */
-        .vp-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(11, 17, 32, 0.6); 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            z-index: 9000; opacity: 0; pointer-events: none; 
-            transition: opacity var(--transition-fast);
-        }
-        .vp-overlay.active { opacity: 1; pointer-events: all; }
-
-        /* Left Drawer (Menu) */
-        .vp-sidebar {
-            position: fixed; top: 0; left: 0; height: 100dvh; width: 300px;
-            background: var(--bg-surface); z-index: 9999;
-            transform: translate3d(-100%, 0, 0); 
-            transition: transform var(--transition-layout);
-            display: flex; flex-direction: column; 
-            box-shadow: 10px 0 30px rgba(0,0,0,0.15);
-        }
-        .vp-sidebar.active { transform: translate3d(0, 0, 0); }
         
-        .sidebar-user-zone {
-            padding: 2.5rem 1.5rem 2rem; background: var(--vp-navy); color: white;
-            position: relative; overflow: hidden;
-        }
-        .sidebar-avatar {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: var(--bg-surface); color: var(--vp-primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem;
-            box-shadow: var(--shadow-md);
-        }
-        .sidebar-links { padding: 1rem 0; flex: 1; overflow-y: auto; }
-        .nav-link {
-            padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem;
-            color: var(--text-body); font-weight: 600; text-decoration: none;
-            transition: var(--transition-fast); border-left: 3px solid transparent;
-        }
-        .nav-link:hover { background: var(--bg-body); color: var(--vp-primary); border-left-color: var(--vp-primary); }
+        .top-nav { display: flex; justify-content: space-between; font-size: 1.3rem; margin-bottom: 20px; }
+        .top-nav i { cursor: pointer; }
 
-        /* Right Drawer (Notifications) */
-        .vp-notif-panel {
-            position: fixed; top: 0; right: 0; height: 100dvh; width: 340px;
-            background: var(--bg-surface); z-index: 9999;
-            transform: translate3d(100%, 0, 0); 
-            transition: transform var(--transition-layout);
-            display: flex; flex-direction: column; 
-            box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+        /* Dropdown - Plain and Simple */
+        .batch-selector {
+            display: inline-flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700;
+            cursor: pointer; position: relative; padding: 5px 0;
         }
-        .vp-notif-panel.active { transform: translate3d(0, 0, 0); }
-        .notif-header {
-            padding: 1.5rem; border-bottom: 1px solid var(--border-light);
-            display: flex; justify-content: space-between; align-items: center;
+        .dropdown-menu {
+            display: none; position: absolute; top: 100%; left: 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; width: 250px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000; overflow: hidden;
         }
-        .notif-body { flex: 1; overflow-y: auto; padding: 1rem; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            padding: 12px 15px; color: var(--text-main); font-size: 0.95rem; font-weight: 600;
+            border-bottom: 1px solid var(--border); cursor: pointer;
+        }
+        .dropdown-item:hover { background: var(--bg-color); color: var(--primary); }
 
-        /* ==========================================================================
-           6. DASHBOARD SPECIFIC COMPONENTS
-           ========================================================================== */
-        .dash-hero {
-            background: var(--vp-navy); padding: 1.5rem 1.5rem 3rem; color: white;
-            border-bottom-left-radius: 32px; border-bottom-right-radius: 32px; 
-            position: relative; z-index: 50; box-shadow: var(--shadow-lg);
+        /* 5. APP GRID (No negative margins!) */
+        .app-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            padding: 20px; background: var(--surface);
         }
+        .grid-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .grid-icon {
+            width: 60px; height: 60px; background: var(--bg-color); color: var(--primary);
+            border-radius: 16px; display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; border: 1px solid var(--border); transition: 0.2s;
+        }
+        .grid-item:active .grid-icon { transform: scale(0.95); background: #E0E7FF; }
+        .grid-text { font-size: 0.75rem; font-weight: 700; text-align: center; }
 
-        /* Batch Dropdown Architecture */
-        .batch-selector-btn {
-            display: inline-flex; align-items: center; gap: 10px; 
-            background: transparent; border: none; color: white; 
-            font-size: 1.3rem; font-weight: 800; cursor: pointer; 
-            padding: 0.5rem 0; transition: opacity 0.2s;
-        }
-        .batch-selector-btn:active { opacity: 0.7; }
-        
-        .batch-dropdown-wrapper { position: relative; display: inline-block; }
-        .batch-dropdown-menu { 
-            position: absolute; top: calc(100% + 5px); left: 0; 
-            background: var(--bg-surface); border-radius: 16px; 
-            box-shadow: var(--shadow-xl); min-width: 280px; 
-            opacity: 0; pointer-events: none; transform: translate3d(0, -15px, 0); 
-            transition: all 0.25s var(--ease-out-back); z-index: 1000; overflow: hidden; 
-            border: 1px solid var(--border-light);
-        }
-        .batch-dropdown-menu.active { opacity: 1; pointer-events: all; transform: translate3d(0, 0, 0); }
-        .batch-item {
-            padding: 1rem 1.5rem; color: var(--text-h1); font-weight: 600; 
-            cursor: pointer; border-bottom: 1px solid var(--border-light);
-            transition: var(--transition-fast);
-        }
-        .batch-item:hover { background: var(--bg-app); color: var(--vp-primary); padding-left: 1.8rem; }
-        .batch-item:last-child { border-bottom: none; }
-
-        /* Main App Nav Grid */
-        .hero-nav-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; 
-            padding: 0 1.5rem; margin-top: -30px; position: relative; z-index: 60;
-        }
-        .nav-grid-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
-        .nav-icon-box {
-            width: 64px; height: 64px; border-radius: 20px;
-            background: var(--bg-surface); color: var(--vp-primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem; box-shadow: var(--shadow-md);
-            transition: all var(--transition-fast);
-        }
-        .nav-grid-item:hover .nav-icon-box { transform: translateY(-4px); box-shadow: var(--shadow-lg); color: var(--vp-primary-hover); }
-        .nav-grid-text { font-size: 0.8rem; font-weight: 700; color: var(--text-h1); text-align: center; }
-
-        /* Section Titles & Scroll Containers */
-        .section-header {
-            padding: 0 1.5rem; margin: 2.5rem 0 1rem;
-            font-size: 1.2rem; font-weight: 800; color: var(--vp-navy);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .h-scroll-track {
-            display: flex; gap: 15px; padding: 0 1.5rem 1.5rem; 
-            overflow-x: auto; scroll-snap-type: x mandatory; 
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* ==========================================================================
-           7. INNER PAGES: HEADERS, TABS & CARDS (Strict Grid)
-           ========================================================================== */
+        /* 6. COMMON LIST CARDS (Subjects, Chapters, Lectures) */
         .page-header {
-            background: var(--bg-surface-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 1rem 1.5rem; display: flex; align-items: center; gap: 15px; 
-            border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; gap: 15px; padding: 15px 20px;
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
         }
-        .btn-icon {
-            width: 42px; height: 42px; border-radius: 50%; border: none; 
-            background: transparent; color: var(--text-h1); font-size: 1.2rem; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            transition: var(--transition-fast);
-        }
-        .btn-icon:hover { background: var(--bg-body); }
-        .page-title { font-size: 1.15rem; font-weight: 800; color: var(--vp-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .back-btn { font-size: 1.2rem; cursor: pointer; border: none; background: transparent; color: var(--text-main); }
+        .page-title { font-size: 1.1rem; font-weight: 700; }
 
-        /* Tab Navigation */
-        .tab-nav {
-            display: flex; gap: 10px; padding: 1rem 1.5rem; 
-            background: var(--bg-surface); overflow-x: auto; 
-            border-bottom: 1px solid var(--border-light);
-            scrollbar-width: none; /* Firefox */
-        }
-        .tab-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-        .tab-btn {
-            padding: 0.6rem 1.2rem; font-weight: 700; font-size: 0.9rem; 
-            color: var(--text-muted); cursor: pointer; border-radius: 100px; 
-            border: 1px solid var(--border-light); white-space: nowrap; 
-            transition: var(--transition-fast); background: transparent;
-        }
-        .tab-btn.active { background: var(--vp-navy); color: white; border-color: var(--vp-navy); }
-
-        /* The Foolproof Universal Grid Container */
-        .grid-container {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 15px; padding: 1.5rem; align-content: start;
-        }
-
-        /* Generic Data Card (Subjects & Chapters) */
-        .vp-card {
-            background: var(--bg-surface); border-radius: 20px; padding: 1.25rem; 
-            display: flex; align-items: center; gap: 15px; 
-            border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); 
-            cursor: pointer; transition: all var(--transition-fast);
-        }
-        .vp-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--vp-primary); }
+        .list-container { padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; }
         
-        .vp-card-icon {
-            width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
-            background: #EFF6FF; color: var(--vp-primary); 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 800; font-size: 1.2rem;
+        .list-card {
+            display: flex; align-items: center; gap: 15px; padding: 15px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer;
         }
-        .vp-card-body { flex: 1; overflow: hidden; }
-        .vp-card-title { font-size: 1.05rem; font-weight: 700; color: var(--text-h1); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .vp-card-meta { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+        .list-card:active { background: var(--bg-color); }
+        .card-icon { width: 45px; height: 45px; background: #E0E7FF; color: var(--primary); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0; }
+        .card-info { flex: 1; overflow: hidden; }
+        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-sub { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
 
-        /* Lecture/Material Card */
-        .material-card {
-            background: var(--bg-surface); border-radius: 20px; padding: 1rem; 
-            border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
-        }
-        .mat-card-header { display: flex; gap: 15px; margin-bottom: 15px; }
-        .mat-thumb {
-            width: 130px; height: 75px; border-radius: 12px; 
-            background: var(--bg-body); position: relative; overflow: hidden; flex-shrink: 0;
-        }
-        .mat-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .mat-play-btn {
-            position: absolute; bottom: 5px; right: 5px; 
-            color: var(--vp-danger); background: white; border-radius: 50%; 
-            font-size: 1.2rem; border: 2px solid white; box-shadow: var(--shadow-sm);
-        }
-        .mat-info h4 { font-size: 0.95rem; font-weight: 700; line-height: 1.3; color: var(--text-h1); margin-bottom: 6px; }
-        .mat-badge { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 5px; }
-        
-        .mat-actions { display: flex; gap: 10px; }
-        .btn-action {
-            flex: 1; padding: 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; 
-            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; 
-            transition: var(--transition-fast);
-        }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border-light); color: var(--text-body); }
-        .btn-outline:hover { background: var(--bg-body); color: var(--text-h1); }
-        .btn-solid { background: var(--vp-navy); border: 1.5px solid var(--vp-navy); color: white; }
-        .btn-solid:hover { background: var(--vp-navy-light); }
+        /* Lecture Card Specific */
+        .lecture-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px; background: var(--surface); margin-bottom: 15px;}
+        .lec-top { display: flex; gap: 12px; margin-bottom: 15px; }
+        .lec-thumb { width: 120px; height: 70px; border-radius: 8px; background: var(--bg-color); object-fit: cover; flex-shrink: 0; }
+        .lec-actions { display: flex; gap: 10px; }
+        .action-btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; border: 1px solid var(--border); background: transparent; }
+        .action-btn.play { background: var(--navy); color: white; border-color: var(--navy); }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .tab-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-weight: 600; font-size: 0.9rem; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
 
         /* Empty State */
-        .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1rem; color: var(--text-muted); text-align: center; }
-        .empty-state i { font-size: 3rem; opacity: 0.5; margin-bottom: 1rem; }
-        .empty-state span { font-size: 1rem; font-weight: 600; }
+        .empty-box { text-align: center; padding: 40px 20px; color: var(--text-light); }
+        .empty-box i { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
+        .empty-box h4 { font-size: 1rem; font-weight: 600; }
 
-        /* ==========================================================================
-           8. DESKTOP / TABLET RESPONSIVENESS (THE MAGIC)
-           ========================================================================== */
-        @media (min-width: 768px) {
-            .hero-nav-grid { padding: 0 3rem; gap: 20px; }
-            .nav-icon-box { width: 75px; height: 75px; font-size: 2rem; border-radius: 24px; }
-            .nav-grid-text { font-size: 0.9rem; margin-top: 5px; }
-            
-            .section-header { padding: 0 3rem; }
-            .h-scroll-track { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); padding: 0 3rem 2rem; overflow-x: visible; }
-            
-            .grid-container { padding: 2rem 3rem; gap: 20px; }
-            .dash-hero { padding: 2.5rem 3rem 4rem; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; }
-            .batch-dropdown-menu { left: 3rem; }
-            
-            .page-header { padding: 1.5rem 3rem; }
-            .tab-nav { padding: 1.5rem 3rem; }
-        }
+        /* Overlays & Modals (Simple implementation) */
+        .simple-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9000; }
+        .simple-modal { display: none; position: fixed; top: 0; width: 280px; height: 100vh; background: var(--surface); z-index: 9999; flex-direction: column; }
+        #menu-modal { left: 0; }
+        #notif-modal { right: 0; width: 320px; }
     </style>
 </head>
 <body>
-    <div class="vp-overlay" id="global-overlay" onclick="closeAllModals()"></div>
+    <div class="simple-overlay" id="global-overlay" onclick="closeModals()"></div>
 
-    <nav class="vp-sidebar" id="side-menu">
-        <div class="sidebar-user-zone">
-            <div class="sidebar-avatar" id="userIcon">U</div>
-            <h3 style="font-size:1.2rem; margin-bottom: 2px;" id="userName">Student</h3>
-            <p style="font-size:0.85rem; color: #CBD5E1;">VidyaPlus Premium</p>
+    <div class="simple-modal" id="menu-modal">
+        <div style="padding: 30px 20px; background: var(--navy); color: white;">
+            <div style="width: 60px; height: 60px; background: white; color: var(--navy); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;" id="userIcon">U</div>
+            <h3 id="userName">Student</h3>
+            <p style="font-size: 0.8rem; opacity: 0.7;">VidyaPlus Premium</p>
         </div>
-        <div class="sidebar-links">
-            <a href="#" class="nav-link"><i class="fas fa-user-circle" style="width:25px; font-size:1.2rem;"></i> My Profile</a>
-            <a href="#" class="nav-link"><i class="fas fa-chart-line" style="width:25px; font-size:1.2rem;"></i> Performance</a>
-            <a href="#" class="nav-link"><i class="fas fa-cog" style="width:25px; font-size:1.2rem;"></i> Settings</a>
-            <a href="#" class="nav-link"><i class="fas fa-headset" style="width:25px; font-size:1.2rem;"></i> Support</a>
-            <div style="height: 1px; background: var(--border-light); margin: 15px 1.5rem;"></div>
-            <a href="#" class="nav-link" style="color:var(--vp-danger);"><i class="fas fa-sign-out-alt" style="width:25px; font-size:1.2rem;"></i> Logout</a>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+            <div style="font-weight: 600; cursor: pointer;"><i class="fas fa-user-circle" style="width: 25px;"></i> Profile</div>
+            <div style="font-weight: 600; cursor: pointer;"><i class="fas fa-cog" style="width: 25px;"></i> Settings</div>
+            <div style="font-weight: 600; color: #EF4444; cursor: pointer; margin-top: 20px;"><i class="fas fa-sign-out-alt" style="width: 25px;"></i> Logout</div>
         </div>
-    </nav>
+    </div>
 
-    <aside class="vp-notif-panel" id="notif-menu">
-        <div class="notif-header">
-            <h3 style="font-size:1.15rem; font-weight:800; color:var(--vp-navy);">Notifications</h3>
-            <button class="btn-icon" onclick="closeAllModals()"><i class="fas fa-times"></i></button>
+    <div class="simple-modal" id="notif-modal">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color: var(--navy);">Notifications</h3>
+            <i class="fas fa-times" style="cursor: pointer; font-size: 1.2rem;" onclick="closeModals()"></i>
         </div>
-        <div class="notif-body" id="notification-container">
-            <div class="empty-state">
-                <i class="far fa-bell-slash"></i>
-                <span>No new notifications</span>
-            </div>
+        <div style="padding: 20px;" id="notif-container">
+            <div class="empty-box"><i class="far fa-bell-slash"></i><h4>No new notifications</h4></div>
         </div>
-    </aside>
+    </div>
 
-    <main class="app-container" id="app-root">
+    <div class="app-container">
         
-        <div id="boot-screen" style="position:absolute; inset:0; background:var(--bg-app); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: opacity 0.5s;">
-            <i class="fas fa-bolt fa-3x" style="background: var(--vp-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:1.5rem; animation: pulse-red 1.5s infinite;"></i>
-            <h3 style="color:var(--vp-navy); font-weight:900; letter-spacing:2px; text-transform: uppercase;">VidyaPlus Core</h3>
+        <div id="boot-screen" style="position: absolute; inset: 0; background: var(--surface); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <i class="fas fa-bolt fa-4x" style="color: var(--primary); margin-bottom: 20px;"></i>
+            <h2 style="color: var(--navy);">VidyaPlus</h2>
         </div>
 
-        <section class="screen active" id="dashboard">
-            <div class="dash-hero">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <i class="fas fa-bars" style="font-size: 1.4rem; cursor: pointer;" onclick="openMenu()"></i>
-                    <i class="fas fa-bell" style="font-size: 1.4rem; cursor: pointer;" onclick="openNotif()"></i>
+        <div class="screen active" id="dashboard">
+            <div class="header-dark">
+                <div class="top-nav">
+                    <i class="fas fa-bars" onclick="openMenu()"></i>
+                    <i class="fas fa-bell" onclick="openNotif()"></i>
                 </div>
+                <div style="font-size: 0.8rem; font-weight: 600; opacity: 0.8; margin-bottom: 5px;">CURRENT BATCH</div>
                 
-                <p style="font-size: 0.8rem; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Currently Studying</p>
-                
-                <div class="batch-dropdown-wrapper">
-                    <button class="batch-selector-btn" onclick="toggleBatchDropdown(event)">
-                        <span id="current-batch-name">Loading Workspace...</span>
-                        <i class="fas fa-chevron-down" style="font-size: 1rem; margin-left: 5px;"></i>
-                    </button>
-                    <div class="batch-dropdown-menu" id="batch-dropdown">
-                        <div class="batch-item">Loading your batches...</div>
+                <div style="position: relative;">
+                    <div class="batch-selector" onclick="toggleDropdown(event)">
+                        <span id="current-batch-name">Loading...</span>
+                        <i class="fas fa-chevron-down" style="font-size: 1rem;"></i>
+                    </div>
+                    <div class="dropdown-menu" id="batch-dropdown">
+                        <div class="dropdown-item">Loading...</div>
                     </div>
                 </div>
             </div>
 
-            <div class="screen-scroll-area">
-                <div class="hero-nav-grid">
-                    <div class="nav-grid-item" onclick="navigate('subjects')">
-                        <div class="nav-icon-box"><i class="fas fa-play-circle"></i></div>
-                        <span class="nav-grid-text">All Classes</span>
+            <div class="screen-content">
+                <div class="app-grid">
+                    <div class="grid-item" onclick="navigate('subjects')">
+                        <div class="grid-icon"><i class="fas fa-play-circle"></i></div>
+                        <span class="grid-text">All Classes</span>
                     </div>
-                    <div class="nav-grid-item">
-                        <div class="nav-icon-box"><i class="fas fa-file-alt"></i></div>
-                        <span class="nav-grid-text">All Tests</span>
+                    <div class="grid-item" onclick="alert('Tests coming soon!')">
+                        <div class="grid-icon"><i class="fas fa-file-alt"></i></div>
+                        <span class="grid-text">All Tests</span>
                     </div>
-                    <div class="nav-grid-item">
-                        <div class="nav-icon-box"><i class="fas fa-question-circle"></i></div>
-                        <span class="nav-grid-text">My Doubts</span>
+                    <div class="grid-item" onclick="alert('Doubts coming soon!')">
+                        <div class="grid-icon"><i class="fas fa-question-circle"></i></div>
+                        <span class="grid-text">My Doubts</span>
                     </div>
-                    <div class="nav-grid-item">
-                        <div class="nav-icon-box"><i class="fas fa-users"></i></div>
-                        <span class="nav-grid-text">Community</span>
-                    </div>
-                </div>
-
-                <div class="section-header">
-                    <span>Live Classes</span>
-                </div>
-                <div class="h-scroll-track" id="live-classes-container">
-                    <div class="empty-state" style="padding: 2rem 1rem; flex: 1;">
-                        <i class="fas fa-satellite-dish" style="font-size: 2rem;"></i>
-                        <span>No live classes scheduled</span>
+                    <div class="grid-item" onclick="alert('Community coming soon!')">
+                        <div class="grid-icon"><i class="fas fa-users"></i></div>
+                        <span class="grid-text">Community</span>
                     </div>
                 </div>
 
-                <div class="section-header">
-                    <span>Announcements</span>
-                </div>
-                <div class="h-scroll-track" id="announcements-container">
-                    <div class="empty-state" style="padding: 2rem 1rem; flex: 1;">
-                        <i class="fas fa-bullhorn" style="font-size: 2rem;"></i>
-                        <span>No new announcements</span>
+                <div style="padding: 20px;">
+                    <h3 style="font-size: 1.1rem; color: var(--navy); margin-bottom: 15px;">Live Classes</h3>
+                    <div id="live-container" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">
+                        <div class="empty-box" style="width: 100%; border: 1px dashed var(--border); border-radius: 12px;"><i class="fas fa-satellite-dish"></i><h4>No live classes</h4></div>
+                    </div>
+
+                    <h3 style="font-size: 1.1rem; color: var(--navy); margin: 25px 0 15px;">Announcements</h3>
+                    <div id="announcement-container" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">
+                        <div class="empty-box" style="width: 100%; border: 1px dashed var(--border); border-radius: 12px;"><i class="fas fa-bullhorn"></i><h4>No new announcements</h4></div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="screen" id="subjects">
-            <header class="page-header">
-                <button class="btn-icon" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
-                <h2 class="page-title">All Classes</h2>
-            </header>
-            <nav class="tab-nav">
-                <button class="tab-btn active" onclick="VidyaEngine.switchTab('subject-list-container', 'subjects', this)">Subjects</button>
-                <button class="tab-btn" onclick="VidyaEngine.switchTab('subject-list-container', 'resources', this)">Resources</button>
-            </nav>
-            <div class="screen-scroll-area grid-container" id="subject-list-container">
+        <div class="screen" id="subjects">
+            <div class="page-header">
+                <button class="back-btn" onclick="navigate('dashboard')"><i class="fas fa-arrow-left"></i></button>
+                <div class="page-title">All Classes</div>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(this, 'subject-list')">Subjects</button>
+                <button class="tab-btn" onclick="switchTab(this, 'resource-list')">Resources</button>
+            </div>
+            <div class="screen-content list-container" id="subject-list">
                 </div>
-        </section>
+        </div>
 
-        <section class="screen" id="chapters">
-            <header class="page-header">
-                <button class="btn-icon" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
-                <h2 class="page-title" id="dynamic-subject-title">Subject Area</h2>
-            </header>
-            <nav class="tab-nav">
+        <div class="screen" id="chapters">
+            <div class="page-header">
+                <button class="back-btn" onclick="navigate('subjects')"><i class="fas fa-arrow-left"></i></button>
+                <div class="page-title" id="dyn-subject-title">Subject</div>
+            </div>
+            <div class="tabs">
                 <button class="tab-btn active">Chapters</button>
-                <button class="tab-btn">Study Material</button>
-            </nav>
-            <div class="screen-scroll-area grid-container" id="chapter-list-container">
+                <button class="tab-btn">Material</button>
+            </div>
+            <div class="screen-content list-container" id="chapter-list">
                 </div>
-        </section>
+        </div>
 
-        <section class="screen" id="classroom">
-            <header class="page-header">
-                <button class="btn-icon" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
-                <h2 class="page-title" id="dynamic-chapter-title">Classroom</h2>
-            </header>
-            <nav class="tab-nav">
-                <button class="tab-btn active" onclick="VidyaEngine.filterClassroom('all', this)">All</button>
-                <button class="tab-btn" onclick="VidyaEngine.filterClassroom('lectures', this)">Lectures</button>
-                <button class="tab-btn" onclick="VidyaEngine.filterClassroom('notes', this)">Notes</button>
-            </nav>
-            <div class="screen-scroll-area grid-container" id="lecture-list-container">
+        <div class="screen" id="classroom">
+            <div class="page-header">
+                <button class="back-btn" onclick="navigate('chapters')"><i class="fas fa-arrow-left"></i></button>
+                <div class="page-title" id="dyn-chapter-title">Chapter</div>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filterClassroom('all', this)">All</button>
+                <button class="tab-btn" onclick="filterClassroom('lectures', this)">Lectures</button>
+                <button class="tab-btn" onclick="filterClassroom('notes', this)">Notes</button>
+            </div>
+            <div class="screen-content list-container" id="lecture-list">
                 </div>
-        </section>
+        </div>
 
-    </main>
+    </div>
         <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // --- GLOBAL STATE ---
+        window.currentSubject = null;
+        window.currentChapter = null;
+        window.materialsTree = {}; 
+
         // ==========================================
-        // 1. GLOBAL UI & MODAL CONTROLLERS
+        // 1. SIMPLE MODALS & DROPDOWNS
         // ==========================================
         window.openMenu = () => {
-            document.getElementById('side-menu').classList.add('active');
-            document.getElementById('global-overlay').classList.add('active');
+            document.getElementById('global-overlay').style.display = 'block';
+            document.getElementById('menu-modal').style.display = 'flex';
         };
 
         window.openNotif = () => {
-            document.getElementById('notif-menu').classList.add('active');
-            document.getElementById('global-overlay').classList.add('active');
+            document.getElementById('global-overlay').style.display = 'block';
+            document.getElementById('notif-modal').style.display = 'flex';
         };
 
-        window.closeAllModals = () => {
-            document.getElementById('side-menu').classList.remove('active');
-            document.getElementById('notif-menu').classList.remove('active');
-            document.getElementById('global-overlay').classList.remove('active');
-            document.getElementById('batch-dropdown').classList.remove('active');
+        window.closeModals = () => {
+            document.getElementById('global-overlay').style.display = 'none';
+            document.getElementById('menu-modal').style.display = 'none';
+            document.getElementById('notif-modal').style.display = 'none';
+            document.getElementById('batch-dropdown').classList.remove('show');
         };
 
-        window.toggleBatchDropdown = (e) => {
+        window.toggleDropdown = (e) => {
             e.stopPropagation();
-            document.getElementById('batch-dropdown').classList.toggle('active');
+            document.getElementById('batch-dropdown').classList.toggle('show');
         };
 
-        // Close dropdown securely when clicking outside
+        // Click outside dropdown to close
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('batch-dropdown');
-            const btn = document.querySelector('.batch-selector-btn');
-            if (dropdown && dropdown.classList.contains('active')) {
-                if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-                    dropdown.classList.remove('active');
-                }
+            if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.batch-selector')) {
+                dropdown.classList.remove('show');
             }
         });
 
         // ==========================================
-        // 2. ADVANCED SPA ROUTER (HASH BASED)
+        // 2. FOOLPROOF NAVIGATION (NO URL HASH BUGS)
         // ==========================================
-        class VidyaRouter {
-            init() {
-                window.addEventListener('hashchange', () => this.handleRoute());
-                // Set default route if empty
-                if (!window.location.hash || window.location.hash === '#') {
-                    window.location.replace('#dashboard');
-                } else {
-                    this.handleRoute();
-                }
-            }
+        window.navigate = (screenId, payload = {}) => {
+            // Close any open menus first
+            closeModals();
 
-            handleRoute() {
-                closeAllModals(); // Always close modals on navigation
-                const targetHash = window.location.hash.substring(1) || 'dashboard';
-                const targetScreen = document.getElementById(targetHash);
-                
-                // Hide all screens and reset state
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                    if(targetHash !== 'dashboard' && screen.id === 'dashboard') {
-                        screen.classList.add('background'); // Depth effect for dashboard
-                    } else {
-                        screen.classList.remove('background');
-                    }
-                });
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Show the requested screen
+            const target = document.getElementById(screenId);
+            if (target) target.classList.add('active');
 
-                // Show target screen
-                if (targetScreen) {
-                    targetScreen.classList.add('active');
-                    
-                    // Contextual Data Rendering based on Route
-                    if (targetHash === 'chapters' && VidyaEngine.currentSubject) {
-                        VidyaEngine.renderChapters(VidyaEngine.currentSubject);
-                    } else if (targetHash === 'classroom' && VidyaEngine.currentChapter) {
-                        VidyaEngine.filterClassroom('all', document.querySelector('#classroom .tab-btn.active') || document.querySelector('#classroom .tab-btn'));
-                    } else if (targetHash === 'subjects') {
-                        VidyaEngine.renderSubjects();
-                    }
-                } else {
-                    // Fallback for invalid URLs
-                    window.location.replace('#dashboard');
-                }
-            }
-        }
+            // Handle data passing (Payloads)
+            if (payload.subject) window.currentSubject = payload.subject;
+            if (payload.chapter) window.currentChapter = payload.chapter;
 
-        // Global Navigation Wrapper (Allows passing state before hash change)
-        window.navigate = (hashId, payload = {}) => {
-            if (payload.subject) window.VidyaEngine.currentSubject = payload.subject;
-            if (payload.chapter) window.VidyaEngine.currentChapter = payload.chapter;
-            window.location.hash = '#' + hashId;
+            // Trigger data rendering
+            if (screenId === 'subjects') renderSubjects();
+            if (screenId === 'chapters') renderChapters(window.currentSubject);
+            if (screenId === 'classroom') filterClassroom('all');
         };
 
         // ==========================================
-        // 3. CORE STATE MANAGER (VIDYA ENGINE)
+        // 3. FIREBASE AUTH & SECURITY BOUNCER
         // ==========================================
-        window.VidyaEngine = {
-            currentUser: null,
-            currentBatchId: null,
-            currentSubject: null,
-            currentChapter: null,
-            enrolledBatches: [],
-            materialsTree: {}, // Ultra-fast JSON Tree
-
-            async init() {
-                const router = new VidyaRouter();
-                router.init();
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        this.currentUser = user;
-                        this.updateUserUI(user);
-                        await this.fetchUserData();
-                    } else {
-                        window.location.replace("login.html");
-                    }
-                });
-            },
-
-            updateUserUI(user) {
-                const name = user.displayName || user.email.split('@')[0];
-                const initial = name.charAt(0).toUpperCase();
-                document.getElementById('userName').innerText = name;
-                document.getElementById('userIcon').innerText = initial;
-            },
-
-            // ==========================================
-            // 🔥 THE SECURITY BOUNCER INTEGRATED HERE 🔥
-            // ==========================================
-            async fetchUserData() {
-                try {
-                    const userRef = doc(db, "users", this.currentUser.uid);
-                    const userSnap = await getDoc(userRef);
-
-                    if (userSnap.exists()) {
-                        const batchIds = userSnap.data().enrolledBatches || [];
-                        
-                        // --- THE SECURITY BOUNCER LOGIC ---
-                        if (batchIds.length === 0) {
-                            // BLOCKER: User logged in hai par batch ek bhi nahi hai
-                            alert("Security Alert: Bhai, aapne koi batch join nahi kiya hai. Pehle batch join kijiye!");
-                            window.location.replace('explore.html'); // Seedha explore page pe feko
-                            return;
-                        }
-
-                        // Agar batch hai, toh process aage badhao
-                        this.enrolledBatches = batchIds;
-                        this.currentBatchId = batchIds[batchIds.length - 1]; // Load most recent
-                        await this.buildBatchDropdown();
-                        await this.loadBatchWorkspace(this.currentBatchId);
-                        
-                    } else {
-                        // User database me nahi hai (Unauthorized)
-                        window.location.replace('index.html');
-                    }
-                } catch (error) {
-                    console.error("Critical Security Breach:", error);
-                    window.location.replace('index.html');
-                }
-            },
-
-            async buildBatchDropdown() {
-                const dropdown = document.getElementById('batch-dropdown');
-                dropdown.innerHTML = '';
-                
-                for (let bId of this.enrolledBatches) {
-                    const bSnap = await getDoc(doc(db, "batches", bId));
-                    if (bSnap.exists()) {
-                        const title = bSnap.data().title;
-                        dropdown.innerHTML += `<div class="batch-item" onclick="VidyaEngine.switchBatch('${bId}', '${title}')">${title}</div>`;
-                    }
-                }
-            },
-
-            async switchBatch(batchId, batchTitle) {
-                document.getElementById('current-batch-name').innerText = "Switching Workspace...";
-                this.currentBatchId = batchId;
-                closeAllModals();
-                window.location.hash = '#dashboard'; // Force return to dashboard
-                await this.loadBatchWorkspace(batchId);
-            },
-
-            async loadBatchWorkspace(batchId) {
-                try {
-                    // 1. Fetch Batch Details
-                    const batchSnap = await getDoc(doc(db, "batches", batchId));
-                    if (batchSnap.exists()) {
-                        document.getElementById('current-batch-name').innerText = batchSnap.data().title;
-                    }
-
-                    // 2. Build Memory Tree
-                    const matRef = collection(db, "batches", batchId, "materials");
-                    const q = query(matRef, where("status", "==", "Active"));
-                    const matSnap = await getDocs(q);
-
-                    this.materialsTree = {};
+        const initApp = () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // Set User UI
+                    const name = user.displayName || user.email.split('@')[0];
+                    document.getElementById('userName').innerText = name;
+                    document.getElementById('userIcon').innerText = name.charAt(0).toUpperCase();
                     
-                    matSnap.forEach(docSnap => {
-                        const data = docSnap.data();
-                        data.id = docSnap.id;
-                        const subject = data.subject || "General";
-                        const chapter = data.chapter || "Uncategorized";
-                        
-                        if (!this.materialsTree[subject]) this.materialsTree[subject] = {};
-                        if (!this.materialsTree[subject][chapter]) this.materialsTree[subject][chapter] = [];
-                        
-                        this.materialsTree[subject][chapter].push(data);
-                    });
-
-                    // 3. Update UI
-                    if(window.location.hash === '#subjects') this.renderSubjects();
-                    this.removeBootScreen();
-
-                } catch (error) {
-                    console.error("Workspace Load Error:", error);
-                    this.removeBootScreen();
+                    await fetchUserBatches(user.uid);
+                } else {
+                    window.location.replace("login.html");
                 }
-            },
+            });
+        };
 
-            removeBootScreen() {
+        const fetchUserBatches = async (uid) => {
+            try {
+                const userSnap = await getDoc(doc(db, "users", uid));
+                if (userSnap.exists()) {
+                    const batchIds = userSnap.data().enrolledBatches || [];
+                    
+                    // 🛡️ SECURITY BOUNCER: Block users without batches
+                    if (batchIds.length === 0) {
+                        alert("Access Denied: Please enroll in a batch first!");
+                        window.location.replace('explore.html');
+                        return;
+                    }
+
+                    // Populate Dropdown
+                    const dropdown = document.getElementById('batch-dropdown');
+                    dropdown.innerHTML = '';
+                    for (let bId of batchIds) {
+                        const bSnap = await getDoc(doc(db, "batches", bId));
+                        if (bSnap.exists()) {
+                            const title = bSnap.data().title;
+                            dropdown.innerHTML += `<div class="dropdown-item" onclick="switchBatch('${bId}')">${title}</div>`;
+                        }
+                    }
+
+                    // Load Latest Batch
+                    await switchBatch(batchIds[batchIds.length - 1]);
+                } else {
+                    window.location.replace("login.html");
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                window.location.replace("login.html");
+            }
+        };
+
+        window.switchBatch = async (batchId) => {
+            document.getElementById('current-batch-name').innerText = "Loading...";
+            closeModals();
+            window.navigate('dashboard'); // Return to main screen safely
+
+            try {
+                // Get Batch Title
+                const batchSnap = await getDoc(doc(db, "batches", batchId));
+                if (batchSnap.exists()) {
+                    document.getElementById('current-batch-name').innerText = batchSnap.data().title;
+                }
+
+                // Fetch Materials
+                const matRef = collection(db, "batches", batchId, "materials");
+                const q = query(matRef, where("status", "==", "Active"));
+                const matSnap = await getDocs(q);
+
+                window.materialsTree = {};
+                matSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const subject = data.subject || "General";
+                    const chapter = data.chapter || "Uncategorized";
+                    
+                    if (!window.materialsTree[subject]) window.materialsTree[subject] = {};
+                    if (!window.materialsTree[subject][chapter]) window.materialsTree[subject][chapter] = [];
+                    
+                    window.materialsTree[subject][chapter].push(data);
+                });
+
+                // Remove Boot Screen
                 const boot = document.getElementById('boot-screen');
-                if(boot) {
-                    boot.style.opacity = "0";
-                    setTimeout(() => boot.remove(), 500);
+                if (boot) {
+                    boot.style.opacity = '0';
+                    setTimeout(() => boot.style.display = 'none', 300);
                 }
-            },
+            } catch (error) {
+                console.error("Data Load Error:", error);
+                alert("Error loading batch data!");
+            }
+        };
 
-            // ==========================================
-            // UI RENDERERS (DOM MANIPULATION)
-            // ==========================================
-            switchTab(containerId, type, btnElement) {
+        // ==========================================
+        // 4. DATA RENDERERS (DOM INJECTION)
+        // ==========================================
+        window.switchTab = (btnElement, listId) => {
+            const tabs = btnElement.parentElement.children;
+            for(let t of tabs) { t.classList.remove('active'); }
+            btnElement.classList.add('active');
+
+            if (listId === 'resource-list') {
+                document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources yet</h4></div>`;
+            } else {
+                renderSubjects();
+            }
+        };
+
+        const renderSubjects = () => {
+            const container = document.getElementById('subject-list');
+            container.innerHTML = ''; 
+            const subjects = Object.keys(window.materialsTree);
+            
+            if (subjects.length === 0) {
+                container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects found</h4></div>`;
+                return;
+            }
+
+            subjects.forEach(subject => {
+                container.innerHTML += `
+                    <div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})">
+                        <div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div>
+                        <div class="card-info">
+                            <div class="card-title">${subject}</div>
+                            <div class="card-sub">Explore chapters</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+                    </div>`;
+            });
+        };
+
+        const renderChapters = (subjectName) => {
+            document.getElementById('dyn-subject-title').innerText = subjectName;
+            const container = document.getElementById('chapter-list');
+            container.innerHTML = '';
+            
+            const chaptersObj = window.materialsTree[subjectName];
+            if (!chaptersObj) {
+                container.innerHTML = `<div class="empty-box"><i class="fas fa-layer-group"></i><h4>No chapters yet</h4></div>`;
+                return;
+            }
+
+            let index = 1;
+            for (const [chapter, materials] of Object.entries(chaptersObj)) {
+                const vidCount = materials.filter(m => m.videoUrl).length;
+                const pdfCount = materials.filter(m => m.pdfUrl).length;
+
+                container.innerHTML += `
+                    <div class="list-card" onclick="navigate('classroom', {chapter: '${chapter}'})">
+                        <div class="card-info">
+                            <span style="font-size:0.75rem; font-weight:800; color:var(--primary); background:#E0E7FF; padding:4px 8px; border-radius:6px;">CH-${index < 10 ? '0'+index : index}</span>
+                            <div class="card-title" style="margin-top: 8px;">${chapter}</div>
+                            <div class="card-sub">Videos: ${vidCount} • Notes: ${pdfCount}</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+                    </div>`;
+                index++;
+            }
+        };
+
+        window.filterClassroom = (filterType, btnElement = null) => {
+            if(btnElement) {
                 const tabs = btnElement.parentElement.children;
                 for(let t of tabs) { t.classList.remove('active'); }
                 btnElement.classList.add('active');
-
-                const container = document.getElementById(containerId);
-                if (type === 'resources') {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open"></i>
-                            <span>No extra resources available right now.</span>
-                        </div>`;
-                } else if (type === 'subjects') {
-                    this.renderSubjects();
-                }
-            },
-
-            renderSubjects() {
-                const container = document.getElementById('subject-list-container');
-                container.innerHTML = ''; 
-                const subjects = Object.keys(this.materialsTree);
-                
-                if (subjects.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><i class="fas fa-book"></i><span>No subjects found in this batch.</span></div>`;
-                    return;
-                }
-
-                subjects.forEach(subject => {
-                    const initial = subject.substring(0, 2).toUpperCase();
-                    container.innerHTML += `
-                        <div class="vp-card" onclick="navigate('chapters', {subject: '${subject}'})">
-                            <div class="vp-card-icon">${initial}</div>
-                            <div class="vp-card-body">
-                                <div class="vp-card-title">${subject}</div>
-                                <div class="vp-card-meta">Explore curriculum</div>
-                            </div>
-                            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
-                        </div>`;
-                });
-            },
-
-            renderChapters(subjectName) {
-                document.getElementById('dynamic-subject-title').innerText = subjectName;
-                const container = document.getElementById('chapter-list-container');
-                container.innerHTML = '';
-                
-                const chaptersObj = this.materialsTree[subjectName];
-                if (!chaptersObj) {
-                    container.innerHTML = `<div class="empty-state"><i class="fas fa-layer-group"></i><span>No chapters uploaded yet.</span></div>`;
-                    return;
-                }
-
-                let index = 1;
-                for (const [chapter, materials] of Object.entries(chaptersObj)) {
-                    const videoCount = materials.filter(m => m.videoUrl).length;
-                    const pdfCount = materials.filter(m => m.pdfUrl).length;
-                    const chLabel = index < 10 ? `0${index}` : index;
-
-                    container.innerHTML += `
-                        <div class="vp-card" onclick="navigate('classroom', {chapter: '${chapter}'})">
-                            <div class="vp-card-body">
-                                <span style="font-size:0.7rem; font-weight:800; color:var(--vp-primary); background:#e0e7ff; padding:4px 8px; border-radius:6px; display:inline-block; margin-bottom:8px;">CH - ${chLabel}</span>
-                                <div class="vp-card-title">${chapter}</div>
-                                <div class="vp-card-meta">Lectures: ${videoCount} • Notes: ${pdfCount}</div>
-                            </div>
-                            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
-                        </div>`;
-                    index++;
-                }
-            },
-
-            filterClassroom(filterType, btnElement) {
-                if(btnElement) {
-                    const tabs = btnElement.parentElement.children;
-                    for(let t of tabs) { t.classList.remove('active'); }
-                    btnElement.classList.add('active');
-                }
-                
-                document.getElementById('dynamic-chapter-title').innerText = this.currentChapter;
-                const container = document.getElementById('lecture-list-container');
-                container.innerHTML = '';
-                
-                const allMaterials = this.materialsTree[this.currentSubject][this.currentChapter];
-
-                if (!allMaterials || allMaterials.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><span>No materials uploaded yet.</span></div>`;
-                    return;
-                }
-
-                let itemsToRender = allMaterials;
-                if(filterType === 'lectures') itemsToRender = allMaterials.filter(m => m.videoUrl);
-                if(filterType === 'notes') itemsToRender = allMaterials.filter(m => m.pdfUrl);
-
-                if (itemsToRender.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><span>Nothing found in this filter.</span></div>`;
-                    return;
-                }
-
-                itemsToRender.forEach(mat => {
-                    const thumb = mat.thumbUrl || 'https://via.placeholder.com/200x120/e2e8f0/94a3b8?text=VidyaPlus';
-                    let actionButtons = '';
-                    
-                    if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
-                        actionButtons += `<a href="${mat.pdfUrl}" target="_blank" class="btn-action btn-outline" style="text-decoration:none;"><i class="fas fa-file-pdf" style="color:var(--vp-danger);"></i> Read Notes</a>`;
-                    }
-                    if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-                        actionButtons += `<button class="btn-action btn-solid" onclick="alert('Video Player API initializing...')"><i class="fas fa-play"></i> Watch Video</button>`;
-                    }
-
-                    container.innerHTML += `
-                        <div class="material-card">
-                            <div class="mat-card-header">
-                                <div class="mat-thumb">
-                                    <img src="${thumb}" alt="Thumbnail" onerror="this.src='https://via.placeholder.com/200x120/e2e8f0/94a3b8?text=VidyaPlus'">
-                                    ${mat.videoUrl && (filterType === 'all' || filterType === 'lectures') ? `<div class="mat-play-btn"><i class="fas fa-play-circle"></i></div>` : ''}
-                                </div>
-                                <div class="mat-info">
-                                    <h4>${mat.title}</h4>
-                                    <div class="mat-badge"><i class="fas fa-bookmark"></i> Subject Material</div>
-                                </div>
-                            </div>
-                            <div class="mat-actions">${actionButtons}</div>
-                        </div>`;
-                });
             }
-        };
-            // Boot up the engine directly (Module scripts are already deferred)
-window.VidyaEngine.init();
             
-                               </script>
+            document.getElementById('dyn-chapter-title').innerText = window.currentChapter;
+            const container = document.getElementById('lecture-list');
+            container.innerHTML = '';
+            
+            const allMaterials = window.materialsTree[window.currentSubject][window.currentChapter];
+
+            if (!allMaterials || allMaterials.length === 0) {
+                container.innerHTML = `<div class="empty-box"><i class="fas fa-box-open"></i><h4>Nothing uploaded yet</h4></div>`;
+                return;
+            }
+
+            let items = allMaterials;
+            if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
+            if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl);
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No ${filterType} found</h4></div>`;
+                return;
+            }
+
+            items.forEach(mat => {
+                let btns = '';
+                if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
+                    btns += `<a href="${mat.pdfUrl}" target="_blank" class="action-btn" style="text-decoration:none; color:inherit;"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Read Notes</a>`;
+                }
+                if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
+                    btns += `<button class="action-btn play" onclick="alert('Video Player API triggered!')"><i class="fas fa-play"></i> Watch</button>`;
+                }
+
+                container.innerHTML += `
+                    <div class="lecture-card">
+                        <div class="lec-top">
+                            <div class="card-info">
+                                <div class="card-title" style="white-space: normal;">${mat.title}</div>
+                                <div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Study Material</div>
+                            </div>
+                        </div>
+                        <div class="lec-actions">${btns}</div>
+                    </div>`;
+            });
+        };
+
+        // Start App Immediately
+        initApp();
+
+    </script>
 </body>
 </html>
