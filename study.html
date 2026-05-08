@@ -889,10 +889,9 @@
                 });
             }
         };
-
-        // Boot up the engine when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => { window.VidyaEngine.init(); });
-        
+            // Boot up the engine directly (Module scripts are already deferred)
+window.VidyaEngine.init();
+            
                                </script>
 </body>
 </html>
