@@ -344,8 +344,25 @@
             <div class="screen-content list-container" id="chapter-list">
                 </div>
                 </div>
+                <div class="screen" id="classroom">
+            <div class="page-header">
+                <button class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
+                <div class="page-title" id="dyn-chapter-title">Chapter</div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filterClassroom('all', this)">All</button>
+                <button class="tab-btn" onclick="filterClassroom('lectures', this)">Lectures</button>
+                <button class="tab-btn" onclick="filterClassroom('notes', this)">Notes</button>
+            </div>
+            
+            <div class="screen-content list-container" id="lecture-list">
+                </div>
+        </div>
 
-                  <div class="classroom-overlay" id="classroom-mode">
+    </div>
+    
+    <div class="classroom-overlay" id="classroom-mode">
         <div class="video-fixed-box">
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
             <iframe id="vp-iframe" allow="autoplay; fullscreen" allowfullscreen></iframe>
