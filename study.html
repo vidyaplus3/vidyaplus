@@ -96,6 +96,85 @@
         .ctrl-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; }
         .progress-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer; position: relative; }
         .progress-fill { height: 100%; background: #EF4444; width: 0%; border-radius: 5px; pointer-events: none; }
+
+                /* ==========================================
+           7. PROFESSIONAL DESKTOP WEBSITE UI
+           ========================================== */
+        @media (min-width: 768px) {
+            body { padding: 40px 0; background: #E2E8F0; } 
+            
+            .app-container {
+                max-width: 1300px; /* Badi website ke liye wide container */
+                border-radius: 16px;
+                min-height: calc(100vh - 80px);
+                border: 1px solid var(--border);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            }
+
+            .header-dark { padding: 2.5rem 3rem; border-top-left-radius: 16px; border-top-right-radius: 16px; }
+            .top-nav { font-size: 1.5rem; }
+            
+            .app-grid { padding: 30px 3rem; gap: 20px; grid-template-columns: repeat(4, 1fr); }
+            .grid-icon { width: 80px; height: 80px; font-size: 2rem; }
+            .grid-text { font-size: 0.9rem; }
+
+            .list-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 20px;
+                padding: 30px 3rem;
+                align-content: start; 
+            }
+            .lecture-card { margin-bottom: 0; } 
+
+            #live-container, #announcement-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                overflow-x: visible;
+                align-content: start; 
+            }
+
+            .page-header { padding: 20px 3rem; }
+            .tabs { padding: 20px 3rem; }
+
+            /* 🚨 DESKTOP CLASSROOM (CINEMATIC WEB MODE) 🚨 */
+            .classroom-overlay { 
+                flex-direction: row; /* Video aur Notes bagal-bagal me */
+                padding: 30px; 
+                background: rgba(11, 17, 32, 0.98); /* Premium dark theatre effect */
+                align-items: center; 
+                justify-content: center;
+                gap: 30px; 
+            }
+
+            .video-fixed-box { 
+                flex: 2.5; /* Video ko screen ka zyada hissa diya */
+                height: auto; 
+                max-height: 85vh; 
+                border-radius: 16px; /* Video me curve */
+                overflow: hidden;
+                box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            }
+
+            .interaction-area { 
+                flex: 1; /* Side bar ki tarah discussion/notes */
+                margin-top: 0; 
+                border-radius: 16px; 
+                height: 85vh; /* Video ki height se match kiya */
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            }
+
+            .close-classroom {
+                top: 30px; left: 30px;
+                background: rgba(255,255,255,0.15);
+                backdrop-filter: blur(5px);
+            }
+            .close-classroom:hover { background: rgba(255,255,255,0.3); }
+
+            /* Desktop me controls ko margin ki zaroorat nahi */
+            .custom-controls { padding-bottom: 15px; } 
+        }
         
     </style>
 </head>
