@@ -311,42 +311,36 @@
         </div>
 
     </div>
-                <script type="module">
+                    <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- GLOBAL STATE (With Batch Memory) ---
+        // --- GLOBAL STATE ---
         window.currentBatchId = localStorage.getItem('vp_batch') || null;
         window.currentSubject = localStorage.getItem('vp_subject') || null;
         window.currentChapter = localStorage.getItem('vp_chapter') || null;
         window.materialsTree = {}; 
 
-        // ==========================================
-        // 1. MODALS & DROPDOWNS (STRICT LOGIC)
-        // ==========================================
+        // 1. MODALS & DROPDOWNS
         window.openMenu = () => {
             document.getElementById('global-overlay').style.display = 'block';
             document.getElementById('menu-modal').style.display = 'flex';
         };
-
         window.openNotif = () => {
             document.getElementById('global-overlay').style.display = 'block';
             document.getElementById('notif-modal').style.display = 'flex';
         };
-
         window.closeModals = () => {
             document.getElementById('global-overlay').style.display = 'none';
             document.getElementById('menu-modal').style.display = 'none';
             document.getElementById('notif-modal').style.display = 'none';
             document.getElementById('batch-dropdown').classList.remove('show');
         };
-
         window.toggleDropdown = (e) => {
             e.stopPropagation();
             document.getElementById('batch-dropdown').classList.toggle('show');
         };
-
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('batch-dropdown');
             if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.batch-selector')) {
@@ -354,10 +348,7 @@
             }
         });
 
-        // ==========================================
-        // 2. BACK-BUTTON FIX & NAVIGATION ENGINE
-        // ==========================================
-        
+        // 2. NAVIGATION ENGINE
         const showScreen = (screenId) => {
             closeModals();
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -370,7 +361,6 @@
         };
 
         window.navigate = (screenId, payload = {}) => {
-            // Save to LocalStorage so data survives a refresh!
             if (payload.subject) {
                 window.currentSubject = payload.subject;
                 localStorage.setItem('vp_subject', payload.subject);
@@ -379,7 +369,6 @@
                 window.currentChapter = payload.chapter;
                 localStorage.setItem('vp_chapter', payload.chapter);
             }
-            
             window.location.hash = screenId;
         };
 
@@ -388,21 +377,41 @@
             showScreen(screenId);
         });
 
-        // ==========================================
-        // 3. FIREBASE AUTH & SECURITY BOUNCER
-        // ==========================================
-        const initApp = () => {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    const name = user.displayName || user.email.split('@')[0];
-                    document.getElementById('userName').innerText = name;
-                    document.getElementById('userIcon').innerText = name.charAt(0).toUpperCase();
-                    
-                    await fetchUserBatches(user.uid);
-                } else {
-                    window.location.replace("login.html");
-                }
-            });
+        // 3. CORE FUNCTIONS (SKELETON & DATA FETCHING)
+        window.switchBatch = async (batchId) => {
+            document.getElementById('current-batch-name').innerText = "Loading...";
+            localStorage.setItem('vp_batch', batchId);
+            window.currentBatchId = batchId;
+            
+            const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(initialScreen);
+            if (target) target.classList.add('active');
+
+            // Skeleton UI
+            const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
+            if(initialScreen === 'subjects') document.getElementById('subject-list').innerHTML = skeletonHTML;
+            if(initialScreen === 'chapters') document.getElementById('chapter-list').innerHTML = skeletonHTML;
+            if(initialScreen === 'classroom') document.getElementById('lecture-list').innerHTML = skeletonHTML;
+
+            try {
+                const batchSnap = await getDoc(doc(db, "batches", batchId));
+                if (batchSnap.exists()) document.getElementById('current-batch-name').innerText = batchSnap.data().title;
+
+                const matRef = collection(db, "batches", batchId, "materials");
+                const q = query(matRef, where("status", "==", "Active"));
+                const matSnap = await getDocs(q);
+
+                window.materialsTree = {};
+                matSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const subject = data.subject || "General", chapter = data.chapter || "Uncategorized";
+                    if (!window.materialsTree[subject]) window.materialsTree[subject] = {};
+                    if (!window.materialsTree[subject][chapter]) window.materialsTree[subject][chapter] = [];
+                    window.materialsTree[subject][chapter].push(data);
+                });
+                showScreen(initialScreen);
+            } catch (error) { console.error("Batch Load Error:", error); }
         };
 
         const fetchUserBatches = async (uid) => {
@@ -410,43 +419,38 @@
                 const userSnap = await getDoc(doc(db, "users", uid));
                 if (userSnap.exists()) {
                     const batchIds = userSnap.data().enrolledBatches || [];
-                    
                     if (batchIds.length === 0) {
-                        alert("Security Alert: Please enroll in a batch first!");
                         window.location.replace('explore.html');
                         return;
                     }
-
                     const dropdown = document.getElementById('batch-dropdown');
                     dropdown.innerHTML = '';
                     for (let bId of batchIds) {
                         const bSnap = await getDoc(doc(db, "batches", bId));
                         if (bSnap.exists()) {
-                            const title = bSnap.data().title;
-                            dropdown.innerHTML += `<div class="dropdown-item" onclick="switchBatch('${bId}')">${title}</div>`;
+                            dropdown.innerHTML += `<div class="dropdown-item" onclick="switchBatch('${bId}')">${bSnap.data().title}</div>`;
                         }
                     }
-
-                    // 🚨 THE FIX IS HERE 🚨 Check if a batch was saved in memory
-                    let batchToLoad = batchIds[batchIds.length - 1]; // Fallback to default
-                    const savedBatch = localStorage.getItem('vp_batch');
-                    
-                    // Verify if the saved batch is still in the user's enrolled list
-                    if (savedBatch && batchIds.includes(savedBatch)) {
-                        batchToLoad = savedBatch;
-                    }
-
-                    await switchBatch(batchToLoad);
+                    let bToLoad = localStorage.getItem('vp_batch') || batchIds[batchIds.length - 1];
+                    await switchBatch(bToLoad);
                 }
-            } catch (error) {
-                window.location.replace("login.html");
-            }
+            } catch (error) { console.error("Auth Error:", error); }
         };
 
-        
-        // ==========================================
-        // 4. DATA RENDERERS
-        // ==========================================
+        const initApp = () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const name = user.displayName || user.email.split('@')[0];
+                    document.getElementById('userName').innerText = name;
+                    document.getElementById('userIcon').innerText = name.charAt(0).toUpperCase();
+                    await fetchUserBatches(user.uid);
+                } else {
+                    window.location.replace("login.html");
+                }
+            });
+        };
+
+        // 4. UI RENDERERS
         window.switchTab = (btnElement, listId) => {
             const tabs = btnElement.parentElement.children;
             for(let t of tabs) { t.classList.remove('active'); }
@@ -456,66 +460,9 @@
                 document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources yet</h4></div>`;
             } else if (listId === 'subject-list') {
                 renderSubjects();
-            } 
-            else if (listId === 'chapter-material') {
+            } else if (listId === 'chapter-material') {
                 document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No subject material yet</h4></div>`;
             } else if (listId === 'chapter-list') {
-               window.switchBatch = async (batchId) => {
-            document.getElementById('current-batch-name').innerText = "Loading...";
-            
-            localStorage.setItem('vp_batch', batchId);
-            window.currentBatchId = batchId;
-            
-            // 1. Kaha jana hai?
-            const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
-            
-            // 2. Chup-chaap us page ko dikhao (Skeletons ke sath)
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(initialScreen);
-            if (target) target.classList.add('active');
-
-            // 3. Shimmer (Skeleton) UI lagao jab tak data aa raha hai
-            const skeletonHTML = `
-                <div class="list-card" style="border:none; box-shadow:none; padding:15px 0;">
-                    <div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div>
-                    <div style="flex:1;">
-                        <div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div>
-                        <div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div>
-                    </div>
-                </div>`.repeat(5); // 5 fake cards dikhayega
-
-            if(initialScreen === 'subjects') document.getElementById('subject-list').innerHTML = skeletonHTML;
-            if(initialScreen === 'chapters') document.getElementById('chapter-list').innerHTML = skeletonHTML;
-            if(initialScreen === 'classroom') document.getElementById('lecture-list').innerHTML = skeletonHTML;
-
-            try {
-                // 4. Firebase se asli data mango
-                const batchSnap = await getDoc(doc(db, "batches", batchId));
-                if (batchSnap.exists()) {
-                    document.getElementById('current-batch-name').innerText = batchSnap.data().title;
-                }
-
-                const matRef = collection(db, "batches", batchId, "materials");
-                const q = query(matRef, where("status", "==", "Active"));
-                const matSnap = await getDocs(q);
-
-                window.materialsTree = {};
-                matSnap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const subject = data.subject || "General";
-                    const chapter = data.chapter || "Uncategorized";
-                    if (!window.materialsTree[subject]) window.materialsTree[subject] = {};
-                    if (!window.materialsTree[subject][chapter]) window.materialsTree[subject][chapter] = [];
-                    window.materialsTree[subject][chapter].push(data);
-                });
-
-                // 5. Asli data aate hi skeleton hata ke real data dikha do
-                showScreen(initialScreen);
-
-            } catch (error) {
-                alert("Error loading batch!");
-            }
-        };
                 renderChapters(window.currentSubject);
             }
         };
@@ -525,22 +472,12 @@
             if(!container) return;
             container.innerHTML = ''; 
             const subjects = Object.keys(window.materialsTree);
-            
             if (subjects.length === 0) {
                 container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects found</h4></div>`;
                 return;
             }
-
             subjects.forEach(subject => {
-                container.innerHTML += `
-                    <div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})">
-                        <div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div>
-                        <div class="card-info">
-                            <div class="card-title">${subject}</div>
-                            <div class="card-sub">Explore chapters</div>
-                        </div>
-                        <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
-                    </div>`;
+                container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Explore chapters</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`;
             });
         };
 
@@ -549,27 +486,14 @@
             if(!container) return;
             document.getElementById('dyn-subject-title').innerText = subjectName;
             container.innerHTML = '';
-            
             const chaptersObj = window.materialsTree[subjectName];
             if (!chaptersObj) {
                 container.innerHTML = `<div class="empty-box"><i class="fas fa-layer-group"></i><h4>No chapters yet</h4></div>`;
                 return;
             }
-
             let index = 1;
             for (const [chapter, materials] of Object.entries(chaptersObj)) {
-                const vidCount = materials.filter(m => m.videoUrl).length;
-                const pdfCount = materials.filter(m => m.pdfUrl).length;
-
-                container.innerHTML += `
-                    <div class="list-card" onclick="navigate('classroom', {chapter: '${chapter}'})">
-                        <div class="card-info">
-                            <span style="font-size:0.75rem; font-weight:800; color:var(--primary); background:#E0E7FF; padding:4px 8px; border-radius:6px;">CH-${index < 10 ? '0'+index : index}</span>
-                            <div class="card-title" style="margin-top: 8px;">${chapter}</div>
-                            <div class="card-sub">Videos: ${vidCount} • Notes: ${pdfCount}</div>
-                        </div>
-                        <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
-                    </div>`;
+                container.innerHTML += `<div class="list-card" onclick="navigate('classroom', {chapter: '${chapter}'})"><div class="card-info"><span style="font-size:0.75rem; font-weight:800; color:var(--primary); background:#E0E7FF; padding:4px 8px; border-radius:6px;">CH-${index < 10 ? '0'+index : index}</span><div class="card-title" style="margin-top: 8px;">${chapter}</div><div class="card-sub">Videos: ${materials.filter(m => m.videoUrl).length} • Notes: ${materials.filter(m => m.pdfUrl).length}</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`;
                 index++;
             }
         };
@@ -582,46 +506,26 @@
                 for(let t of tabs) { t.classList.remove('active'); }
                 btnElement.classList.add('active');
             }
-            
             document.getElementById('dyn-chapter-title').innerText = window.currentChapter;
             container.innerHTML = '';
-            
             const allMaterials = window.materialsTree[window.currentSubject]?.[window.currentChapter];
             if (!allMaterials) return;
-
             let items = allMaterials;
             if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
             if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl);
-
             if (items.length === 0) {
                 container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No ${filterType} found</h4></div>`;
                 return;
             }
-
             items.forEach(mat => {
                 let btns = '';
-                if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
-                    btns += `<a href="${mat.pdfUrl}" target="_blank" class="action-btn" style="text-decoration:none; color:inherit;"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Read Notes</a>`;
-                }
-                if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-                    btns += `<button class="action-btn play" onclick="alert('Video Player API triggered!')"><i class="fas fa-play"></i> Watch</button>`;
-                }
-
-                container.innerHTML += `
-                    <div class="lecture-card">
-                        <div class="lec-top">
-                            <div class="card-info">
-                                <div class="card-title" style="white-space: normal;">${mat.title}</div>
-                                <div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Study Material</div>
-                            </div>
-                        </div>
-                        <div class="lec-actions">${btns}</div>
-                    </div>`;
+                if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) btns += `<a href="${mat.pdfUrl}" target="_blank" class="action-btn" style="text-decoration:none; color:inherit;"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Read Notes</a>`;
+                if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) btns += `<button class="action-btn play" onclick="alert('Video Player API triggered!')"><i class="fas fa-play"></i> Watch</button>`;
+                container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Study Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
             });
         };
 
         initApp();
-
-                </script>
+                    </script>
 </body>
 </html>
