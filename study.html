@@ -365,7 +365,7 @@
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
             <div style="width: 100%; height: 100%; pointer-events: none;"><div id="vp-player"></div></div>
             
-            <div class="security-shield" onclick="togglePlay()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
+                        <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
 
                           <div class="custom-controls" id="custom-controls">
@@ -831,8 +831,17 @@
         // 5. 🎬 AUTO-HIDE UI (Cinematic Mode)
         // ==========================================
         window.uiTimeout = null;
+        let lastMouseX = -1;
+        let lastMouseY = -1;
 
-        window.showUI = () => {
+        window.showUI = (e) => {
+            // 🚨 GHOST TRACKER: Fake mousemove ko block karne ke liye
+            if (e && e.type === 'mousemove') {
+                if (e.clientX === lastMouseX && e.clientY === lastMouseY) return; // Agar mouse actually nahi hila, toh ignore karo
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            }
+
             const controls = document.getElementById('custom-controls');
             const backBtn = document.querySelector('.close-classroom');
             
@@ -841,21 +850,30 @@
             
             clearTimeout(window.uiTimeout);
             
-            // Sirf tabhi hide karo jab video PLAY ho rahi ho (pause par controls hamesha dikhenge)
             let state = window.ytPlayer && window.ytPlayer.getPlayerState ? window.ytPlayer.getPlayerState() : -1;
             if (state === 1) { 
                 window.uiTimeout = setTimeout(() => {
-                    // Agar settings menu khula hai toh gayab mat karo
                     const menu = document.getElementById('settings-menu');
-                    if (menu && menu.classList.contains('show')) return;
+                    if (menu && menu.classList.contains('show')) return; // Settings khuli hai toh hide mat karo
                     
                     if(controls) controls.classList.add('hidden');
                     if(backBtn) backBtn.classList.add('hidden');
-                }, 5000); // 5 seconds baad gayab
+                }, 5000); // 5 Seconds Timer
             }
         };
 
-        // Jaise hi mouse hile ya screen touch ho, timer reset kar do
+        // 🚨 SMART SHIELD LOGIC (UX FIX) 🚨
+        window.handleShieldClick = () => {
+            const controls = document.getElementById('custom-controls');
+            if(controls && controls.classList.contains('hidden')) {
+                // Agar controls chhupe hain, toh sirf unhe dikhao (video pause MAT karo)
+                window.showUI();
+            } else {
+                // Agar controls pehle se dikh rahe hain, tab play/pause karo
+                window.togglePlay();
+            }
+        };
+
         const vContainer = document.getElementById('video-container');
         if(vContainer) {
             vContainer.addEventListener('mousemove', window.showUI);
