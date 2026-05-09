@@ -186,6 +186,42 @@
             background-size: 1000px 100%;
             animation: shimmer 2s infinite linear forwards;
         }
+                /* --- ADVANCE SECURE VIDEO PLAYER UI --- */
+        .video-modal {
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.95); z-index: 10000;
+            justify-content: center; align-items: center; padding: 10px;
+        }
+        .video-modal.active { display: flex; }
+        
+        .video-player-container {
+            width: 100%; max-width: 900px; aspect-ratio: 16/9;
+            background: #000; border-radius: 12px; position: relative;
+            overflow: hidden; border: 2px solid var(--navy);
+        }
+
+        .security-shield {
+            position: absolute; inset: 0; z-index: 10;
+            background: transparent; cursor: default;
+        }
+
+        #video-watermark {
+            position: absolute; z-index: 15; color: rgba(255,255,255,0.3);
+            font-size: 0.75rem; font-weight: 700; pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); transition: 1s ease-in-out;
+            white-space: nowrap; user-select: none;
+        }
+
+        .close-video {
+            position: absolute; top: -45px; right: 0; color: white;
+            font-size: 1.5rem; cursor: pointer; background: rgba(255,255,255,0.1);
+            width: 35px; height: 35px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .close-video:hover { background: #EF4444; }
+
+        iframe#vp-iframe { width: 100%; height: 100%; border: none; }
+        
     </style>
 </head>
 <body>
@@ -311,7 +347,18 @@
         </div>
 
     </div>
-                    <script type="module">
+        <div class="video-modal" id="video-modal">
+        <div class="video-player-container">
+            <div class="close-video" onclick="closeVideo()"><i class="fas fa-times"></i></div>
+            
+            <div class="security-shield" oncontextmenu="return false;"></div>
+            <div id="video-watermark">Student</div>
+
+            <iframe id="vp-iframe" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+        </div>
+    
+                        <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -388,7 +435,6 @@
             const target = document.getElementById(initialScreen);
             if (target) target.classList.add('active');
 
-            // Skeleton UI
             const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
             if(initialScreen === 'subjects') document.getElementById('subject-list').innerHTML = skeletonHTML;
             if(initialScreen === 'chapters') document.getElementById('chapter-list').innerHTML = skeletonHTML;
@@ -520,12 +566,56 @@
             items.forEach(mat => {
                 let btns = '';
                 if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) btns += `<a href="${mat.pdfUrl}" target="_blank" class="action-btn" style="text-decoration:none; color:inherit;"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Read Notes</a>`;
-                if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) btns += `<button class="action-btn play" onclick="alert('Video Player API triggered!')"><i class="fas fa-play"></i> Watch</button>`;
+                
+                // 🚨 WATCH BUTTON UPDATED HERE 🚨
+                if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) btns += `<button class="action-btn play" onclick="openVideo('${mat.videoUrl}')"><i class="fas fa-play"></i> Watch</button>`;
+                
                 container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Study Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
             });
         };
 
+        // 5. VIDEO PLAYER LOGIC & ANTI-PIRACY SECURITY
+        window.openVideo = (vidUrl) => {
+            if(!vidUrl) return alert("Video link not found!");
+            
+            let vidId = vidUrl.split('v=')[1] || vidUrl.split('/').pop();
+            const secureUrl = `https://www.youtube.com/embed/${vidId}?autoplay=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&controls=1&disablekb=1`;
+            
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('vp-iframe');
+            const watermark = document.getElementById('video-watermark');
+
+            let userEmail = auth.currentUser ? auth.currentUser.email : "Student";
+            watermark.innerText = userEmail + " | " + new Date().toLocaleDateString();
+            
+            iframe.src = secureUrl;
+            modal.classList.add('active');
+
+            window.watermarkInterval = setInterval(() => {
+                const top = Math.random() * 80 + 10;
+                const left = Math.random() * 70 + 5;
+                watermark.style.top = top + "%";
+                watermark.style.left = left + "%";
+            }, 5000);
+        };
+
+        window.closeVideo = () => {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('vp-iframe');
+            iframe.src = ""; 
+            modal.classList.remove('active');
+            clearInterval(window.watermarkInterval);
+        };
+
+        // Block Inspect Element Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
         initApp();
-                    </script>
+                        </script>
 </body>
 </html>
