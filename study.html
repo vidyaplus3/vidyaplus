@@ -148,6 +148,17 @@
         .speed-opt.active, .quality-opt.active { background: #4F46E5; font-weight: 700; }
         
         .badge-na { font-size: 0.55rem; background: #EF4444; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+                /* 🚨 AUTO-HIDE MAGIC 🚨 */
+        .custom-controls.hidden { 
+            opacity: 0 !important; 
+            pointer-events: none; 
+            transform: translateY(15px); /* Niche slide hoke gayab hoga */
+        }
+        
+        .close-classroom { transition: opacity 0.3s ease; } /* Back button ke liye smooth transition */
+        .close-classroom.hidden { 
+            opacity: 0 !important; 
+            pointer-events: none;
         
                 /* ==========================================
            7. PROFESSIONAL DESKTOP WEBSITE UI
@@ -810,6 +821,41 @@
             document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
             document.getElementById('time-display').innerText = window.formatTime(percentage * duration);
         };
+                    // ==========================================
+        // 5. 🎬 AUTO-HIDE UI (Cinematic Mode)
+        // ==========================================
+        window.uiTimeout = null;
+
+        window.showUI = () => {
+            const controls = document.getElementById('custom-controls');
+            const backBtn = document.querySelector('.close-classroom');
+            
+            if(controls) controls.classList.remove('hidden');
+            if(backBtn) backBtn.classList.remove('hidden');
+            
+            clearTimeout(window.uiTimeout);
+            
+            // Sirf tabhi hide karo jab video PLAY ho rahi ho (pause par controls hamesha dikhenge)
+            let state = window.ytPlayer && window.ytPlayer.getPlayerState ? window.ytPlayer.getPlayerState() : -1;
+            if (state === 1) { 
+                window.uiTimeout = setTimeout(() => {
+                    // Agar settings menu khula hai toh gayab mat karo
+                    const menu = document.getElementById('settings-menu');
+                    if (menu && menu.classList.contains('show')) return;
+                    
+                    if(controls) controls.classList.add('hidden');
+                    if(backBtn) backBtn.classList.add('hidden');
+                }, 3000); // 3 seconds baad gayab
+            }
+        };
+
+        // Jaise hi mouse hile ya screen touch ho, timer reset kar do
+        const vContainer = document.getElementById('video-container');
+        if(vContainer) {
+            vContainer.addEventListener('mousemove', window.showUI);
+            vContainer.addEventListener('touchstart', window.showUI);
+            vContainer.addEventListener('click', window.showUI);
+        }
             
 
         initApp();
