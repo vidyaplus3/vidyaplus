@@ -649,15 +649,21 @@
                 container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
             });
         };
-
-        // =====================================
-        // CLASSROOM MODE & CUSTOM API PLAYER
+                                                    // =====================================
+        // CLASSROOM MODE & CUSTOM API PLAYER (BLACK SCREEN FIX)
         // =====================================
         window.openVideo = (vidUrl, title, pdfUrl) => {
             if(!vidUrl) return alert("Playback URL is invalid.");
             
-            let vidId = vidUrl.split('v=')[1] || vidUrl.split('/').pop();
+            // 🚨 THE FIX: Smart ID Extractor (Removes ?si= and extra garbage) 🚨
+            let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+            let vidId = match ? match[1] : vidUrl;
             
+            // Safety check for slow internet
+            if(typeof YT === 'undefined' || !YT.Player) {
+                return alert("Player is loading... Please click 'Watch' again in 2 seconds!");
+            }
+
             // UI Reset
             document.getElementById('play-icon').className = "fas fa-pause";
             document.getElementById('progress-fill').style.width = "0%";
@@ -672,14 +678,18 @@
             let userEmail = auth.currentUser ? auth.currentUser.email : "Authenticated User";
             document.getElementById('video-watermark').innerText = userEmail + " | VidyaPlus";
 
-            // If player already exists, just load new video
+            // If player already exists, just load new video securely
             if (window.ytPlayer && window.ytPlayer.loadVideoById) {
                 window.ytPlayer.loadVideoById(vidId);
             } else {
                 // Initialize new Custom YT Player
                 window.ytPlayer = new YT.Player('vp-player', {
                     videoId: vidId,
-                    playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0, 'disablekb': 1, 'fs': 0, 'playsinline': 1 },
+                    playerVars: { 
+                        'autoplay': 1, 'controls': 0, 'modestbranding': 1, 
+                        'rel': 0, 'showinfo': 0, 'disablekb': 1, 'fs': 0, 
+                        'playsinline': 1, 'origin': window.location.origin 
+                    },
                     events: {
                         'onReady': (event) => { 
                             event.target.playVideo(); 
@@ -694,6 +704,7 @@
                 });
             }
         };
+                                            
 
         window.closeClassroom = () => {
             const overlay = document.getElementById('classroom-mode');
