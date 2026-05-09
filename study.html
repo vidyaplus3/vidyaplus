@@ -650,18 +650,17 @@
             });
         };
                                                     // =====================================
-        // CLASSROOM MODE & CUSTOM API PLAYER (BLACK SCREEN FIX)
+                // =====================================
+        // CLASSROOM MODE & CUSTOM API PLAYER (STRICT CONTROLS FIX)
         // =====================================
         window.openVideo = (vidUrl, title, pdfUrl) => {
             if(!vidUrl) return alert("Playback URL is invalid.");
             
-            // 🚨 THE FIX: Smart ID Extractor (Removes ?si= and extra garbage) 🚨
             let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
             let vidId = match ? match[1] : vidUrl;
             
-            // Safety check for slow internet
             if(typeof YT === 'undefined' || !YT.Player) {
-                return alert("Player is loading... Please click 'Watch' again in 2 seconds!");
+                return alert("Player initialization in progress. Please attempt playback in a moment.");
             }
 
             // UI Reset
@@ -678,34 +677,41 @@
             let userEmail = auth.currentUser ? auth.currentUser.email : "Authenticated User";
             document.getElementById('video-watermark').innerText = userEmail + " | VidyaPlus";
 
-            // If player already exists, just load new video securely
-            if (window.ytPlayer && window.ytPlayer.loadVideoById) {
-                window.ytPlayer.loadVideoById(vidId);
-            } else {
-                // Initialize new Custom YT Player
-                window.ytPlayer = new YT.Player('vp-player', {
-                    videoId: vidId,
-                    playerVars: { 
-                        'autoplay': 1, 'controls': 0, 'modestbranding': 1, 
-                        'rel': 0, 'showinfo': 0, 'disablekb': 1, 'fs': 0, 
-                        'playsinline': 1, 'origin': window.location.origin 
-                    },
-                    events: {
-                        'onReady': (event) => { 
-                            event.target.playVideo(); 
-                            window.ytProgressInterval = setInterval(window.updateProgressBar, 500);
-                        },
-                        'onStateChange': (event) => {
-                            let icon = document.getElementById('play-icon');
-                            if(event.data === 1) icon.className = "fas fa-pause"; // Playing
-                            else icon.className = "fas fa-play"; // Paused/Ended
-                        }
-                    }
-                });
+            // 🚨 THE FIX: Har baar purana player destroy karo taaki YT apni marzi na chalaye 🚨
+            if (window.ytPlayer && typeof window.ytPlayer.destroy === 'function') {
+                window.ytPlayer.destroy();
+                window.ytPlayer = null;
             }
+
+            // Ekdum fresh player create karo strict rules ke sath
+            window.ytPlayer = new YT.Player('vp-player', {
+                videoId: vidId,
+                playerVars: { 
+                    'autoplay': 1, 
+                    'controls': 0,       // STRCITLY NO YOUTUBE CONTROLS
+                    'disablekb': 1,      // No keyboard shortcuts
+                    'fs': 0,             // No fullscreen button
+                    'modestbranding': 1, // Hide YouTube logos
+                    'rel': 0,            // No related videos
+                    'showinfo': 0, 
+                    'playsinline': 1, 
+                    'origin': window.location.origin 
+                },
+                events: {
+                    'onReady': (event) => { 
+                        event.target.playVideo(); 
+                        if(window.ytProgressInterval) clearInterval(window.ytProgressInterval);
+                        window.ytProgressInterval = setInterval(window.updateProgressBar, 500);
+                    },
+                    'onStateChange': (event) => {
+                        let icon = document.getElementById('play-icon');
+                        if(event.data === 1) icon.className = "fas fa-pause"; 
+                        else icon.className = "fas fa-play"; 
+                    }
+                }
+            });
         };
                                             
-
         window.closeClassroom = () => {
             const overlay = document.getElementById('classroom-mode');
             if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
