@@ -534,6 +534,16 @@
         };
 
         window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
+                window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
+
+        // 🚨 PHONE BACK BUTTON FIX: Jab mobile ka back button press ho
+        window.addEventListener('popstate', (e) => {
+            const overlay = document.getElementById('classroom-mode');
+            if (overlay && overlay.classList.contains('active')) {
+                window.closeClassroom(true); 
+            }
+        });
+                                            
 
         window.switchBatch = async (batchId) => {
             document.getElementById('current-batch-name').innerText = "Loading...";
@@ -677,6 +687,14 @@
             
             const overlay = document.getElementById('classroom-mode');
             overlay.classList.add('active');
+                        const overlay = document.getElementById('classroom-mode');
+            overlay.classList.add('active');
+            
+            // 🚨 PHONE BACK BUTTON FIX: Ek dummy history record add karo
+            window.history.pushState({ videoOpen: true }, '', window.location.href);
+            
+            window.currentClassroomData = { title, pdfUrl };
+            switchClassroomTab('comments');
             
             window.currentClassroomData = { title, pdfUrl };
             switchClassroomTab('comments');
@@ -719,12 +737,17 @@
             });
         };
                                             
-        window.closeClassroom = () => {
+                window.closeClassroom = (fromPopState = false) => {
             const overlay = document.getElementById('classroom-mode');
             if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
             overlay.classList.remove('active');
+            
+            // 🚨 FIX: Agar App ke top 'Back Arrow' se close kiya hai, toh history clean karo
+            if (fromPopState !== true) {
+                window.history.back();
+            }
         };
-
+                                            
         window.switchClassroomTab = (type) => {
             const content = document.getElementById('classroom-dynamic-content');
             document.getElementById('tab-comments').classList.remove('active');
