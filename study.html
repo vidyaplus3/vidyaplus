@@ -410,43 +410,6 @@
                 </div>
                           </div>
             
-                <div class="time-display" id="time-display">0:00</div>
-                
-                <div class="progress-bar-bg" onclick="seekVideo(event)" id="progress-bg">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-
-                <button class="ctrl-btn" onclick="toggleSettings()"><i class="fas fa-cog"></i></button>
-                
-                <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-up" id="mute-icon"></i></button>
-                <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
-
-                <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
-                    <div class="settings-header">Playback Settings</div>
-                    
-                    <div class="settings-section">
-                        <div class="settings-title">Playback Speed</div>
-                        <div class="settings-options">
-                            <span class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</span>
-                            <span class="speed-opt active" id="spd-1" onclick="setSpeed(1)">1x</span>
-                            <span class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</span>
-                            <span class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</span>
-                            <span class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</span>
-                        </div>
-                    </div>
-
-                    <div class="settings-section">
-                        <div class="settings-title">Video Quality <span class="badge-na">Not Available</span></div>
-                        <div class="settings-options" style="opacity: 0.5; pointer-events: none;">
-                            <span class="quality-opt active">Auto</span>
-                            <span class="quality-opt">480p</span>
-                            <span class="quality-opt">720p</span>
-                            <span class="quality-opt">1080p</span>
-                        </div>
-                    </div>
-                </div>
-                        </div>
-            
         <div class="interaction-area">
             <div class="classroom-tabs">
                 <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
