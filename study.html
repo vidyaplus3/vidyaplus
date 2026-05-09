@@ -235,6 +235,26 @@
             .video-fixed-box { flex: 2; height: 100vh; max-height: 100vh; }
             .interaction-area { flex: 1; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }
         }
+                /* --- CUSTOM VIDEO CONTROLS --- */
+        .custom-controls {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 15px 20px; display: flex; align-items: center; gap: 15px;
+            z-index: 100;
+        }
+        .ctrl-btn {
+            background: none; border: none; color: white; font-size: 1.2rem;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+        }
+        .progress-bar-bg {
+            flex: 1; height: 6px; background: rgba(255,255,255,0.3);
+            border-radius: 5px; cursor: pointer; position: relative;
+        }
+        .progress-fill {
+            height: 100%; background: #EF4444; width: 0%; border-radius: 5px;
+            pointer-events: none;
+        }
+        
     </style>
 </head>
 <body>
@@ -364,10 +384,27 @@
     
     <div class="classroom-overlay" id="classroom-mode">
         <div class="video-fixed-box">
+                    <div class="video-fixed-box" id="video-container">
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
-            <iframe id="vp-iframe" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            
+            <div style="width: 100%; height: 100%; pointer-events: none;">
+                <div id="vp-player"></div>
+            </div>
+
+            <div class="security-shield" onclick="togglePlay()" oncontextmenu="return false;"></div>
+            
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
-        </div>
+
+            <div class="custom-controls" id="custom-controls">
+                <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-pause" id="play-icon"></i></button>
+                <div class="progress-bar-bg" onclick="seekVideo(event)" id="progress-bg">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="time-display" id="time-display" style="color:white; font-size: 0.75rem; font-weight:600;">0:00</div>
+                <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-up" id="mute-icon"></i></button>
+                <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
+            </div>
+                    </div>
 
         <div class="interaction-area">
             <div class="classroom-tabs">
@@ -380,7 +417,7 @@
         </div>
                   </div>
     
-                            <script type="module">
+                                        <script type="module">
         import { db, auth } from './firebase-init.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -391,33 +428,87 @@
         window.currentChapter = localStorage.getItem('vp_chapter') || null;
         window.materialsTree = {}; 
 
-        // 1. MODALS & DROPDOWNS
-        window.openMenu = () => {
-            document.getElementById('global-overlay').style.display = 'block';
-            document.getElementById('menu-modal').style.display = 'flex';
-        };
-        window.openNotif = () => {
-            document.getElementById('global-overlay').style.display = 'block';
-            document.getElementById('notif-modal').style.display = 'flex';
-        };
-        window.closeModals = () => {
-            document.getElementById('global-overlay').style.display = 'none';
-            document.getElementById('menu-modal').style.display = 'none';
-            document.getElementById('notif-modal').style.display = 'none';
-            document.getElementById('batch-dropdown').classList.remove('show');
-        };
-        window.toggleDropdown = (e) => {
-            e.stopPropagation();
-            document.getElementById('batch-dropdown').classList.toggle('show');
-        };
-        document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById('batch-dropdown');
-            if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.batch-selector')) {
-                dropdown.classList.remove('show');
-            }
-        });
+        // =====================================
+        // NEW: YOUTUBE API SETUP
+        // =====================================
+        const ytScript = document.createElement('script');
+        ytScript.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(ytScript);
+        window.ytPlayer = null;
+        window.ytProgressInterval = null;
 
-        // 2. NAVIGATION ENGINE
+        window.formatTime = (time) => {
+            if(isNaN(time)) return "0:00";
+            let min = Math.floor(time / 60);
+            let sec = Math.floor(time % 60);
+            return min + ":" + (sec < 10 ? "0" + sec : sec);
+        };
+
+        window.updateProgressBar = () => {
+            if(window.ytPlayer && window.ytPlayer.getCurrentTime) {
+                let current = window.ytPlayer.getCurrentTime();
+                let duration = window.ytPlayer.getDuration();
+                let percentage = (current / duration) * 100;
+                document.getElementById('progress-fill').style.width = percentage + "%";
+                document.getElementById('time-display').innerText = window.formatTime(current);
+            }
+        };
+
+        window.togglePlay = () => {
+            if(!window.ytPlayer || !window.ytPlayer.getPlayerState) return;
+            let state = window.ytPlayer.getPlayerState();
+            let icon = document.getElementById('play-icon');
+            if (state === 1) { // If Playing
+                window.ytPlayer.pauseVideo();
+                icon.className = "fas fa-play";
+            } else { // If Paused/Stopped
+                window.ytPlayer.playVideo();
+                icon.className = "fas fa-pause";
+            }
+        };
+
+        window.toggleMute = () => {
+            if(!window.ytPlayer) return;
+            let icon = document.getElementById('mute-icon');
+            if (window.ytPlayer.isMuted()) {
+                window.ytPlayer.unMute();
+                icon.className = "fas fa-volume-up";
+            } else {
+                window.ytPlayer.mute();
+                icon.className = "fas fa-volume-mute";
+            }
+        };
+
+        window.seekVideo = (e) => {
+            if(!window.ytPlayer) return;
+            let bg = document.getElementById('progress-bg');
+            let rect = bg.getBoundingClientRect();
+            let clickX = e.clientX - rect.left;
+            let percentage = clickX / rect.width;
+            let duration = window.ytPlayer.getDuration();
+            window.ytPlayer.seekTo(percentage * duration, true);
+        };
+
+        window.toggleFullScreen = () => {
+            let container = document.getElementById('video-container');
+            if (!document.fullscreenElement) {
+                if(container.requestFullscreen) { container.requestFullscreen(); }
+                else if(container.webkitRequestFullscreen) { container.webkitRequestFullscreen(); } 
+            } else {
+                if(document.exitFullscreen) { document.exitFullscreen(); }
+                else if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+            }
+        };
+
+        // =====================================
+        // NAVIGATION & FIREBASE LOGIC
+        // =====================================
+        window.openMenu = () => { document.getElementById('global-overlay').style.display = 'block'; document.getElementById('menu-modal').style.display = 'flex'; };
+        window.openNotif = () => { document.getElementById('global-overlay').style.display = 'block'; document.getElementById('notif-modal').style.display = 'flex'; };
+        window.closeModals = () => { document.getElementById('global-overlay').style.display = 'none'; document.getElementById('menu-modal').style.display = 'none'; document.getElementById('notif-modal').style.display = 'none'; document.getElementById('batch-dropdown').classList.remove('show'); };
+        window.toggleDropdown = (e) => { e.stopPropagation(); document.getElementById('batch-dropdown').classList.toggle('show'); };
+        document.addEventListener('click', (e) => { const dropdown = document.getElementById('batch-dropdown'); if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.batch-selector')) { dropdown.classList.remove('show'); } });
+
         const showScreen = (screenId) => {
             closeModals();
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -430,23 +521,13 @@
         };
 
         window.navigate = (screenId, payload = {}) => {
-            if (payload.subject) {
-                window.currentSubject = payload.subject;
-                localStorage.setItem('vp_subject', payload.subject);
-            }
-            if (payload.chapter) {
-                window.currentChapter = payload.chapter;
-                localStorage.setItem('vp_chapter', payload.chapter);
-            }
+            if (payload.subject) { window.currentSubject = payload.subject; localStorage.setItem('vp_subject', payload.subject); }
+            if (payload.chapter) { window.currentChapter = payload.chapter; localStorage.setItem('vp_chapter', payload.chapter); }
             window.location.hash = screenId;
         };
 
-        window.addEventListener('hashchange', () => {
-            const screenId = window.location.hash.replace('#', '') || 'dashboard';
-            showScreen(screenId);
-        });
+        window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
 
-        // 3. CORE FUNCTIONS
         window.switchBatch = async (batchId) => {
             document.getElementById('current-batch-name').innerText = "Loading...";
             localStorage.setItem('vp_batch', batchId);
@@ -487,17 +568,12 @@
                 const userSnap = await getDoc(doc(db, "users", uid));
                 if (userSnap.exists()) {
                     const batchIds = userSnap.data().enrolledBatches || [];
-                    if (batchIds.length === 0) {
-                        window.location.replace('explore.html');
-                        return;
-                    }
+                    if (batchIds.length === 0) { window.location.replace('explore.html'); return; }
                     const dropdown = document.getElementById('batch-dropdown');
                     dropdown.innerHTML = '';
                     for (let bId of batchIds) {
                         const bSnap = await getDoc(doc(db, "batches", bId));
-                        if (bSnap.exists()) {
-                            dropdown.innerHTML += `<div class="dropdown-item" onclick="switchBatch('${bId}')">${bSnap.data().title}</div>`;
-                        }
+                        if (bSnap.exists()) { dropdown.innerHTML += `<div class="dropdown-item" onclick="switchBatch('${bId}')">${bSnap.data().title}</div>`; }
                     }
                     let bToLoad = localStorage.getItem('vp_batch') || batchIds[batchIds.length - 1];
                     await switchBatch(bToLoad);
@@ -512,27 +588,20 @@
                     document.getElementById('userName').innerText = name;
                     document.getElementById('userIcon').innerText = name.charAt(0).toUpperCase();
                     await fetchUserBatches(user.uid);
-                } else {
-                    window.location.replace("login.html");
-                }
+                } else { window.location.replace("login.html"); }
             });
         };
-
-        // 4. UI RENDERERS
+                    // =====================================
+        // DATA RENDERING
+        // =====================================
         window.switchTab = (btnElement, listId) => {
             const tabs = btnElement.parentElement.children;
             for(let t of tabs) { t.classList.remove('active'); }
             btnElement.classList.add('active');
-
-            if (listId === 'resource-list') {
-                document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources currently available.</h4></div>`;
-            } else if (listId === 'subject-list') {
-                renderSubjects();
-            } else if (listId === 'chapter-material') {
-                document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No material found for this subject.</h4></div>`;
-            } else if (listId === 'chapter-list') {
-                renderChapters(window.currentSubject);
-            }
+            if (listId === 'resource-list') { document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources currently available.</h4></div>`; } 
+            else if (listId === 'subject-list') { renderSubjects(); } 
+            else if (listId === 'chapter-material') { document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No material found for this subject.</h4></div>`; } 
+            else if (listId === 'chapter-list') { renderChapters(window.currentSubject); }
         };
 
         const renderSubjects = () => {
@@ -540,13 +609,8 @@
             if(!container) return;
             container.innerHTML = ''; 
             const subjects = Object.keys(window.materialsTree);
-            if (subjects.length === 0) {
-                container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`;
-                return;
-            }
-            subjects.forEach(subject => {
-                container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`;
-            });
+            if (subjects.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; return; }
+            subjects.forEach(subject => { container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; });
         };
 
         const renderChapters = (subjectName) => {
@@ -555,10 +619,7 @@
             document.getElementById('dyn-subject-title').innerText = subjectName;
             container.innerHTML = '';
             const chaptersObj = window.materialsTree[subjectName];
-            if (!chaptersObj) {
-                container.innerHTML = `<div class="empty-box"><i class="fas fa-layer-group"></i><h4>No chapters structured yet.</h4></div>`;
-                return;
-            }
+            if (!chaptersObj) { container.innerHTML = `<div class="empty-box"><i class="fas fa-layer-group"></i><h4>No chapters structured yet.</h4></div>`; return; }
             let index = 1;
             for (const [chapter, materials] of Object.entries(chaptersObj)) {
                 container.innerHTML += `<div class="list-card" onclick="navigate('classroom', {chapter: '${chapter}'})"><div class="card-info"><span style="font-size:0.75rem; font-weight:800; color:var(--primary); background:#E0E7FF; padding:4px 8px; border-radius:6px;">CH-${index < 10 ? '0'+index : index}</span><div class="card-title" style="margin-top: 8px;">${chapter}</div><div class="card-sub">Lectures: ${materials.filter(m => m.videoUrl).length} • Documents: ${materials.filter(m => m.pdfUrl).length}</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`;
@@ -569,11 +630,7 @@
         window.filterClassroom = (filterType, btnElement = null) => {
             const container = document.getElementById('lecture-list');
             if(!container) return;
-            if(btnElement) {
-                const tabs = btnElement.parentElement.children;
-                for(let t of tabs) { t.classList.remove('active'); }
-                btnElement.classList.add('active');
-            }
+            if(btnElement) { const tabs = btnElement.parentElement.children; for(let t of tabs) { t.classList.remove('active'); } btnElement.classList.add('active'); }
             document.getElementById('dyn-chapter-title').innerText = window.currentChapter;
             container.innerHTML = '';
             const allMaterials = window.materialsTree[window.currentSubject]?.[window.currentChapter];
@@ -581,48 +638,66 @@
             let items = allMaterials;
             if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
             if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl);
-            if (items.length === 0) {
-                container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`;
-                return;
-            }
+            if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
+            
             items.forEach(mat => {
                 let btns = '';
                 if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) btns += `<a href="${mat.pdfUrl}" target="_blank" class="action-btn" style="text-decoration:none; color:inherit;"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</a>`;
-                
-                // WATCH BUTTON TRIGGER
                 if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
                     btns += `<button class="action-btn play" onclick="openVideo('${mat.videoUrl}', '${mat.title}', '${mat.pdfUrl || ''}')"><i class="fas fa-play"></i> Watch</button>`;
                 }
-                
                 container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
             });
         };
 
-        // 5. ADVANCED CLASSROOM MODE & ANTI-PIRACY
+        // =====================================
+        // CLASSROOM MODE & CUSTOM API PLAYER
+        // =====================================
         window.openVideo = (vidUrl, title, pdfUrl) => {
             if(!vidUrl) return alert("Playback URL is invalid.");
             
             let vidId = vidUrl.split('v=')[1] || vidUrl.split('/').pop();
-            const secureUrl = `https://www.youtube.com/embed/${vidId}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1`;
+            
+            // UI Reset
+            document.getElementById('play-icon').className = "fas fa-pause";
+            document.getElementById('progress-fill').style.width = "0%";
+            document.getElementById('time-display').innerText = "0:00";
             
             const overlay = document.getElementById('classroom-mode');
-            const iframe = document.getElementById('vp-iframe');
-            
-            iframe.src = secureUrl;
             overlay.classList.add('active');
-
+            
             window.currentClassroomData = { title, pdfUrl };
             switchClassroomTab('comments');
 
             let userEmail = auth.currentUser ? auth.currentUser.email : "Authenticated User";
-            const watermark = document.getElementById('video-watermark');
-            watermark.innerText = userEmail + " | VidyaPlus";
+            document.getElementById('video-watermark').innerText = userEmail + " | VidyaPlus";
+
+            // If player already exists, just load new video
+            if (window.ytPlayer && window.ytPlayer.loadVideoById) {
+                window.ytPlayer.loadVideoById(vidId);
+            } else {
+                // Initialize new Custom YT Player
+                window.ytPlayer = new YT.Player('vp-player', {
+                    videoId: vidId,
+                    playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0, 'disablekb': 1, 'fs': 0, 'playsinline': 1 },
+                    events: {
+                        'onReady': (event) => { 
+                            event.target.playVideo(); 
+                            window.ytProgressInterval = setInterval(window.updateProgressBar, 500);
+                        },
+                        'onStateChange': (event) => {
+                            let icon = document.getElementById('play-icon');
+                            if(event.data === 1) icon.className = "fas fa-pause"; // Playing
+                            else icon.className = "fas fa-play"; // Paused/Ended
+                        }
+                    }
+                });
+            }
         };
 
         window.closeClassroom = () => {
             const overlay = document.getElementById('classroom-mode');
-            const iframe = document.getElementById('vp-iframe');
-            iframe.src = ""; 
+            if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
             overlay.classList.remove('active');
         };
 
@@ -673,15 +748,11 @@
             }
         };
 
-        // Block Inspect Element
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                return false;
-            }
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) { e.preventDefault(); return false; }
         });
 
         initApp();
-            </script>
+    </script>
 </body>
 </html>
