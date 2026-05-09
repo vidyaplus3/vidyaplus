@@ -91,63 +91,58 @@
 
         .close-classroom { position: absolute; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
-                /* ==========================================
-           🎬 NAYE SMART VIDEO CONTROLS & SETTINGS 
-           ========================================== */
-        .custom-controls { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); 
-            padding: 15px 20px; display: flex; align-items: center; gap: 15px; 
-            z-index: 100; transition: opacity 0.3s ease; 
-        }
-        
-        .ctrl-btn { 
-            background: none; border: none; color: white; font-size: 1.1rem; 
-            cursor: pointer; display: flex; justify-content: center; align-items: center; 
-            transition: 0.2s; 
-        }
-        .ctrl-btn:hover { color: #4F46E5; transform: scale(1.1); }
-        
-        .time-display { color: white; font-size: 0.8rem; font-weight: 600; min-width: 45px; text-align: center; }
-        
-        /* Smooth Progress Bar */
-        .progress-bar-bg { 
-            flex: 1; height: 5px; background: rgba(255,255,255,0.3); 
-            border-radius: 5px; cursor: pointer; position: relative; transition: height 0.2s; 
-        }
-        .progress-bar-bg:hover { height: 8px; }
-        .progress-fill { 
-            height: 100%; background: #EF4444; width: 0%; border-radius: 5px; 
-            pointer-events: none; position: relative; 
-        }
-        .progress-fill::after { 
-            content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); 
-            width: 12px; height: 12px; background: white; border-radius: 50%; 
-            opacity: 0; transition: opacity 0.2s; box-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-        .progress-bar-bg:hover .progress-fill::after { opacity: 1; }
+                            <div class="custom-controls" id="custom-controls">
+                
+                <button class="ctrl-btn" onclick="skipVideo(-10)" style="position: relative;">
+                    <i class="fas fa-undo" style="font-size: 1.3rem;"></i>
+                    <span style="position: absolute; font-size: 0.5rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -40%);">10</span>
+                </button>
+                
+                <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
+                
+                <button class="ctrl-btn" onclick="skipVideo(10)" style="position: relative;">
+                    <i class="fas fa-redo" style="font-size: 1.3rem;"></i>
+                    <span style="position: absolute; font-size: 0.5rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -40%);">10</span>
+                </button>
+                
+                <div class="time-display" id="time-display">0:00</div>
+                
+                <div class="progress-bar-bg" id="progress-bg" 
+                     onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
+                     ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
 
-        /* ⚙️ Settings Menu UI */
-        .settings-menu { 
-            display: none; position: absolute; bottom: 65px; right: 20px; 
-            background: rgba(11, 17, 32, 0.95); backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
-            width: 260px; padding: 15px; flex-direction: column; gap: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 150; 
-        }
-        .settings-menu.show { display: flex; }
-        .settings-header { color: white; font-weight: 700; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .settings-section { display: flex; flex-direction: column; gap: 8px; }
-        .settings-title { color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; }
-        .settings-options { display: flex; flex-wrap: wrap; gap: 8px; }
-        .speed-opt, .quality-opt { 
-            color: white; font-size: 0.8rem; background: rgba(255,255,255,0.1); 
-            padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: 500;
-        }
-        .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.2); }
-        .speed-opt.active, .quality-opt.active { background: #4F46E5; font-weight: 700; }
-        
-        .badge-na { font-size: 0.55rem; background: #EF4444; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+                <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
+                
+                <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
+                <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
+
+                <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
+                    <div class="settings-header">Playback Settings</div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-title">Playback Speed</div>
+                        <div class="settings-options">
+                            <span class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</span>
+                            <span class="speed-opt active" id="spd-1" onclick="setSpeed(1)">1x</span>
+                            <span class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</span>
+                            <span class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</span>
+                            <span class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-title">Video Quality <span class="badge-na">Not Available</span></div>
+                        <div class="settings-options" style="opacity: 0.5; pointer-events: none;">
+                            <span class="quality-opt active">Auto</span>
+                            <span class="quality-opt">480p</span>
+                            <span class="quality-opt">720p</span>
+                            <span class="quality-opt">1080p</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         
                 /* ==========================================
            7. PROFESSIONAL DESKTOP WEBSITE UI
@@ -427,17 +422,7 @@
             let sec = Math.floor(time % 60);
             return min + ":" + (sec < 10 ? "0" + sec : sec);
         };
-
-        window.updateProgressBar = () => {
-            if(window.ytPlayer && window.ytPlayer.getCurrentTime) {
-                let current = window.ytPlayer.getCurrentTime();
-                let duration = window.ytPlayer.getDuration();
-                let percentage = (current / duration) * 100;
-                document.getElementById('progress-fill').style.width = percentage + "%";
-                document.getElementById('time-display').innerText = window.formatTime(current);
-            }
-        };
-
+            
         window.togglePlay = () => {
             if(!window.ytPlayer || !window.ytPlayer.getPlayerState) return;
             if(window.ytPlayer.isMuted()) {
@@ -467,15 +452,6 @@
             }
         };
 
-        window.seekVideo = (e) => {
-            if(!window.ytPlayer) return;
-            let bg = document.getElementById('progress-bg');
-            let rect = bg.getBoundingClientRect();
-            let clickX = e.clientX - rect.left;
-            let percentage = clickX / rect.width;
-            let duration = window.ytPlayer.getDuration();
-            window.ytPlayer.seekTo(percentage * duration, true);
-        };
 
         window.toggleFullScreen = () => {
             let container = document.getElementById('video-container');
@@ -748,6 +724,76 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) { e.preventDefault(); return false; }
         });
+                    // ==========================================
+        // 🚀 SMART PLAYER LOGIC: DRAG, SKIP & SPEED 
+        // ==========================================
+
+        // 1. Interval Update (Dragging ke time interference rokne ke liye)
+        window.updateProgressBar = () => {
+            if(window.ytPlayer && window.ytPlayer.getCurrentTime && !window.isDragging) {
+                let current = window.ytPlayer.getCurrentTime();
+                let duration = window.ytPlayer.getDuration();
+                let percentage = (current / duration) * 100;
+                document.getElementById('progress-fill').style.width = percentage + "%";
+                document.getElementById('time-display').innerText = window.formatTime(current);
+            }
+        };
+
+        // 2. 10 Second Skip Logic
+        window.skipVideo = (seconds) => {
+            if(!window.ytPlayer || !window.ytPlayer.getCurrentTime) return;
+            let newTime = window.ytPlayer.getCurrentTime() + seconds;
+            window.ytPlayer.seekTo(newTime, true);
+        };
+
+        // 3. Settings Menu & Playback Speed Logic
+        window.toggleSettings = (e) => { 
+            e.stopPropagation(); 
+            document.getElementById('settings-menu').classList.toggle('show'); 
+        };
+        
+        // Agar Settings Menu ke bahar click ho toh usko band kar do
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('settings-menu');
+            if (menu && menu.classList.contains('show') && !e.target.closest('.custom-controls')) {
+                menu.classList.remove('show');
+            }
+        });
+
+        window.setSpeed = (rate) => {
+            if(!window.ytPlayer || !window.ytPlayer.setPlaybackRate) return;
+            window.ytPlayer.setPlaybackRate(rate);
+            
+            // Highlight the active speed button
+            document.querySelectorAll('.speed-opt').forEach(el => el.classList.remove('active'));
+            document.getElementById('spd-' + rate).classList.add('active');
+        };
+
+        // 4. Draggable Progress Bar (Scrubbing Magic)
+        window.isDragging = false;
+        
+        window.startDrag = (e) => { window.isDragging = true; window.updateScrub(e); };
+        window.stopDrag = (e) => { if(window.isDragging) { window.updateScrub(e); window.isDragging = false; } };
+        window.doDrag = (e) => { if(window.isDragging) window.updateScrub(e); };
+
+        window.updateScrub = (e) => {
+            if(!window.ytPlayer || !window.ytPlayer.getDuration) return;
+            let bg = document.getElementById('progress-bg');
+            let rect = bg.getBoundingClientRect();
+            
+            // Support for both PC Mouse and Mobile Touch
+            let clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : (e.clientX || 0);
+            if(clientX === 0 && e.changedTouches) clientX = e.changedTouches[0].clientX; 
+            
+            let clickX = clientX - rect.left;
+            let percentage = Math.max(0, Math.min(1, clickX / rect.width));
+            let duration = window.ytPlayer.getDuration();
+            
+            window.ytPlayer.seekTo(percentage * duration, true);
+            document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
+            document.getElementById('time-display').innerText = window.formatTime(percentage * duration);
+        };
+            
 
         initApp();
     </script>
