@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VidyaPlus Study Zone</title>
     
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -26,7 +27,7 @@
 
         /* 2. MAIN APP CONTAINER */
         .app-container {
-            max-width: 100%; /* Default Mobile */
+            max-width: 100%;
             margin: 0 auto;
             background: var(--surface);
             min-height: 100vh;
@@ -91,7 +92,13 @@
         .back-btn { font-size: 1.2rem; cursor: pointer; border: none; background: transparent; color: var(--text-main); }
         .page-title { font-size: 1.1rem; font-weight: 700; }
 
-        .list-container { padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; }
+        .list-container { 
+            padding: 15px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            align-content: flex-start; /* Safety line */
+        }
         
         .list-card {
             display: flex; align-items: center; gap: 15px; padding: 15px;
@@ -132,37 +139,37 @@
            7. DESKTOP FRIENDLY MAGIC (MEDIA QUERIES)
            ========================================== */
         @media (min-width: 768px) {
-            body { padding: 20px 0; } /* Spacing from top/bottom on PC */
+            body { padding: 20px 0; } 
             
             .app-container {
-                max-width: 1200px; /* Expands to full desktop width */
+                max-width: 1200px;
                 border-radius: 16px;
-                min-height: calc(100vh - 40px); /* Adjust height for body padding */
+                min-height: calc(100vh - 40px);
                 border: 1px solid var(--border);
             }
 
             .header-dark { padding: 2rem 3rem; border-top-left-radius: 16px; border-top-right-radius: 16px; }
             .top-nav { font-size: 1.5rem; }
             
-            /* Make App Icons bigger */
             .app-grid { padding: 30px 3rem; gap: 20px; }
             .grid-icon { width: 80px; height: 80px; font-size: 2rem; }
             .grid-text { font-size: 0.9rem; }
 
-            /* Grid Layout for Lists (No more single column stretch) */
+            /* 🚨 YAHAN FIX HUA HAI: align-content: start; add kar diya 🚨 */
             .list-container {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
                 gap: 20px;
                 padding: 30px 3rem;
+                align-content: start; /* Ye cards ko lamba hone se rokega */
             }
-            .lecture-card { margin-bottom: 0; } /* Grid handles the gap now */
+            .lecture-card { margin-bottom: 0; } 
 
-            /* Horizontal Scrolls become Grids on PC */
             #live-container, #announcement-container {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                 overflow-x: visible;
+                align-content: start; /* Ye inko lamba hone se rokega */
             }
 
             .page-header { padding: 20px 3rem; }
