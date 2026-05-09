@@ -154,11 +154,10 @@
             pointer-events: none; 
             transform: translateY(15px); /* Niche slide hoke gayab hoga */
         }
-        
-        .close-classroom { transition: opacity 0.3s ease; } /* Back button ke liye smooth transition */
-        .close-classroom.hidden { 
+                .close-classroom.hidden { 
             opacity: 0 !important; 
             pointer-events: none;
+        } /* 🚨 FIX: Ye aakhiri bracket lagana zaroori tha */
         
                 /* ==========================================
            7. PROFESSIONAL DESKTOP WEBSITE UI
@@ -243,8 +242,7 @@
 </head>
 <body>
     <div class="simple-overlay" id="global-overlay" onclick="closeModals()"></div>
-
-    <div class="simple-modal" id="menu-modal">
+        <div class="simple-modal" id="menu-modal">
         <div style="padding: 30px 20px; background: var(--navy); color: white;">
             <div style="width: 60px; height: 60px; background: white; color: var(--navy); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;" id="userIcon">U</div>
             <h3 id="userName">Student</h3>
@@ -255,8 +253,8 @@
             <div style="font-weight: 600; cursor: pointer;"><i class="fas fa-cog" style="width: 25px;"></i> Settings</div>
             <div style="font-weight: 600; color: #EF4444; cursor: pointer; margin-top: 20px;"><i class="fas fa-sign-out-alt" style="width: 25px;"></i> Logout</div>
         </div>
-    </div>
-
+        </div>
+    
     <div class="simple-modal" id="notif-modal">
         <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <h3 style="color: var(--navy);">Notifications</h3>
@@ -672,8 +670,7 @@
                 window.ytPlayer.destroy();
                 window.ytPlayer = null;
             }
-
-            window.ytPlayer = new YT.Player('vp-player', {
+                        window.ytPlayer = new YT.Player('vp-player', {
                 videoId: vidId,
                 playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'fs': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0, 'playsinline': 1, 'origin': window.location.origin, 'mute': 1 },
                 events: {
@@ -682,20 +679,18 @@
                         if(window.ytProgressInterval) clearInterval(window.ytProgressInterval);
                         window.ytProgressInterval = setInterval(window.updateProgressBar, 500);
                     },
-                    
                     'onStateChange': (event) => {
                         let icon = document.getElementById('play-icon');
                         if(event.data === 1) { 
                             icon.className = "fas fa-pause"; 
-                            if(typeof window.showUI === 'function') window.showUI(); // Play hone par timer properly start hoga
+                            if(typeof window.showUI === 'function') window.showUI(); 
                         } else { 
                             icon.className = "fas fa-play"; 
-                            if(typeof window.showUI === 'function') window.showUI(); // Pause/Stop hone par controls properly display rahenge
+                            if(typeof window.showUI === 'function') window.showUI(); 
                         }
                     }
-                
+                } // 🚨 FIX: Ye bracket miss ho gaya tha pehle!
             });
-        };
 
         window.closeClassroom = (fromPopState = false) => {
             const overlay = document.getElementById('classroom-mode');
