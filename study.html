@@ -216,11 +216,6 @@
 
     <div class="app-container">
         
-        <div id="boot-screen" style="position: absolute; inset: 0; background: var(--surface); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <i class="fas fa-bolt fa-4x" style="color: var(--primary); margin-bottom: 20px;"></i>
-            <h2 style="color: var(--navy);">VidyaPlus</h2>
-        </div>
-
         <div class="screen active" id="dashboard">
             <div class="header-dark">
                 <div class="top-nav">
@@ -448,14 +443,53 @@
             }
         };
 
-        window.switchBatch = async (batchId) => {
+        
+        // ==========================================
+        // 4. DATA RENDERERS
+        // ==========================================
+        window.switchTab = (btnElement, listId) => {
+            const tabs = btnElement.parentElement.children;
+            for(let t of tabs) { t.classList.remove('active'); }
+            btnElement.classList.add('active');
+
+            if (listId === 'resource-list') {
+                document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources yet</h4></div>`;
+            } else if (listId === 'subject-list') {
+                renderSubjects();
+            } 
+            else if (listId === 'chapter-material') {
+                document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No subject material yet</h4></div>`;
+            } else if (listId === 'chapter-list') {
+               window.switchBatch = async (batchId) => {
             document.getElementById('current-batch-name').innerText = "Loading...";
             
-            // 🚨 THE FIX IS HERE 🚨 Save selected batch to memory
             localStorage.setItem('vp_batch', batchId);
             window.currentBatchId = batchId;
             
+            // 1. Kaha jana hai?
+            const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
+            
+            // 2. Chup-chaap us page ko dikhao (Skeletons ke sath)
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(initialScreen);
+            if (target) target.classList.add('active');
+
+            // 3. Shimmer (Skeleton) UI lagao jab tak data aa raha hai
+            const skeletonHTML = `
+                <div class="list-card" style="border:none; box-shadow:none; padding:15px 0;">
+                    <div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div>
+                        <div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div>
+                    </div>
+                </div>`.repeat(5); // 5 fake cards dikhayega
+
+            if(initialScreen === 'subjects') document.getElementById('subject-list').innerHTML = skeletonHTML;
+            if(initialScreen === 'chapters') document.getElementById('chapter-list').innerHTML = skeletonHTML;
+            if(initialScreen === 'classroom') document.getElementById('lecture-list').innerHTML = skeletonHTML;
+
             try {
+                // 4. Firebase se asli data mango
                 const batchSnap = await getDoc(doc(db, "batches", batchId));
                 if (batchSnap.exists()) {
                     document.getElementById('current-batch-name').innerText = batchSnap.data().title;
@@ -475,35 +509,13 @@
                     window.materialsTree[subject][chapter].push(data);
                 });
 
-                const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
+                // 5. Asli data aate hi skeleton hata ke real data dikha do
                 showScreen(initialScreen);
 
-                const boot = document.getElementById('boot-screen');
-                if (boot) {
-                    boot.style.opacity = '0';
-                    setTimeout(() => boot.style.display = 'none', 300);
-                }
             } catch (error) {
                 alert("Error loading batch!");
             }
         };
-
-        // ==========================================
-        // 4. DATA RENDERERS
-        // ==========================================
-        window.switchTab = (btnElement, listId) => {
-            const tabs = btnElement.parentElement.children;
-            for(let t of tabs) { t.classList.remove('active'); }
-            btnElement.classList.add('active');
-
-            if (listId === 'resource-list') {
-                document.getElementById('subject-list').innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources yet</h4></div>`;
-            } else if (listId === 'subject-list') {
-                renderSubjects();
-            } 
-            else if (listId === 'chapter-material') {
-                document.getElementById('chapter-list').innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No subject material yet</h4></div>`;
-            } else if (listId === 'chapter-list') {
                 renderChapters(window.currentSubject);
             }
         };
