@@ -26,7 +26,7 @@
 
         /* 2. MAIN APP CONTAINER */
         .app-container {
-            max-width: 800px; /* Tablet/Desktop friendly */
+            max-width: 100%; /* Default Mobile */
             margin: 0 auto;
             background: var(--surface);
             min-height: 100vh;
@@ -35,23 +35,22 @@
             display: flex; flex-direction: column;
         }
 
-        /* 3. SIMPLE SCREENS (No complex slide animations that cause bugs) */
+        /* 3. SIMPLE SCREENS */
         .screen { display: none; flex-direction: column; min-height: 100vh; }
         .screen.active { display: flex; }
 
         .screen-content { flex: 1; overflow-y: auto; padding-bottom: 30px; }
 
-        /* 4. HEADER & BATCH DROPDOWN (Z-Index Fixed) */
+        /* 4. HEADER & BATCH DROPDOWN */
         .header-dark {
             background: var(--navy); color: white;
             padding: 1.5rem; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-            position: relative; z-index: 100; /* Highest priority */
+            position: relative; z-index: 100;
         }
         
         .top-nav { display: flex; justify-content: space-between; font-size: 1.3rem; margin-bottom: 20px; }
         .top-nav i { cursor: pointer; }
 
-        /* Dropdown - Plain and Simple */
         .batch-selector {
             display: inline-flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700;
             cursor: pointer; position: relative; padding: 5px 0;
@@ -69,7 +68,7 @@
         }
         .dropdown-item:hover { background: var(--bg-color); color: var(--primary); }
 
-        /* 5. APP GRID (No negative margins!) */
+        /* 5. APP GRID */
         .app-grid {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
             padding: 20px; background: var(--surface);
@@ -83,7 +82,7 @@
         .grid-item:active .grid-icon { transform: scale(0.95); background: #E0E7FF; }
         .grid-text { font-size: 0.75rem; font-weight: 700; text-align: center; }
 
-        /* 6. COMMON LIST CARDS (Subjects, Chapters, Lectures) */
+        /* 6. COMMON LIST CARDS */
         .page-header {
             display: flex; align-items: center; gap: 15px; padding: 15px 20px;
             background: var(--surface); border-bottom: 1px solid var(--border);
@@ -105,11 +104,11 @@
         .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-sub { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
 
-        /* Lecture Card Specific */
-        .lecture-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px; background: var(--surface); margin-bottom: 15px;}
+        /* Lecture Card */
+        .lecture-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px; background: var(--surface); margin-bottom: 15px; display: flex; flex-direction: column;}
         .lec-top { display: flex; gap: 12px; margin-bottom: 15px; }
         .lec-thumb { width: 120px; height: 70px; border-radius: 8px; background: var(--bg-color); object-fit: cover; flex-shrink: 0; }
-        .lec-actions { display: flex; gap: 10px; }
+        .lec-actions { display: flex; gap: 10px; margin-top: auto; }
         .action-btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; border: 1px solid var(--border); background: transparent; }
         .action-btn.play { background: var(--navy); color: white; border-color: var(--navy); }
 
@@ -119,15 +118,56 @@
         .tab-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
 
         /* Empty State */
-        .empty-box { text-align: center; padding: 40px 20px; color: var(--text-light); }
+        .empty-box { text-align: center; padding: 40px 20px; color: var(--text-light); width: 100%; }
         .empty-box i { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
         .empty-box h4 { font-size: 1rem; font-weight: 600; }
 
-        /* Overlays & Modals (Simple implementation) */
+        /* Modals */
         .simple-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9000; }
         .simple-modal { display: none; position: fixed; top: 0; width: 280px; height: 100vh; background: var(--surface); z-index: 9999; flex-direction: column; }
         #menu-modal { left: 0; }
         #notif-modal { right: 0; width: 320px; }
+
+        /* ==========================================
+           7. DESKTOP FRIENDLY MAGIC (MEDIA QUERIES)
+           ========================================== */
+        @media (min-width: 768px) {
+            body { padding: 20px 0; } /* Spacing from top/bottom on PC */
+            
+            .app-container {
+                max-width: 1200px; /* Expands to full desktop width */
+                border-radius: 16px;
+                min-height: calc(100vh - 40px); /* Adjust height for body padding */
+                border: 1px solid var(--border);
+            }
+
+            .header-dark { padding: 2rem 3rem; border-top-left-radius: 16px; border-top-right-radius: 16px; }
+            .top-nav { font-size: 1.5rem; }
+            
+            /* Make App Icons bigger */
+            .app-grid { padding: 30px 3rem; gap: 20px; }
+            .grid-icon { width: 80px; height: 80px; font-size: 2rem; }
+            .grid-text { font-size: 0.9rem; }
+
+            /* Grid Layout for Lists (No more single column stretch) */
+            .list-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 20px;
+                padding: 30px 3rem;
+            }
+            .lecture-card { margin-bottom: 0; } /* Grid handles the gap now */
+
+            /* Horizontal Scrolls become Grids on PC */
+            #live-container, #announcement-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                overflow-x: visible;
+            }
+
+            .page-header { padding: 20px 3rem; }
+            .tabs { padding: 20px 3rem; }
+        }
     </style>
 </head>
 <body>
