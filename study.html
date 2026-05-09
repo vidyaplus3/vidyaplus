@@ -682,12 +682,18 @@
                         if(window.ytProgressInterval) clearInterval(window.ytProgressInterval);
                         window.ytProgressInterval = setInterval(window.updateProgressBar, 500);
                     },
+                    
                     'onStateChange': (event) => {
                         let icon = document.getElementById('play-icon');
-                        if(event.data === 1) icon.className = "fas fa-pause"; 
-                        else icon.className = "fas fa-play"; 
+                        if(event.data === 1) { 
+                            icon.className = "fas fa-pause"; 
+                            if(typeof window.showUI === 'function') window.showUI(); // Play hone par timer properly start hoga
+                        } else { 
+                            icon.className = "fas fa-play"; 
+                            if(typeof window.showUI === 'function') window.showUI(); // Pause/Stop hone par controls properly display rahenge
+                        }
                     }
-                }
+                
             });
         };
 
@@ -845,7 +851,7 @@
                     
                     if(controls) controls.classList.add('hidden');
                     if(backBtn) backBtn.classList.add('hidden');
-                }, 3000); // 3 seconds baad gayab
+                }, 5000); // 5 seconds baad gayab
             }
         };
 
