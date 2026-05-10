@@ -19,7 +19,11 @@ window.toggleFullScreen = VideoPlayer.toggleFullScreen;
 window.skipVideo = VideoPlayer.skipVideo;
 window.setSpeed = VideoPlayer.setSpeed;
 window.closeClassroom = VideoPlayer.closeVideo;
-window.openVideo = VideoPlayer.openVideo;
+window.openVideo = (vidUrl, title, pdfUrl) => {
+    VideoPlayer.openVideo(vidUrl, title, pdfUrl); // Pehle video chalayega
+    window.switchClassroomTab('comments'); // 🚨 FIX: Turant discussion tab ko load karega
+};
+
 
 window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
