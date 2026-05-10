@@ -448,6 +448,7 @@ window.openPDF = (url, title) => {
     
     const overlay = document.getElementById('pdf-mode');
     
+    // Exact Video Player Logic: History add karo agar already open nahi hai
     if (!overlay.classList.contains('active')) {
         window.history.pushState({ pdfOpen: true }, '', window.location.href);
         overlay.classList.add('active');
@@ -456,8 +457,8 @@ window.openPDF = (url, title) => {
 
 window.closePDF = () => {
     const overlay = document.getElementById('pdf-mode');
+    // Exact Video Player Logic: Sirf browser ko back bhejo, UI Popstate khud band karega
     if (overlay.classList.contains('active')) {
-        // Sirf browser ko back jane bolo, Popstate baki sambhal lega!
         window.history.back(); 
     }
 };
