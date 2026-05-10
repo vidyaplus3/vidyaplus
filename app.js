@@ -6,7 +6,6 @@ window.currentBatchId = localStorage.getItem('vp_batch') || null;
 window.currentSubject = localStorage.getItem('vp_subject') || null;
 window.currentChapter = localStorage.getItem('vp_chapter') || null;
 window.materialsTree = {}; 
-window.isProgrammaticBack = false; // 🚨 GHOST KILLER FLAG
 
 const ytScript = document.createElement('script');
 ytScript.src = "https://www.youtube.com/iframe_api";
@@ -86,19 +85,18 @@ window.navigate = (screenId, payload = {}) => {
 
 window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
 
-// 🚨 BULLETPROOF PHONE BACK BUTTON (GHOST HISTORY KILLER)
+// 🚨 THE MASTER BUG FIX: Popstate handles everything automatically!
 window.addEventListener('popstate', (e) => {
-    if (window.isProgrammaticBack) {
-        window.isProgrammaticBack = false; 
-        return; 
-    }
     const pdfOverlay = document.getElementById('pdf-mode');
     const classOverlay = document.getElementById('classroom-mode');
     
+    // Agar PDF khula hai, toh pehle sirf PDF band hoga
     if (pdfOverlay && pdfOverlay.classList.contains('active')) {
         pdfOverlay.classList.remove('active');
         document.getElementById('pdf-iframe').src = "";
-    } else if (classOverlay && classOverlay.classList.contains('active')) {
+    } 
+    // Agar PDF nahi hai aur Video khula hai, toh Video band hoga
+    else if (classOverlay && classOverlay.classList.contains('active')) {
         classOverlay.classList.remove('active');
         if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
     }
@@ -229,7 +227,7 @@ window.filterClassroom = (filterType, btnElement = null) => {
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
     });
 };
-window.openVideo = (vidUrl, title, pdfUrl) => {
+    window.openVideo = (vidUrl, title, pdfUrl) => {
     if(!vidUrl) return alert("Playback URL is invalid.");
     let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     let vidId = match ? match[1] : vidUrl;
@@ -242,7 +240,6 @@ window.openVideo = (vidUrl, title, pdfUrl) => {
     
     const overlay = document.getElementById('classroom-mode');
     
-    // 🚨 GHOST KILLER: Prevent spam clicks from breaking history
     if (!overlay.classList.contains('active')) {
         window.history.pushState({ videoOpen: true }, '', window.location.href);
         overlay.classList.add('active');
@@ -285,11 +282,8 @@ window.openVideo = (vidUrl, title, pdfUrl) => {
 window.closeClassroom = () => {
     const overlay = document.getElementById('classroom-mode');
     if (overlay.classList.contains('active')) {
-        overlay.classList.remove('active');
-        if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
-        
-        window.isProgrammaticBack = true; // 🚨 GHOST KILLER
-        window.history.back(); // Clear the history cleanly
+        // Sirf browser ko back jane bolo, Popstate baki sambhal lega!
+        window.history.back(); 
     }
 };
 
@@ -454,7 +448,6 @@ window.openPDF = (url, title) => {
     
     const overlay = document.getElementById('pdf-mode');
     
-    // 🚨 GHOST KILLER: Prevent spam clicks from breaking history
     if (!overlay.classList.contains('active')) {
         window.history.pushState({ pdfOpen: true }, '', window.location.href);
         overlay.classList.add('active');
@@ -464,11 +457,8 @@ window.openPDF = (url, title) => {
 window.closePDF = () => {
     const overlay = document.getElementById('pdf-mode');
     if (overlay.classList.contains('active')) {
-        overlay.classList.remove('active');
-        document.getElementById('pdf-iframe').src = "";
-        
-        window.isProgrammaticBack = true; // 🚨 GHOST KILLER
-        window.history.back(); // Clear the history cleanly
+        // Sirf browser ko back jane bolo, Popstate baki sambhal lega!
+        window.history.back(); 
     }
 };
 
@@ -479,3 +469,4 @@ window.togglePDFFull = () => {
 };
 
 initApp();
+                                                 
