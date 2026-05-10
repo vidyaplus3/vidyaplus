@@ -188,6 +188,24 @@
                     </div>
                 </div>
                           </div>
+            <div class="pdf-overlay" id="pdf-mode">
+    <div class="pdf-header">
+        <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
+        <div class="pdf-title-box">
+            <h3 id="pdf-dyn-title">Study Notes</h3>
+            <span class="pdf-badge">SECURE READER</span>
+        </div>
+        <div class="pdf-actions">
+            <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
+        </div>
+    </div>
+    
+    <div class="pdf-container" id="pdf-viewer-container">
+        <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
+        <div class="pdf-shield" oncontextmenu="return false;"></div>
+        <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
+    </div>
+            </div>
             
         <div class="interaction-area">
             <div class="classroom-tabs">
