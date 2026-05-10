@@ -51,6 +51,14 @@ export const VideoPlayer = {
         document.getElementById('play-icon').className = "fas fa-pause";
         document.getElementById('progress-fill').style.width = "0%";
         document.getElementById('time-display').innerText = "0:00";
+                document.getElementById('play-icon').className = "fas fa-pause";
+        document.getElementById('progress-fill').style.width = "0%";
+        document.getElementById('time-display').innerText = "0:00";
+        
+        // 🚨 UI SYNC FIX: Jab video start ho, toh icon ko bhi permanently Mute dikhao
+        const muteIconEl = document.getElementById('mute-icon');
+        if(muteIconEl) muteIconEl.className = "fas fa-volume-mute"; 
+        
         
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
