@@ -128,15 +128,15 @@
         </div>
     </div>
     
-    <div class="classroom-overlay" id="classroom-mode">
+        <div class="classroom-overlay" id="classroom-mode">
         <div class="video-fixed-box" id="video-container">
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
             <div style="width: 100%; height: 100%; pointer-events: none;"><div id="vp-player"></div></div>
             
-                        <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
+            <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
 
-                          <div class="custom-controls" id="custom-controls">
+            <div class="custom-controls" id="custom-controls">
                 
                 <button class="ctrl-btn" onclick="skipVideo(-10)" style="position: relative;">
                     <i class="fas fa-undo" style="font-size: 1.3rem;"></i>
@@ -187,37 +187,33 @@
                         </div>
                     </div>
                 </div>
-                          </div>
-            
-        <div class="interaction-area">
+            </div>
+        </div> <div class="interaction-area">
             <div class="classroom-tabs">
                 <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
                 <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
             </div>
             <div class="tab-content-area" id="classroom-dynamic-content"></div>
         </div>
+    </div> <div class="pdf-overlay" id="pdf-mode">
+        <div class="pdf-header">
+            <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
+            <div class="pdf-title-box">
+                <h3 id="pdf-dyn-title">Study Notes</h3>
+                <span class="pdf-badge">SECURE READER</span>
+            </div>
+            <div class="pdf-actions">
+                <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
+            </div>
         </div>
         
-        <script type="module" src="app.js?v=final_fix_2"></script>
-        
-        <div class="pdf-overlay" id="pdf-mode">
-    <div class="pdf-header">
-        <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
-        <div class="pdf-title-box">
-            <h3 id="pdf-dyn-title">Study Notes</h3>
-            <span class="pdf-badge">SECURE READER</span>
-        </div>
-        <div class="pdf-actions">
-            <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
+        <div class="pdf-container" id="pdf-viewer-container">
+            <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
+            <div class="pdf-shield" oncontextmenu="return false;"></div>
+            <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
         </div>
     </div>
     
-    <div class="pdf-container" id="pdf-viewer-container">
-        <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
-        <div class="pdf-shield" oncontextmenu="return false;"></div>
-        <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
-    </div>
-        </div>
-        
+    <script type="module" src="app.js?v=god_mode"></script>
 </body>
 </html>
