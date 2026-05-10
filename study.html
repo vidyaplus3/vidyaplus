@@ -188,7 +188,16 @@
                     </div>
                 </div>
                           </div>
-            <div class="pdf-overlay" id="pdf-mode">
+            
+        <div class="interaction-area">
+            <div class="classroom-tabs">
+                <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
+                <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
+            </div>
+            <div class="tab-content-area" id="classroom-dynamic-content"></div>
+        </div>
+        </div>
+        <div class="pdf-overlay" id="pdf-mode">
     <div class="pdf-header">
         <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
         <div class="pdf-title-box">
@@ -205,16 +214,8 @@
         <div class="pdf-shield" oncontextmenu="return false;"></div>
         <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
     </div>
-            </div>
-            
-        <div class="interaction-area">
-            <div class="classroom-tabs">
-                <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
-                <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
-            </div>
-            <div class="tab-content-area" id="classroom-dynamic-content"></div>
         </div>
-        </div>        
+        
         <script type="module" src="app.js"></script>
 </body>
 </html>
