@@ -208,22 +208,22 @@ window.filterClassroom = (filterType, btnElement = null) => {
     if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
     
     items.forEach(mat => {
-        // 🚨 BULLETPROOF ENCODING: Ensures no hidden characters break the button HTML
-        let encTitle = encodeURIComponent(mat.title || 'Study Material');
-        let encPdf = encodeURIComponent(mat.pdfUrl || '');
-        let encVid = encodeURIComponent(mat.videoUrl || '');
+        // 🚨 CRASH FIX: URL aur Title me se saare single/double quotes hataye
+        let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Study Material";
+        let safePdf = mat.pdfUrl ? mat.pdfUrl.replace(/['"\\]/g, "") : "";
+        let safeVid = mat.videoUrl ? mat.videoUrl.replace(/['"\\]/g, "") : "";
         
         let btns = '';
         if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
-            btns += `<button class="action-btn" onclick="openPDF(decodeURIComponent('${encPdf}'), decodeURIComponent('${encTitle}'))" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
+            btns += `<button class="action-btn" onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
         }
         if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-            btns += `<button class="action-btn play" onclick="openVideo(decodeURIComponent('${encVid}'), decodeURIComponent('${encTitle}'), decodeURIComponent('${encPdf}'))"><i class="fas fa-play"></i> Watch</button>`;
+            btns += `<button class="action-btn play" onclick="openVideo('${safeVid}', '${safeTitle}', '${safePdf}')"><i class="fas fa-play"></i> Watch</button>`;
         }
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
     });
 };
-window.openVideo = (vidUrl, title, pdfUrl) => {
+        window.openVideo = (vidUrl, title, pdfUrl) => {
     if(!vidUrl) return alert("Playback URL is invalid.");
     let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     let vidId = match ? match[1] : vidUrl;
@@ -273,6 +273,13 @@ window.openVideo = (vidUrl, title, pdfUrl) => {
     });
 };
 
+window.closeClassroom = (fromPopState = false) => {
+    const overlay = document.getElementById('classroom-mode');
+    if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
+    overlay.classList.remove('active');
+    if (fromPopState !== true) window.history.back();
+};
+
 window.switchClassroomTab = (type) => {
     const content = document.getElementById('classroom-dynamic-content');
     document.getElementById('tab-comments').classList.remove('active');
@@ -303,9 +310,9 @@ window.switchClassroomTab = (type) => {
     } else if (type === 'notes') {
         const pdf = window.currentClassroomData.pdfUrl;
         if (pdf && pdf !== 'undefined' && pdf !== '') {
-            // 🚨 ENCODING HERE TOO
-            let encTitle = encodeURIComponent(window.currentClassroomData.title || 'Study Notes');
-            let encPdf = encodeURIComponent(pdf);
+            // 🚨 YAHAN BHI BUG FIX KIYA HAI (No Duplicate else-if)
+            let safeTitle = window.currentClassroomData.title ? window.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes";
+            let safePdf = pdf.replace(/['"\\]/g, "");
             
             content.innerHTML = `
                 <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div>
@@ -315,7 +322,7 @@ window.switchClassroomTab = (type) => {
                         <div class="card-title">Reference Material.pdf</div>
                         <div class="card-sub">Select to view</div>
                     </div>
-                    <button onclick="openPDF(decodeURIComponent('${encPdf}'), decodeURIComponent('${encTitle}'))" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
+                    <button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
                 </div>
             `;
         } else {
@@ -456,4 +463,3 @@ window.togglePDFFull = () => {
 };
 
 initApp();
-        
