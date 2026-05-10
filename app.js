@@ -313,10 +313,19 @@ import { db, auth } from './firebase-init.js';
                                 <div class="card-title">Reference Material.pdf</div>
                                 <div class="card-sub">Select to view</div>
                             </div>
-                            <a href="${pdf}" target="_blank" class="btn-action btn-solid" style="background: #ef4444; border:none; text-decoration:none; padding: 8px 15px; color:white; border-radius:8px;">Access</a>
-                        </div>
-                    `;
-                } else {
+                            content.innerHTML = `
+    <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div>
+    <div class="list-card" style="background: #fdf2f2; border-color: #fecaca;">
+        <div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div>
+        <div class="card-info">
+            <div class="card-title">Reference Material.pdf</div>
+            <div class="card-sub">Select to view</div>
+        </div>
+        <button onclick="openPDF('${pdf}', 'Study Notes')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
+    </div>
+`;
+                
+                 } else {
                     content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`;
                 }
             }
