@@ -445,6 +445,35 @@ import { db, auth } from './firebase-init.js';
             vContainer.addEventListener('touchstart', window.showUI);
             vContainer.addEventListener('click', window.showUI);
         }
+window.openPDF = (url, title) => {
+    if(!url) return alert("PDF link is missing!");
+    let finalUrl = url;
+    if(url.includes('drive.google.com')) {
+        if(url.includes('/view')) finalUrl = url.replace('/view', '/preview');
+        else if(url.includes('?id=')) {
+            let id = url.split('id=')[1].split('&')[0];
+            finalUrl = `https://drive.google.com/file/d/${id}/preview`;
+        }
+    }
+    document.getElementById('pdf-dyn-title').innerText = title;
+    document.getElementById('pdf-iframe').src = finalUrl;
+    let userEmail = auth.currentUser ? auth.currentUser.email : "Vidyaplus User";
+    document.getElementById('pdf-watermark-text').innerText = userEmail;
+    document.getElementById('pdf-mode').classList.add('active');
+    window.history.pushState({ pdfOpen: true }, '', window.location.href);
+};
+
+window.closePDF = (fromPopState = false) => {
+    document.getElementById('pdf-mode').classList.remove('active');
+    document.getElementById('pdf-iframe').src = "";
+    if(!fromPopState) window.history.back();
+};
+
+window.togglePDFFull = () => {
+    let elem = document.getElementById('pdf-viewer-container');
+    if (!document.fullscreenElement) elem.requestFullscreen();
+    else document.exitFullscreen();
+};
             
 
         initApp();
