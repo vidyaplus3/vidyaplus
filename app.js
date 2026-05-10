@@ -85,20 +85,29 @@ window.navigate = (screenId, payload = {}) => {
 
 window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
 
-// 🚨 THE MASTER BUG FIX: Popstate handles everything automatically!
+// 🚨 SMART POPSTATE (Video aur PDF dono ko safely handle karega)
 window.addEventListener('popstate', (e) => {
     const pdfOverlay = document.getElementById('pdf-mode');
     const classOverlay = document.getElementById('classroom-mode');
     
-    // Agar PDF khula hai, toh pehle sirf PDF band hoga
+    // 1. Agar PDF khula hai
     if (pdfOverlay && pdfOverlay.classList.contains('active')) {
         pdfOverlay.classList.remove('active');
-        document.getElementById('pdf-iframe').src = "";
+        let iframe = document.getElementById('pdf-iframe');
+        if (iframe) iframe.remove(); // 🚨 DESTROY IFRAME: Video player ki tarah PDF ko jadd se khatam karo
+        
+        // Ghost history ko automatically bypass karne ka logic
+        if (e.state && e.state.pdfOpen) {
+            window.history.back();
+        }
     } 
-    // Agar PDF nahi hai aur Video khula hai, toh Video band hoga
+    // 2. Agar Video khula hai
     else if (classOverlay && classOverlay.classList.contains('active')) {
-        classOverlay.classList.remove('active');
-        if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
+        // Video tabhi close hoga jab actual back ho
+        if (!e.state || !e.state.videoOpen) {
+            classOverlay.classList.remove('active');
+            if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
+        }
     }
 });
 
@@ -430,7 +439,7 @@ if(vContainer) {
     vContainer.addEventListener('click', window.showUI);
 }
 
-// 📄 PREMIUM PDF VIEWER LOGIC
+// 📄 PREMIUM PDF VIEWER LOGIC (Video Player Mechanism Applied)
 window.openPDF = (url, title) => {
     if(!url || url === 'undefined') return alert("PDF link is missing or empty!");
     let finalUrl = url;
@@ -442,13 +451,27 @@ window.openPDF = (url, title) => {
         }
     }
     document.getElementById('pdf-dyn-title').innerText = title;
-    document.getElementById('pdf-iframe').src = finalUrl;
+    
+    // 🚨 DYNAMIC IFRAME: Purana kachra hatao aur fresh banao
+    const container = document.getElementById('pdf-viewer-container');
+    let oldIframe = document.getElementById('pdf-iframe');
+    if (oldIframe) oldIframe.remove();
+    
+    let newIframe = document.createElement('iframe');
+    newIframe.id = 'pdf-iframe';
+    newIframe.allow = "autoplay";
+    newIframe.style.width = "100%";
+    newIframe.style.height = "100%";
+    newIframe.style.border = "none";
+    newIframe.style.background = "white";
+    newIframe.src = finalUrl;
+    
+    container.insertBefore(newIframe, container.firstChild);
+    
     let userEmail = auth.currentUser ? auth.currentUser.email : "Vidyaplus User";
     document.getElementById('pdf-watermark-text').innerText = userEmail;
     
     const overlay = document.getElementById('pdf-mode');
-    
-    // Exact Video Player Logic: History add karo agar already open nahi hai
     if (!overlay.classList.contains('active')) {
         window.history.pushState({ pdfOpen: true }, '', window.location.href);
         overlay.classList.add('active');
@@ -457,8 +480,10 @@ window.openPDF = (url, title) => {
 
 window.closePDF = () => {
     const overlay = document.getElementById('pdf-mode');
-    // Exact Video Player Logic: Sirf browser ko back bhejo, UI Popstate khud band karega
     if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        let iframe = document.getElementById('pdf-iframe');
+        if (iframe) iframe.remove(); // 🚨 DESTROY IFRAME
         window.history.back(); 
     }
 };
