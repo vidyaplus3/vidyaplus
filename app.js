@@ -273,13 +273,6 @@ window.openVideo = (vidUrl, title, pdfUrl) => {
     });
 };
 
-window.closeClassroom = (fromPopState = false) => {
-    const overlay = document.getElementById('classroom-mode');
-    if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
-    overlay.classList.remove('active');
-    if (fromPopState !== true) window.history.back();
-};
-
 window.switchClassroomTab = (type) => {
     const content = document.getElementById('classroom-dynamic-content');
     document.getElementById('tab-comments').classList.remove('active');
@@ -294,6 +287,13 @@ window.switchClassroomTab = (type) => {
                 <div class="comment-body">
                     <div class="comment-user">Student <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div>
                     <div class="comment-text">The conceptual breakdown in this lecture was highly effective.</div>
+                </div>
+            </div>
+            <div class="comment-card">
+                <div class="user-avatar" style="background: #10B981;">VP</div>
+                <div class="comment-body">
+                    <div class="comment-user">Instructor <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div>
+                    <div class="comment-text">Please ensure you review the attached documentation in the Notes tab for comprehensive understanding.</div>
                 </div>
             </div>
             <div style="position: sticky; bottom: 0; background: white; padding-top: 10px;">
@@ -316,25 +316,6 @@ window.switchClassroomTab = (type) => {
                         <div class="card-sub">Select to view</div>
                     </div>
                     <button onclick="openPDF(decodeURIComponent('${encPdf}'), decodeURIComponent('${encTitle}'))" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
-                </div>
-            `;
-        } else {
-            content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`;
-        }
-    }
-};
-else if (type === 'notes') {
-        const pdf = window.currentClassroomData.pdfUrl;
-        if (pdf && pdf !== 'undefined') {
-            content.innerHTML = `
-                <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div>
-                <div class="list-card" style="background: #fdf2f2; border-color: #fecaca;">
-                    <div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div>
-                    <div class="card-info">
-                        <div class="card-title">Reference Material.pdf</div>
-                        <div class="card-sub">Select to view</div>
-                    </div>
-                    <button onclick="openPDF('${pdf}', 'Study Notes')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
                 </div>
             `;
         } else {
