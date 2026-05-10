@@ -205,7 +205,9 @@ import { db, auth } from './firebase-init.js';
             
             items.forEach(mat => {
                 let btns = '';
-                if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) btns += `<a href="${mat.pdfUrl}" target="_blank" class="action-btn" style="text-decoration:none; color:inherit;"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</a>`;
+                if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
+    btns += `<button class="action-btn" onclick="openPDF('${mat.pdfUrl}', '${mat.title}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
+                }
                 if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
                     btns += `<button class="action-btn play" onclick="openVideo('${mat.videoUrl}', '${mat.title}', '${mat.pdfUrl || ''}')"><i class="fas fa-play"></i> Watch</button>`;
                 }
