@@ -86,10 +86,15 @@ import { db, auth } from './firebase-init.js';
         window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
 
                     // 🚨 PHONE BACK BUTTON FIX
+                // 🚨 PHONE BACK BUTTON FIX (UPDATED FOR BOTH VIDEO & PDF)
         window.addEventListener('popstate', (e) => {
-            const overlay = document.getElementById('classroom-mode');
-            if (overlay && overlay.classList.contains('active')) {
-                window.closeClassroom(true); 
+            const pdfOverlay = document.getElementById('pdf-mode');
+            const classOverlay = document.getElementById('classroom-mode');
+            
+            if (pdfOverlay && pdfOverlay.classList.contains('active')) {
+                window.closePDF(true); // Agar PDF khula hai toh usko smoothly band karo
+            } else if (classOverlay && classOverlay.classList.contains('active')) {
+                window.closeClassroom(true); // Agar Video khula hai toh usko smoothly band karo
             }
         });
 
@@ -203,17 +208,20 @@ import { db, auth } from './firebase-init.js';
             if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl);
             if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
             
-            items.forEach(mat => {
+                        items.forEach(mat => {
                 let btns = '';
+                // 🚨 FIX 1: Title se quotes hataye taaki button ka HTML na toote
+                let safeTitle = mat.title ? mat.title.replace(/['"]/g, "") : "Study Material";
+                
                 if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
-    btns += `<button class="action-btn" onclick="openPDF('${mat.pdfUrl}', '${mat.title}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
+                    btns += `<button class="action-btn" onclick="openPDF('${mat.pdfUrl}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
                 }
                 if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-                    btns += `<button class="action-btn play" onclick="openVideo('${mat.videoUrl}', '${mat.title}', '${mat.pdfUrl || ''}')"><i class="fas fa-play"></i> Watch</button>`;
+                    btns += `<button class="action-btn play" onclick="openVideo('${mat.videoUrl}', '${safeTitle}', '${mat.pdfUrl || ''}')"><i class="fas fa-play"></i> Watch</button>`;
                 }
                 container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
             });
-        };
+                                                                                                                      
 
         window.openVideo = (vidUrl, title, pdfUrl) => {
             if(!vidUrl) return alert("Playback URL is invalid.");
