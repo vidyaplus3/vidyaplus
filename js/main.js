@@ -25,9 +25,18 @@ window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
 window.togglePDFFull = PDFViewer.togglePDFFull;
 
-// 🚦 ROUTING & POPSTATE
+// 🚦 🚨 NAYA ROUTING ENGINE: Screen Dikhayega + Data Render Karega
+window.handleScreenRender = (screenId) => {
+    UI.showScreen(screenId); // CSS classes change karega
+    
+    // Automatically related data ko load karega!
+    if (screenId === 'subjects') window.renderSubjects();
+    if (screenId === 'chapters' && AppState.currentSubject) window.renderChapters(AppState.currentSubject);
+    if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
+};
+
 window.addEventListener('hashchange', () => { 
-    UI.showScreen(window.location.hash.replace('#', '') || 'dashboard'); 
+    window.handleScreenRender(window.location.hash.replace('#', '') || 'dashboard'); 
 });
 
 window.addEventListener('popstate', (e) => {
@@ -54,9 +63,8 @@ window.navigate = (screenId, payload = {}) => {
     window.location.hash = screenId;
 };
 
-// 🧠 BUSINESS LOGIC (With Bulletproof Null Checks)
+// 🧠 BUSINESS LOGIC
 window.switchBatch = async (batchId) => {
-    // BUG FIX 2: Agar Element screen par nahi hai, toh crash hone se bachao
     const batchNameEl = document.getElementById('current-batch-name');
     if (batchNameEl) batchNameEl.innerText = "Loading...";
     
@@ -64,7 +72,7 @@ window.switchBatch = async (batchId) => {
     AppState.currentBatchId = batchId;
     
     const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
-    UI.showScreen(initialScreen);
+    window.handleScreenRender(initialScreen); // 🚨 FIX: Automatically render initially
 
     const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
     
@@ -92,7 +100,7 @@ window.switchBatch = async (batchId) => {
             if (!AppState.materialsTree[subject][chapter]) AppState.materialsTree[subject][chapter] = [];
             AppState.materialsTree[subject][chapter].push(data);
         });
-        UI.showScreen(initialScreen);
+        window.handleScreenRender(initialScreen); // 🚨 FIX: Data aane ke baad bhi wapas render karo
     } catch (error) { console.error("Batch Load Error:", error); }
 };
 
@@ -233,7 +241,6 @@ VideoPlayer.initAPI();
 initAuth((batches) => {
     setupDropdown(batches);
     let bToLoad = AppState.currentBatchId || batches[batches.length - 1];
-    
-    // BUG FIX 1: window object ka strict reference 
     window.switchBatch(bToLoad); 
 });
+        
