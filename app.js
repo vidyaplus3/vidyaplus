@@ -6,6 +6,7 @@ window.currentBatchId = localStorage.getItem('vp_batch') || null;
 window.currentSubject = localStorage.getItem('vp_subject') || null;
 window.currentChapter = localStorage.getItem('vp_chapter') || null;
 window.materialsTree = {}; 
+window.isProgrammaticBack = false; // 🚨 GHOST KILLER FLAG
 
 const ytScript = document.createElement('script');
 ytScript.src = "https://www.youtube.com/iframe_api";
@@ -85,15 +86,21 @@ window.navigate = (screenId, payload = {}) => {
 
 window.addEventListener('hashchange', () => { showScreen(window.location.hash.replace('#', '') || 'dashboard'); });
 
-// 🚨 SMART PHONE BACK BUTTON (PDF & VIDEO DONO KE LIYE)
+// 🚨 BULLETPROOF PHONE BACK BUTTON (GHOST HISTORY KILLER)
 window.addEventListener('popstate', (e) => {
+    if (window.isProgrammaticBack) {
+        window.isProgrammaticBack = false; 
+        return; 
+    }
     const pdfOverlay = document.getElementById('pdf-mode');
     const classOverlay = document.getElementById('classroom-mode');
     
     if (pdfOverlay && pdfOverlay.classList.contains('active')) {
-        window.closePDF(true); 
+        pdfOverlay.classList.remove('active');
+        document.getElementById('pdf-iframe').src = "";
     } else if (classOverlay && classOverlay.classList.contains('active')) {
-        window.closeClassroom(true); 
+        classOverlay.classList.remove('active');
+        if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
     }
 });
 
@@ -208,7 +215,6 @@ window.filterClassroom = (filterType, btnElement = null) => {
     if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
     
     items.forEach(mat => {
-        // 🚨 CRASH FIX: URL aur Title me se saare single/double quotes hataye
         let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Study Material";
         let safePdf = mat.pdfUrl ? mat.pdfUrl.replace(/['"\\]/g, "") : "";
         let safeVid = mat.videoUrl ? mat.videoUrl.replace(/['"\\]/g, "") : "";
@@ -223,7 +229,7 @@ window.filterClassroom = (filterType, btnElement = null) => {
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
     });
 };
-    window.openVideo = (vidUrl, title, pdfUrl) => {
+window.openVideo = (vidUrl, title, pdfUrl) => {
     if(!vidUrl) return alert("Playback URL is invalid.");
     let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     let vidId = match ? match[1] : vidUrl;
@@ -235,9 +241,12 @@ window.filterClassroom = (filterType, btnElement = null) => {
     document.getElementById('time-display').innerText = "0:00";
     
     const overlay = document.getElementById('classroom-mode');
-    overlay.classList.add('active');
     
-    window.history.pushState({ videoOpen: true }, '', window.location.href);
+    // 🚨 GHOST KILLER: Prevent spam clicks from breaking history
+    if (!overlay.classList.contains('active')) {
+        window.history.pushState({ videoOpen: true }, '', window.location.href);
+        overlay.classList.add('active');
+    }
 
     window.currentClassroomData = { title, pdfUrl };
     switchClassroomTab('comments');
@@ -273,11 +282,15 @@ window.filterClassroom = (filterType, btnElement = null) => {
     });
 };
 
-window.closeClassroom = (fromPopState = false) => {
+window.closeClassroom = () => {
     const overlay = document.getElementById('classroom-mode');
-    if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
-    overlay.classList.remove('active');
-    if (fromPopState !== true) window.history.back();
+    if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        if(window.ytPlayer && window.ytPlayer.pauseVideo) window.ytPlayer.pauseVideo();
+        
+        window.isProgrammaticBack = true; // 🚨 GHOST KILLER
+        window.history.back(); // Clear the history cleanly
+    }
 };
 
 window.switchClassroomTab = (type) => {
@@ -296,13 +309,6 @@ window.switchClassroomTab = (type) => {
                     <div class="comment-text">The conceptual breakdown in this lecture was highly effective.</div>
                 </div>
             </div>
-            <div class="comment-card">
-                <div class="user-avatar" style="background: #10B981;">VP</div>
-                <div class="comment-body">
-                    <div class="comment-user">Instructor <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div>
-                    <div class="comment-text">Please ensure you review the attached documentation in the Notes tab for comprehensive understanding.</div>
-                </div>
-            </div>
             <div style="position: sticky; bottom: 0; background: white; padding-top: 10px;">
                 <input type="text" placeholder="Post a query..." style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid var(--border); outline: none;">
             </div>
@@ -310,7 +316,6 @@ window.switchClassroomTab = (type) => {
     } else if (type === 'notes') {
         const pdf = window.currentClassroomData.pdfUrl;
         if (pdf && pdf !== 'undefined' && pdf !== '') {
-            // 🚨 YAHAN BHI BUG FIX KIYA HAI (No Duplicate else-if)
             let safeTitle = window.currentClassroomData.title ? window.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes";
             let safePdf = pdf.replace(/['"\\]/g, "");
             
@@ -446,14 +451,25 @@ window.openPDF = (url, title) => {
     document.getElementById('pdf-iframe').src = finalUrl;
     let userEmail = auth.currentUser ? auth.currentUser.email : "Vidyaplus User";
     document.getElementById('pdf-watermark-text').innerText = userEmail;
-    document.getElementById('pdf-mode').classList.add('active');
-    window.history.pushState({ pdfOpen: true }, '', window.location.href);
+    
+    const overlay = document.getElementById('pdf-mode');
+    
+    // 🚨 GHOST KILLER: Prevent spam clicks from breaking history
+    if (!overlay.classList.contains('active')) {
+        window.history.pushState({ pdfOpen: true }, '', window.location.href);
+        overlay.classList.add('active');
+    }
 };
 
-window.closePDF = (fromPopState = false) => {
-    document.getElementById('pdf-mode').classList.remove('active');
-    document.getElementById('pdf-iframe').src = "";
-    if(!fromPopState) window.history.back();
+window.closePDF = () => {
+    const overlay = document.getElementById('pdf-mode');
+    if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        document.getElementById('pdf-iframe').src = "";
+        
+        window.isProgrammaticBack = true; // 🚨 GHOST KILLER
+        window.history.back(); // Clear the history cleanly
+    }
 };
 
 window.togglePDFFull = () => {
