@@ -24,6 +24,11 @@ window.openVideo = (vidUrl, title, pdfUrl) => {
     window.switchClassroomTab('comments'); // 🚨 FIX: Turant discussion tab ko load karega
 };
 window.showUI = VideoPlayer.showUI;
+window.handleShieldClick = VideoPlayer.handleShieldClick;
+window.toggleSettings = VideoPlayer.toggleSettings;
+window.startDrag = VideoPlayer.startDrag;
+window.stopDrag = VideoPlayer.stopDrag;
+window.doDrag = VideoPlayer.doDrag;
 
 
 window.openPDF = PDFViewer.openPDF;
