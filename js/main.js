@@ -23,6 +23,7 @@ window.openVideo = (vidUrl, title, pdfUrl) => {
     VideoPlayer.openVideo(vidUrl, title, pdfUrl); // Pehle video chalayega
     window.switchClassroomTab('comments'); // 🚨 FIX: Turant discussion tab ko load karega
 };
+window.showUI = VideoPlayer.showUI;
 
 
 window.openPDF = PDFViewer.openPDF;
