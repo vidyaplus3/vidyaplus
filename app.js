@@ -291,7 +291,9 @@ window.filterClassroom = (filterType, btnElement = null) => {
 window.closeClassroom = () => {
     const overlay = document.getElementById('classroom-mode');
     if (overlay.classList.contains('active')) {
-        // Sirf browser ko back jane bolo, Popstate baki sambhal lega!
+        // 🚨 MEMORY LEAK FIX: Video band hone par timer roko
+        if(window.ytProgressInterval) clearInterval(window.ytProgressInterval); 
+        
         window.history.back(); 
     }
 };
