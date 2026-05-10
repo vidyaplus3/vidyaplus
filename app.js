@@ -208,19 +208,22 @@ window.filterClassroom = (filterType, btnElement = null) => {
     if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
     
     items.forEach(mat => {
-        let btns = '';
-        let safeTitle = mat.title ? mat.title.replace(/['"]/g, "") : "Study Material";
+        // 🚨 BULLETPROOF ENCODING: Ensures no hidden characters break the button HTML
+        let encTitle = encodeURIComponent(mat.title || 'Study Material');
+        let encPdf = encodeURIComponent(mat.pdfUrl || '');
+        let encVid = encodeURIComponent(mat.videoUrl || '');
         
+        let btns = '';
         if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
-            btns += `<button class="action-btn" onclick="openPDF('${mat.pdfUrl}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
+            btns += `<button class="action-btn" onclick="openPDF(decodeURIComponent('${encPdf}'), decodeURIComponent('${encTitle}'))" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
         }
         if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-            btns += `<button class="action-btn play" onclick="openVideo('${mat.videoUrl}', '${safeTitle}', '${mat.pdfUrl || ''}')"><i class="fas fa-play"></i> Watch</button>`;
+            btns += `<button class="action-btn play" onclick="openVideo(decodeURIComponent('${encVid}'), decodeURIComponent('${encTitle}'), decodeURIComponent('${encPdf}'))"><i class="fas fa-play"></i> Watch</button>`;
         }
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
     });
 };
-                    window.openVideo = (vidUrl, title, pdfUrl) => {
+window.openVideo = (vidUrl, title, pdfUrl) => {
     if(!vidUrl) return alert("Playback URL is invalid.");
     let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     let vidId = match ? match[1] : vidUrl;
@@ -293,18 +296,34 @@ window.switchClassroomTab = (type) => {
                     <div class="comment-text">The conceptual breakdown in this lecture was highly effective.</div>
                 </div>
             </div>
-            <div class="comment-card">
-                <div class="user-avatar" style="background: #10B981;">VP</div>
-                <div class="comment-body">
-                    <div class="comment-user">Instructor <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div>
-                    <div class="comment-text">Please ensure you review the attached documentation in the Notes tab for comprehensive understanding.</div>
-                </div>
-            </div>
             <div style="position: sticky; bottom: 0; background: white; padding-top: 10px;">
                 <input type="text" placeholder="Post a query..." style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid var(--border); outline: none;">
             </div>
         `;
     } else if (type === 'notes') {
+        const pdf = window.currentClassroomData.pdfUrl;
+        if (pdf && pdf !== 'undefined' && pdf !== '') {
+            // 🚨 ENCODING HERE TOO
+            let encTitle = encodeURIComponent(window.currentClassroomData.title || 'Study Notes');
+            let encPdf = encodeURIComponent(pdf);
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div>
+                <div class="list-card" style="background: #fdf2f2; border-color: #fecaca;">
+                    <div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div>
+                    <div class="card-info">
+                        <div class="card-title">Reference Material.pdf</div>
+                        <div class="card-sub">Select to view</div>
+                    </div>
+                    <button onclick="openPDF(decodeURIComponent('${encPdf}'), decodeURIComponent('${encTitle}'))" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`;
+        }
+    }
+};
+else if (type === 'notes') {
         const pdf = window.currentClassroomData.pdfUrl;
         if (pdf && pdf !== 'undefined') {
             content.innerHTML = `
