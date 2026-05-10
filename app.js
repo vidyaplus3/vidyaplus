@@ -221,6 +221,7 @@ import { db, auth } from './firebase-init.js';
                 }
                 container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
             });
+        };
                                                                                                                       
 
         window.openVideo = (vidUrl, title, pdfUrl) => {
