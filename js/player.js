@@ -37,14 +37,12 @@ export const VideoPlayer = {
         document.getElementById('time-display').innerText = "0:00";
         
         const overlay = document.getElementById('classroom-mode');
-        
         if (!overlay.classList.contains('active')) {
             window.history.pushState({ videoOpen: true }, '', window.location.href);
             overlay.classList.add('active');
         }
 
         VideoPlayer.currentClassroomData = { title, pdfUrl };
-
         let userEmail = auth.currentUser ? auth.currentUser.email : "Authenticated User";
         document.getElementById('video-watermark').innerText = userEmail + " | VidyaPlus";
 
@@ -74,36 +72,6 @@ export const VideoPlayer = {
                 }
             }
         });
-
-        // 🛡️ THE MASTER FIX: DYNAMIC CLICK SHIELD 🛡️
-        let container = document.getElementById('video-container');
-        if (container) {
-            container.style.position = 'relative'; // Make sure shield stays inside container
-            let shield = document.getElementById('yt-click-shield');
-            if (!shield) {
-                shield = document.createElement('div');
-                shield.id = 'yt-click-shield';
-                // Invisible Sheesha Design
-                shield.style.position = 'absolute';
-                shield.style.top = '0';
-                shield.style.left = '0';
-                shield.style.width = '100%';
-                shield.style.height = '100%';
-                shield.style.zIndex = '5'; // Iframe ke upar, controls ke niche
-                shield.style.cursor = 'pointer'; // Clickable feel aayegi
-                container.appendChild(shield);
-
-                // Jab mouse hile ya touch ho, toh UI ko jagao
-                shield.addEventListener('mousemove', VideoPlayer.showUI);
-                shield.addEventListener('touchstart', VideoPlayer.showUI);
-                
-                // Screen pe click karne se Play/Pause hoga! (Bonus Feature)
-                shield.addEventListener('click', (e) => {
-                    VideoPlayer.showUI(e);
-                    VideoPlayer.togglePlay(); 
-                });
-            }
-        }
     },
 
     closeVideo: () => {
@@ -197,7 +165,7 @@ export const VideoPlayer = {
                 if (menu && menu.classList.contains('show')) return; 
                 if(controls) controls.classList.add('hidden');
                 if(backBtn) backBtn.classList.add('hidden');
-            }, 4000); // 4 seconds baad hide ho jayega
+            }, 4000);
         }
     }
 };
