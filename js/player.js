@@ -16,6 +16,22 @@ export const VideoPlayer = {
             ytScript.src = "https://www.youtube.com/iframe_api";
             document.head.appendChild(ytScript);
         }
+        
+        // 🚨 MISSING FIX 1: Video Container ke asli listeners
+        const vContainer = document.getElementById('video-container');
+        if(vContainer) {
+            vContainer.addEventListener('mousemove', VideoPlayer.showUI);
+            vContainer.addEventListener('touchstart', VideoPlayer.showUI);
+            vContainer.addEventListener('click', VideoPlayer.showUI);
+        }
+
+        // Settings Menu band karne ka global click
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('settings-menu');
+            if (menu && menu.classList.contains('show') && !e.target.closest('.custom-controls')) {
+                menu.classList.remove('show');
+            }
+        });
     },
 
     formatTime: (time) => {
@@ -167,5 +183,41 @@ export const VideoPlayer = {
                 if(backBtn) backBtn.classList.add('hidden');
             }, 4000);
         }
+    },
+
+    // 🚨 RESTORED: All Missing Logical Functions
+    handleShieldClick: () => {
+        const controls = document.getElementById('custom-controls');
+        if(controls && controls.classList.contains('hidden')) {
+            VideoPlayer.showUI();
+        } else {
+            VideoPlayer.togglePlay();
+        }
+    },
+
+    toggleSettings: (e) => { 
+        if(e) e.stopPropagation(); 
+        const menu = document.getElementById('settings-menu');
+        if(menu) menu.classList.toggle('show'); 
+    },
+
+    startDrag: (e) => { VideoPlayer.isDragging = true; VideoPlayer.updateScrub(e); },
+    stopDrag: (e) => { if(VideoPlayer.isDragging) { VideoPlayer.updateScrub(e); VideoPlayer.isDragging = false; } },
+    doDrag: (e) => { if(VideoPlayer.isDragging) VideoPlayer.updateScrub(e); },
+
+    updateScrub: (e) => {
+        if(!VideoPlayer.ytPlayer || !VideoPlayer.ytPlayer.getDuration) return;
+        let bg = document.getElementById('progress-bg');
+        if(!bg) return;
+        let rect = bg.getBoundingClientRect();
+        let clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : (e.clientX || 0);
+        if(clientX === 0 && e.changedTouches) clientX = e.changedTouches[0].clientX; 
+        let clickX = clientX - rect.left;
+        let percentage = Math.max(0, Math.min(1, clickX / rect.width));
+        let duration = VideoPlayer.ytPlayer.getDuration();
+        VideoPlayer.ytPlayer.seekTo(percentage * duration, true);
+        document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
+        document.getElementById('time-display').innerText = VideoPlayer.formatTime(percentage * duration);
     }
 };
+        
