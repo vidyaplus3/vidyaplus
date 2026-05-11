@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Gateway | VidyaPlus PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #6366f1; --secondary: #ec4899; --bg: #0f172a; --surface: #1e293b; --text: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text); background-image: radial-gradient(circle at top right, rgba(99,102,241,0.1), transparent 40%), radial-gradient(circle at bottom left, rgba(236,72,153,0.1), transparent 40%); }
+        
+        .login-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); padding: 3rem; border-radius: 24px; width: 100%; max-width: 420px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; }
+        
+        .brand { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .brand span { color: var(--secondary); }
+        .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .input-group { position: relative; margin-bottom: 1.5rem; text-align: left; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b; }
+        .input-group input { width: 100%; padding: 1.2rem 1rem 1.2rem 2.8rem; background: rgba(15,23,42,0.5); border: 1px solid #334155; border-radius: 16px; color: white; outline: none; transition: 0.3s; font-size: 0.95rem; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99,102,241,0.15); }
+        
+        .btn-login { width: 100%; padding: 1.2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 16px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px -5px rgba(236,72,153,0.4); margin-top: 1rem; }
+        .btn-login:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(236,72,153,0.6); }
+        
+        #error-msg { color: #f87171; font-size: 0.85rem; font-weight: 600; margin-top: 1rem; display: none; background: rgba(248,113,113,0.1); padding: 10px; border-radius: 10px; border: 1px solid rgba(248,113,113,0.2); }
+        
+        .loader { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;"></i>
+        <div class="brand">Vidya<span>Plus</span></div>
+        <div class="subtitle">Secure Admin Gateway</div>
+        
+        <form id="admin-login-form">
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Admin Email" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Admin Password" required>
+            </div>
+            <button type="submit" class="btn-login" id="login-btn">
+                <span id="btn-text">Authenticate Identity</span>
+                <div class="loader" id="btn-loader"></div>
+            </button>
+            <div id="error-msg"></div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { auth, db } from '../js/firebase-init.js';
+        import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const form = document.getElementById('admin-login-form');
+        const btnText = document.getElementById('btn-text');
+        const btnLoader = document.getElementById('btn-loader');
+        const errorMsg = document.getElementById('error-msg');
+
+        const showError = (msg) => {
+            errorMsg.innerText = msg;
+            errorMsg.style.display = 'block';
+            btnText.style.display = 'block';
+            btnLoader.style.display = 'none';
+        };
+
+        // AUTO-REDIRECT: Agar pehle se admin logged in hai
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists() && docSnap.data().role === 'admin') {
+                        window.location.href = 'studio.html'; // Gateway pass!
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            errorMsg.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // 1. Firebase Auth check
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Role Check (The Real Security)
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                
+                if (docSnap.exists() && docSnap.data().role === 'admin') {
+                    // Success! Redirect to Mega Studio
+                    window.location.href = 'studio.html';
+                } else {
+                    // Hacker detected! Normal user trying to access admin panel
+                    await signOut(auth);
+                    showError("ACCESS DENIED: You do not have Administrative privileges.");
+                }
+            } catch (error) {
+                console.error(error);
+                showError("Authentication Failed. Invalid credentials.");
+            }
+        });
+    </script>
+</body>
+</html>
