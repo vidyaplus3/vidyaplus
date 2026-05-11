@@ -240,53 +240,34 @@
         import { collection, getDocs, addDoc, query, doc, deleteDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ==========================================
-        // 1. FIREBASE ROUTE PROTECTION (The Firewall)
+        // 1. ROUTE PROTECTION & PIN
         // ==========================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists() && docSnap.data().role === 'admin') {
-                        // SUCCESS: Hacker test passed.
                         document.getElementById('auth-verifier').style.opacity = '0';
                         setTimeout(() => {
                             document.getElementById('auth-verifier').style.display = 'none';
-                            document.getElementById('security-lock').style.display = 'flex'; // Show PIN lock next
+                            document.getElementById('security-lock').style.display = 'flex';
                         }, 300);
-                        fetchBatches(); // Load data in background
+                        fetchBatches(); 
                     } else {
-                        // FAILED: Normal user trying to access admin
                         await signOut(auth);
                         window.location.href = 'login.html';
                     }
-                } catch (error) {
-                    window.location.href = 'login.html';
-                }
-            } else {
-                // FAILED: Not even logged in
-                window.location.href = 'login.html';
-            }
+                } catch (error) { window.location.href = 'login.html'; }
+            } else { window.location.href = 'login.html'; }
         });
 
-        window.adminLogout = async () => {
-            await signOut(auth);
-            window.location.href = 'login.html';
-        };
+        window.adminLogout = async () => { await signOut(auth); window.location.href = 'login.html'; };
 
-        // ==========================================
-        // 2. BANK LEVEL PIN LOCK (Local Security)
-        // ==========================================
         let masterPin = localStorage.getItem('vp_studio_pin') || "1234";
-
-        window.moveToNext = (curr, nextId) => {
-            if (curr.value.length === 1 && nextId) document.getElementById(nextId).focus();
-        };
-
+        window.moveToNext = (curr, nextId) => { if (curr.value.length === 1 && nextId) document.getElementById(nextId).focus(); };
         window.checkPin = () => {
             const inputs = document.querySelectorAll('.pin-inputs input');
-            let entered = "";
-            inputs.forEach(inp => entered += inp.value);
-            
+            let entered = Array.from(inputs).map(inp => inp.value).join('');
             if (entered.length === 4) {
                 if (entered === masterPin) {
                     document.getElementById('security-lock').style.opacity = '0';
@@ -305,20 +286,17 @@
 
         window.updateMasterPin = () => {
             const newPin = document.getElementById('new-pin').value;
-            if(newPin.length !== 4) return showMsg("PIN must be exactly 4 digits!");
-            localStorage.setItem('vp_studio_pin', newPin);
-            masterPin = newPin;
-            document.getElementById('new-pin').value = '';
-            showMsg("Master PIN Updated Successfully! 🔒");
+            if(newPin.length !== 4) return showMsg("PIN must be 4 digits!");
+            localStorage.setItem('vp_studio_pin', newPin); masterPin = newPin;
+            document.getElementById('new-pin').value = ''; showMsg("Master PIN Updated 🔒");
         };
 
         // ==========================================
-        // 3. UI & TAB NAVIGATION
+        // 2. UI UTILS & VALIDATIONS
         // ==========================================
         window.showMsg = (msg) => {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('active');
+            t.innerText = msg; t.classList.add('active');
             setTimeout(() => t.classList.remove('active'), 3000);
         };
 
@@ -329,8 +307,46 @@
             document.getElementById('view-' + viewId).classList.add('active');
         };
 
+        window.openUploadPanel = () => {
+            const batchId = document.getElementById('master-batch-select').value;
+            if(!batchId) {
+                showMsg("Verification Failed: Please select a Target Batch first.");
+                return;
+            }
+            document.getElementById('upload-panel').style.display = 'block';
+            toggleFormFields();
+        };
+
+        window.closeUploadPanel = () => {
+            document.getElementById('upload-panel').style.display = 'none';
+            document.getElementById('upload-form').reset();
+        };
+
+        window.toggleFormFields = () => {
+            const type = document.getElementById('inp-type').value;
+            const format = document.getElementById('inp-format').value;
+            
+            // Toggle Format UI (File vs URL)
+            if(format === 'url') {
+                document.getElementById('url-container').style.display = 'block';
+                document.getElementById('file-container').style.display = 'none';
+                document.getElementById('inp-url').required = true;
+            } else {
+                document.getElementById('url-container').style.display = 'none';
+                document.getElementById('file-container').style.display = 'block';
+                document.getElementById('inp-url').required = false;
+            }
+
+            // Toggle Attached PDF for Lectures
+            if(type === 'lecture') {
+                document.getElementById('attached-pdf-container').style.display = 'block';
+            } else {
+                document.getElementById('attached-pdf-container').style.display = 'none';
+            }
+        };
+
         // ==========================================
-        // 4. CONTENT ENGINE (Lectures, Notes, DPP)
+        // 3. HIERARCHICAL CONTENT ENGINE
         // ==========================================
         const batchSelect = document.getElementById('master-batch-select');
         const contentContainer = document.getElementById('content-list-container');
@@ -338,15 +354,14 @@
         async function fetchBatches() {
             const snap = await getDocs(collection(db, "batches"));
             batchSelect.innerHTML = '<option value="">-- Select Batch to Manage --</option>';
-            snap.forEach(doc => {
-                batchSelect.innerHTML += `<option value="${doc.id}">${doc.data().title}</option>`;
-            });
+            snap.forEach(doc => { batchSelect.innerHTML += `<option value="${doc.id}">${doc.data().title}</option>`; });
         }
 
         window.loadBatchData = async () => {
             const batchId = batchSelect.value;
             if(!batchId) {
-                contentContainer.innerHTML = '<p style="text-align:center; padding:2rem;">Select a batch above.</p>';
+                contentContainer.innerHTML = '<div style="text-align:center; padding:4rem; color:var(--text-light);"><i class="fas fa-folder-open fa-3x" style="opacity:0.2;"></i><p>Select a target batch to view organized content hierarchy.</p></div>';
+                closeUploadPanel();
                 return;
             }
 
@@ -355,80 +370,138 @@
                 const matRef = collection(db, "batches", batchId, "materials");
                 const snap = await getDocs(query(matRef));
                 
-                contentContainer.innerHTML = '';
                 if(snap.empty) {
-                    contentContainer.innerHTML = `<p style="text-align:center; padding:2rem; color:var(--text-light);">No content in this batch. Upload something!</p>`;
+                    contentContainer.innerHTML = `<p style="text-align:center; padding:2rem; color:var(--text-light);">No content in this batch. Upload something to begin.</p>`;
                     return;
                 }
 
+                // Group data hierarchically: Subject -> Chapter -> Contents
+                const tree = {};
                 snap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    let badgeClass = "type-vid"; let badgeText = "Video"; let icon = "fa-video";
-                    if(data.type === "pdf") { badgeClass = "type-pdf"; badgeText = "Notes"; icon = "fa-file-pdf"; }
-                    if(data.type === "dpp") { badgeClass = "type-dpp"; badgeText = "DPP"; icon = "fa-tasks"; }
-
-                    contentContainer.innerHTML += `
-                        <div class="content-row">
-                            <div style="display:flex; align-items:center; gap:15px;">
-                                <div style="width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; display: flex; justify-content: center; align-items: center; color: var(--text-light);">
-                                    <i class="fas ${icon}"></i>
-                                </div>
-                                <div>
-                                    <h4 style="font-size: 1rem; color: var(--text);">${data.title}</h4>
-                                    <p style="font-size: 0.8rem; color: var(--text-light);">Chapter: ${data.chapter || 'General'}</p>
-                                </div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:15px;">
-                                <span class="type-badge ${badgeClass}">${badgeText}</span>
-                                <button onclick="deleteContent('${docSnap.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem;"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </div>
-                    `;
+                    const data = { id: docSnap.id, ...docSnap.data() };
+                    const subject = data.subject || "Extra Material";
+                    const chapter = data.chapter || "General Notes";
+                    
+                    if(!tree[subject]) tree[subject] = {};
+                    if(!tree[subject][chapter]) tree[subject][chapter] = [];
+                    tree[subject][chapter].push(data);
                 });
-            } catch (err) { showMsg("Error loading content"); }
+
+                renderContentTree(tree);
+
+            } catch (err) { showMsg("Error loading content hierarchy"); }
         };
 
+        function renderContentTree(tree) {
+            contentContainer.innerHTML = '';
+            
+            for (const [subject, chapters] of Object.entries(tree)) {
+                let html = `
+                <div class="tree-subject">
+                    <div class="tree-subject-header">
+                        <span>${subject}</span>
+                        <span style="font-size:0.8rem; background:rgba(99,102,241,0.1); padding:4px 10px; border-radius:12px;">${Object.keys(chapters).length} Chapters</span>
+                    </div>`;
+
+                for (const [chapter, items] of Object.entries(chapters)) {
+                    html += `
+                    <div class="tree-chapter">
+                        <div class="tree-chapter-title">${chapter}</div>
+                        <div style="padding-left: 15px;">`;
+
+                    items.forEach(item => {
+                        let badgeClass = "type-vid"; let badgeText = "Video"; let icon = "fa-video";
+                        if(item.type === "pdf") { badgeClass = "type-pdf"; badgeText = "Notes"; icon = "fa-file-pdf"; }
+                        if(item.type === "dpp") { badgeClass = "type-dpp"; badgeText = "DPP"; icon = "fa-tasks"; }
+
+                        // Check for attached notes
+                        let attachBadge = item.attachedPdfUrl ? `<i class="fas fa-paperclip" title="Notes Attached" style="color:#10b981; margin-left:10px;"></i>` : "";
+
+                        html += `
+                            <div class="content-row">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width: 35px; height: 35px; border-radius: 8px; background: #f1f5f9; display: flex; justify-content: center; align-items: center; color: var(--text-light); font-size:0.9rem;">
+                                        <i class="fas ${icon}"></i>
+                                    </div>
+                                    <span style="font-weight: 600; font-size: 0.95rem;">${item.title} ${attachBadge}</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:15px;">
+                                    <span class="type-badge ${badgeClass}">${badgeText}</span>
+                                    <button onclick="deleteContent('${item.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem;"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </div>`;
+                    });
+
+                    html += `</div></div>`;
+                }
+                html += `</div>`;
+                contentContainer.innerHTML += html;
+            }
+        }
+
+        // ==========================================
+        // 4. UPLOAD LOGIC
+        // ==========================================
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const batchId = batchSelect.value;
-            if(!batchId) return showMsg("Select a batch first!");
+            if(!batchId) return showMsg("Validation Error: Batch selection required.");
 
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.innerText = "Saving...";
+            const format = document.getElementById('inp-format').value;
+            
+            // Validate Firebase Storage for direct file uploads
+            if(format === 'file') {
+                showMsg("Direct file uploads require Firebase Storage configuration. Using URL mode as fallback.");
+                return;
+            }
+
+            const submitBtn = document.getElementById('btn-save-content');
+            submitBtn.innerText = "Processing...";
+            submitBtn.disabled = true;
             
             const type = document.getElementById('inp-type').value;
             const url = document.getElementById('inp-url').value;
+            const attachedPdf = document.getElementById('inp-attached-pdf').value;
 
             const payload = {
                 type: type,
-                title: document.getElementById('inp-title').value,
+                subject: document.getElementById('inp-subject').value || "Extra Material",
                 chapter: document.getElementById('inp-chapter').value,
+                title: document.getElementById('inp-title').value,
                 status: "Active",
                 createdAt: serverTimestamp()
             };
 
-            if(type === 'lecture') payload.videoUrl = url;
-            else payload.pdfUrl = url;
+            // Intelligent URL assignment based on category
+            if(type === 'lecture') {
+                payload.videoUrl = url;
+                if(attachedPdf) payload.attachedPdfUrl = attachedPdf;
+            } else {
+                payload.pdfUrl = url;
+            }
 
             try {
                 await addDoc(collection(db, "batches", batchId, "materials"), payload);
-                showMsg("Uploaded Successfully!");
-                document.getElementById('upload-form').reset();
-                document.getElementById('upload-panel').style.display = 'none';
+                showMsg("Content Published Successfully!");
+                closeUploadPanel();
                 loadBatchData(); 
-            } catch (err) { showMsg("Upload failed."); } 
-            finally { submitBtn.innerText = "Save to Database"; }
+            } catch (err) { showMsg("Upload execution failed."); } 
+            finally { 
+                submitBtn.innerText = "Publish Content to Batch"; 
+                submitBtn.disabled = false;
+            }
         });
 
         window.deleteContent = async (matId) => {
-            if(!confirm("Delete this material permanently?")) return;
-            const batchId = batchSelect.value;
+            if(!confirm("Are you sure you want to permanently delete this resource?")) return;
             try {
-                await deleteDoc(doc(db, "batches", batchId, "materials", matId));
-                showMsg("Material Deleted.");
+                await deleteDoc(doc(db, "batches", batchSelect.value, "materials", matId));
+                showMsg("Resource Deleted.");
                 loadBatchData();
-            } catch (err) { showMsg("Failed to delete."); }
+            } catch (err) { showMsg("Deletion failed."); }
         };
+
+        fetchBatches();
     </script>
 </body>
 </html>
