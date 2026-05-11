@@ -323,7 +323,23 @@
         // State variables
         let batchToDeleteId = null; 
         let batchToEditId = null;
-        window.loadedBatches = {}; 
+        window.loadedBatches = {};
+                    // QUILL EDITOR SETUP
+        const toolbarOptions = [
+            ['bold', 'italic', 'underline'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'color': [] }, { 'background': [] }],
+            ['clean'] // formatting hatane ke liye
+        ];
+        const quillAdd = new Quill('#editor-container-add', {
+            theme: 'snow', placeholder: 'What students will get in this batch...',
+            modules: { toolbar: toolbarOptions }
+        });
+        const quillEdit = new Quill('#editor-container-edit', {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+            
         window.loadedStudents = []; // For Client-side instant search
 
         // =======================
