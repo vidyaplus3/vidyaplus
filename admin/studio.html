@@ -76,6 +76,30 @@
 
         #toast { position: fixed; bottom: 30px; right: 30px; background: white; padding: 1rem 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-weight: 700; transform: translateX(150%); transition: 0.4s; z-index: 9999; border-left: 5px solid var(--primary); }
         #toast.active { transform: translateX(0); }
+                /* Accordion & Smart List Styles */
+        .tree-subject { margin-bottom: 1.5rem; background: var(--surface); border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .tree-subject-header { background: #f8fafc; padding: 1.2rem 1.5rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #e2e8f0; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .tree-subject-header:hover { background: #eff6ff; }
+        
+        .tree-chapter-header { padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: white; transition: 0.2s; }
+        .tree-chapter-header:hover { background: #f8fafc; }
+        .tree-chapter-title { font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 10px; }
+        .tree-chapter-title::before { content: ''; width: 4px; height: 18px; background: var(--secondary); border-radius: 4px; }
+        
+        .chapter-content-body { display: none; padding: 1rem 1.5rem 1.5rem 2.5rem; background: #fafcff; border-bottom: 1px solid #f1f5f9; }
+        .chapter-content-body.active { display: block; animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .content-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.2rem; background: var(--surface); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
+        .content-row:hover { border-color: var(--primary); box-shadow: 0 5px 15px rgba(99,102,241,0.08); transform: translateX(5px); }
+        
+        .mat-thumbnail { width: 90px; height: 50px; border-radius: 8px; object-fit: cover; background: #e2e8f0; border: 1px solid #cbd5e1; }
+        .badge-attached { background: #ecfdf5; color: #10b981; padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; border: 1px solid #a7f3d0; margin-left: 10px; }
+        .icon-btn { background: white; border: 1px solid #e2e8f0; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        .icon-btn.edit { color: var(--primary); }
+        .icon-btn.delete { color: #ef4444; }
+        .icon-btn:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+            
     </style>
 </head>
 <body>
@@ -144,18 +168,17 @@
                     <h2>Content Studio</h2>
                     <button class="btn-gradient" onclick="openUploadPanel()"><i class="fas fa-upload"></i> Upload Material</button>
                 </div>
-
-                <div id="upload-panel" class="premium-card" style="display: none; margin-bottom: 2rem; border: 2px dashed var(--primary);">
+                                <div id="upload-panel" class="premium-card" style="display: none; margin-bottom: 2rem; border: 2px dashed var(--primary);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>Upload New Material</h3>
+                        <h3 id="form-heading">Upload New Material</h3>
                         <button onclick="closeUploadPanel()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color: var(--text-light);"><i class="fas fa-times"></i></button>
                     </div>
 
                     <form id="upload-form">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="input-group">
-                                <label>Subject Name (Optional for Extra Materials)</label>
-                                <input type="text" id="inp-subject" class="input-control" placeholder="e.g. Physics, Extra Material">
+                                <label>Subject Name (Leave blank for Extra Material)</label>
+                                <input type="text" id="inp-subject" class="input-control" placeholder="e.g. Physics">
                             </div>
                             <div class="input-group">
                                 <label>Chapter / Topic Name</label>
@@ -180,7 +203,7 @@
                                 <label>Resource Format</label>
                                 <select id="inp-format" class="input-control" onchange="toggleFormFields()">
                                     <option value="url">External URL (YouTube / Drive Link)</option>
-                                    <option value="file">Direct File Upload (MP4 / PDF)</option>
+                                    <option value="file">Direct File Upload (Requires Storage Setup)</option>
                                 </select>
                             </div>
 
@@ -192,7 +215,11 @@
                             <div class="input-group" id="file-container" style="display: none;">
                                 <label id="lbl-main-file">Select File (MP4/PDF)</label>
                                 <input type="file" id="inp-file" class="input-control" accept="video/mp4,application/pdf">
-                                <small style="color: #ef4444; font-weight: 600; margin-top: 5px; display: block;">* Requires Firebase Storage Initialization</small>
+                            </div>
+
+                            <div class="input-group" id="thumb-container">
+                                <label>Video Thumbnail URL</label>
+                                <input type="url" id="inp-thumb" class="input-control" placeholder="Link to video thumbnail image...">
                             </div>
 
                             <div class="input-group" id="attached-pdf-container">
@@ -203,8 +230,8 @@
 
                         <button type="submit" class="btn-gradient" style="width: 100%;" id="btn-save-content">Publish Content to Batch</button>
                     </form>
-                </div>
-
+                                </div>
+                
                 <div id="content-list-container">
                     <div style="text-align: center; padding: 4rem; color: var(--text-light);">
                         <i class="fas fa-folder-open fa-3x" style="opacity: 0.2; margin-bottom: 1rem;"></i>
@@ -322,11 +349,31 @@
             document.getElementById('upload-form').reset();
         };
 
+                window.loadedMaterialsCache = {}; // Cache for Edit functionality
+        window.editMaterialId = null;     // Tracks if we are adding or editing
+
+        window.openUploadPanel = () => {
+            const batchId = document.getElementById('master-batch-select').value;
+            if(!batchId) return showMsg("Validation Error: Please select a Target Batch first.");
+            
+            window.editMaterialId = null; // Reset edit state
+            document.getElementById('form-heading').innerText = "Upload New Material";
+            document.getElementById('btn-save-content').innerText = "Publish Content to Batch";
+            document.getElementById('upload-form').reset();
+            document.getElementById('upload-panel').style.display = 'block';
+            toggleFormFields();
+        };
+
+        window.closeUploadPanel = () => {
+            document.getElementById('upload-panel').style.display = 'none';
+            document.getElementById('upload-form').reset();
+            window.editMaterialId = null;
+        };
+
         window.toggleFormFields = () => {
             const type = document.getElementById('inp-type').value;
             const format = document.getElementById('inp-format').value;
             
-            // Toggle Format UI (File vs URL)
             if(format === 'url') {
                 document.getElementById('url-container').style.display = 'block';
                 document.getElementById('file-container').style.display = 'none';
@@ -337,16 +384,31 @@
                 document.getElementById('inp-url').required = false;
             }
 
-            // Toggle Attached PDF for Lectures
+            // Show Thumbnail and Attached PDF ONLY for Lectures
             if(type === 'lecture') {
                 document.getElementById('attached-pdf-container').style.display = 'block';
+                document.getElementById('thumb-container').style.display = 'block';
             } else {
                 document.getElementById('attached-pdf-container').style.display = 'none';
+                document.getElementById('thumb-container').style.display = 'none';
+            }
+        };
+
+        // ACCORDION TOGGLE LOGIC
+        window.toggleAccordion = (id) => {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            if(el.classList.contains('active')) {
+                el.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                el.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
             }
         };
 
         // ==========================================
-        // 3. HIERARCHICAL CONTENT ENGINE
+        // 3. SMART HIERARCHICAL ENGINE
         // ==========================================
         const batchSelect = document.getElementById('master-batch-select');
         const contentContainer = document.getElementById('content-list-container');
@@ -375,26 +437,38 @@
                     return;
                 }
 
-                // Group data hierarchically: Subject -> Chapter -> Contents
+                window.loadedMaterialsCache = {}; // Reset cache
                 const tree = {};
+                const extraMaterials = {}; // Separate bucket for uncategorized
+
                 snap.forEach(docSnap => {
                     const data = { id: docSnap.id, ...docSnap.data() };
-                    const subject = data.subject || "Extra Material";
+                    window.loadedMaterialsCache[docSnap.id] = data; // Save for editing
+                    
+                    let subject = data.subject ? data.subject.trim() : "";
                     const chapter = data.chapter || "General Notes";
                     
-                    if(!tree[subject]) tree[subject] = {};
-                    if(!tree[subject][chapter]) tree[subject][chapter] = [];
-                    tree[subject][chapter].push(data);
+                    // Smart Routing: Empty subject goes to Extra Materials
+                    if(subject === "" || subject.toLowerCase() === "extra material") {
+                        if(!extraMaterials[chapter]) extraMaterials[chapter] = [];
+                        extraMaterials[chapter].push(data);
+                    } else {
+                        if(!tree[subject]) tree[subject] = {};
+                        if(!tree[subject][chapter]) tree[subject][chapter] = [];
+                        tree[subject][chapter].push(data);
+                    }
                 });
 
-                renderContentTree(tree);
+                renderContentTree(tree, extraMaterials);
 
-            } catch (err) { showMsg("Error loading content hierarchy"); }
+            } catch (err) { showMsg("Error loading content hierarchy"); console.error(err); }
         };
 
-        function renderContentTree(tree) {
+        function renderContentTree(tree, extraMaterials) {
             contentContainer.innerHTML = '';
+            let accIdCounter = 0;
             
+            // 1. Render Main Subjects
             for (const [subject, chapters] of Object.entries(tree)) {
                 let html = `
                 <div class="tree-subject">
@@ -404,56 +478,130 @@
                     </div>`;
 
                 for (const [chapter, items] of Object.entries(chapters)) {
+                    accIdCounter++;
+                    let chapId = `chap-${accIdCounter}`;
+                    
                     html += `
                     <div class="tree-chapter">
-                        <div class="tree-chapter-title">${chapter}</div>
-                        <div style="padding-left: 15px;">`;
+                        <div class="tree-chapter-header" onclick="toggleAccordion('${chapId}')">
+                            <div class="tree-chapter-title">${chapter} <span style="font-size:0.7rem; color:#94a3b8; font-weight:600; margin-left:10px;">(${items.length} items)</span></div>
+                            <i class="fas fa-chevron-down" id="icon-${chapId}" style="color:var(--text-light); transition:0.3s;"></i>
+                        </div>
+                        <div class="chapter-content-body" id="${chapId}">`;
 
-                    items.forEach(item => {
-                        let badgeClass = "type-vid"; let badgeText = "Video"; let icon = "fa-video";
-                        if(item.type === "pdf") { badgeClass = "type-pdf"; badgeText = "Notes"; icon = "fa-file-pdf"; }
-                        if(item.type === "dpp") { badgeClass = "type-dpp"; badgeText = "DPP"; icon = "fa-tasks"; }
-
-                        // Check for attached notes
-                        let attachBadge = item.attachedPdfUrl ? `<i class="fas fa-paperclip" title="Notes Attached" style="color:#10b981; margin-left:10px;"></i>` : "";
-
-                        html += `
-                            <div class="content-row">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div style="width: 35px; height: 35px; border-radius: 8px; background: #f1f5f9; display: flex; justify-content: center; align-items: center; color: var(--text-light); font-size:0.9rem;">
-                                        <i class="fas ${icon}"></i>
-                                    </div>
-                                    <span style="font-weight: 600; font-size: 0.95rem;">${item.title} ${attachBadge}</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:15px;">
-                                    <span class="type-badge ${badgeClass}">${badgeText}</span>
-                                    <button onclick="deleteContent('${item.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem;"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            </div>`;
-                    });
-
+                    html += generateItemsHTML(items);
                     html += `</div></div>`;
                 }
                 html += `</div>`;
                 contentContainer.innerHTML += html;
             }
+
+            // 2. Render Extra Materials at the very bottom
+            if(Object.keys(extraMaterials).length > 0) {
+                let extraHtml = `
+                <div class="tree-subject" style="border-color: #cbd5e1;">
+                    <div class="tree-subject-header" style="background:#f1f5f9; color:#475569;">
+                        <span><i class="fas fa-box-open" style="margin-right:8px;"></i> Extra Materials & Resources</span>
+                        <span style="font-size:0.8rem; background:#e2e8f0; padding:4px 10px; border-radius:12px;">${Object.keys(extraMaterials).length} Folders</span>
+                    </div>`;
+
+                for (const [chapter, items] of Object.entries(extraMaterials)) {
+                    accIdCounter++;
+                    let chapId = `chap-${accIdCounter}`;
+                    extraHtml += `
+                    <div class="tree-chapter">
+                        <div class="tree-chapter-header" onclick="toggleAccordion('${chapId}')">
+                            <div class="tree-chapter-title" style="color:#475569;">${chapter}</div>
+                            <i class="fas fa-chevron-down" id="icon-${chapId}"></i>
+                        </div>
+                        <div class="chapter-content-body" id="${chapId}">`;
+                    
+                    extraHtml += generateItemsHTML(items);
+                    extraHtml += `</div></div>`;
+                }
+                extraHtml += `</div>`;
+                contentContainer.innerHTML += extraHtml;
+            }
+        }
+
+        // Helper function to generate HTML for list items (Thumbnails, Edit, PDF badges)
+        function generateItemsHTML(items) {
+            let html = '';
+            items.forEach(item => {
+                let badgeClass = "type-vid"; let badgeText = "Video"; let icon = "fa-video";
+                if(item.type === "pdf") { badgeClass = "type-pdf"; badgeText = "Notes"; icon = "fa-file-pdf"; }
+                if(item.type === "dpp") { badgeClass = "type-dpp"; badgeText = "DPP"; icon = "fa-tasks"; }
+
+                let attachBadge = item.attachedPdfUrl ? `<span class="badge-attached"><i class="fas fa-paperclip"></i> PDF Attached</span>` : "";
+                
+                // Smart Thumbnail System
+                let visualEl = '';
+                if(item.type === 'lecture') {
+                    let thumbSrc = item.thumbnailUrl || 'https://images.unsplash.com/photo-1632516643738-4e892c5fc5e7';
+                    visualEl = `<img src="${thumbSrc}" class="mat-thumbnail">`;
+                } else {
+                    visualEl = `<div style="width: 50px; height: 50px; border-radius: 8px; background: #f1f5f9; display: flex; justify-content: center; align-items: center; color: var(--text-light); font-size:1.2rem;"><i class="fas ${icon}"></i></div>`;
+                }
+
+                html += `
+                    <div class="content-row">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            ${visualEl}
+                            <div>
+                                <h4 style="font-size: 1rem; color: var(--text); font-weight:700;">${item.title}</h4>
+                                <div style="margin-top:5px; display:flex; align-items:center;">
+                                    <span class="type-badge ${badgeClass}">${badgeText}</span>
+                                    ${attachBadge}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button class="icon-btn edit" onclick="triggerEditContent('${item.id}')" title="Edit Content"><i class="fas fa-pen"></i></button>
+                            <button class="icon-btn delete" onclick="deleteContent('${item.id}')" title="Delete Content"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>`;
+            });
+            return html;
         }
 
         // ==========================================
-        // 4. UPLOAD LOGIC
+        // 4. UPLOAD & EDIT LOGIC
         // ==========================================
+        
+        // Populate Form for Editing
+        window.triggerEditContent = (matId) => {
+            const data = window.loadedMaterialsCache[matId];
+            if(!data) return;
+
+            window.editMaterialId = matId;
+            document.getElementById('form-heading').innerText = "Edit Material";
+            document.getElementById('btn-save-content').innerText = "Update Content";
+            
+            document.getElementById('inp-subject').value = data.subject || "";
+            document.getElementById('inp-chapter').value = data.chapter || "";
+            document.getElementById('inp-type').value = data.type || "lecture";
+            document.getElementById('inp-title').value = data.title || "";
+            
+            if(data.type === 'lecture') {
+                document.getElementById('inp-url').value = data.videoUrl || "";
+                document.getElementById('inp-thumb').value = data.thumbnailUrl || "";
+                document.getElementById('inp-attached-pdf').value = data.attachedPdfUrl || "";
+            } else {
+                document.getElementById('inp-url').value = data.pdfUrl || "";
+            }
+
+            document.getElementById('upload-panel').style.display = 'block';
+            toggleFormFields();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const batchId = batchSelect.value;
             if(!batchId) return showMsg("Validation Error: Batch selection required.");
 
             const format = document.getElementById('inp-format').value;
-            
-            // Validate Firebase Storage for direct file uploads
-            if(format === 'file') {
-                showMsg("Direct file uploads require Firebase Storage configuration. Using URL mode as fallback.");
-                return;
-            }
+            if(format === 'file') return showMsg("Direct file uploads require Firebase Storage. Use URL mode.");
 
             const submitBtn = document.getElementById('btn-save-content');
             submitBtn.innerText = "Processing...";
@@ -461,33 +609,43 @@
             
             const type = document.getElementById('inp-type').value;
             const url = document.getElementById('inp-url').value;
-            const attachedPdf = document.getElementById('inp-attached-pdf').value;
 
             const payload = {
                 type: type,
-                subject: document.getElementById('inp-subject').value || "Extra Material",
+                subject: document.getElementById('inp-subject').value,
                 chapter: document.getElementById('inp-chapter').value,
                 title: document.getElementById('inp-title').value,
                 status: "Active",
-                createdAt: serverTimestamp()
+                updatedAt: serverTimestamp()
             };
 
-            // Intelligent URL assignment based on category
+            // Smart Data assignment
             if(type === 'lecture') {
                 payload.videoUrl = url;
-                if(attachedPdf) payload.attachedPdfUrl = attachedPdf;
+                payload.thumbnailUrl = document.getElementById('inp-thumb').value;
+                payload.attachedPdfUrl = document.getElementById('inp-attached-pdf').value;
             } else {
                 payload.pdfUrl = url;
+                payload.videoUrl = ""; // clear if type changed
+                payload.thumbnailUrl = "";
             }
 
             try {
-                await addDoc(collection(db, "batches", batchId, "materials"), payload);
-                showMsg("Content Published Successfully!");
+                if(window.editMaterialId) {
+                    // Update existing
+                    await updateDoc(doc(db, "batches", batchId, "materials", window.editMaterialId), payload);
+                    showMsg("Content Updated Successfully!");
+                } else {
+                    // Create new
+                    payload.createdAt = serverTimestamp();
+                    await addDoc(collection(db, "batches", batchId, "materials"), payload);
+                    showMsg("Content Published Successfully!");
+                }
                 closeUploadPanel();
                 loadBatchData(); 
-            } catch (err) { showMsg("Upload execution failed."); } 
+            } catch (err) { showMsg("Operation failed."); console.error(err); } 
             finally { 
-                submitBtn.innerText = "Publish Content to Batch"; 
+                submitBtn.innerText = window.editMaterialId ? "Update Content" : "Publish Content to Batch"; 
                 submitBtn.disabled = false;
             }
         });
