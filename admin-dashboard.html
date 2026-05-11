@@ -320,16 +320,19 @@
         const searchInput = document.getElementById('search-input');
         const toastContainer = document.getElementById('toast-container');
         
-        // State variables
         let batchToDeleteId = null; 
         let batchToEditId = null;
         window.loadedBatches = {};
-                    // QUILL EDITOR SETUP
+        window.loadedStudents = [];
+
+        // =======================
+        // QUILL EDITOR SETUP
+        // =======================
         const toolbarOptions = [
             ['bold', 'italic', 'underline'],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
             [{ 'color': [] }, { 'background': [] }],
-            ['clean'] // formatting hatane ke liye
+            ['clean'] 
         ];
         const quillAdd = new Quill('#editor-container-add', {
             theme: 'snow', placeholder: 'What students will get in this batch...',
@@ -339,8 +342,6 @@
             theme: 'snow',
             modules: { toolbar: toolbarOptions }
         });
-            
-        window.loadedStudents = []; // For Client-side instant search
 
         // =======================
         // UI & TAB LOGIC
@@ -363,22 +364,15 @@
         document.getElementById('open-add-modal').addEventListener('click', () => openModal('add-modal'));
 
         window.switchAdminTab = (tabName) => {
-            // Update Sidebar UI
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById('nav-' + tabName).classList.add('active');
-            
-            // Toggle Views
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(tabName + '-view').classList.add('active');
-
-            // Agar student tab par gaye, toh dropdown update karo
-            if(tabName === 'students') {
-                populateStudentDropdown();
-            }
+            if(tabName === 'students') populateStudentDropdown();
         };
 
         // =======================
-        // BATCH MANAGEMENT LOGIC (From previous step)
+        // BATCH MANAGEMENT LOGIC
         // =======================
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
@@ -400,12 +394,13 @@
                     title: document.getElementById('batch-name').value,
                     subject: selectedSubjects,
                     price: document.getElementById('batch-price').value,
-                    quillEdit.root.innerHTML = batchData.description || '';
+                    description: quillAdd.root.innerHTML, 
                     imageUrl: document.getElementById('batch-image').value,
                     status: "Active",
                     createdAt: serverTimestamp()
                 });
                 document.getElementById('add-batch-form').reset();
+                quillAdd.root.innerHTML = ''; 
                 closeModal('add-modal');
                 showToast("Batch Launched Successfully!", "success");
                 loadBatches();
@@ -427,7 +422,27 @@
             openModal('edit-modal');
         };
 
-        
+        document.getElementById('edit-batch-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!batchToEditId) return;
+            let selectedSubjects = Array.from(document.querySelectorAll('#edit-batch-subjects input:checked')).map(cb => cb.value).join(', ');
+            const btn = document.getElementById('edit-submit-btn');
+            btn.innerText = "Saving...";
+            try {
+                await updateDoc(doc(db, "batches", batchToEditId), {
+                    title: document.getElementById('edit-batch-name').value,
+                    subject: selectedSubjects,
+                    price: document.getElementById('edit-batch-price').value,
+                    description: quillEdit.root.innerHTML,
+                    imageUrl: document.getElementById('edit-batch-image').value,
+                });
+                closeModal('edit-modal');
+                showToast("Batch Updated Successfully!", "success");
+                loadBatches();
+            } catch (error) { showToast("Failed to update.", "error"); } 
+            finally { btn.innerText = "Save Changes ✅"; batchToEditId = null; }
+        });
+
         window.triggerDelete = (event, batchId) => {
             event.stopPropagation(); 
             batchToDeleteId = batchId;
@@ -439,32 +454,7 @@
             const btn = document.getElementById('confirm-delete-btn');
             btn.innerText = "Deleting...";
             try {
-                      document.getElementById('add-batch-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked')).map(cb => cb.value).join(', ');
-            if(!selectedSubjects) { showToast("Please select a subject!", "error"); return; }
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.innerText = "Processing...";
-            submitBtn.disabled = true;
-            try {
-                await addDoc(collection(db, "batches"), {
-                    title: document.getElementById('batch-name').value,
-                    subject: selectedSubjects,
-                    price: document.getElementById('batch-price').value,
-                    description: quillAdd.root.innerHTML, //  SAHI LINE YAHAN AAYEGI
-                    imageUrl: document.getElementById('batch-image').value,
-                    status: "Active",
-                    createdAt: serverTimestamp()
-                });
-                document.getElementById('add-batch-form').reset();
-                quillAdd.root.innerHTML = ''; // Add hone ke baad editor khali karne ke liye
-                closeModal('add-modal');
-                showToast("Batch Launched Successfully!", "success");
-                loadBatches();
-            } catch (err) { showToast("Error saving batch!", "error"); }
-            finally { submitBtn.innerText = "Launch Batch "; submitBtn.disabled = false; }
-        });
-                          await deleteDoc(doc(db, "batches", batchToDeleteId));
+                await deleteDoc(doc(db, "batches", batchToDeleteId));
                 closeModal('delete-modal');
                 showToast("Batch deleted.", "success");
                 loadBatches();
@@ -500,18 +490,15 @@
                             </div>
                         </div>`;
                 });
-                // Agar pehle se students tab pe hai, to dropdown refresh karo
                 populateStudentDropdown();
             } catch (error) { console.error(error); }
         }
 
         // =======================
-        // STUDENTS DASHBOARD LOGIC 🚀
+        // STUDENTS DASHBOARD LOGIC 
         // =======================
-        
         function populateStudentDropdown() {
             const select = document.getElementById('student-batch-select');
-            // Purane options clean karo (sirf default chhod ke)
             select.innerHTML = '<option value="">-- Select a Batch --</option>';
             Object.keys(window.loadedBatches).forEach(bId => {
                 const batch = window.loadedBatches[bId];
@@ -528,29 +515,19 @@
                 document.getElementById('stat-active-students').innerText = "0";
                 return;
             }
-            
-            // Loading State
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem; color: var(--primary);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Fetching Database...</td></tr>`;
-            
             try {
-                // Magic Query: Wo saare 'users' dhoondho jinke 'enrolledBatches' array me ye batchId hai
                 const q = query(collection(db, "users"), where("enrolledBatches", "array-contains", batchId));
                 const snap = await getDocs(q);
-                
                 window.loadedStudents = [];
-                snap.forEach(doc => {
-                    window.loadedStudents.push({ id: doc.id, ...doc.data() });
-                });
-                
+                snap.forEach(doc => { window.loadedStudents.push({ id: doc.id, ...doc.data() }); });
                 renderStudentsTable(window.loadedStudents);
-                
             } catch (error) {
                 console.error("Student Fetch Error: ", error);
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: #ef4444;"><i class="fas fa-exclamation-circle fa-2x"></i><br>Error fetching students!</td></tr>`;
             }
         });
 
-        // Instant Student Search
         document.getElementById('student-search').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = window.loadedStudents.filter(s => {
@@ -564,8 +541,6 @@
         function renderStudentsTable(studentsArray) {
             const tbody = document.getElementById('students-tbody');
             tbody.innerHTML = '';
-            
-            // Update Top Stats
             document.getElementById('stat-total-students').innerText = studentsArray.length;
             document.getElementById('stat-active-students').innerText = studentsArray.length;
 
@@ -577,12 +552,10 @@
             studentsArray.forEach(student => {
                 const name = student.displayName || student.name || student.email.split('@')[0];
                 const initial = name.charAt(0).toUpperCase();
-                // Check for Date
                 let enrolledDate = "N/A";
                 if(student.createdAt && student.createdAt.toDate) {
                     enrolledDate = new Date(student.createdAt.toDate()).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
                 }
-
                 tbody.innerHTML += `
                     <tr>
                         <td>
@@ -610,8 +583,9 @@
             });
         }
 
-        // Initialize Call
         loadBatches();
-    </script>
+            </script>
+    
+        
 </body>
 </html>
