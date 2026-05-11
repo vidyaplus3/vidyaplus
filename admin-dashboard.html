@@ -400,7 +400,7 @@
                     title: document.getElementById('batch-name').value,
                     subject: selectedSubjects,
                     price: document.getElementById('batch-price').value,
-                    description: document.getElementById('batch-desc').value,
+                    quillEdit.root.innerHTML = batchData.description || '';
                     imageUrl: document.getElementById('batch-image').value,
                     status: "Active",
                     createdAt: serverTimestamp()
