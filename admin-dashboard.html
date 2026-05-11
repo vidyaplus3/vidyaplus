@@ -136,7 +136,7 @@
             <form id="add-batch-form">
                 <div class="input-group">
                     <label>Batch Name</label>
-                    <input type="text" id="batch-name" placeholder="e.g. JEE Rankers 2026" required>
+                    <input type="text" id="batch-name" required>
                 </div>
                 <div class="input-group">
                     <label>Select Subjects</label>
@@ -152,18 +152,57 @@
                 <div style="display: flex; gap: 15px;">
                     <div class="input-group" style="flex: 1;">
                         <label>Price (₹)</label>
-                        <input type="number" id="batch-price" placeholder="0 for Free" required>
+                        <input type="number" id="batch-price" required>
                     </div>
                     <div class="input-group" style="flex: 2;">
                         <label>Thumbnail URL</label>
-                        <input type="url" id="batch-image" placeholder="https://..." required>
+                        <input type="url" id="batch-image" required>
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Full Batch Description</label>
-                    <textarea id="batch-desc" rows="3" placeholder="What students will get in this batch..." required></textarea>
+                    <textarea id="batch-desc" rows="3" required></textarea>
                 </div>
                 <button type="submit" class="btn-submit" id="submit-btn">Launch Batch 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('edit-modal')"><i class="fas fa-times"></i></button>
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.4rem; color: var(--text);">Edit Batch Details</h3>
+            <form id="edit-batch-form">
+                <div class="input-group">
+                    <label>Batch Name</label>
+                    <input type="text" id="edit-batch-name" required>
+                </div>
+                <div class="input-group">
+                    <label>Select Subjects</label>
+                    <div class="checkbox-grid" id="edit-batch-subjects">
+                        <label class="check-label"><input type="checkbox" value="Physics"> Physics</label>
+                        <label class="check-label"><input type="checkbox" value="Chemistry"> Chemistry</label>
+                        <label class="check-label"><input type="checkbox" value="Maths"> Maths</label>
+                        <label class="check-label"><input type="checkbox" value="Biology"> Biology</label>
+                        <label class="check-label"><input type="checkbox" value="English"> English</label>
+                        <label class="check-label"><input type="checkbox" value="Hindi"> Hindi</label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Price (₹)</label>
+                        <input type="number" id="edit-batch-price" required>
+                    </div>
+                    <div class="input-group" style="flex: 2;">
+                        <label>Thumbnail URL</label>
+                        <input type="url" id="edit-batch-image" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Full Batch Description</label>
+                    <textarea id="edit-batch-desc" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit" id="edit-submit-btn">Save Changes ✅</button>
             </form>
         </div>
     </div>
@@ -180,15 +219,17 @@
         </div>
     </div>
         <script type="module">
-        import { db } from './firebase-init.js';
-        import { collection, getDocs, addDoc, query, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { db } from './js/firebase-init.js';
+        import { collection, getDocs, addDoc, query, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const container = document.getElementById('batches-container');
         const searchInput = document.getElementById('search-input');
         const toastContainer = document.getElementById('toast-container');
+        
         let batchToDeleteId = null; 
+        let batchToEditId = null;
+        window.loadedBatches = {}; 
 
-        // Toast System
         window.showToast = (message, type = "success") => {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -214,16 +255,14 @@
             });
         });
 
-        // Add Batch
+        // ADD LOGIC
         document.getElementById('add-batch-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked')).map(cb => cb.value).join(', ');
             if(!selectedSubjects) { showToast("Please select a subject!", "error"); return; }
-
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.innerText = "Processing...";
             submitBtn.disabled = true;
-
             try {
                 await addDoc(collection(db, "batches"), {
                     title: document.getElementById('batch-name').value,
@@ -238,11 +277,49 @@
                 closeModal('add-modal');
                 showToast("Batch Launched Successfully!", "success");
                 loadBatches();
-            } catch (err) { showToast("Error saving batch!", "error"); console.error(err); }
+            } catch (err) { showToast("Error saving batch!", "error"); }
             finally { submitBtn.innerText = "Launch Batch 🚀"; submitBtn.disabled = false; }
         });
 
-        // Delete Batch
+        // EDIT LOGIC
+        window.triggerEdit = (event, batchId) => {
+            event.stopPropagation();
+            batchToEditId = batchId;
+            const batchData = window.loadedBatches[batchId];
+            if(!batchData) return;
+            document.getElementById('edit-batch-name').value = batchData.title || '';
+            document.getElementById('edit-batch-price').value = batchData.price || '';
+            document.getElementById('edit-batch-image').value = batchData.imageUrl || '';
+            document.getElementById('edit-batch-desc').value = batchData.description || '';
+            const subjectsArray = batchData.subject ? batchData.subject.split(', ') : [];
+            document.querySelectorAll('#edit-batch-subjects input').forEach(cb => {
+                cb.checked = subjectsArray.includes(cb.value);
+            });
+            openModal('edit-modal');
+        };
+
+        document.getElementById('edit-batch-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!batchToEditId) return;
+            let selectedSubjects = Array.from(document.querySelectorAll('#edit-batch-subjects input:checked')).map(cb => cb.value).join(', ');
+            const btn = document.getElementById('edit-submit-btn');
+            btn.innerText = "Saving...";
+            try {
+                await updateDoc(doc(db, "batches", batchToEditId), {
+                    title: document.getElementById('edit-batch-name').value,
+                    subject: selectedSubjects,
+                    price: document.getElementById('edit-batch-price').value,
+                    description: document.getElementById('edit-batch-desc').value,
+                    imageUrl: document.getElementById('edit-batch-image').value,
+                });
+                closeModal('edit-modal');
+                showToast("Batch Updated Successfully!", "success");
+                loadBatches();
+            } catch (error) { showToast("Failed to update.", "error"); } 
+            finally { btn.innerText = "Save Changes ✅"; batchToEditId = null; }
+        });
+
+        // DELETE LOGIC
         window.triggerDelete = (event, batchId) => {
             event.stopPropagation(); 
             batchToDeleteId = batchId;
@@ -262,63 +339,36 @@
             finally { btn.innerText = "Yes, Delete it"; batchToDeleteId = null; }
         });
 
-        window.triggerEdit = (event) => {
-            event.stopPropagation();
-            showToast("Edit feature coming in next update!", "success");
-        }
-
-        // Bulletproof Load
         async function loadBatches() {
             try {
-                const q = query(collection(db, "batches"));
-                const snap = await getDocs(q);
+                const snap = await getDocs(query(collection(db, "batches")));
                 container.innerHTML = '';
-                
+                window.loadedBatches = {};
                 if (snap.empty) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: var(--white); border-radius: 15px;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" style="width: 100px; opacity: 0.5; margin-bottom: 1rem;">
-                        <h3 style="color: var(--text);">No Batches Yet</h3>
-                        <p style="color: #64748b;">Click 'Create New Batch' to start.</p>
-                    </div>`;
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem;"><h3>No Batches Yet</h3></div>`;
                     return;
                 }
-
                 snap.forEach(doc => {
                     const d = doc.data();
+                    window.loadedBatches[doc.id] = d;
                     let displaySubject = (d.subject && d.subject.length > 20) ? d.subject.substring(0, 20) + '...' : (d.subject || 'N/A');
                     let displayPrice = (d.price === undefined || d.price === "" || d.price == 0) ? 'FREE' : '₹' + d.price;
-                    let displayImage = d.imageUrl || 'https://images.unsplash.com/photo-1632516643738-4e892c5fc5e7';
-                    
                     container.innerHTML += `
                         <div class="batch-card" onclick="window.location.href='admin-studio.html?id=${doc.id}'">
                             <div class="card-actions">
-                                <button class="btn-action edit" onclick="triggerEdit(event)" title="Edit Batch"><i class="fas fa-pen"></i></button>
-                                <button class="btn-action delete" onclick="triggerDelete(event, '${doc.id}')" title="Delete Batch"><i class="fas fa-trash"></i></button>
+                                <button class="btn-action edit" onclick="triggerEdit(event, '${doc.id}')"><i class="fas fa-pen"></i></button>
+                                <button class="btn-action delete" onclick="triggerDelete(event, '${doc.id}')"><i class="fas fa-trash"></i></button>
                             </div>
-                            <img src="${displayImage}" class="batch-thumb" onerror="this.src='https://images.unsplash.com/photo-1632516643738-4e892c5fc5e7'">
+                            <img src="${d.imageUrl}" class="batch-thumb" onerror="this.src='https://images.unsplash.com/photo-1632516643738-4e892c5fc5e7'">
                             <div class="batch-info">
-                                <div class="batch-header-info">
-                                    <span class="batch-tag" title="${d.subject || ''}">${displaySubject}</span>
-                                    <span class="status-badge">Active</span>
-                                </div>
-                                <h3 class="batch-title">${d.title || 'Untitled Batch'}</h3>
+                                <div class="batch-header-info"><span class="batch-tag">${displaySubject}</span><span class="status-badge">Active</span></div>
+                                <h3 class="batch-title">${d.title || 'Untitled'}</h3>
                                 <p class="batch-price">${displayPrice}</p>
-                                <div class="batch-stats">
-                                    <span><i class="fas fa-video" style="color: var(--primary);"></i> 0 Lectures</span>
-                                    <span><i class="fas fa-tasks" style="color: var(--primary);"></i> 0 DPPs</span>
-                                </div>
                             </div>
                         </div>`;
                 });
-            } catch (error) {
-                console.error(error);
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 2rem;">
-                    <i class="fas fa-exclamation-triangle fa-2x"></i>
-                    <p>Error loading batches! Check your internet connection.</p>
-                </div>`;
-            }
+            } catch (error) { console.error(error); }
         }
-        
         loadBatches();
     </script>
 </body>
