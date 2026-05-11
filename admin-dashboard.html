@@ -427,27 +427,7 @@
             openModal('edit-modal');
         };
 
-        document.getElementById('edit-batch-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!batchToEditId) return;
-            let selectedSubjects = Array.from(document.querySelectorAll('#edit-batch-subjects input:checked')).map(cb => cb.value).join(', ');
-            const btn = document.getElementById('edit-submit-btn');
-            btn.innerText = "Saving...";
-            try {
-                await updateDoc(doc(db, "batches", batchToEditId), {
-                    title: document.getElementById('edit-batch-name').value,
-                    subject: selectedSubjects,
-                    price: document.getElementById('edit-batch-price').value,
-                    description: quillEdit.root.innerHTML,
-                    imageUrl: document.getElementById('edit-batch-image').value,
-                });
-                closeModal('edit-modal');
-                showToast("Batch Updated Successfully!", "success");
-                loadBatches();
-            } catch (error) { showToast("Failed to update.", "error"); } 
-            finally { btn.innerText = "Save Changes "; batchToEditId = null; }
-        });
-
+        
         window.triggerDelete = (event, batchId) => {
             event.stopPropagation(); 
             batchToDeleteId = batchId;
@@ -459,7 +439,32 @@
             const btn = document.getElementById('confirm-delete-btn');
             btn.innerText = "Deleting...";
             try {
-                await deleteDoc(doc(db, "batches", batchToDeleteId));
+                      document.getElementById('add-batch-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked')).map(cb => cb.value).join(', ');
+            if(!selectedSubjects) { showToast("Please select a subject!", "error"); return; }
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerText = "Processing...";
+            submitBtn.disabled = true;
+            try {
+                await addDoc(collection(db, "batches"), {
+                    title: document.getElementById('batch-name').value,
+                    subject: selectedSubjects,
+                    price: document.getElementById('batch-price').value,
+                    description: quillAdd.root.innerHTML, //  SAHI LINE YAHAN AAYEGI
+                    imageUrl: document.getElementById('batch-image').value,
+                    status: "Active",
+                    createdAt: serverTimestamp()
+                });
+                document.getElementById('add-batch-form').reset();
+                quillAdd.root.innerHTML = ''; // Add hone ke baad editor khali karne ke liye
+                closeModal('add-modal');
+                showToast("Batch Launched Successfully!", "success");
+                loadBatches();
+            } catch (err) { showToast("Error saving batch!", "error"); }
+            finally { submitBtn.innerText = "Launch Batch "; submitBtn.disabled = false; }
+        });
+                          await deleteDoc(doc(db, "batches", batchToDeleteId));
                 closeModal('delete-modal');
                 showToast("Batch deleted.", "success");
                 loadBatches();
