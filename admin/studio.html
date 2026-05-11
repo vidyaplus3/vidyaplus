@@ -14,12 +14,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* LAYER 2 SECURITY: Auth Verification Screen */
+        /* Security Screens */
         #auth-verifier { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: 0.3s ease; }
         .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* BANK LEVEL SECURITY: Master PIN Lock */
         #security-lock { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s ease; }
         .lock-box { background: var(--surface); padding: 3rem; border-radius: 24px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .pin-inputs { display: flex; gap: 10px; justify-content: center; margin: 2rem 0; }
@@ -40,47 +39,53 @@
 
         /* Main Workspace */
         .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
+        .top-header { background: var(--surface); height: 70px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; z-index: 5; }
+        .batch-selector { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0.6rem 1.2rem; border-radius: 20px; font-weight: 700; color: var(--primary); outline: none; cursor: pointer; min-width: 250px; }
         
-        /* Top Header */
-        .top-header { background: var(--surface); height: 70px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; }
-        .batch-selector { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; color: var(--primary); outline: none; cursor: pointer; }
-        
-        /* Dynamic Views */
         .workspace-area { flex: 1; overflow-y: auto; padding: 2.5rem; background: var(--bg); }
         .view-section { display: none; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .header-slim h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1.5rem; }
-        .premium-card { background: var(--surface); padding: 1.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .premium-card { background: var(--surface); padding: 1.8rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
         .btn-gradient { background: var(--gradient); color: white; padding: 0.8rem 1.5rem; border-radius: 30px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(236,72,153,0.3); transition: 0.3s; }
         .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(236,72,153,0.4); }
+        .btn-gradient:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .content-row { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: var(--surface); border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 10px; transition: 0.2s; }
-        .content-row:hover { border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .type-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        /* Form Inputs */
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; font-weight: 700; font-size: 0.85rem; color: var(--text-light); margin-bottom: 6px; }
+        .input-control { width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 0.95rem; outline: none; transition: 0.2s; }
+        .input-control:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
+        
+        /* Tree View Hierarchy */
+        .tree-subject { margin-bottom: 1.5rem; background: var(--surface); border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+        .tree-subject-header { background: #f8fafc; padding: 1rem 1.5rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #e2e8f0; font-size: 1.1rem; display: flex; justify-content: space-between; }
+        .tree-chapter { padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
+        .tree-chapter:last-child { border-bottom: none; }
+        .tree-chapter-title { font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .tree-chapter-title::before { content: ''; width: 4px; height: 16px; background: var(--secondary); border-radius: 4px; }
+        
+        .content-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; background: #fafcff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; transition: 0.2s; }
+        .content-row:hover { border-color: var(--primary); background: white; }
+        .type-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .type-vid { background: #fee2e2; color: #ef4444; }
         .type-pdf { background: #eff6ff; color: #3b82f6; }
         .type-dpp { background: #fef3c7; color: #d97706; }
 
-        /* Toast */
         #toast { position: fixed; bottom: 30px; right: 30px; background: white; padding: 1rem 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-weight: 700; transform: translateX(150%); transition: 0.4s; z-index: 9999; border-left: 5px solid var(--primary); }
         #toast.active { transform: translateX(0); }
     </style>
 </head>
 <body>
 
-    <div id="auth-verifier">
-        <div class="spinner"></div>
-        <h2 style="font-weight: 700; letter-spacing: 1px;">Verifying Admin Authorization...</h2>
-        <p style="color: #94a3b8; margin-top: 10px; font-size: 0.9rem;">Connecting to VidyaPlus Secure Servers</p>
-    </div>
+    <div id="auth-verifier"><div class="spinner"></div><h2>Verifying Authorization...</h2></div>
 
     <div id="security-lock">
         <div class="lock-box">
             <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
             <h2 style="font-weight: 800; font-size: 1.5rem;">Admin PIN Required</h2>
-            <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 5px;">Enter Master PIN to access Studio</p>
             <div class="pin-inputs">
                 <input type="password" maxlength="1" onkeyup="moveToNext(this, 'pin2')">
                 <input type="password" maxlength="1" id="pin2" onkeyup="moveToNext(this, 'pin3')">
@@ -91,7 +96,7 @@
         </div>
     </div>
 
-    <div id="toast">Message here</div>
+    <div id="toast">System Notification</div>
 
     <aside class="sidebar">
         <div class="sidebar-brand">
@@ -119,7 +124,6 @@
             <li><a class="nav-link" onclick="switchView('tracking')" id="nav-tracking"><div class="nav-link-left"><i class="fas fa-chart-line"></i> 8. Batch Tracking</div></a></li>
             <li><a class="nav-link" onclick="switchView('security')" id="nav-security"><div class="nav-link-left"><i class="fas fa-shield-alt"></i> 9. Security Lock</div></a></li>
         </ul>
-        <br>
     </aside>
 
     <main class="main-content">
@@ -138,43 +142,73 @@
             <div id="view-lectures" class="view-section active">
                 <div class="header-slim" style="display: flex; justify-content: space-between;">
                     <h2>Content Studio</h2>
-                    <button class="btn-gradient" onclick="document.getElementById('upload-panel').style.display='block'"><i class="fas fa-upload"></i> Upload New</button>
+                    <button class="btn-gradient" onclick="openUploadPanel()"><i class="fas fa-upload"></i> Upload Material</button>
                 </div>
 
                 <div id="upload-panel" class="premium-card" style="display: none; margin-bottom: 2rem; border: 2px dashed var(--primary);">
-                    <h3 style="margin-bottom: 1.5rem;">Upload Material</h3>
-                    <form id="upload-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">Content Type</label>
-                            <select id="inp-type" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
-                                <option value="lecture">Video Lecture</option>
-                                <option value="pdf">PDF Notes</option>
-                                <option value="dpp">DPP (Daily Practice)</option>
-                            </select>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Upload New Material</h3>
+                        <button onclick="closeUploadPanel()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color: var(--text-light);"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <form id="upload-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="input-group">
+                                <label>Subject Name (Optional for Extra Materials)</label>
+                                <input type="text" id="inp-subject" class="input-control" placeholder="e.g. Physics, Extra Material">
+                            </div>
+                            <div class="input-group">
+                                <label>Chapter / Topic Name</label>
+                                <input type="text" id="inp-chapter" class="input-control" required placeholder="e.g. Electrostatics">
+                            </div>
+                            <div class="input-group">
+                                <label>Content Category</label>
+                                <select id="inp-type" class="input-control" onchange="toggleFormFields()">
+                                    <option value="lecture">Video Lecture</option>
+                                    <option value="pdf">Standalone PDF Notes</option>
+                                    <option value="dpp">DPP (Practice Format)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Content Title</label>
+                                <input type="text" id="inp-title" class="input-control" required placeholder="e.g. Lec 01: Introduction">
+                            </div>
                         </div>
-                        <div>
-                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">Title</label>
-                            <input type="text" id="inp-title" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
+
+                        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 16px; margin: 1rem 0; border: 1px solid #e2e8f0;">
+                            <div class="input-group">
+                                <label>Resource Format</label>
+                                <select id="inp-format" class="input-control" onchange="toggleFormFields()">
+                                    <option value="url">External URL (YouTube / Drive Link)</option>
+                                    <option value="file">Direct File Upload (MP4 / PDF)</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group" id="url-container">
+                                <label id="lbl-main-url">Video/Resource URL</label>
+                                <input type="url" id="inp-url" class="input-control" placeholder="https://...">
+                            </div>
+
+                            <div class="input-group" id="file-container" style="display: none;">
+                                <label id="lbl-main-file">Select File (MP4/PDF)</label>
+                                <input type="file" id="inp-file" class="input-control" accept="video/mp4,application/pdf">
+                                <small style="color: #ef4444; font-weight: 600; margin-top: 5px; display: block;">* Requires Firebase Storage Initialization</small>
+                            </div>
+
+                            <div class="input-group" id="attached-pdf-container">
+                                <label>Attached Class Notes URL (Optional)</label>
+                                <input type="url" id="inp-attached-pdf" class="input-control" placeholder="Link to PDF notes for this specific lecture">
+                            </div>
                         </div>
-                        <div>
-                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">Chapter Name</label>
-                            <input type="text" id="inp-chapter" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
-                        </div>
-                        <div>
-                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">URL (Video/PDF Link)</label>
-                            <input type="text" id="inp-url" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <button type="button" onclick="document.getElementById('upload-panel').style.display='none'" style="padding:10px 20px; border:none; background:#f1f5f9; border-radius:10px; cursor:pointer; font-weight:700;">Cancel</button>
-                            <button type="submit" class="btn-gradient" style="padding:10px 20px;">Save to Database</button>
-                        </div>
+
+                        <button type="submit" class="btn-gradient" style="width: 100%;" id="btn-save-content">Publish Content to Batch</button>
                     </form>
                 </div>
 
                 <div id="content-list-container">
                     <div style="text-align: center; padding: 4rem; color: var(--text-light);">
-                        <i class="fas fa-layer-group fa-3x" style="opacity: 0.2; margin-bottom: 1rem;"></i>
-                        <p>Select a batch above to view its contents.</p>
+                        <i class="fas fa-folder-open fa-3x" style="opacity: 0.2; margin-bottom: 1rem;"></i>
+                        <p>Select a target batch to view organized content hierarchy.</p>
                     </div>
                 </div>
             </div>
@@ -199,8 +233,8 @@
             <div id="view-tracking" class="view-section"><div class="header-slim"><h2>Batch Tracking</h2></div><div class="premium-card"><p>Phase 4 Feature</p></div></div>
 
         </div>
-  </main>
-      <script type="module">
+    </main>
+        <script type="module">
         import { auth, db } from '../js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { collection, getDocs, addDoc, query, doc, deleteDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
