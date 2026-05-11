@@ -421,7 +421,7 @@
             document.getElementById('edit-batch-name').value = batchData.title || '';
             document.getElementById('edit-batch-price').value = batchData.price || '';
             document.getElementById('edit-batch-image').value = batchData.imageUrl || '';
-            document.getElementById('edit-batch-desc').value = batchData.description || '';
+            quillEdit.root.innerHTML = batchData.description || '';
             const subjectsArray = batchData.subject ? batchData.subject.split(', ') : [];
             document.querySelectorAll('#edit-batch-subjects input').forEach(cb => { cb.checked = subjectsArray.includes(cb.value); });
             openModal('edit-modal');
@@ -438,14 +438,14 @@
                     title: document.getElementById('edit-batch-name').value,
                     subject: selectedSubjects,
                     price: document.getElementById('edit-batch-price').value,
-                    description: document.getElementById('edit-batch-desc').value,
+                    description: quillEdit.root.innerHTML,
                     imageUrl: document.getElementById('edit-batch-image').value,
                 });
                 closeModal('edit-modal');
                 showToast("Batch Updated Successfully!", "success");
                 loadBatches();
             } catch (error) { showToast("Failed to update.", "error"); } 
-            finally { btn.innerText = "Save Changes ✅"; batchToEditId = null; }
+            finally { btn.innerText = "Save Changes "; batchToEditId = null; }
         });
 
         window.triggerDelete = (event, batchId) => {
