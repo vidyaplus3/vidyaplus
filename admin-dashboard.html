@@ -15,12 +15,18 @@
         .sidebar-brand { padding: 1.5rem; font-size: 1.3rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #f1f5f9; }
         .nav-links { list-style: none; padding: 1rem; flex-grow: 1; }
         .nav-item { margin-bottom: 0.5rem; }
-        .nav-link { display: flex; align-items: center; padding: 0.8rem 1rem; color: #64748b; text-decoration: none; border-radius: 10px; font-weight: 600; transition: 0.3s; }
+        .nav-link { display: flex; align-items: center; padding: 0.8rem 1rem; color: #64748b; text-decoration: none; border-radius: 10px; font-weight: 600; transition: 0.3s; cursor: pointer; }
         .nav-link i { margin-right: 12px; width: 20px; text-align: center; }
         .nav-link.active, .nav-link:hover { background: #eff6ff; color: var(--primary); }
 
         /* Content Area */
         .main-content { margin-left: 240px; width: calc(100% - 240px); padding: 2.5rem; }
+        
+        /* View Sections (For Toggling Tabs) */
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .header-slim { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 15px; }
         .header-slim h2 { font-size: 1.8rem; font-weight: 800; color: var(--text); }
         
@@ -30,32 +36,51 @@
         .search-box input { width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; outline: none; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         
+        .form-select { padding: 0.8rem 1rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; outline: none; background: var(--white); min-width: 200px; cursor: pointer; color: var(--text); font-weight: 600; }
+        
         .btn-add { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; white-space: nowrap; transition: 0.3s; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
         .btn-add:hover { background: #1d4ed8; transform: translateY(-2px); }
 
-        /* Grid & Cards */
+        /* Grid & Cards (Batches) */
         .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.8rem; }
-        .batch-card { position: relative; background: var(--white); border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+        .batch-card { position: relative; background: var(--white); border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; cursor: pointer; }
         .batch-card:hover { transform: translateY(-6px); box-shadow: 0 12px 20px rgba(0,0,0,0.06); }
-        
-        /* Actions */
         .card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 2; opacity: 0; transition: 0.3s; }
         .batch-card:hover .card-actions { opacity: 1; } 
         .btn-action { background: rgba(255,255,255,0.9); border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn-action.edit { color: var(--primary); }
         .btn-action.delete { color: #ef4444; }
         .btn-action:hover { transform: scale(1.1); background: white; }
-
-        .batch-thumb { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; cursor: pointer; }
-        .batch-info { padding: 1.5rem; cursor: pointer; flex-grow: 1; display: flex; flex-direction: column; }
+        .batch-thumb { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; }
+        .batch-info { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
         .batch-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
         .batch-tag { font-size: 0.7rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 0.4rem 0.8rem; border-radius: 20px; text-transform: uppercase; }
         .status-badge { font-size: 0.7rem; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 4px; }
         .status-badge::before { content: ''; width: 6px; height: 6px; background: #10b981; border-radius: 50%; }
-        
         .batch-title { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; line-height: 1.3; }
         .batch-price { font-size: 1.1rem; font-weight: 800; color: #10b981; margin-top: auto; margin-bottom: 1rem; }
-        .batch-stats { font-size: 0.85rem; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 1rem; display: flex; justify-content: space-between; font-weight: 500; }
+
+        /* Business Dashboard (Students) Styles */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); padding: 1.5rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 15px; }
+        .stat-icon { width: 55px; height: 55px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+        .stat-icon.blue { background: #eff6ff; color: var(--primary); }
+        .stat-icon.green { background: #ecfdf5; color: #10b981; }
+        .stat-icon.purple { background: #f5f3ff; color: #8b5cf6; }
+        .stat-info h4 { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-info h2 { font-size: 1.8rem; color: var(--text); font-weight: 800; margin-top: 5px; }
+
+        .table-container { background: var(--white); border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        .data-table th, .data-table td { padding: 1.2rem 1.5rem; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        .data-table th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table tr:hover { background: #f8fafc; }
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+        .user-details h5 { font-size: 1rem; color: var(--text); margin-bottom: 2px; }
+        .user-details p { font-size: 0.85rem; color: #64748b; }
+        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .status-pill.active { background: #ecfdf5; color: #10b981; }
 
         /* Modals */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); overflow-y: auto; padding: 20px; }
@@ -84,7 +109,7 @@
         .check-label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px 10px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; }
         .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: 0.3s; }
 
-        /* Toast Notifications */
+        /* Toast */
         .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { min-width: 250px; background: white; padding: 1rem 1.5rem; border-radius: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; animation: slideInRight 0.3s ease forwards; border-left: 5px solid; }
         .toast.success { border-color: #10b981; color: #10b981; }
@@ -102,30 +127,93 @@
     </style>
 </head>
 <body>
-
-    <div class="toast-container" id="toast-container"></div>
+        <div class="toast-container" id="toast-container"></div>
 
     <aside class="sidebar">
         <div class="sidebar-brand">VidyaPlus Pro</div>
         <ul class="nav-links">
-            <li class="nav-item"><a href="#" class="nav-link active"><i class="fas fa-layer-group"></i> Batches</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-users"></i> Students</a></li>
+            <li class="nav-item"><a id="nav-batches" onclick="switchAdminTab('batches')" class="nav-link active"><i class="fas fa-layer-group"></i> Batches</a></li>
+            <li class="nav-item"><a id="nav-students" onclick="switchAdminTab('students')" class="nav-link"><i class="fas fa-users"></i> Students</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
-        <header class="header-slim">
-            <h2>Batch Management</h2>
-            <div class="header-actions">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="search-input" placeholder="Search batches by name...">
+        
+        <div id="batches-view" class="view-section active">
+            <header class="header-slim">
+                <h2>Batch Management</h2>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Search batches by name...">
+                    </div>
+                    <button class="btn-add" id="open-add-modal"><i class="fas fa-plus"></i> Create New Batch</button>
                 </div>
-                <button class="btn-add" id="open-add-modal"><i class="fas fa-plus"></i> Create New Batch</button>
+            </header>
+            <div class="batch-grid" id="batches-container">
+                <div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 3rem;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
             </div>
-        </header>
-        <div class="batch-grid" id="batches-container">
-            <div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 3rem;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+        </div>
+
+        <div id="students-view" class="view-section">
+            <header class="header-slim">
+                <h2>Student Management</h2>
+                <div class="header-actions">
+                    <select id="student-batch-select" class="form-select">
+                        <option value="">-- Select a Batch --</option>
+                    </select>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="student-search" placeholder="Search student by name or email...">
+                    </div>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
+                    <div class="stat-info">
+                        <h4>Total Enrolled</h4>
+                        <h2 id="stat-total-students">0</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>Active Students</h4>
+                        <h2 id="stat-active-students">0</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h4>Avg. Engagement</h4>
+                        <h2>High</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student Info</th>
+                            <th>Enrollment Date</th>
+                            <th>Status</th>
+                            <th>Course Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding: 3rem; color: #64748b;">
+                                <i class="fas fa-mouse-pointer fa-2x" style="margin-bottom:10px; opacity: 0.5;"></i><br>
+                                Please select a batch from the dropdown above to view students.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -220,16 +308,21 @@
     </div>
         <script type="module">
         import { db } from './js/firebase-init.js';
-        import { collection, getDocs, addDoc, query, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, addDoc, query, where, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const container = document.getElementById('batches-container');
         const searchInput = document.getElementById('search-input');
         const toastContainer = document.getElementById('toast-container');
         
+        // State variables
         let batchToDeleteId = null; 
         let batchToEditId = null;
         window.loadedBatches = {}; 
+        window.loadedStudents = []; // For Client-side instant search
 
+        // =======================
+        // UI & TAB LOGIC
+        // =======================
         window.showToast = (message, type = "success") => {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -247,6 +340,24 @@
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
         document.getElementById('open-add-modal').addEventListener('click', () => openModal('add-modal'));
 
+        window.switchAdminTab = (tabName) => {
+            // Update Sidebar UI
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('nav-' + tabName).classList.add('active');
+            
+            // Toggle Views
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(tabName + '-view').classList.add('active');
+
+            // Agar student tab par gaye, toh dropdown update karo
+            if(tabName === 'students') {
+                populateStudentDropdown();
+            }
+        };
+
+        // =======================
+        // BATCH MANAGEMENT LOGIC (From previous step)
+        // =======================
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('.batch-card').forEach(card => {
@@ -255,7 +366,6 @@
             });
         });
 
-        // ADD LOGIC
         document.getElementById('add-batch-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             let selectedSubjects = Array.from(document.querySelectorAll('#batch-subjects input:checked')).map(cb => cb.value).join(', ');
@@ -281,7 +391,6 @@
             finally { submitBtn.innerText = "Launch Batch 🚀"; submitBtn.disabled = false; }
         });
 
-        // EDIT LOGIC
         window.triggerEdit = (event, batchId) => {
             event.stopPropagation();
             batchToEditId = batchId;
@@ -292,9 +401,7 @@
             document.getElementById('edit-batch-image').value = batchData.imageUrl || '';
             document.getElementById('edit-batch-desc').value = batchData.description || '';
             const subjectsArray = batchData.subject ? batchData.subject.split(', ') : [];
-            document.querySelectorAll('#edit-batch-subjects input').forEach(cb => {
-                cb.checked = subjectsArray.includes(cb.value);
-            });
+            document.querySelectorAll('#edit-batch-subjects input').forEach(cb => { cb.checked = subjectsArray.includes(cb.value); });
             openModal('edit-modal');
         };
 
@@ -319,7 +426,6 @@
             finally { btn.innerText = "Save Changes ✅"; batchToEditId = null; }
         });
 
-        // DELETE LOGIC
         window.triggerDelete = (event, batchId) => {
             event.stopPropagation(); 
             batchToDeleteId = batchId;
@@ -367,8 +473,117 @@
                             </div>
                         </div>`;
                 });
+                // Agar pehle se students tab pe hai, to dropdown refresh karo
+                populateStudentDropdown();
             } catch (error) { console.error(error); }
         }
+
+        // =======================
+        // STUDENTS DASHBOARD LOGIC 🚀
+        // =======================
+        
+        function populateStudentDropdown() {
+            const select = document.getElementById('student-batch-select');
+            // Purane options clean karo (sirf default chhod ke)
+            select.innerHTML = '<option value="">-- Select a Batch --</option>';
+            Object.keys(window.loadedBatches).forEach(bId => {
+                const batch = window.loadedBatches[bId];
+                select.innerHTML += `<option value="${bId}">${batch.title}</option>`;
+            });
+        }
+
+        document.getElementById('student-batch-select').addEventListener('change', async (e) => {
+            const batchId = e.target.value;
+            const tbody = document.getElementById('students-tbody');
+            if(!batchId) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem; color: #64748b;"><i class="fas fa-mouse-pointer fa-2x" style="margin-bottom:10px; opacity: 0.5;"></i><br>Please select a batch from the dropdown above to view students.</td></tr>`;
+                document.getElementById('stat-total-students').innerText = "0";
+                document.getElementById('stat-active-students').innerText = "0";
+                return;
+            }
+            
+            // Loading State
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem; color: var(--primary);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Fetching Database...</td></tr>`;
+            
+            try {
+                // Magic Query: Wo saare 'users' dhoondho jinke 'enrolledBatches' array me ye batchId hai
+                const q = query(collection(db, "users"), where("enrolledBatches", "array-contains", batchId));
+                const snap = await getDocs(q);
+                
+                window.loadedStudents = [];
+                snap.forEach(doc => {
+                    window.loadedStudents.push({ id: doc.id, ...doc.data() });
+                });
+                
+                renderStudentsTable(window.loadedStudents);
+                
+            } catch (error) {
+                console.error("Student Fetch Error: ", error);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: #ef4444;"><i class="fas fa-exclamation-circle fa-2x"></i><br>Error fetching students!</td></tr>`;
+            }
+        });
+
+        // Instant Student Search
+        document.getElementById('student-search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = window.loadedStudents.filter(s => {
+                const name = (s.displayName || s.name || s.email || "").toLowerCase();
+                const email = (s.email || "").toLowerCase();
+                return name.includes(term) || email.includes(term);
+            });
+            renderStudentsTable(filtered);
+        });
+
+        function renderStudentsTable(studentsArray) {
+            const tbody = document.getElementById('students-tbody');
+            tbody.innerHTML = '';
+            
+            // Update Top Stats
+            document.getElementById('stat-total-students').innerText = studentsArray.length;
+            document.getElementById('stat-active-students').innerText = studentsArray.length;
+
+            if(studentsArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem; color: #64748b;"><i class="fas fa-folder-open fa-2x" style="margin-bottom:10px; opacity:0.5;"></i><br>No students found.</td></tr>`;
+                return;
+            }
+
+            studentsArray.forEach(student => {
+                const name = student.displayName || student.name || student.email.split('@')[0];
+                const initial = name.charAt(0).toUpperCase();
+                // Check for Date
+                let enrolledDate = "N/A";
+                if(student.createdAt && student.createdAt.toDate) {
+                    enrolledDate = new Date(student.createdAt.toDate()).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar">${initial}</div>
+                                <div class="user-details">
+                                    <h5>${name}</h5>
+                                    <p>${student.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span style="color:#64748b; font-weight:500;">${enrolledDate}</span></td>
+                        <td><span class="status-pill active">Active</span></td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="flex:1; height:6px; background:#e2e8f0; border-radius:5px;"><div style="width:15%; height:100%; background:var(--primary); border-radius:5px;"></div></div>
+                                <span style="font-size:0.8rem; font-weight:700; color:#475569;">15%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn-action" style="color:var(--primary); background:#eff6ff;" title="View Student"><i class="fas fa-eye"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Initialize Call
         loadBatches();
     </script>
 </body>
