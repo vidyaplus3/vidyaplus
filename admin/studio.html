@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Studio | VidyaPlus PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #6366f1; --secondary: #ec4899; --gradient: linear-gradient(135deg, #6366f1, #ec4899);
+            --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-light: #64748b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* LAYER 2 SECURITY: Auth Verification Screen */
+        #auth-verifier { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: 0.3s ease; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* BANK LEVEL SECURITY: Master PIN Lock */
+        #security-lock { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s ease; }
+        .lock-box { background: var(--surface); padding: 3rem; border-radius: 24px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .pin-inputs { display: flex; gap: 10px; justify-content: center; margin: 2rem 0; }
+        .pin-inputs input { width: 50px; height: 60px; font-size: 2rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 800; color: var(--primary); outline: none; transition: 0.2s; }
+        .pin-inputs input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(99,102,241,0.2); }
+        #pin-error { color: #ef4444; font-size: 0.85rem; font-weight: 700; opacity: 0; transition: 0.3s; }
+
+        /* Sidebar Hierarchy */
+        .sidebar { width: 280px; background: var(--surface); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; z-index: 10; }
+        .sidebar-brand { padding: 2rem 1.5rem; font-size: 1.5rem; font-weight: 800; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: var(--surface); z-index: 2; }
+        .nav-section-title { font-size: 0.75rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 1.5rem 0.5rem; }
+        .nav-links { list-style: none; padding: 0 1rem; }
+        .nav-link { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.2rem; color: var(--text-light); text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.9rem; transition: 0.3s; cursor: pointer; margin-bottom: 4px; border: 1px solid transparent; }
+        .nav-link-left { display: flex; align-items: center; }
+        .nav-link i { margin-right: 12px; width: 20px; text-align: center; font-size: 1rem; }
+        .nav-link:hover { background: #f8fafc; color: var(--text); border-color: #e2e8f0; }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 10px 15px -3px rgba(99,102,241,0.3); }
+
+        /* Main Workspace */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
+        
+        /* Top Header */
+        .top-header { background: var(--surface); height: 70px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; }
+        .batch-selector { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; color: var(--primary); outline: none; cursor: pointer; }
+        
+        /* Dynamic Views */
+        .workspace-area { flex: 1; overflow-y: auto; padding: 2.5rem; background: var(--bg); }
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-slim h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1.5rem; }
+        .premium-card { background: var(--surface); padding: 1.5rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .btn-gradient { background: var(--gradient); color: white; padding: 0.8rem 1.5rem; border-radius: 30px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(236,72,153,0.3); transition: 0.3s; }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(236,72,153,0.4); }
+
+        .content-row { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: var(--surface); border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 10px; transition: 0.2s; }
+        .content-row:hover { border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .type-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .type-vid { background: #fee2e2; color: #ef4444; }
+        .type-pdf { background: #eff6ff; color: #3b82f6; }
+        .type-dpp { background: #fef3c7; color: #d97706; }
+
+        /* Toast */
+        #toast { position: fixed; bottom: 30px; right: 30px; background: white; padding: 1rem 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-weight: 700; transform: translateX(150%); transition: 0.4s; z-index: 9999; border-left: 5px solid var(--primary); }
+        #toast.active { transform: translateX(0); }
+    </style>
+</head>
+<body>
+
+    <div id="auth-verifier">
+        <div class="spinner"></div>
+        <h2 style="font-weight: 700; letter-spacing: 1px;">Verifying Admin Authorization...</h2>
+        <p style="color: #94a3b8; margin-top: 10px; font-size: 0.9rem;">Connecting to VidyaPlus Secure Servers</p>
+    </div>
+
+    <div id="security-lock">
+        <div class="lock-box">
+            <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h2 style="font-weight: 800; font-size: 1.5rem;">Admin PIN Required</h2>
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 5px;">Enter Master PIN to access Studio</p>
+            <div class="pin-inputs">
+                <input type="password" maxlength="1" onkeyup="moveToNext(this, 'pin2')">
+                <input type="password" maxlength="1" id="pin2" onkeyup="moveToNext(this, 'pin3')">
+                <input type="password" maxlength="1" id="pin3" onkeyup="moveToNext(this, 'pin4')">
+                <input type="password" maxlength="1" id="pin4" onkeyup="checkPin()">
+            </div>
+            <p id="pin-error">Incorrect PIN. Access Denied.</p>
+        </div>
+    </div>
+
+    <div id="toast">Message here</div>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span style="color: var(--text);">Vidya</span><span style="color: var(--secondary);">Plus</span>
+            <span style="background: var(--gradient); color: white; padding: 2px 6px; border-radius: 8px; font-size: 0.6rem; vertical-align: top;">STUDIO</span>
+        </div>
+        
+        <div class="nav-section-title">Content Manager</div>
+        <ul class="nav-links">
+            <li><a class="nav-link active" onclick="switchView('lectures')" id="nav-lectures"><div class="nav-link-left"><i class="fas fa-video"></i> 1. Content Studio</div></a></li>
+            <li><a class="nav-link" onclick="switchView('quiz')" id="nav-quiz"><div class="nav-link-left"><i class="fas fa-question-circle"></i> 2. Quiz Engine</div> <i class="fas fa-lock" style="font-size:0.7rem; opacity:0.5;"></i></a></li>
+        </ul>
+
+        <div class="nav-section-title">Engagement & Users</div>
+        <ul class="nav-links">
+            <li><a class="nav-link" onclick="switchView('doubts')" id="nav-doubts"><div class="nav-link-left"><i class="fas fa-comments"></i> 3. Doubt Section</div></a></li>
+            <li><a class="nav-link" onclick="switchView('community')" id="nav-community"><div class="nav-link-left"><i class="fas fa-users"></i> 4. Community</div> <i class="fas fa-lock" style="font-size:0.7rem; opacity:0.5;"></i></a></li>
+            <li><a class="nav-link" onclick="switchView('notifications')" id="nav-notifications"><div class="nav-link-left"><i class="fas fa-bell"></i> 5. Notifications</div></a></li>
+            <li><a class="nav-link" onclick="switchView('events')" id="nav-events"><div class="nav-link-left"><i class="fas fa-calendar-alt"></i> 6. Events</div></a></li>
+        </ul>
+
+        <div class="nav-section-title">Analytics & Settings</div>
+        <ul class="nav-links">
+            <li><a class="nav-link" onclick="switchView('status')" id="nav-status"><div class="nav-link-left"><i class="fas fa-user-check"></i> 7. Student Status</div></a></li>
+            <li><a class="nav-link" onclick="switchView('tracking')" id="nav-tracking"><div class="nav-link-left"><i class="fas fa-chart-line"></i> 8. Batch Tracking</div></a></li>
+            <li><a class="nav-link" onclick="switchView('security')" id="nav-security"><div class="nav-link-left"><i class="fas fa-shield-alt"></i> 9. Security Lock</div></a></li>
+        </ul>
+        <br>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div>
+                <span style="color: var(--text-light); font-weight: 600; font-size: 0.9rem; margin-right: 10px;">Target Batch:</span>
+                <select id="master-batch-select" class="batch-selector" onchange="loadBatchData()">
+                    <option value="">-- Select Batch to Manage --</option>
+                </select>
+            </div>
+            <button onclick="adminLogout()" style="background:none; border:none; color: var(--text-light); font-weight: 700; cursor: pointer;"><i class="fas fa-sign-out-alt"></i> Secure Logout</button>
+        </header>
+
+        <div class="workspace-area">
+            
+            <div id="view-lectures" class="view-section active">
+                <div class="header-slim" style="display: flex; justify-content: space-between;">
+                    <h2>Content Studio</h2>
+                    <button class="btn-gradient" onclick="document.getElementById('upload-panel').style.display='block'"><i class="fas fa-upload"></i> Upload New</button>
+                </div>
+
+                <div id="upload-panel" class="premium-card" style="display: none; margin-bottom: 2rem; border: 2px dashed var(--primary);">
+                    <h3 style="margin-bottom: 1.5rem;">Upload Material</h3>
+                    <form id="upload-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">Content Type</label>
+                            <select id="inp-type" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
+                                <option value="lecture">Video Lecture</option>
+                                <option value="pdf">PDF Notes</option>
+                                <option value="dpp">DPP (Daily Practice)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">Title</label>
+                            <input type="text" id="inp-title" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
+                        </div>
+                        <div>
+                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">Chapter Name</label>
+                            <input type="text" id="inp-chapter" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
+                        </div>
+                        <div>
+                            <label style="font-weight:700; font-size:0.8rem; color:var(--text-light);">URL (Video/PDF Link)</label>
+                            <input type="text" id="inp-url" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0; margin-top:5px;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button type="button" onclick="document.getElementById('upload-panel').style.display='none'" style="padding:10px 20px; border:none; background:#f1f5f9; border-radius:10px; cursor:pointer; font-weight:700;">Cancel</button>
+                            <button type="submit" class="btn-gradient" style="padding:10px 20px;">Save to Database</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="content-list-container">
+                    <div style="text-align: center; padding: 4rem; color: var(--text-light);">
+                        <i class="fas fa-layer-group fa-3x" style="opacity: 0.2; margin-bottom: 1rem;"></i>
+                        <p>Select a batch above to view its contents.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-security" class="view-section">
+                <div class="header-slim"><h2>Studio Security Settings</h2></div>
+                <div class="premium-card">
+                    <h3 style="margin-bottom: 1rem;"><i class="fas fa-key" style="color: var(--secondary);"></i> Update Master PIN</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">Change the 4-digit code required to enter this Studio.</p>
+                    <input type="password" id="new-pin" placeholder="Enter New 4-Digit PIN" style="padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; outline: none; margin-bottom: 1rem; width: 100%; max-width: 300px;">
+                    <br>
+                    <button class="btn-gradient" onclick="updateMasterPin()">Update PIN</button>
+                </div>
+            </div>
+
+            <div id="view-quiz" class="view-section"><div class="header-slim"><h2>Quiz Engine</h2></div><div class="premium-card"><p>Phase 2 Feature</p></div></div>
+            <div id="view-doubts" class="view-section"><div class="header-slim"><h2>Doubts Center</h2></div><div class="premium-card"><p>Phase 2 Feature</p></div></div>
+            <div id="view-community" class="view-section"><div class="header-slim"><h2>Community</h2></div><div class="premium-card"><p>Phase 3 Feature</p></div></div>
+            <div id="view-notifications" class="view-section"><div class="header-slim"><h2>Push Notifications</h2></div><div class="premium-card"><p>Phase 3 Feature</p></div></div>
+            <div id="view-events" class="view-section"><div class="header-slim"><h2>Live Events</h2></div><div class="premium-card"><p>Phase 3 Feature</p></div></div>
+            <div id="view-status" class="view-section"><div class="header-slim"><h2>Student Status</h2></div><div class="premium-card"><p>Phase 4 Feature</p></div></div>
+            <div id="view-tracking" class="view-section"><div class="header-slim"><h2>Batch Tracking</h2></div><div class="premium-card"><p>Phase 4 Feature</p></div></div>
+
+        </div>
+  </main>
+      <script type="module">
+        import { auth, db } from '../js/firebase-init.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, getDocs, addDoc, query, doc, deleteDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // 1. FIREBASE ROUTE PROTECTION (The Firewall)
+        // ==========================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists() && docSnap.data().role === 'admin') {
+                        // SUCCESS: Hacker test passed.
+                        document.getElementById('auth-verifier').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('auth-verifier').style.display = 'none';
+                            document.getElementById('security-lock').style.display = 'flex'; // Show PIN lock next
+                        }, 300);
+                        fetchBatches(); // Load data in background
+                    } else {
+                        // FAILED: Normal user trying to access admin
+                        await signOut(auth);
+                        window.location.href = 'login.html';
+                    }
+                } catch (error) {
+                    window.location.href = 'login.html';
+                }
+            } else {
+                // FAILED: Not even logged in
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.adminLogout = async () => {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        };
+
+        // ==========================================
+        // 2. BANK LEVEL PIN LOCK (Local Security)
+        // ==========================================
+        let masterPin = localStorage.getItem('vp_studio_pin') || "1234";
+
+        window.moveToNext = (curr, nextId) => {
+            if (curr.value.length === 1 && nextId) document.getElementById(nextId).focus();
+        };
+
+        window.checkPin = () => {
+            const inputs = document.querySelectorAll('.pin-inputs input');
+            let entered = "";
+            inputs.forEach(inp => entered += inp.value);
+            
+            if (entered.length === 4) {
+                if (entered === masterPin) {
+                    document.getElementById('security-lock').style.opacity = '0';
+                    setTimeout(() => document.getElementById('security-lock').style.display = 'none', 500);
+                } else {
+                    document.getElementById('pin-error').style.opacity = '1';
+                    inputs.forEach(inp => { inp.value = ''; inp.style.borderColor = '#ef4444'; });
+                    inputs[0].focus();
+                    setTimeout(() => {
+                        document.getElementById('pin-error').style.opacity = '0';
+                        inputs.forEach(inp => inp.style.borderColor = '#e2e8f0');
+                    }, 2000);
+                }
+            }
+        };
+
+        window.updateMasterPin = () => {
+            const newPin = document.getElementById('new-pin').value;
+            if(newPin.length !== 4) return showMsg("PIN must be exactly 4 digits!");
+            localStorage.setItem('vp_studio_pin', newPin);
+            masterPin = newPin;
+            document.getElementById('new-pin').value = '';
+            showMsg("Master PIN Updated Successfully! 🔒");
+        };
+
+        // ==========================================
+        // 3. UI & TAB NAVIGATION
+        // ==========================================
+        window.showMsg = (msg) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('active');
+            setTimeout(() => t.classList.remove('active'), 3000);
+        };
+
+        window.switchView = (viewId) => {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('nav-' + viewId).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+        };
+
+        // ==========================================
+        // 4. CONTENT ENGINE (Lectures, Notes, DPP)
+        // ==========================================
+        const batchSelect = document.getElementById('master-batch-select');
+        const contentContainer = document.getElementById('content-list-container');
+
+        async function fetchBatches() {
+            const snap = await getDocs(collection(db, "batches"));
+            batchSelect.innerHTML = '<option value="">-- Select Batch to Manage --</option>';
+            snap.forEach(doc => {
+                batchSelect.innerHTML += `<option value="${doc.id}">${doc.data().title}</option>`;
+            });
+        }
+
+        window.loadBatchData = async () => {
+            const batchId = batchSelect.value;
+            if(!batchId) {
+                contentContainer.innerHTML = '<p style="text-align:center; padding:2rem;">Select a batch above.</p>';
+                return;
+            }
+
+            contentContainer.innerHTML = `<div style="text-align:center; padding:3rem;"><div class="spinner" style="margin:0 auto; border-left-color:var(--primary);"></div></div>`;
+            try {
+                const matRef = collection(db, "batches", batchId, "materials");
+                const snap = await getDocs(query(matRef));
+                
+                contentContainer.innerHTML = '';
+                if(snap.empty) {
+                    contentContainer.innerHTML = `<p style="text-align:center; padding:2rem; color:var(--text-light);">No content in this batch. Upload something!</p>`;
+                    return;
+                }
+
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    let badgeClass = "type-vid"; let badgeText = "Video"; let icon = "fa-video";
+                    if(data.type === "pdf") { badgeClass = "type-pdf"; badgeText = "Notes"; icon = "fa-file-pdf"; }
+                    if(data.type === "dpp") { badgeClass = "type-dpp"; badgeText = "DPP"; icon = "fa-tasks"; }
+
+                    contentContainer.innerHTML += `
+                        <div class="content-row">
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; display: flex; justify-content: center; align-items: center; color: var(--text-light);">
+                                    <i class="fas ${icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 style="font-size: 1rem; color: var(--text);">${data.title}</h4>
+                                    <p style="font-size: 0.8rem; color: var(--text-light);">Chapter: ${data.chapter || 'General'}</p>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <span class="type-badge ${badgeClass}">${badgeText}</span>
+                                <button onclick="deleteContent('${docSnap.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem;"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) { showMsg("Error loading content"); }
+        };
+
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const batchId = batchSelect.value;
+            if(!batchId) return showMsg("Select a batch first!");
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Saving...";
+            
+            const type = document.getElementById('inp-type').value;
+            const url = document.getElementById('inp-url').value;
+
+            const payload = {
+                type: type,
+                title: document.getElementById('inp-title').value,
+                chapter: document.getElementById('inp-chapter').value,
+                status: "Active",
+                createdAt: serverTimestamp()
+            };
+
+            if(type === 'lecture') payload.videoUrl = url;
+            else payload.pdfUrl = url;
+
+            try {
+                await addDoc(collection(db, "batches", batchId, "materials"), payload);
+                showMsg("Uploaded Successfully!");
+                document.getElementById('upload-form').reset();
+                document.getElementById('upload-panel').style.display = 'none';
+                loadBatchData(); 
+            } catch (err) { showMsg("Upload failed."); } 
+            finally { submitBtn.innerText = "Save to Database"; }
+        });
+
+        window.deleteContent = async (matId) => {
+            if(!confirm("Delete this material permanently?")) return;
+            const batchId = batchSelect.value;
+            try {
+                await deleteDoc(doc(db, "batches", batchId, "materials", matId));
+                showMsg("Material Deleted.");
+                loadBatchData();
+            } catch (err) { showMsg("Failed to delete."); }
+        };
+    </script>
+</body>
+</html>
