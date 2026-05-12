@@ -171,9 +171,12 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 1.5rem;">
                             <div class="input-group" id="group-subject">
-                                <label>Subject Name</label>
-                                <input type="text" id="inp-subject" class="input-control" placeholder="e.g. Physics">
+    <label>Subject Name</label>
+    <select id="inp-subject" class="input-control" required>
+        <option value="">-- Automatically loaded from batch --</option>
+    </select>
                             </div>
+                            
                             <div class="input-group" id="group-chapter">
                                 <label>Chapter Name</label>
                                 <input type="text" id="inp-chapter" class="input-control" placeholder="e.g. Electrostatics">
@@ -409,17 +412,21 @@
                 icon.style.transform = 'rotate(180deg)';
             }
         };
-
-        // ==========================================
+                    // ==========================================
         // 3. SMART HIERARCHICAL ENGINE
         // ==========================================
         const batchSelect = document.getElementById('master-batch-select');
         const contentContainer = document.getElementById('content-list-container');
+        window.batchesData = {}; // 🚨 NAYA: Batch details global save karne ke liye
 
         async function fetchBatches() {
             const snap = await getDocs(collection(db, "batches"));
             batchSelect.innerHTML = '<option value="">-- Select Batch to Manage --</option>';
-            snap.forEach(doc => { batchSelect.innerHTML += `<option value="${doc.id}">${doc.data().title}</option>`; });
+            snap.forEach(doc => { 
+                const data = doc.data();
+                window.batchesData[doc.id] = data; // Cache data
+                batchSelect.innerHTML += `<option value="${doc.id}">${data.title}</option>`; 
+            });
         }
 
         window.loadBatchData = async () => {
@@ -428,6 +435,21 @@
                 contentContainer.innerHTML = '<div style="text-align:center; padding:4rem; color:var(--text-light);"><i class="fas fa-folder-open fa-3x" style="opacity:0.2;"></i><p>Select a target batch to view organized content hierarchy.</p></div>';
                 closeUploadPanel();
                 return;
+            }
+
+            // 🚨 SMART FIX: Dropdown me automatically subjects daalo
+            const batchData = window.batchesData[batchId];
+            const subjectSelect = document.getElementById('inp-subject');
+            subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+            
+            if (batchData && batchData.subject) {
+                // Comma (,) se split karke list banayega
+                const subjectsList = batchData.subject.split(',').map(s => s.trim()).filter(s => s !== "");
+                subjectsList.forEach(sub => {
+                    subjectSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
+                });
+            } else {
+                subjectSelect.innerHTML += `<option value="General">General</option>`;
             }
 
             contentContainer.innerHTML = `<div style="text-align:center; padding:3rem;"><div class="spinner" style="margin:0 auto; border-left-color:var(--primary);"></div></div>`;
@@ -619,7 +641,17 @@
                 document.getElementById('inp-target-area').value = "chapter_content";
             }
 
-            document.getElementById('inp-subject').value = data.subject !== "Batch Resources" ? (data.subject || "") : "";
+                        // NAYA Edit logic for dropdown
+            const targetSubject = data.subject !== "Batch Resources" ? (data.subject || "") : "";
+            const subjectSelect = document.getElementById('inp-subject');
+            
+            // Ensure item exists in dropdown
+            let optionExists = Array.from(subjectSelect.options).some(opt => opt.value === targetSubject);
+            if (!optionExists && targetSubject) {
+                subjectSelect.innerHTML += `<option value="${targetSubject}">${targetSubject}</option>`;
+            }
+            subjectSelect.value = targetSubject;
+                
             document.getElementById('inp-chapter').value = (data.chapter !== "Subject Materials" && data.chapter !== "General Files") ? (data.chapter || "") : "";
             document.getElementById('inp-type').value = data.type || "lecture";
             document.getElementById('inp-title').value = data.title || "";
