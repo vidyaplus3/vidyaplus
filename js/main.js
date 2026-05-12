@@ -20,8 +20,8 @@ window.skipVideo = VideoPlayer.skipVideo;
 window.setSpeed = VideoPlayer.setSpeed;
 window.closeClassroom = VideoPlayer.closeVideo;
 window.openVideo = (vidUrl, title, pdfUrl) => {
-    VideoPlayer.openVideo(vidUrl, title, pdfUrl); // Pehle video chalayega
-    window.switchClassroomTab('comments'); // 🚨 FIX: Turant discussion tab ko load karega
+    VideoPlayer.openVideo(vidUrl, title, pdfUrl); 
+    window.switchClassroomTab('comments'); 
 };
 window.showUI = VideoPlayer.showUI;
 window.handleShieldClick = VideoPlayer.handleShieldClick;
@@ -30,16 +30,14 @@ window.startDrag = VideoPlayer.startDrag;
 window.stopDrag = VideoPlayer.stopDrag;
 window.doDrag = VideoPlayer.doDrag;
 
-
 window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
 window.togglePDFFull = PDFViewer.togglePDFFull;
 
-// 🚦 🚨 NAYA ROUTING ENGINE: Screen Dikhayega + Data Render Karega
+// 🚦 ROUTING ENGINE
 window.handleScreenRender = (screenId) => {
-    UI.showScreen(screenId); // CSS classes change karega
+    UI.showScreen(screenId); 
     
-    // Automatically related data ko load karega!
     if (screenId === 'subjects') window.renderSubjects();
     if (screenId === 'chapters' && AppState.currentSubject) window.renderChapters(AppState.currentSubject);
     if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
@@ -73,7 +71,7 @@ window.navigate = (screenId, payload = {}) => {
     window.location.hash = screenId;
 };
 
-// 🧠 BUSINESS LOGIC
+// 🧠 BUSINESS LOGIC & SMART DATA FILTERING
 window.switchBatch = async (batchId) => {
     const batchNameEl = document.getElementById('current-batch-name');
     if (batchNameEl) batchNameEl.innerText = "Loading...";
@@ -82,7 +80,7 @@ window.switchBatch = async (batchId) => {
     AppState.currentBatchId = batchId;
     
     const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
-    window.handleScreenRender(initialScreen); // 🚨 FIX: Automatically render initially
+    window.handleScreenRender(initialScreen); 
 
     const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
     
@@ -102,30 +100,82 @@ window.switchBatch = async (batchId) => {
         const q = query(matRef, where("status", "==", "Active"));
         const matSnap = await getDocs(q);
 
+        // 🚨 NAYA SMART ROUTING TREE
         AppState.materialsTree = {};
+        AppState.globalResources = [];
+        AppState.subjectMaterials = {};
+
         matSnap.forEach(docSnap => {
             const data = docSnap.data();
-            const subject = data.subject || "General", chapter = data.chapter || "Uncategorized";
-            if (!AppState.materialsTree[subject]) AppState.materialsTree[subject] = {};
-            if (!AppState.materialsTree[subject][chapter]) AppState.materialsTree[subject][chapter] = [];
-            AppState.materialsTree[subject][chapter].push(data);
+            const targetLayer = data.targetLayer || "";
+            const subject = data.subject || "General";
+            const chapter = data.chapter || "Uncategorized";
+
+            // Filter logic matches Admin Studio categories
+            if (targetLayer === 'global_resource' || subject === 'Batch Resources') {
+                AppState.globalResources.push(data);
+            } else if (targetLayer === 'subject_material' || chapter === 'Subject Materials') {
+                if (!AppState.subjectMaterials[subject]) AppState.subjectMaterials[subject] = [];
+                AppState.subjectMaterials[subject].push(data);
+            } else {
+                if (!AppState.materialsTree[subject]) AppState.materialsTree[subject] = {};
+                if (!AppState.materialsTree[subject][chapter]) AppState.materialsTree[subject][chapter] = [];
+                AppState.materialsTree[subject][chapter].push(data);
+            }
         });
-        window.handleScreenRender(initialScreen); // 🚨 FIX: Data aane ke baad bhi wapas render karo
+        window.handleScreenRender(initialScreen); 
     } catch (error) { console.error("Batch Load Error:", error); }
 };
 
+// 🚨 SMART TAB SWITCHER
 window.switchTab = (btnElement, listId) => {
     UI.switchTabUI(btnElement);
     if (listId === 'resource-list') { 
-        const sl = document.getElementById('subject-list');
-        if(sl) sl.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>No resources currently available.</h4></div>`; 
+        window.renderExtraMaterials('subject-list', AppState.globalResources, "No global resources (Timetable, Syllabus) available yet."); 
     } 
     else if (listId === 'subject-list') { window.renderSubjects(); } 
     else if (listId === 'chapter-material') { 
-        const cl = document.getElementById('chapter-list');
-        if(cl) cl.innerHTML = `<div class="empty-box"><i class="fas fa-file-alt"></i><h4>No material found for this subject.</h4></div>`; 
+        const mats = AppState.subjectMaterials[AppState.currentSubject] || [];
+        window.renderExtraMaterials('chapter-list', mats, "No extra material (Formula sheets, Docs) found for this subject."); 
     } 
     else if (listId === 'chapter-list') { window.renderChapters(AppState.currentSubject); }
+};
+
+// 🚨 NAYA FUNCTION: Extra Materials Render karne ke liye
+window.renderExtraMaterials = (containerId, items, emptyMsg) => {
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML = '';
+    
+    if(!items || items.length === 0) {
+        container.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>${emptyMsg}</h4></div>`;
+        return;
+    }
+    
+    items.forEach(mat => {
+        let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Resource";
+        let url = mat.pdfUrl || mat.linkUrl || mat.videoUrl || "";
+        let safeUrl = url.replace(/['"\\]/g, "");
+        
+        let icon = 'fa-link'; let color = '#3B82F6'; let badge = 'LINK';
+        if(mat.type === 'pdf') { icon = 'fa-file-pdf'; color = '#EF4444'; badge = 'PDF'; }
+        if(mat.type === 'dpp') { icon = 'fa-tasks'; color = '#F59E0B'; badge = 'DPP'; }
+
+        let btnHtml = `<button onclick="window.open('${safeUrl}', '_blank')" style="background: ${color}; border:none; padding: 6px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Open</button>`;
+        if(mat.type === 'pdf' || mat.type === 'dpp' || mat.pdfUrl) {
+            btnHtml = `<button onclick="openPDF('${safeUrl}', '${safeTitle}')" style="background: ${color}; border:none; padding: 6px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">View</button>`;
+        }
+
+        container.innerHTML += `
+            <div class="list-card">
+                <div class="card-icon" style="background: ${color}15; color: ${color};"><i class="fas ${icon}"></i></div>
+                <div class="card-info">
+                    <div class="card-title">${mat.title}</div>
+                    <div class="card-sub" style="margin-top:4px;"><span style="font-size:0.65rem; background:${color}20; color:${color}; padding:2px 6px; border-radius:4px; font-weight:800;">${badge}</span></div>
+                </div>
+                ${btnHtml}
+            </div>`;
+    });
 };
 
 window.renderSubjects = () => {
@@ -134,7 +184,7 @@ window.renderSubjects = () => {
     container.innerHTML = ''; 
     const subjects = Object.keys(AppState.materialsTree);
     if (subjects.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; return; }
-    subjects.forEach(subject => { container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; });
+    subjects.forEach(subject => { container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials & lectures</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; });
 };
 
 window.renderChapters = (subjectName) => {
@@ -180,7 +230,9 @@ window.filterClassroom = (filterType, btnElement = null) => {
             btns += `<button class="action-btn" onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
         }
         if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-            btns += `<button class="action-btn play" onclick="openVideo('${safeVid}', '${safeTitle}', '${safePdf}')"><i class="fas fa-play"></i> Watch</button>`;
+            // 🚨 NAYA: video open karte waqt attached PDF ka data bhi bhej rahe hain
+            let attach = mat.attachedPdfUrl ? mat.attachedPdfUrl.replace(/['"\\]/g, "") : "";
+            btns += `<button class="action-btn play" onclick="openVideo('${safeVid}', '${safeTitle}', '${attach}')"><i class="fas fa-play"></i> Watch</button>`;
         }
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
     });
@@ -213,7 +265,9 @@ window.switchClassroomTab = (type) => {
             </div>
         `;
     } else if (type === 'notes') {
-        const pdf = VideoPlayer.currentClassroomData ? VideoPlayer.currentClassroomData.pdfUrl : '';
+        // 🚨 NAYA: Ye PDF check ab accurately attachedPdfUrl aur normal pdfUrl dono ko check karta hai!
+        const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
+        
         if (pdf && pdf !== 'undefined' && pdf !== '') {
             let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes";
             let safePdf = pdf.replace(/['"\\]/g, "");
@@ -223,7 +277,7 @@ window.switchClassroomTab = (type) => {
                 <div class="list-card" style="background: #fdf2f2; border-color: #fecaca;">
                     <div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div>
                     <div class="card-info">
-                        <div class="card-title">Reference Material.pdf</div>
+                        <div class="card-title">Class_Notes.pdf</div>
                         <div class="card-sub">Select to view</div>
                     </div>
                     <button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
@@ -253,4 +307,3 @@ initAuth((batches) => {
     let bToLoad = AppState.currentBatchId || batches[batches.length - 1];
     window.switchBatch(bToLoad); 
 });
-        
