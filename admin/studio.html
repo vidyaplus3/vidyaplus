@@ -172,7 +172,96 @@
                 </div>
             </div>
 
-            <div id="view-quiz" class="view-section"><div class="header-slim"><h2>Quiz Engine</h2></div><div class="premium-card"><p>Phase 2 Feature</p></div></div>
+                        <div id="view-quiz" class="view-section">
+                <div class="header-slim" style="display: flex; justify-content: space-between;">
+                    <h2>Advanced Test Engine</h2>
+                    <button class="btn-gradient" onclick="openQuizPanel()"><i class="fas fa-plus-circle"></i> Create Master Test</button>
+                </div>
+
+                <div id="quiz-panel" class="premium-card" style="display: none; margin-bottom: 2rem; border: 2px dashed var(--secondary);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3><i class="fas fa-cogs" style="color:var(--secondary);"></i> Configure Mock Test</h3>
+                        <button onclick="closeQuizPanel()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <form id="quiz-config-form">
+                        <div style="background: #eff6ff; padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #bfdbfe;">
+                            <label style="font-weight:800; font-size:0.9rem; color:var(--primary-dark); margin-bottom: 10px; display:block;">1. Exam Parameters</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div class="input-group">
+                                    <label>Test Title</label>
+                                    <input type="text" id="q-title" class="input-control" required placeholder="e.g. JEE Full Syllabus Mock 01">
+                                </div>
+                                <div class="input-group">
+                                    <label>Duration (Minutes)</label>
+                                    <input type="number" id="q-duration" class="input-control" required placeholder="e.g. 180">
+                                </div>
+                                <div class="input-group">
+                                    <label>Target Category</label>
+                                    <select id="q-subject" class="input-control" required>
+                                        <option value="Full Mock Test">Full Mock Test</option>
+                                        <option value="Physics">Physics Only</option>
+                                        <option value="Chemistry">Chemistry Only</option>
+                                        <option value="Mathematics">Mathematics Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+                            <label style="font-weight:800; font-size:0.9rem; color:var(--text); margin-bottom: 10px; display:block;">2. Add Question to Section</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr; gap: 10px; align-items: end;">
+                                <div class="input-group" style="margin-bottom:0;">
+                                    <label>Section</label>
+                                    <select id="q-curr-section" class="input-control">
+                                        <option value="Physics">Physics</option>
+                                        <option value="Chemistry">Chemistry</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="Biology">Biology</option>
+                                        <option value="Aptitude">Aptitude</option>
+                                    </select>
+                                </div>
+                                <div class="input-group" style="margin-bottom:0;">
+                                    <label>Question Type</label>
+                                    <select id="q-curr-type" class="input-control">
+                                        <option value="single">Single Choice MCQ</option>
+                                        <option value="multiple">Multiple Correct MCQ</option>
+                                        <option value="numerical">Numerical / Integer</option>
+                                    </select>
+                                </div>
+                                <div class="input-group" style="margin-bottom:0;">
+                                    <label>Marks (+)</label>
+                                    <input type="number" id="q-mark-plus" class="input-control" value="4" required>
+                                </div>
+                                <div class="input-group" style="margin-bottom:0;">
+                                    <label>Negative (-)</label>
+                                    <input type="number" id="q-mark-minus" class="input-control" value="1" required>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addNewQuestionField()" class="btn-gradient" style="width: 100%; margin-top: 15px; background: var(--secondary); box-shadow:none;"><i class="fas fa-plus"></i> Generate Question Block</button>
+                        </div>
+
+                        <div id="questions-container" style="margin-bottom: 1.5rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                                <h4 style="color: var(--text-main);">Test Blueprint</h4>
+                                <span style="font-size:0.8rem; background:#e2e8f0; padding:4px 10px; border-radius:12px; font-weight:700;">Total Qs: <span id="q-count">0</span></span>
+                            </div>
+                            <div id="q-list-items">
+                                </div>
+                        </div>
+
+                        <button type="submit" class="btn-gradient" style="width: 100%; font-size: 1.1rem; padding: 15px;" id="btn-save-quiz">Publish Test to App 🚀</button>
+                    </form>
+                </div>
+
+                <div id="quiz-list-container">
+                    <div style="text-align: center; padding: 4rem; color: var(--text-light);">
+                        <i class="fas fa-file-alt fa-3x" style="opacity: 0.2; margin-bottom: 1rem;"></i>
+                        <p>Select a batch to view and manage Mock Tests.</p>
+                    </div>
+                </div>
+                        </div>
+            
             <div id="view-doubts" class="view-section"><div class="header-slim"><h2>Doubts Center</h2></div><div class="premium-card"><p>Phase 2 Feature</p></div></div>
             <div id="view-community" class="view-section"><div class="header-slim"><h2>Community</h2></div><div class="premium-card"><p>Phase 3 Feature</p></div></div>
             <div id="view-notifications" class="view-section"><div class="header-slim"><h2>Push Notifications</h2></div><div class="premium-card"><p>Phase 3 Feature</p></div></div>
@@ -184,5 +273,6 @@
     </main>
             <script type="module" src="js/core.js"></script>
     <script type="module" src="js/content-engine.js"></script>
+    <script type="module" src="js/quiz-engine.js"></script>
 </body>
 </html>
