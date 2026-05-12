@@ -172,7 +172,7 @@
                 </div>
             </div>
 
-                        <div id="view-quiz" class="view-section">
+                                    <div id="view-quiz" class="view-section">
                 <div class="header-slim" style="display: flex; justify-content: space-between;">
                     <h2>Advanced Test Engine</h2>
                     <button class="btn-gradient" onclick="openQuizPanel()"><i class="fas fa-plus-circle"></i> Create Master Test</button>
@@ -186,71 +186,39 @@
 
                     <form id="quiz-config-form">
                         <div style="background: #eff6ff; padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #bfdbfe;">
-                            <label style="font-weight:800; font-size:0.9rem; color:var(--primary-dark); margin-bottom: 10px; display:block;">1. Exam Parameters</label>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div class="input-group">
+                                <div class="input-group" style="margin:0;">
                                     <label>Test Title</label>
                                     <input type="text" id="q-title" class="input-control" required placeholder="e.g. JEE Full Syllabus Mock 01">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group" style="margin:0;">
                                     <label>Duration (Minutes)</label>
                                     <input type="number" id="q-duration" class="input-control" required placeholder="e.g. 180">
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group" style="margin:0;">
                                     <label>Target Category</label>
                                     <select id="q-subject" class="input-control" required>
                                         <option value="Full Mock Test">Full Mock Test</option>
                                         <option value="Physics">Physics Only</option>
                                         <option value="Chemistry">Chemistry Only</option>
                                         <option value="Mathematics">Mathematics Only</option>
+                                        <option value="Biology">Biology Only</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
-                        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
-                            <label style="font-weight:800; font-size:0.9rem; color:var(--text); margin-bottom: 10px; display:block;">2. Add Question to Section</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr; gap: 10px; align-items: end;">
-                                <div class="input-group" style="margin-bottom:0;">
-                                    <label>Section</label>
-                                    <select id="q-curr-section" class="input-control">
-                                        <option value="Physics">Physics</option>
-                                        <option value="Chemistry">Chemistry</option>
-                                        <option value="Mathematics">Mathematics</option>
-                                        <option value="Biology">Biology</option>
-                                        <option value="Aptitude">Aptitude</option>
-                                    </select>
-                                </div>
-                                <div class="input-group" style="margin-bottom:0;">
-                                    <label>Question Type</label>
-                                    <select id="q-curr-type" class="input-control">
-                                        <option value="single">Single Choice MCQ</option>
-                                        <option value="multiple">Multiple Correct MCQ</option>
-                                        <option value="numerical">Numerical / Integer</option>
-                                    </select>
-                                </div>
-                                <div class="input-group" style="margin-bottom:0;">
-                                    <label>Marks (+)</label>
-                                    <input type="number" id="q-mark-plus" class="input-control" value="4" required>
-                                </div>
-                                <div class="input-group" style="margin-bottom:0;">
-                                    <label>Negative (-)</label>
-                                    <input type="number" id="q-mark-minus" class="input-control" value="1" required>
-                                </div>
-                            </div>
-                            <button type="button" onclick="addNewQuestionField()" class="btn-gradient" style="width: 100%; margin-top: 15px; background: var(--secondary); box-shadow:none;"><i class="fas fa-plus"></i> Generate Question Block</button>
+                        <div style="position: sticky; top: 70px; background: white; z-index: 10; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="color: var(--primary-dark); font-weight: 800; margin:0;"><i class="fas fa-list-ol"></i> Test Blueprint</h4>
+                            <span id="q-count-display" style="font-size:0.85rem; background:#eff6ff; color:#2563eb; padding:6px 12px; border-radius:20px; font-weight:800;">Total: 0</span>
                         </div>
 
-                        <div id="questions-container" style="margin-bottom: 1.5rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-                                <h4 style="color: var(--text-main);">Test Blueprint</h4>
-                                <span style="font-size:0.8rem; background:#e2e8f0; padding:4px 10px; border-radius:12px; font-weight:700;">Total Qs: <span id="q-count">0</span></span>
+                        <div id="q-list-items">
                             </div>
-                            <div id="q-list-items">
-                                </div>
-                        </div>
 
-                        <button type="submit" class="btn-gradient" style="width: 100%; font-size: 1.1rem; padding: 15px;" id="btn-save-quiz">Publish Test to App 🚀</button>
+                        <button type="button" onclick="addNewQuestionField()" class="btn-gradient" style="width: 100%; margin-bottom: 1.5rem; background: var(--surface); color: var(--primary); border: 2px dashed var(--primary); box-shadow:none;"><i class="fas fa-plus"></i> Add New Question</button>
+
+                        <button type="submit" class="btn-gradient" style="width: 100%; font-size: 1.1rem; padding: 15px;" id="btn-save-quiz">Publish Master Test 🚀</button>
                     </form>
                 </div>
 
@@ -260,7 +228,8 @@
                         <p>Select a batch to view and manage Mock Tests.</p>
                     </div>
                 </div>
-                        </div>
+                                    </div>
+            
             
             <div id="view-doubts" class="view-section"><div class="header-slim"><h2>Doubts Center</h2></div><div class="premium-card"><p>Phase 2 Feature</p></div></div>
             <div id="view-community" class="view-section"><div class="header-slim"><h2>Community</h2></div><div class="premium-card"><p>Phase 3 Feature</p></div></div>
