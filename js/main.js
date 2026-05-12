@@ -182,9 +182,22 @@ window.renderSubjects = () => {
     const container = document.getElementById('subject-list');
     if(!container) return;
     container.innerHTML = ''; 
-    const subjects = Object.keys(AppState.materialsTree);
-    if (subjects.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; return; }
-    subjects.forEach(subject => { container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials & lectures</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; });
+
+    // 🚨 SMART FIX: Engine ab dono jagah check karega (Chapters me bhi aur Materials me bhi)
+    const coreSubjects = Object.keys(AppState.materialsTree || {});
+    const extraSubjects = Object.keys(AppState.subjectMaterials || {});
+    
+    // Dono list ko mila kar duplicates hata dega (taaki do baar Physics na dikhe)
+    const subjects = [...new Set([...coreSubjects, ...extraSubjects])];
+
+    if (subjects.length === 0) { 
+        container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; 
+        return; 
+    }
+    
+    subjects.forEach(subject => { 
+        container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials & lectures</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; 
+    });
 };
 
 window.renderChapters = (subjectName) => {
