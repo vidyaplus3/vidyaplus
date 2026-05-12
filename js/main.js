@@ -215,25 +215,34 @@ window.filterClassroom = (filterType, btnElement = null) => {
     container.innerHTML = '';
     const allMaterials = AppState.materialsTree[AppState.currentSubject]?.[AppState.currentChapter];
     if (!allMaterials) return;
+    
     let items = allMaterials;
+    
+    // 🚨 SMART FIX 1: Filter karte waqt attachedPdfUrl ko bhi check karega
     if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
-    if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl);
+    if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl || m.attachedPdfUrl); 
+    
     if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
     
     items.forEach(mat => {
         let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Study Material";
-        let safePdf = mat.pdfUrl ? mat.pdfUrl.replace(/['"\\]/g, "") : "";
+        
+        // 🚨 SMART FIX 2: Agar standalone pdf nahi hai to attached pdf ko pakdo
+        let actualPdfUrl = mat.pdfUrl || mat.attachedPdfUrl || ""; 
+        let safePdf = actualPdfUrl.replace(/['"\\]/g, "");
         let safeVid = mat.videoUrl ? mat.videoUrl.replace(/['"\\]/g, "") : "";
         
         let btns = '';
-        if (mat.pdfUrl && (filterType === 'all' || filterType === 'notes')) {
+        
+        // 🚨 SMART FIX 3: Card pe Document button dikhayega agar koi bhi PDF hai
+        if (actualPdfUrl && (filterType === 'all' || filterType === 'notes')) {
             btns += `<button class="action-btn" onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
         }
         if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-            // 🚨 NAYA: video open karte waqt attached PDF ka data bhi bhej rahe hain
             let attach = mat.attachedPdfUrl ? mat.attachedPdfUrl.replace(/['"\\]/g, "") : "";
             btns += `<button class="action-btn play" onclick="openVideo('${safeVid}', '${safeTitle}', '${attach}')"><i class="fas fa-play"></i> Watch</button>`;
         }
+        
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
     });
 };
