@@ -7,12 +7,12 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-        <link rel="stylesheet" href="style.css?v=god_mode">
+    <link rel="stylesheet" href="style.css?v=god_mode">
 </head>
 <body>
     <div class="simple-overlay" id="global-overlay" onclick="closeModals()"></div>
-        <div class="simple-modal" id="menu-modal">
+    
+    <div class="simple-modal" id="menu-modal">
         <div style="padding: 30px 20px; background: var(--navy); color: white;">
             <div style="width: 60px; height: 60px; background: white; color: var(--navy); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;" id="userIcon">U</div>
             <h3 id="userName">Student</h3>
@@ -23,7 +23,7 @@
             <div style="font-weight: 600; cursor: pointer;"><i class="fas fa-cog" style="width: 25px;"></i> Settings</div>
             <div style="font-weight: 600; color: #EF4444; cursor: pointer; margin-top: 20px;"><i class="fas fa-sign-out-alt" style="width: 25px;"></i> Logout</div>
         </div>
-        </div>
+    </div>
     
     <div class="simple-modal" id="notif-modal">
         <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
@@ -44,7 +44,6 @@
                     <i class="fas fa-bell" onclick="openNotif()"></i>
                 </div>
                 <div style="font-size: 0.8rem; font-weight: 600; opacity: 0.8; margin-bottom: 5px;">CURRENT BATCH</div>
-                
                 <div style="position: relative;">
                     <div class="batch-selector" onclick="toggleDropdown(event)">
                         <span id="current-batch-name">Loading...</span>
@@ -63,10 +62,9 @@
                         <span class="grid-text">All Classes</span>
                     </div>
                     <div class="grid-item" onclick="navigate('tests')">
-    <div class="grid-icon"><i class="fas fa-file-alt"></i></div>
-    <span class="grid-text">All Tests</span>
+                        <div class="grid-icon"><i class="fas fa-file-alt"></i></div>
+                        <span class="grid-text">All Tests</span>
                     </div>
-                    
                     <div class="grid-item" onclick="alert('Doubts coming soon!')">
                         <div class="grid-icon"><i class="fas fa-question-circle"></i></div>
                         <span class="grid-text">My Doubts</span>
@@ -115,7 +113,7 @@
             <div class="screen-content list-container" id="chapter-list"></div>
         </div>
         
-                <div class="screen" id="classroom">
+        <div class="screen" id="classroom">
             <div class="page-header">
                 <button class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
                 <div class="page-title" id="dyn-chapter-title">Chapter</div>
@@ -141,7 +139,84 @@
                 </div>
         </div>
 
-    </div> <div class="classroom-overlay" id="instruction-mode" style="background: var(--bg); display: none; z-index: 2000; flex-direction: column; height: 100vh; position: fixed; top: 0; left: 0; width: 100%;">
+    </div> <div class="classroom-overlay" id="classroom-mode">
+        <div class="video-fixed-box" id="video-container">
+            <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
+            <div style="width: 100%; height: 100%; pointer-events: none;"><div id="vp-player"></div></div>
+            
+            <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
+            <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
+
+            <div class="custom-controls" id="custom-controls">
+                <button class="ctrl-btn" onclick="skipVideo(-10)" style="position: relative;">
+                    <i class="fas fa-undo" style="font-size: 1.3rem;"></i>
+                    <span style="position: absolute; font-size: 0.5rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -40%);">10</span>
+                </button>
+                
+                <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
+                
+                <button class="ctrl-btn" onclick="skipVideo(10)" style="position: relative;">
+                    <i class="fas fa-redo" style="font-size: 1.3rem;"></i>
+                    <span style="position: absolute; font-size: 0.5rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -40%);">10</span>
+                </button>
+                
+                <div class="time-display" id="time-display">0:00</div>
+                
+                <div class="progress-bar-bg" id="progress-bg" 
+                     onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
+                     ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
+                <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
+                <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
+
+                <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
+                    <div class="settings-header">Playback Settings</div>
+                    <div class="settings-section">
+                        <div class="settings-title">Playback Speed</div>
+                        <div class="settings-options">
+                            <span class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</span>
+                            <span class="speed-opt active" id="spd-1" onclick="setSpeed(1)">1x</span>
+                            <span class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</span>
+                            <span class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</span>
+                            <span class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+
+        <div class="interaction-area">
+            <div class="classroom-tabs">
+                <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
+                <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
+                <div class="tab-pill" id="tab-dpp" onclick="switchClassroomTab('dpp')"><i class="fas fa-tasks"></i> Practice</div>
+            </div>
+            <div class="tab-content-area" id="classroom-dynamic-content"></div>
+        </div>
+    </div> 
+
+    <div class="pdf-overlay" id="pdf-mode">
+        <div class="pdf-header">
+            <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
+            <div class="pdf-title-box">
+                <h3 id="pdf-dyn-title">Study Notes</h3>
+                <span class="pdf-badge">SECURE READER</span>
+            </div>
+            <div class="pdf-actions">
+                <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
+            </div>
+        </div>
+        <div class="pdf-container" id="pdf-viewer-container">
+            <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
+            <div class="pdf-shield" oncontextmenu="return false;"></div>
+            <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
+        </div>
+    </div>
+
+    <div class="classroom-overlay" id="instruction-mode" style="background: var(--bg); display: none; z-index: 2000; flex-direction: column; height: 100vh; position: fixed; top: 0; left: 0; width: 100%;">
         <div class="page-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 15px;">
             <button class="back-btn" onclick="closeInstructions()"><i class="fas fa-times"></i></button>
             <div class="page-title" style="font-size: 1.2rem;">Test Instructions</div>
@@ -193,103 +268,7 @@
             <button class="action-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: var(--primary); color: white; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);" onclick="startTestPlayer()">I am ready to begin <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></button>
         </div>
     </div>
-    
-            
-            <div class="tabs">
-                <button class="tab-btn active" onclick="filterClassroom('all', this)">All</button>
-                <button class="tab-btn" onclick="filterClassroom('lectures', this)">Lectures</button>
-                <button class="tab-btn" onclick="filterClassroom('notes', this)">Notes</button>
-            </div>
-            <div class="screen-content list-container" id="lecture-list"></div>
-        </div>
-    </div>
-    
-        <div class="classroom-overlay" id="classroom-mode">
-        <div class="video-fixed-box" id="video-container">
-            <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
-            <div style="width: 100%; height: 100%; pointer-events: none;"><div id="vp-player"></div></div>
-            
-            <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
-            <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
 
-            <div class="custom-controls" id="custom-controls">
-                
-                <button class="ctrl-btn" onclick="skipVideo(-10)" style="position: relative;">
-                    <i class="fas fa-undo" style="font-size: 1.3rem;"></i>
-                    <span style="position: absolute; font-size: 0.5rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -40%);">10</span>
-                </button>
-                
-                <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                
-                <button class="ctrl-btn" onclick="skipVideo(10)" style="position: relative;">
-                    <i class="fas fa-redo" style="font-size: 1.3rem;"></i>
-                    <span style="position: absolute; font-size: 0.5rem; font-weight: 900; top: 50%; left: 50%; transform: translate(-50%, -40%);">10</span>
-                </button>
-                
-                <div class="time-display" id="time-display">0:00</div>
-                
-                <div class="progress-bar-bg" id="progress-bg" 
-                     onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
-                     ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-
-                <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
-                
-                <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
-                <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
-
-                <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
-                    <div class="settings-header">Playback Settings</div>
-                    
-                    <div class="settings-section">
-                        <div class="settings-title">Playback Speed</div>
-                        <div class="settings-options">
-                            <span class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</span>
-                            <span class="speed-opt active" id="spd-1" onclick="setSpeed(1)">1x</span>
-                            <span class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</span>
-                            <span class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</span>
-                            <span class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</span>
-                        </div>
-                    </div>
-
-                    <div class="settings-section">
-                        <div class="settings-title">Video Quality <span class="badge-na">Not Available</span></div>
-                        <div class="settings-options" style="opacity: 0.5; pointer-events: none;">
-                            <span class="quality-opt active">Auto</span>
-                            <span class="quality-opt">480p</span>
-                            <span class="quality-opt">720p</span>
-                            <span class="quality-opt">1080p</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> <div class="interaction-area">
-            <div class="classroom-tabs">
-                <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
-                <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
-            </div>
-            <div class="tab-content-area" id="classroom-dynamic-content"></div>
-        </div>
-    </div> <div class="pdf-overlay" id="pdf-mode">
-        <div class="pdf-header">
-            <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
-            <div class="pdf-title-box">
-                <h3 id="pdf-dyn-title">Study Notes</h3>
-                <span class="pdf-badge">SECURE READER</span>
-            </div>
-            <div class="pdf-actions">
-                <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
-            </div>
-        </div>
-        
-        <div class="pdf-container" id="pdf-viewer-container">
-            <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
-            <div class="pdf-shield" oncontextmenu="return false;"></div>
-            <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
-        </div>
-    </div>
-    
-        <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
