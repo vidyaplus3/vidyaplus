@@ -16,12 +16,13 @@
         body { background: #ffffff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
 
         /* HEADER */
-        .exam-header { background: white; padding: 8px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .exam-title-text { font-weight: 700; font-size: 0.95rem; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        .exam-header { background: white; padding: 8px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 10px;}
+        .exam-title-text { font-weight: 700; font-size: 0.95rem; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
         
-        /* SLEEK TIMER */
+        .header-actions { display: flex; gap: 8px; align-items: center; }
         .timer-box { background: transparent; color: var(--navy); padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
-        .grid-toggle-btn { background: transparent; color: var(--navy); border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
+        .grid-toggle-btn { background: transparent; color: var(--navy); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
+        .submit-top-btn { background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
 
         /* SECTION TABS */
         .section-bar { background: #f8fafc; padding: 6px 15px; display: flex; gap: 6px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
@@ -93,8 +94,11 @@
         <div>
             <h3 id="exam-title" class="exam-title-text">Assessment</h3>
         </div>
-        <div class="timer-box" id="exam-timer">--:--:--</div>
-        <button class="grid-toggle-btn" onclick="togglePalette()"><i class="fas fa-th"></i> Grid</button>
+        <div class="header-actions">
+            <div class="timer-box" id="exam-timer">--:--:--</div>
+            <button class="grid-toggle-btn" onclick="togglePalette()"><i class="fas fa-th"></i></button>
+            <button class="submit-top-btn" onclick="confirmSubmit()">Submit</button>
+        </div>
     </header>
 
     <div class="section-bar" id="section-tabs-container"></div>
@@ -128,7 +132,7 @@
             </div>
             <div class="palette-grid" id="palette-container"></div>
             <div style="padding: 12px 15px; border-top: 1px solid var(--border); background: white;">
-                <button onclick="confirmSubmit()" style="width: 100%; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">Submit Test</button>
+                <button onclick="confirmSubmit()" style="width: 100%; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">Final Submit</button>
             </div>
         </aside>
     </div>
