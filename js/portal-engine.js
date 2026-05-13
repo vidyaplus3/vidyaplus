@@ -14,8 +14,8 @@ let timeRemaining = 0;
 let timerInterval = null;
 let isSubmitting = false;
 let currentUserId = null; 
+let sections = []; // Subject list store karne ke liye
 
-// 🚨 BROWSER WARNING: Prevent accidental tab close
 window.addEventListener('beforeunload', function (e) {
     if (!isSubmitting) {
         e.preventDefault();
@@ -23,14 +23,12 @@ window.addEventListener('beforeunload', function (e) {
     }
 });
 
-// 1. SECURE INITIALIZATION
 onAuthStateChanged(auth, async (user) => {
     if (!user) { alert("Authentication failed. Please log in again."); window.close(); return; }
     currentUserId = user.uid; 
 
     if(!testId || !batchId) { alert("Invalid Assessment Session."); window.close(); return; }
 
-    // Check if already submitted in this session
     if(sessionStorage.getItem('submitted_' + testId)) {
         showSuccessScreen("Assessment already submitted.");
         return;
@@ -58,6 +56,14 @@ function initializePortal() {
     document.getElementById('exam-title').innerText = testData.title;
     timeRemaining = testData.duration * 60;
     
+    // 🚨 NAYA LOGIC: Subjects collect karke Dropdown me daalo
+    sections = [...new Set(testData.questions.map(q => q.section || "General"))];
+    const selector = document.getElementById('subject-selector');
+    selector.innerHTML = '';
+    sections.forEach(sec => {
+        selector.innerHTML += `<option value="${sec}">${sec}</option>`;
+    });
+
     startTimer();
     renderQuestion();
     renderPalette();
@@ -75,15 +81,22 @@ function startTimer() {
         const mins = Math.floor((timeRemaining % 3600) / 60);
         const secs = timeRemaining % 60;
         
-        // Naye sleek timer me update karega
         document.getElementById('timer-val').innerText = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
-        // Laal background hatne ki wajah se, last 5 mins me sirf text color RED hoga
         if(timeRemaining < 300) {
             document.getElementById('timer-val').style.color = '#ef4444';
         }
-    }, 1000); // 🚨 YE WALE BRACKETS MISSING THE!
+    }, 1000);
 }
+
+// 🚨 NAYA FUNCTION: Dropdown se Subject Jump karne ke liye
+window.jumpToSubject = (secName) => {
+    const firstQOfSec = testData.questions.findIndex(q => (q.section || "General") === secName);
+    if(firstQOfSec !== -1) {
+        currentQIdx = firstQOfSec;
+        renderQuestion();
+    }
+};
 
 window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
@@ -91,9 +104,18 @@ window.renderQuestion = () => {
 
     document.getElementById('q-meta').innerText = `Question ${currentQIdx + 1} of ${testData.questions.length}`;
     
+    // 🚨 NAYA LOGIC: Question Type Badge Update
+    let tText = "Single Correct";
+    if(q.type === 'multiple') tText = "Multiple Correct";
+    if(q.type === 'numerical') tText = "Numerical";
+    document.getElementById('q-type-badge').innerText = `(${tText})`;
+
+    // 🚨 Dropdown ko current question ke subject ke sath sync karo
+    document.getElementById('subject-selector').value = q.section || "General";
+    
     const pM = q.marks?.correct || 4;
     const nM = q.marks?.incorrect || 1;
-    document.getElementById('q-marks').innerText = `[Marks: +${pM}, -${nM}]`;
+    document.getElementById('q-marks').innerText = `[+${pM}, -${nM}]`;
     
     document.getElementById('q-text').innerText = q.questionText || "Missing content";
     
@@ -180,6 +202,10 @@ window.navigateQ = (step) => {
 window.jumpToQ = (idx) => {
     currentQIdx = idx;
     renderQuestion();
+    if(window.innerWidth < 900) {
+        document.getElementById('p-panel').classList.remove('open');
+        document.getElementById('palette-overlay').classList.remove('open');
+    }
 };
 
 function renderPalette() {
@@ -207,7 +233,6 @@ function updatePaletteUI() {
     });
 }
 
-// 🚨 3. FINAL SUBMISSION ENGINE
 window.confirmSubmit = () => {
     if(isSubmitting) return;
     if (confirm("Are you sure you want to final submit the assessment? You cannot modify your answers later.")) {
@@ -220,7 +245,6 @@ async function autoSubmit() {
     isSubmitting = true;
     clearInterval(timerInterval);
     
-    // UI Change to Submitting State
     document.body.innerHTML = `
         <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc;">
             <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: #1d4ed8; margin-bottom: 20px;"></i>
@@ -245,7 +269,6 @@ async function autoSubmit() {
             userAnswers: safeUserAnswers 
         });
         
-        // Lock this test for this session
         sessionStorage.setItem('submitted_' + testData.docId, 'true'); 
         
         showSuccessScreen(`Score Captured: ${result.totalScore} / ${testData.maxMarks}`);
