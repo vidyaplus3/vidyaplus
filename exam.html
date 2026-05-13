@@ -3,81 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Secure Exam Player | VidyaPlus</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Assessment | VidyaPlus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4f46e5; --primary-light: #e0e7ff; --navy: #0f172a; --bg: #f8fafc;
-            --ans: #10b981; --review: #8b5cf6; --not-visited: #cbd5e1; --not-ans: #ef4444;
-            --border: #e2e8f0; --text: #334155;
+            --primary: #2563eb; --navy: #1e293b; --bg: #f8fafc;
+            --ans: #22c55e; --review: #a855f7; --not-visited: #f1f5f9; --not-ans: #ef4444;
+            --border: #cbd5e1; --text: #334155;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
+        body { background: #ffffff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
 
-        /* HEADER (Fixed Top) */
-        .exam-header { background: white; padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-        .timer-box { background: #fee2e2; color: #ef4444; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 1.1rem; border: 1px solid #fecaca; display: flex; align-items: center; gap: 6px; }
-        .grid-toggle-btn { background: var(--primary-light); color: var(--primary); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+        /* HEADER */
+        .exam-header { background: white; padding: 8px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .exam-title-text { font-weight: 700; font-size: 0.95rem; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        
+        /* SLEEK TIMER */
+        .timer-box { background: transparent; color: var(--navy); padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+        .grid-toggle-btn { background: transparent; color: var(--navy); border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
 
         /* SECTION TABS */
-        .section-bar { background: white; padding: 10px 15px; display: flex; gap: 10px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        .section-bar { background: #f8fafc; padding: 6px 15px; display: flex; gap: 6px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
         .section-bar::-webkit-scrollbar { display: none; }
-        .sec-tab { padding: 8px 16px; border-radius: 20px; background: #f1f5f9; border: 1px solid transparent; cursor: pointer; font-weight: 700; font-size: 0.85rem; color: #64748b; transition: 0.2s; }
-        .sec-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+        .sec-tab { padding: 6px 14px; border-radius: 4px; background: transparent; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text); transition: 0.2s; }
+        .sec-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         /* MAIN CONTENT AREA */
         .exam-body { flex: 1; position: relative; overflow: hidden; display: flex; }
-        .question-area { flex: 1; overflow-y: auto; padding: 20px 15px 100px 15px; } /* Bottom padding for fixed footer */
+        .question-area { flex: 1; overflow-y: auto; padding: 15px 15px 80px 15px; } 
         
-        .q-meta-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .q-tag { font-size: 0.85rem; font-weight: 800; color: white; background: var(--navy); padding: 4px 12px; border-radius: 6px; }
-        .q-marks { font-size: 0.75rem; font-weight: 800; color: var(--ans); background: #ecfdf5; padding: 4px 10px; border-radius: 6px; border: 1px solid #a7f3d0; }
+        .q-meta-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+        .q-tag { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
+        .q-marks { font-size: 0.85rem; font-weight: 600; color: var(--text); }
         
-        .q-text { font-size: 1.15rem; font-weight: 700; color: var(--navy); line-height: 1.6; margin-bottom: 20px; word-wrap: break-word; }
+        .q-text { font-size: 1rem; font-weight: 500; color: #000; line-height: 1.6; margin-bottom: 20px; word-wrap: break-word; }
         
-        /* OPTION CARDS */
-        .option-card { background: white; padding: 16px; border: 2px solid var(--border); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 1rem; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
-        .option-card:active { transform: scale(0.98); }
-        .option-card.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
-        .opt-id { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; font-weight: 800; color: #64748b; flex-shrink: 0; }
-        .selected .opt-id { background: var(--primary); color: white; }
+        /* COMPACT OPTION CARDS */
+        .option-card { background: white; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.95rem; color: var(--text); }
+        .option-card.selected { border-color: var(--primary); background: #eff6ff; }
+        .opt-id { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); background: white; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: 600; color: var(--text); flex-shrink: 0; }
+        .selected .opt-id { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* FOOTER ACTIONS (Fixed Bottom for Mobile) */
-        .exam-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 12px 15px; border-top: 1px solid var(--border); box-shadow: 0 -4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 10px; }
-        .f-btn { flex: 1; padding: 12px 0; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.85rem; border: none; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 5px; }
-        .btn-clear { background: #f1f5f9; color: var(--text); }
-        .btn-review { background: #ede9fe; color: var(--review); }
-        .btn-next { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
+        /* FOOTER ACTIONS */
+        .exam-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #f8fafc; padding: 10px 15px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; gap: 8px; }
+        .f-btn { flex: 1; padding: 10px 0; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.85rem; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; gap: 5px; background: white; color: var(--text); }
+        .btn-next { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* SMART QUESTION PALETTE (Sliding Drawer on Mobile) */
-        .palette-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100vh; background: white; z-index: 1000; transition: right 0.3s ease-in-out; display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.1); }
+        /* SMART QUESTION PALETTE */
+        .palette-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 320px; height: 100vh; background: white; z-index: 1000; transition: right 0.3s ease; display: flex; flex-direction: column; border-left: 1px solid var(--border); }
         .palette-drawer.open { right: 0; }
-        .drawer-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
-        .palette-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: 0.3s; }
+        .drawer-header { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .palette-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; display: none; opacity: 0; transition: 0.3s; }
         .palette-overlay.open { display: block; opacity: 1; }
 
-        .palette-grid { padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; overflow-y: auto; flex: 1; align-content: start; }
-        .p-btn { aspect-ratio: 1; border-radius: 50%; border: none; font-weight: 800; cursor: pointer; font-size: 0.95rem; display: flex; justify-content: center; align-items: center; color: var(--navy); background: var(--not-visited); transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .p-btn.visited { background: var(--not-ans); color: white; }
-        .p-btn.answered { background: var(--ans); color: white; }
-        .p-btn.review { background: var(--review); color: white; }
-        .p-btn.current { border: 3px solid var(--navy); transform: scale(1.1); }
+        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; flex: 1; align-content: start; }
+        .p-btn { aspect-ratio: 1; border-radius: 4px; border: 1px solid var(--border); font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; color: var(--navy); background: white; transition: 0.1s; }
+        .p-btn.visited { background: var(--not-ans); color: white; border-color: var(--not-ans); }
+        .p-btn.answered { background: var(--ans); color: white; border-color: var(--ans); }
+        .p-btn.review { background: var(--review); color: white; border-color: var(--review); }
+        .p-btn.current { border: 2px solid var(--navy); }
 
-        .num-input { width: 100%; padding: 15px; font-size: 1.5rem; font-weight: 800; border-radius: 12px; border: 2px solid var(--primary); outline: none; text-align: center; color: var(--navy); background: white; }
+        .num-input { width: 100%; padding: 10px; font-size: 1.1rem; font-weight: 600; border-radius: 4px; border: 1px solid var(--border); outline: none; color: black; background: white; }
+        .num-input:focus { border-color: var(--primary); }
 
         /* Loading Spinner */
         #loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .spinner { border: 3px solid #e2e8f0; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (min-width: 900px) {
             .exam-body { flex-direction: row; }
-            .palette-drawer { position: static; right: 0; max-width: 320px; border-left: 1px solid var(--border); box-shadow: none; height: auto; }
+            .palette-drawer { position: static; right: 0; max-width: 300px; height: auto; }
             .grid-toggle-btn { display: none; }
             .drawer-header .fa-times { display: none; }
-            .question-area { padding-bottom: 30px; }
-            .exam-footer { position: static; box-shadow: none; border-top: 1px solid var(--border); }
+            .question-area { padding-bottom: 20px; }
+            .exam-footer { position: static; border-top: 1px solid var(--border); }
         }
     </style>
 </head>
@@ -85,15 +86,15 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <h3 style="color: var(--navy); font-weight: 800;">Initializing Secure Exam...</h3>
+        <h3 style="color: var(--text); font-weight: 600; font-size: 0.95rem;">Initializing Secure Session...</h3>
     </div>
 
     <header class="exam-header">
         <div>
-            <h3 id="exam-title" style="font-weight: 800; font-size: 1rem; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">Mock Test</h3>
+            <h3 id="exam-title" class="exam-title-text">Assessment</h3>
         </div>
-        <div class="timer-box" id="exam-timer"><i class="fas fa-clock"></i> --:--:--</div>
-        <button class="grid-toggle-btn" onclick="togglePalette()"><i class="fas fa-th-large"></i> Grid</button>
+        <div class="timer-box" id="exam-timer">--:--:--</div>
+        <button class="grid-toggle-btn" onclick="togglePalette()"><i class="fas fa-th"></i> Grid</button>
     </header>
 
     <div class="section-bar" id="section-tabs-container"></div>
@@ -101,11 +102,11 @@
     <div class="exam-body">
         <div class="question-area">
             <div class="q-meta-bar">
-                <span class="q-tag" id="q-meta">Q. 1</span>
-                <span class="q-marks" id="q-marks-display">+4 / -1</span>
+                <span class="q-tag" id="q-meta">Question 1</span>
+                <span class="q-marks" id="q-marks-display">Marks: +4, -1</span>
             </div>
             <div id="q-content">
-                <p class="q-text" id="q-text">Loading question...</p>
+                <p class="q-text" id="q-text">Loading...</p>
                 <div id="q-options"></div>
             </div>
         </div>
@@ -114,28 +115,28 @@
 
         <aside class="palette-drawer" id="palette-drawer">
             <div class="drawer-header">
-                <h4 style="font-weight: 800; font-size: 1rem; color: var(--navy);">Question Grid</h4>
-                <i class="fas fa-times" style="font-size: 1.2rem; color: var(--text); cursor: pointer;" onclick="togglePalette()"></i>
+                <h4 style="font-weight: 600; font-size: 0.95rem; color: var(--navy);">Question Palette</h4>
+                <i class="fas fa-times" style="font-size: 1.1rem; color: var(--text); cursor: pointer;" onclick="togglePalette()"></i>
             </div>
-            <div style="padding: 15px; border-bottom: 1px solid var(--border); background: white;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem; font-weight: 700; color: var(--text);">
-                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:14px; height:14px; background:var(--ans); border-radius:50%;"></span> Answered</div>
-                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:14px; height:14px; background:var(--not-ans); border-radius:50%;"></span> Not Answered</div>
-                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:14px; height:14px; background:var(--review); border-radius:50%;"></span> Review</div>
-                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:14px; height:14px; background:var(--not-visited); border-radius:50%;"></span> Not Visited</div>
+            <div style="padding: 12px 15px; border-bottom: 1px solid var(--border); background: white;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.75rem; font-weight: 600; color: var(--text);">
+                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:12px; height:12px; background:var(--ans); border-radius:2px;"></span> Answered</div>
+                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:12px; height:12px; background:var(--not-ans); border-radius:2px;"></span> Not Answered</div>
+                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:12px; height:12px; background:var(--review); border-radius:2px;"></span> Review</div>
+                    <div style="display:flex; align-items:center; gap:6px;"><span style="width:12px; height:12px; background:var(--not-visited); border-radius:2px; border:1px solid var(--border);"></span> Not Visited</div>
                 </div>
             </div>
             <div class="palette-grid" id="palette-container"></div>
-            <div style="padding: 15px; border-top: 1px solid var(--border); background: white;">
-                <button onclick="confirmSubmit()" style="width: 100%; padding: 14px; background: #ef4444; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">Submit Final Test</button>
+            <div style="padding: 12px 15px; border-top: 1px solid var(--border); background: white;">
+                <button onclick="confirmSubmit()" style="width: 100%; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 4px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">Submit Test</button>
             </div>
         </aside>
     </div>
 
     <footer class="exam-footer">
-        <button class="f-btn btn-clear" onclick="clearResponse()"><i class="fas fa-eraser"></i> Clear</button>
-        <button class="f-btn btn-review" onclick="markForReview()"><i class="fas fa-star"></i> Review</button>
-        <button class="f-btn btn-next" onclick="saveAndNext()">Save & Next <i class="fas fa-arrow-right"></i></button>
+        <button class="f-btn" onclick="clearResponse()">Clear</button>
+        <button class="f-btn" onclick="markForReview()">Review</button>
+        <button class="f-btn btn-next" onclick="saveAndNext()">Save & Next <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i></button>
     </footer>
 
     <script type="module" src="js/exam-engine.js"></script>
