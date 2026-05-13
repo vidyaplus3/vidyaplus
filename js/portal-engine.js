@@ -100,10 +100,12 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 onAuthStateChanged(auth, async (user) => {
-    if (!user) { alert("Authentication required. Please initiate a valid session."); window.location.href = DASHBOARD_URL; return; }
+    // ⚡ FIX: Location replace implemented
+    if (!user) { alert("Authentication required. Please initiate a valid session."); window.location.replace(DASHBOARD_URL); return; }
     currentUserId = user.uid; 
 
-    if(!testId || !batchId) { alert("Invalid Assessment Session Parameters."); window.location.href = DASHBOARD_URL; return; }
+    // ⚡ FIX: Location replace implemented
+    if(!testId || !batchId) { alert("Invalid Assessment Session Parameters."); window.location.replace(DASHBOARD_URL); return; }
 
     if(sessionStorage.getItem('submitted_' + testId)) {
         showSuccessScreen("This assessment has already been submitted and concluded.");
@@ -122,15 +124,18 @@ onAuthStateChanged(auth, async (user) => {
             testData.docId = testId; 
             
             if(!testData.questions || testData.questions.length === 0) {
-                alert("Assessment structural error: No questions populated."); window.location.href = DASHBOARD_URL; return;
+                // ⚡ FIX: Location replace implemented
+                alert("Assessment structural error: No questions populated."); window.location.replace(DASHBOARD_URL); return;
             }
             initializePortal();
         } else {
-            alert("Assessment not found or Authorization Denied."); window.location.href = DASHBOARD_URL;
+            // ⚡ FIX: Location replace implemented
+            alert("Assessment not found or Authorization Denied."); window.location.replace(DASHBOARD_URL);
         }
     } catch (err) { 
         console.error("Fetch error:", err);
-        alert("Network Error: Failed to establish secure connection to the assessment server."); window.location.href = DASHBOARD_URL;
+        // ⚡ FIX: Location replace implemented
+        alert("Network Error: Failed to establish secure connection to the assessment server."); window.location.replace(DASHBOARD_URL);
     }
 });
 
@@ -476,7 +481,7 @@ function showSuccessScreen(msg) {
                 <i class="fas fa-shield-check" style="color: #16a34a; font-size: 4rem; margin-bottom: 20px;"></i>
                 <h2 style="color: #0f172a; font-weight: 800; font-size: 1.5rem; margin-bottom: 10px;">Assessment Concluded</h2>
                 <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now safely exit this screen and return to your dashboard.</p>
-                <button onclick="window.location.href='${DASHBOARD_URL}'" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Return to Dashboard</button>
+                <button onclick="window.location.replace('${DASHBOARD_URL}')" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Return to Dashboard</button>
             </div>
         </div>
     `;
