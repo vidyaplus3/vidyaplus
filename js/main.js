@@ -1,7 +1,7 @@
 // js/main.js
 import { db } from './firebase-init.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { initAuth, AppState, auth } from './auth.js';
+import { initAuth, AppState } from './auth.js'; // 🚨 THE FIX: 'auth' hata diya gaya hai
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
