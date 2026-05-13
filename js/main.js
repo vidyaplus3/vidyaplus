@@ -1,12 +1,14 @@
 // js/main.js
 import { db } from './firebase-init.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { initAuth, AppState } from './auth.js';
+import { initAuth, AppState, auth } from './auth.js';
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
 
-// 🌟 API GATEWAY
+// ==========================================
+// API GATEWAY
+// ==========================================
 window.openMenu = UI.openMenu;
 window.openNotif = UI.openNotif;
 window.closeModals = UI.closeModals;
@@ -34,15 +36,15 @@ window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
 window.togglePDFFull = PDFViewer.togglePDFFull;
 
-// 🚦 ROUTING ENGINE
+// ==========================================
+// ROUTING ENGINE
+// ==========================================
 window.handleScreenRender = (screenId) => {
     UI.showScreen(screenId); 
     
     if (screenId === 'subjects') window.renderSubjects();
     if (screenId === 'chapters' && AppState.currentSubject) window.renderChapters(AppState.currentSubject);
     if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
-    
-    // 🚨 NAYA: Test list ko route karna
     if (screenId === 'tests') window.renderTestsList('live'); 
 };
 
@@ -74,7 +76,9 @@ window.navigate = (screenId, payload = {}) => {
     window.location.hash = screenId;
 };
 
-// 🧠 BUSINESS LOGIC & SMART DATA FILTERING
+// ==========================================
+// BUSINESS LOGIC & SMART DATA FILTERING
+// ==========================================
 window.switchBatch = async (batchId) => {
     const batchNameEl = document.getElementById('current-batch-name');
     if (batchNameEl) batchNameEl.innerText = "Loading...";
@@ -103,19 +107,20 @@ window.switchBatch = async (batchId) => {
         const q = query(matRef, where("status", "==", "Active"));
         const matSnap = await getDocs(q);
 
-        // 🚨 NAYA SMART ROUTING TREE
         AppState.materialsTree = {};
         AppState.globalResources = [];
         AppState.subjectMaterials = {};
+        AppState.quizzes = [];
 
         matSnap.forEach(docSnap => {
-            const data = docSnap.data();
+            const data = { id: docSnap.id, ...docSnap.data() };
             const targetLayer = data.targetLayer || "";
             const subject = data.subject || "General";
             const chapter = data.chapter || "Uncategorized";
 
-            // Filter logic matches Admin Studio categories
-            if (targetLayer === 'global_resource' || subject === 'Batch Resources') {
+            if (data.type === 'quiz') {
+                AppState.quizzes.push(data);
+            } else if (targetLayer === 'global_resource' || subject === 'Batch Resources') {
                 AppState.globalResources.push(data);
             } else if (targetLayer === 'subject_material' || chapter === 'Subject Materials') {
                 if (!AppState.subjectMaterials[subject]) AppState.subjectMaterials[subject] = [];
@@ -130,21 +135,19 @@ window.switchBatch = async (batchId) => {
     } catch (error) { console.error("Batch Load Error:", error); }
 };
 
-// 🚨 SMART TAB SWITCHER
 window.switchTab = (btnElement, listId) => {
     UI.switchTabUI(btnElement);
     if (listId === 'resource-list') { 
-        window.renderExtraMaterials('subject-list', AppState.globalResources, "No global resources (Timetable, Syllabus) available yet."); 
+        window.renderExtraMaterials('subject-list', AppState.globalResources, "No global resources available yet."); 
     } 
     else if (listId === 'subject-list') { window.renderSubjects(); } 
     else if (listId === 'chapter-material') { 
         const mats = AppState.subjectMaterials[AppState.currentSubject] || [];
-        window.renderExtraMaterials('chapter-list', mats, "No extra material (Formula sheets, Docs) found for this subject."); 
+        window.renderExtraMaterials('chapter-list', mats, "No extra material found for this subject."); 
     } 
     else if (listId === 'chapter-list') { window.renderChapters(AppState.currentSubject); }
 };
 
-// 🚨 NAYA FUNCTION: Extra Materials Render karne ke liye
 window.renderExtraMaterials = (containerId, items, emptyMsg) => {
     const container = document.getElementById(containerId);
     if(!container) return;
@@ -186,11 +189,8 @@ window.renderSubjects = () => {
     if(!container) return;
     container.innerHTML = ''; 
 
-    // 🚨 SMART FIX: Engine ab dono jagah check karega (Chapters me bhi aur Materials me bhi)
     const coreSubjects = Object.keys(AppState.materialsTree || {});
     const extraSubjects = Object.keys(AppState.subjectMaterials || {});
-    
-    // Dono list ko mila kar duplicates hata dega (taaki do baar Physics na dikhe)
     const subjects = [...new Set([...coreSubjects, ...extraSubjects])];
 
     if (subjects.length === 0) { 
@@ -234,7 +234,6 @@ window.filterClassroom = (filterType, btnElement = null) => {
     
     let items = allMaterials;
     
-    // 🚨 SMART FIX 1: Filter karte waqt attachedPdfUrl ko bhi check karega
     if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
     if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl || m.attachedPdfUrl); 
     
@@ -242,15 +241,11 @@ window.filterClassroom = (filterType, btnElement = null) => {
     
     items.forEach(mat => {
         let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Study Material";
-        
-        // 🚨 SMART FIX 2: Agar standalone pdf nahi hai to attached pdf ko pakdo
         let actualPdfUrl = mat.pdfUrl || mat.attachedPdfUrl || ""; 
         let safePdf = actualPdfUrl.replace(/['"\\]/g, "");
         let safeVid = mat.videoUrl ? mat.videoUrl.replace(/['"\\]/g, "") : "";
         
         let btns = '';
-        
-        // 🚨 SMART FIX 3: Card pe Document button dikhayega agar koi bhi PDF hai
         if (actualPdfUrl && (filterType === 'all' || filterType === 'notes')) {
             btns += `<button class="action-btn" onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
         }
@@ -290,7 +285,6 @@ window.switchClassroomTab = (type) => {
             </div>
         `;
     } else if (type === 'notes') {
-        // 🚨 NAYA: Ye PDF check ab accurately attachedPdfUrl aur normal pdfUrl dono ko check karta hai!
         const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
         
         if (pdf && pdf !== 'undefined' && pdf !== '') {
@@ -314,55 +308,11 @@ window.switchClassroomTab = (type) => {
     }
 };
 
-const setupDropdown = (batchIds) => {
-    const dropdown = document.getElementById('batch-dropdown');
-    if(!dropdown) return;
-    dropdown.innerHTML = '';
-    batchIds.forEach(async (bId) => {
-        const bSnap = await getDoc(doc(db, "batches", bId));
-        if (bSnap.exists()) { 
-            dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${bSnap.data().title}</div>`; 
-        }
-    });
-};
-
-VideoPlayer.initAPI();
-initAuth((batches) => {
-    setupDropdown(batches);
-    let bToLoad = AppState.currentBatchId || batches[batches.length - 1];
-    window.switchBatch(bToLoad); 
-});
 // ==========================================
-// 🚨 NAYA: TEST ENGINE & GOD MEMORY
+// TEST ENGINE LOGIC
 // ==========================================
-
-// 1. Update HandleScreenRender to support Tests
-const originalHandleScreenRender = window.handleScreenRender;
-window.handleScreenRender = (screenId) => {
-    originalHandleScreenRender(screenId); // Purana kaam karega
-    if (screenId === 'tests') window.renderTestsList('live'); // Naya kaam karega
-};
-
-// 2. Update switchBatch to collect quizzes smartly
-const originalSwitchBatch = window.switchBatch;
-window.switchBatch = async (batchId) => {
-    await originalSwitchBatch(batchId); // Pehle sab purana data load karega
-    
-    // Naya logic: Database me se quizzes dhoondh kar alag array me daalo
-    AppState.quizzes = [];
-    try {
-        const matRef = collection(db, "batches", batchId, "materials");
-        const q = query(matRef, where("status", "==", "Active"), where("type", "==", "quiz"));
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => {
-            AppState.quizzes.push({ id: docSnap.id, ...docSnap.data() });
-        });
-    } catch(err) { console.error("Error fetching quizzes:", err); }
-};
-
-// 3. Render Test UI Logic
 window.testsDataCache = {};
-window.userAttemptedQuizzes = {}; // Future: Sync with Firebase user profile
+window.userAttemptedQuizzes = {}; 
 
 window.switchTestTab = (type, btn) => {
     UI.switchTabUI(btn);
@@ -399,7 +349,7 @@ window.renderTestsList = (type = 'live') => {
             : `<button onclick="openInstructions('${test.id}')" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--primary); color: white; border: none; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.2);">Start Test <i class="fas fa-arrow-right"></i></button>`;
 
         let cardHtml = `
-            <div class="premium-card" style="background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+            <div class="premium-card" style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                     <div style="width: 75%;">
                         <span style="font-size:0.7rem; font-weight:800; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:6px; margin-bottom:10px; display:inline-block; text-transform: uppercase;">${test.subject || 'Full Mock Test'}</span>
@@ -434,13 +384,15 @@ window.openInstructions = (testId) => {
     window.currentActiveTestId = testId;
     
     document.getElementById('inst-title').innerText = test.title;
-    document.getElementById('inst-subject').innerText = test.subject || 'Full Mock Test';
     document.getElementById('inst-time').innerText = test.duration + " Mins";
     document.getElementById('inst-marks').innerText = test.maxMarks;
     
     if(test.questions && test.questions.length > 0) {
         document.getElementById('inst-plus').innerText = `+${test.questions[0].marks.correct} Marks`;
         document.getElementById('inst-minus').innerText = `-${test.questions[0].marks.incorrect} Mark`;
+    } else {
+        document.getElementById('inst-plus').innerText = `+4 Marks`;
+        document.getElementById('inst-minus').innerText = `-1 Mark`;
     }
 
     document.getElementById('instruction-mode').style.display = 'flex';
@@ -451,12 +403,31 @@ window.closeInstructions = () => {
     window.currentActiveTestId = null;
 };
 
-// 🚨 NAYA REDIRECT LOGIC TO ISOLATED EXAM UI
 window.startTestPlayer = () => {
     if(!window.currentActiveTestId || !AppState.currentBatchId) {
         alert("Session error. Please reload the page."); return;
     }
-    // exam.html par redirect karega URL parameters ke sath!
     window.location.href = `exam.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`;
 };
 
+// ==========================================
+// INITIALIZATION
+// ==========================================
+const setupDropdown = (batchIds) => {
+    const dropdown = document.getElementById('batch-dropdown');
+    if(!dropdown) return;
+    dropdown.innerHTML = '';
+    batchIds.forEach(async (bId) => {
+        const bSnap = await getDoc(doc(db, "batches", bId));
+        if (bSnap.exists()) { 
+            dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${bSnap.data().title}</div>`; 
+        }
+    });
+};
+
+VideoPlayer.initAPI();
+initAuth((batches) => {
+    setupDropdown(batches);
+    let bToLoad = AppState.currentBatchId || batches[batches.length - 1];
+    window.switchBatch(bToLoad); 
+});
