@@ -38,7 +38,7 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
         // 🛡️ FETCHING FROM SECURE SERVER (Answers stripped out)
-        const response = await fetch(`${BACKEND_URL}/api/getSecureTest`, {
+        const response = await fetch(${BACKEND_URL}/getSecureTest, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ testId, batchId })
@@ -291,7 +291,7 @@ async function autoSubmit() {
 
     try {
         // 🛡️ SENDING RESPONSES TO SERVER FOR SECURE EVALUATION
-        const response = await fetch(`${BACKEND_URL}/api/submitAssessment`, {
+        const response = await fetch(${BACKEND_URL}/submitAssessment, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
