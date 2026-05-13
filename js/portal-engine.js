@@ -17,13 +17,14 @@ let currentUserId = null;
 let sections = []; 
 
 const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
+const DASHBOARD_URL = "/"; // 👈 Redirect URL when test finishes or fails
 
 // ==========================================
-// 🛡️ ADVANCED ACADEMIC SECURITY MODULE
+// 🛡️ ADVANCED ACADEMIC SECURITY MODULE (Updated)
 // ==========================================
 const SecurityModule = {
     warnings: 0,
-    maxWarnings: 3,
+    maxWarnings: 5, // 👈 Increased for Mobile Tolerance (Calls/Notifications)
     isActive: false,
 
     init() {
@@ -45,6 +46,10 @@ const SecurityModule = {
                (e.ctrlKey && e.key === 'U')) {
                 e.preventDefault();
             }
+
+            // ⚡ UX IMPROVEMENT: Keyboard Navigation (JEE CBT Feel)
+            if(e.key === 'ArrowRight' && !isSubmitting) window.saveAndNext();
+            if(e.key === 'ArrowLeft' && !isSubmitting) window.navigateQ(-1);
         });
     },
 
@@ -62,18 +67,20 @@ const SecurityModule = {
 
     monitorVisibility() {
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden && this.isActive && !isSubmitting) {
-                this.triggerViolation("Navigated away from the active assessment window");
+            if (document.hidden && !isSubmitting) {
+                saveProgressLocally(); // 👈 Emergency save on minimize
+                if(this.isActive) this.triggerViolation("Navigated away from the active assessment window");
             }
         });
 
         window.addEventListener('blur', () => {
             if (this.isActive && !isSubmitting) {
+                // 👈 1.5s Delay for mobile notifications & accidental swipes
                 setTimeout(() => {
                     if (!document.hasFocus()) {
                         this.triggerViolation("Assessment window lost focus (Tab switch/App switch detected)");
                     }
-                }, 500);
+                }, 1500); 
             }
         });
     }
@@ -88,10 +95,10 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 onAuthStateChanged(auth, async (user) => {
-    if (!user) { alert("Authentication required. Please initiate a valid session."); window.close(); return; }
+    if (!user) { alert("Authentication required. Please initiate a valid session."); window.location.href = DASHBOARD_URL; return; }
     currentUserId = user.uid; 
 
-    if(!testId || !batchId) { alert("Invalid Assessment Session Parameters."); window.close(); return; }
+    if(!testId || !batchId) { alert("Invalid Assessment Session Parameters."); window.location.href = DASHBOARD_URL; return; }
 
     if(sessionStorage.getItem('submitted_' + testId)) {
         showSuccessScreen("This assessment has already been submitted and concluded.");
@@ -110,15 +117,15 @@ onAuthStateChanged(auth, async (user) => {
             testData.docId = testId; 
             
             if(!testData.questions || testData.questions.length === 0) {
-                alert("Assessment structural error: No questions populated."); window.close(); return;
+                alert("Assessment structural error: No questions populated."); window.location.href = DASHBOARD_URL; return;
             }
             initializePortal();
         } else {
-            alert("Assessment not found or Authorization Denied."); window.close();
+            alert("Assessment not found or Authorization Denied."); window.location.href = DASHBOARD_URL;
         }
     } catch (err) { 
         console.error("Fetch error:", err);
-        alert("Network Error: Failed to establish secure connection to the assessment server."); window.close();
+        alert("Network Error: Failed to establish secure connection to the assessment server."); window.location.href = DASHBOARD_URL;
     }
 });
 
@@ -271,7 +278,6 @@ window.selectOption = (idx, type) => {
         else userAnswers[qId].answer.push(idx);
     }
     
-    // ⚡ OPTIMIZATION: Fast DOM Update (No full redraw)
     const optContainer = document.getElementById('q-options');
     if (optContainer) {
         const optionRows = optContainer.children;
@@ -288,12 +294,15 @@ window.selectOption = (idx, type) => {
     updatePaletteUI();
 };
 
+// ⚡ CRITICAL BUG FIXED: NaN Input filtering
 window.saveNumerical = (val) => {
     const qId = testData.questions[currentQIdx].id;
-    if(val === "") {
+    const num = parseFloat(val);
+    
+    if(val === "" || isNaN(num)) {
         delete userAnswers[qId];
     } else {
-        userAnswers[qId] = { answer: [parseFloat(val)], status: 'visited' };
+        userAnswers[qId] = { answer: [num], status: 'visited' };
     }
 };
 
@@ -320,7 +329,6 @@ window.clearResponse = () => {
     const qId = testData.questions[currentQIdx].id;
     delete userAnswers[qId];
     
-    // ⚡ OPTIMIZATION: Fast DOM Clear (No full redraw)
     const optContainer = document.getElementById('q-options');
     if (optContainer) {
         const optionRows = optContainer.children;
@@ -438,13 +446,14 @@ async function autoSubmit() {
 }
 
 function showSuccessScreen(msg) {
+    // ⚡ BUG FIXED: window.close() removed. Replaced with redirection to Dashboard
     document.body.innerHTML = `
         <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; font-family: 'Inter', sans-serif;">
             <div style="background: white; padding: 40px; border-radius: 12px; border: 1px solid #cbd5e1; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 400px; width: 90%;">
                 <i class="fas fa-shield-check" style="color: #16a34a; font-size: 4rem; margin-bottom: 20px;"></i>
                 <h2 style="color: #0f172a; font-weight: 800; font-size: 1.5rem; margin-bottom: 10px;">Assessment Concluded</h2>
-                <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now close this secure window and return to the main dashboard.</p>
-                <button onclick="window.close()" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Exit Environment</button>
+                <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now safely exit this screen and return to your dashboard.</p>
+                <button onclick="window.location.href='${DASHBOARD_URL}'" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Return to Dashboard</button>
             </div>
         </div>
     `;
