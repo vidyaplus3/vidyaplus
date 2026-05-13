@@ -403,10 +403,20 @@ window.closeInstructions = () => {
     window.currentActiveTestId = null;
 };
 
+// 🚨 UPDATE THIS FUNCTION IN js/main.js
 window.startTestPlayer = () => {
     if(!window.currentActiveTestId || !AppState.currentBatchId) {
-        alert("Session error. Please reload the page."); return;
+        alert("Session validation failed. Please refresh."); return;
     }
+    
+    // 1. Session Lock Hatao (Taaki Test Reattempt / Start ho sake)
+    sessionStorage.removeItem('submitted_' + window.currentActiveTestId);
+    
+    // 2. Ghost Modal Fix (Test me jaane se pehle isko chhupa do)
+    const instModal = document.getElementById('instruction-mode');
+    if(instModal) instModal.style.display = 'none';
+    
+    // 3. Navigate to Exam Player
     window.location.href = `exam.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`;
 };
 
