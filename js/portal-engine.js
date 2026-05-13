@@ -10,7 +10,7 @@ let testData = null;
 let currentQIdx = 0;
 let userAnswers = {}; 
 let timeRemaining = 0;
-let examEndTime = 0; // 🚨 New Absolute Timer Anchor
+let examEndTime = 0; 
 let timerInterval = null;
 let isSubmitting = false;
 let currentUserId = null; 
@@ -40,7 +40,6 @@ const SecurityModule = {
         document.addEventListener('paste', e => e.preventDefault());
         
         document.addEventListener('keydown', e => {
-            // Block DevTools & Source Code shortcuts
             if (e.key === 'F12' || 
                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
                (e.ctrlKey && e.key === 'U')) {
@@ -65,6 +64,16 @@ const SecurityModule = {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && this.isActive && !isSubmitting) {
                 this.triggerViolation("Navigated away from the active assessment window");
+            }
+        });
+
+        window.addEventListener('blur', () => {
+            if (this.isActive && !isSubmitting) {
+                setTimeout(() => {
+                    if (!document.hasFocus()) {
+                        this.triggerViolation("Assessment window lost focus (Tab switch/App switch detected)");
+                    }
+                }, 500);
             }
         });
     }
@@ -147,14 +156,13 @@ function initializePortal() {
         selector.innerHTML += `<option value="${sec}">${sec}</option>`;
     });
 
-    SecurityModule.init(); // Activate Anti-Cheat
+    SecurityModule.init(); 
     startTimer();
     renderQuestion();
     renderPalette();
 }
 
 function startTimer() {
-    // 🚨 SMART TIMER: Absolute time anchoring
     examEndTime = Date.now() + (timeRemaining * 1000);
 
     timerInterval = setInterval(() => {
@@ -182,7 +190,6 @@ function startTimer() {
             document.getElementById('timer-val').style.color = '#ef4444';
         }
 
-        // Optimization: Save progress only every 5 seconds instead of 1
         if (timeRemaining % 5 === 0) saveProgressLocally();
 
     }, 1000);
@@ -214,7 +221,6 @@ window.renderQuestion = () => {
     const nM = q.marks?.incorrect || 1;
     document.getElementById('q-marks').innerText = `[+${pM}, -${nM}]`;
     
-    // Using textContent for safe injection (XSS Prevention)
     document.getElementById('q-text').textContent = q.questionText || "Missing content";
     
     const optContainer = document.getElementById('q-options');
@@ -227,7 +233,6 @@ window.renderQuestion = () => {
         options.forEach((opt, idx) => {
             const isSelected = saved.answer.includes(idx);
             
-            // XSS Safe option rendering
             const optRow = document.createElement('div');
             optRow.className = `option-row ${isSelected ? 'selected' : ''}`;
             optRow.onclick = () => selectOption(idx, q.type);
@@ -265,7 +270,22 @@ window.selectOption = (idx, type) => {
         if (pos > -1) userAnswers[qId].answer.splice(pos, 1);
         else userAnswers[qId].answer.push(idx);
     }
-    renderQuestion();
+    
+    // ⚡ OPTIMIZATION: Fast DOM Update (No full redraw)
+    const optContainer = document.getElementById('q-options');
+    if (optContainer) {
+        const optionRows = optContainer.children;
+        for (let i = 0; i < optionRows.length; i++) {
+            if(optionRows[i].classList.contains('option-row')) {
+                if (userAnswers[qId].answer.includes(i)) {
+                    optionRows[i].classList.add('selected');
+                } else {
+                    optionRows[i].classList.remove('selected');
+                }
+            }
+        }
+    }
+    updatePaletteUI();
 };
 
 window.saveNumerical = (val) => {
@@ -299,7 +319,22 @@ window.markForReview = () => {
 window.clearResponse = () => {
     const qId = testData.questions[currentQIdx].id;
     delete userAnswers[qId];
-    renderQuestion();
+    
+    // ⚡ OPTIMIZATION: Fast DOM Clear (No full redraw)
+    const optContainer = document.getElementById('q-options');
+    if (optContainer) {
+        const optionRows = optContainer.children;
+        for (let i = 0; i < optionRows.length; i++) {
+            if(optionRows[i].classList.contains('option-row')) {
+                optionRows[i].classList.remove('selected');
+            }
+        }
+    }
+    
+    const numInput = document.getElementById('num-ans');
+    if (numInput) numInput.value = '';
+    
+    updatePaletteUI();
 };
 
 window.navigateQ = (step) => {
@@ -354,7 +389,7 @@ window.confirmSubmit = () => {
 async function autoSubmit() {
     if(isSubmitting) return;
     isSubmitting = true;
-    SecurityModule.isActive = false; // Turn off warnings during submission
+    SecurityModule.isActive = false; 
     clearInterval(timerInterval);
     
     document.body.innerHTML = `
