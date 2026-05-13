@@ -62,10 +62,11 @@
                         <div class="grid-icon"><i class="fas fa-play-circle"></i></div>
                         <span class="grid-text">All Classes</span>
                     </div>
-                    <div class="grid-item" onclick="alert('Tests coming soon!')">
-                        <div class="grid-icon"><i class="fas fa-file-alt"></i></div>
-                        <span class="grid-text">All Tests</span>
+                    <div class="grid-item" onclick="navigate('tests')">
+    <div class="grid-icon"><i class="fas fa-file-alt"></i></div>
+    <span class="grid-text">All Tests</span>
                     </div>
+                    
                     <div class="grid-item" onclick="alert('Doubts coming soon!')">
                         <div class="grid-icon"><i class="fas fa-question-circle"></i></div>
                         <span class="grid-text">My Doubts</span>
@@ -119,6 +120,72 @@
                 <button class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
                 <div class="page-title" id="dyn-chapter-title">Chapter</div>
             </div>
+                    <div class="screen" id="tests">
+            <div class="page-header">
+                <button class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
+                <div class="page-title">Mock Tests & Quizzes</div>
+            </div>
+            <div class="tabs" style="margin-bottom: 10px;">
+                <button class="tab-btn active" onclick="switchTestTab('live', this)">Live Tests</button>
+                <button class="tab-btn" onclick="switchTestTab('attempted', this)">Attempted</button>
+            </div>
+            <div class="screen-content list-container" id="test-list-container" style="padding: 15px; background: #f8fafc;">
+                </div>
+        </div>
+
+        <div class="classroom-overlay" id="instruction-mode" style="background: var(--bg); display: none; z-index: 2000; flex-direction: column; height: 100vh;">
+            <div class="page-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 15px;">
+                <button class="back-btn" onclick="closeInstructions()"><i class="fas fa-times"></i></button>
+                <div class="page-title" style="font-size: 1.2rem;">Test Instructions</div>
+            </div>
+            
+            <div style="flex: 1; overflow-y: auto; padding: 20px;">
+                <div class="premium-card" style="background: white; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <span id="inst-subject" style="background:#e0e7ff; color:#4f46e5; padding:6px 12px; border-radius:8px; font-size:0.8rem; font-weight:800; text-transform:uppercase;">SUBJECT</span>
+                        <h2 id="inst-title" style="color: var(--navy); margin-top: 15px; font-size: 1.5rem; line-height: 1.3;">Test Title Goes Here</h2>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                        <div style="background: #eff6ff; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #bfdbfe;">
+                            <i class="fas fa-stopwatch" style="font-size: 1.8rem; color: #2563eb; margin-bottom: 10px;"></i>
+                            <div style="font-weight: 800; font-size: 1.2rem; color: var(--navy);" id="inst-time">0 Mins</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); font-weight: 600;">Time Duration</div>
+                        </div>
+                        <div style="background: #ecfdf5; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #a7f3d0;">
+                            <i class="fas fa-trophy" style="font-size: 1.8rem; color: #10b981; margin-bottom: 10px;"></i>
+                            <div style="font-weight: 800; font-size: 1.2rem; color: var(--navy);" id="inst-marks">0 Marks</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); font-weight: 600;">Maximum Score</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1rem; color: var(--navy); margin-bottom: 15px;"><i class="fas fa-balance-scale"></i> Marking Scheme</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight: 600; font-size: 0.9rem; color: var(--text);">Correct Answer</span>
+                            <span style="font-weight: 800; color: #10b981; background: #d1fae5; padding: 4px 10px; border-radius: 6px;" id="inst-plus">+4 Marks</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 600; font-size: 0.9rem; color: var(--text);">Incorrect Answer</span>
+                            <span style="font-weight: 800; color: #ef4444; background: #fee2e2; padding: 4px 10px; border-radius: 6px;" id="inst-minus">-1 Mark</span>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 1rem; color: var(--navy); margin-bottom: 10px;"><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> General Instructions</h3>
+                    <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--text-light); line-height: 1.7; font-weight: 500;">
+                        <li>This is a secure assessment. Do not switch tabs or minimize the application.</li>
+                        <li>Any attempt to exit full-screen mode may trigger auto-submission of the test.</li>
+                        <li>You can use the "Mark for Review" feature for doubtful questions.</li>
+                        <li>Unanswered questions will not attract negative marking.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="padding: 20px; background: white; border-top: 1px solid #e2e8f0;">
+                <button class="action-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: var(--primary); color: white; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);" onclick="startTestPlayer()">I am ready to begin <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></button>
+            </div>
+        </div>
+            
             <div class="tabs">
                 <button class="tab-btn active" onclick="filterClassroom('all', this)">All</button>
                 <button class="tab-btn" onclick="filterClassroom('lectures', this)">Lectures</button>
