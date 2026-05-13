@@ -75,13 +75,15 @@ function startTimer() {
         const mins = Math.floor((timeRemaining % 3600) / 60);
         const secs = timeRemaining % 60;
         
-                // Naye sleek timer me update karega
+        // Naye sleek timer me update karega
         document.getElementById('timer-val').innerText = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
         // Laal background hatne ki wajah se, last 5 mins me sirf text color RED hoga
         if(timeRemaining < 300) {
             document.getElementById('timer-val').style.color = '#ef4444';
         }
+    }, 1000); // 🚨 YE WALE BRACKETS MISSING THE!
+}
 
 window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
@@ -205,7 +207,7 @@ function updatePaletteUI() {
     });
 }
 
-// 🚨 3. FINAL SUBMISSION ENGINE (No History Loops!)
+// 🚨 3. FINAL SUBMISSION ENGINE
 window.confirmSubmit = () => {
     if(isSubmitting) return;
     if (confirm("Are you sure you want to final submit the assessment? You cannot modify your answers later.")) {
@@ -310,4 +312,5 @@ function calculateScore() {
         accuracy: attempted > 0 ? ((correctCount / attempted) * 100).toFixed(2) : 0,
         sectionWise
     };
-      }
+}
+    
