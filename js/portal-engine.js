@@ -75,11 +75,13 @@ function startTimer() {
         const mins = Math.floor((timeRemaining % 3600) / 60);
         const secs = timeRemaining % 60;
         
-        // Sleek UI update (Faaltu red background hata diya)
-        document.getElementById('exam-timer').innerHTML = `<i class="far fa-clock" style="font-size: 1.1rem;"></i> Time Left: ${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                // Naye sleek timer me update karega
+        document.getElementById('timer-val').innerText = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
-    }, 1000);
-}
+        // Laal background hatne ki wajah se, last 5 mins me sirf text color RED hoga
+        if(timeRemaining < 300) {
+            document.getElementById('timer-val').style.color = '#ef4444';
+        }
 
 window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
