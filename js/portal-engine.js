@@ -17,14 +17,13 @@ let currentUserId = null;
 let sections = []; 
 
 const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
-const DASHBOARD_URL = "/study#tests"; // 👈 Sahi jagah redirect karega
 
 // ==========================================
 // 🛡️ ADVANCED ACADEMIC SECURITY MODULE
 // ==========================================
 const SecurityModule = {
     warnings: 0,
-    maxWarnings: 5, // Mobile tolerance
+    maxWarnings: 5, 
     isActive: false,
 
     init() {
@@ -35,21 +34,18 @@ const SecurityModule = {
     },
 
     applyStrictEnvironment() {
-        // Block Right Click, Copy, Paste
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('copy', e => e.preventDefault());
         document.addEventListener('cut', e => e.preventDefault());
         document.addEventListener('paste', e => e.preventDefault());
         
         document.addEventListener('keydown', e => {
-            // Block DevTools
             if (e.key === 'F12' || 
                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
                (e.ctrlKey && e.key === 'U')) {
                 e.preventDefault();
             }
 
-            // ⚡ UX: Keyboard Navigation (Arrow Keys) - Ignore if typing in Numerical Input
             if (e.target.tagName !== 'INPUT' && !isSubmitting) {
                 if(e.key === 'ArrowRight') window.saveAndNext();
                 if(e.key === 'ArrowLeft') window.navigateQ(-1);
@@ -65,12 +61,11 @@ const SecurityModule = {
             alert(`ACADEMIC INTEGRITY VIOLATION\n\nMaximum warnings exceeded (${this.maxWarnings}/${this.maxWarnings}).\nReason: ${reason}\n\nYour assessment is being automatically submitted for administrative review.`);
             autoSubmit();
         } else {
-            alert(`WARNING: ACADEMIC INTEGRITY MONITORING\n\nAction detected: ${reason}.\nPlease remain focused on the assessment window. Do not switch tabs or applications.\n\nWarning ${this.warnings} of ${this.maxWarnings}.`);
+            alert(`WARNING: ACADEMIC INTEGRITY MONITORING\n\nAction detected: ${reason}.\nPlease remain focused on the assessment window.\n\nWarning ${this.warnings} of ${this.maxWarnings}.`);
         }
     },
 
     monitorVisibility() {
-        // Immediate save on minimize, trigger warning
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !isSubmitting) {
                 saveProgressLocally(); 
@@ -78,12 +73,11 @@ const SecurityModule = {
             }
         });
 
-        // 2-Second Delay for mobile blur (prevents accidental swipe penalties)
         window.addEventListener('blur', () => {
             if (this.isActive && !isSubmitting) {
                 setTimeout(() => {
                     if (!document.hasFocus() && !document.hidden) {
-                        this.triggerViolation("Assessment window lost focus (Possible background app opened)");
+                        this.triggerViolation("Assessment window lost focus");
                     }
                 }, 2000); 
             }
@@ -100,15 +94,14 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 onAuthStateChanged(auth, async (user) => {
-    // ⚡ FIX: Location replace implemented
-    if (!user) { alert("Authentication required. Please initiate a valid session."); window.location.replace(DASHBOARD_URL); return; }
+    // ⚡ FIX: Back to smooth window.close()
+    if (!user) { alert("Authentication failed. Please log in again."); window.close(); return; }
     currentUserId = user.uid; 
 
-    // ⚡ FIX: Location replace implemented
-    if(!testId || !batchId) { alert("Invalid Assessment Session Parameters."); window.location.replace(DASHBOARD_URL); return; }
+    if(!testId || !batchId) { alert("Invalid Assessment Session."); window.close(); return; }
 
     if(sessionStorage.getItem('submitted_' + testId)) {
-        showSuccessScreen("This assessment has already been submitted and concluded.");
+        showSuccessScreen("Assessment already submitted.");
         return;
     }
 
@@ -124,18 +117,15 @@ onAuthStateChanged(auth, async (user) => {
             testData.docId = testId; 
             
             if(!testData.questions || testData.questions.length === 0) {
-                // ⚡ FIX: Location replace implemented
-                alert("Assessment structural error: No questions populated."); window.location.replace(DASHBOARD_URL); return;
+                alert("Error: Assessment contains no questions."); window.close(); return;
             }
             initializePortal();
         } else {
-            // ⚡ FIX: Location replace implemented
-            alert("Assessment not found or Authorization Denied."); window.location.replace(DASHBOARD_URL);
+            alert("Assessment not found or Access Denied."); window.close();
         }
     } catch (err) { 
         console.error("Fetch error:", err);
-        // ⚡ FIX: Location replace implemented
-        alert("Network Error: Failed to establish secure connection to the assessment server."); window.location.replace(DASHBOARD_URL);
+        alert("Network Error: Failed to load secure assessment."); window.close();
     }
 });
 
@@ -146,7 +136,6 @@ function saveProgressLocally() {
         timeRemaining: timeRemaining,
         currentQIdx: currentQIdx
     };
-    // Note: Backend validaton stops users from cheating by editing this localStorage
     localStorage.setItem('vp_exam_progress_' + testData.docId, JSON.stringify(progressState));
 }
 
@@ -177,7 +166,7 @@ function initializePortal() {
     SecurityModule.init(); 
     startTimer();
     renderQuestion();
-    renderPalette(); // Render virtualized palette
+    renderPalette(); 
 }
 
 function startTimer() {
@@ -242,13 +231,12 @@ window.renderQuestion = () => {
     document.getElementById('q-text').textContent = q.questionText || "Missing content";
     
     const optContainer = document.getElementById('q-options');
-    optContainer.innerHTML = ''; // Fast clear
+    optContainer.innerHTML = ''; 
     
     const saved = userAnswers[q.id] || { answer: [] };
 
     if (q.type === 'single' || q.type === 'multiple') {
         const options = q.options || [];
-        // DocumentFragment for faster rendering if options are large
         const frag = document.createDocumentFragment(); 
         
         options.forEach((opt, idx) => {
@@ -310,12 +298,10 @@ window.selectOption = (idx, type) => {
     updatePaletteUI();
 };
 
-// ⚡ NaN Bug Fixed strictly
 window.saveNumerical = (val) => {
     const qId = testData.questions[currentQIdx].id;
     const num = parseFloat(val);
     
-    // Check if input is empty, just a minus sign, or invalid
     if(val.trim() === "" || isNaN(num)) {
         delete userAnswers[qId];
     } else {
@@ -381,7 +367,6 @@ window.jumpToQ = (idx) => {
     }
 };
 
-// ⚡ UI UX Update: Virtualized Palette Rendering
 function renderPalette() {
     const container = document.getElementById('palette-container');
     container.innerHTML = '';
@@ -432,7 +417,7 @@ async function autoSubmit() {
     document.body.innerHTML = `
         <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc;">
             <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: #1d4ed8; margin-bottom: 20px;"></i>
-            <h2 style="color: #0f172a; font-weight: 700;">Transmitting Responses Securely...</h2>
+            <h2 style="color: #0f172a; font-weight: 700;">Evaluating & Securing Responses...</h2>
         </div>
     `;
 
@@ -480,8 +465,8 @@ function showSuccessScreen(msg) {
             <div style="background: white; padding: 40px; border-radius: 12px; border: 1px solid #cbd5e1; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 400px; width: 90%;">
                 <i class="fas fa-shield-check" style="color: #16a34a; font-size: 4rem; margin-bottom: 20px;"></i>
                 <h2 style="color: #0f172a; font-weight: 800; font-size: 1.5rem; margin-bottom: 10px;">Assessment Concluded</h2>
-                <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now safely exit this screen and return to your dashboard.</p>
-                <button onclick="window.location.replace('${DASHBOARD_URL}')" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Return to Dashboard</button>
+                <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now close this tab and return to the main dashboard.</p>
+                <button onclick="window.close()" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Close Tab</button>
             </div>
         </div>
     `;
