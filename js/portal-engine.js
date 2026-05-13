@@ -10,60 +10,111 @@ let testData = null;
 let currentQIdx = 0;
 let userAnswers = {}; 
 let timeRemaining = 0;
+let examEndTime = 0; // 🚨 New Absolute Timer Anchor
 let timerInterval = null;
 let isSubmitting = false;
 let currentUserId = null; 
 let sections = []; 
 
-// 🚨 NEW VERCEL BACKEND URL
 const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
+
+// ==========================================
+// 🛡️ ADVANCED ACADEMIC SECURITY MODULE
+// ==========================================
+const SecurityModule = {
+    warnings: 0,
+    maxWarnings: 3,
+    isActive: false,
+
+    init() {
+        this.isActive = true;
+        this.applyStrictEnvironment();
+        this.monitorVisibility();
+        console.log("Secure Assessment Environment Activated.");
+    },
+
+    applyStrictEnvironment() {
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('cut', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+        
+        document.addEventListener('keydown', e => {
+            // Block DevTools & Source Code shortcuts
+            if (e.key === 'F12' || 
+               (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+               (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+            }
+        });
+    },
+
+    triggerViolation(reason) {
+        if (!this.isActive || isSubmitting) return;
+        this.warnings++;
+        
+        if (this.warnings >= this.maxWarnings) {
+            alert(`ACADEMIC INTEGRITY VIOLATION\n\nMaximum warnings exceeded (${this.maxWarnings}/${this.maxWarnings}).\nReason: ${reason}\n\nYour assessment is being automatically submitted for administrative review.`);
+            autoSubmit();
+        } else {
+            alert(`WARNING: ACADEMIC INTEGRITY MONITORING\n\nAction detected: ${reason}.\nPlease remain focused on the assessment window. Do not switch tabs or applications. Further violations will result in automatic submission.\n\nWarning ${this.warnings} of ${this.maxWarnings}.`);
+        }
+    },
+
+    monitorVisibility() {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && this.isActive && !isSubmitting) {
+                this.triggerViolation("Navigated away from the active assessment window");
+            }
+        });
+    }
+};
+// ==========================================
 
 window.addEventListener('beforeunload', function (e) {
     if (!isSubmitting) {
         e.preventDefault();
-        e.returnValue = 'Are you sure you want to leave? Your progress is saved automatically.';
+        e.returnValue = 'Assessment in progress. Exiting will discard unsaved progress.';
     }
 });
 
 onAuthStateChanged(auth, async (user) => {
-    if (!user) { alert("Authentication failed. Please log in again."); window.close(); return; }
+    if (!user) { alert("Authentication required. Please initiate a valid session."); window.close(); return; }
     currentUserId = user.uid; 
 
-    if(!testId || !batchId) { alert("Invalid Assessment Session."); window.close(); return; }
+    if(!testId || !batchId) { alert("Invalid Assessment Session Parameters."); window.close(); return; }
 
     if(sessionStorage.getItem('submitted_' + testId)) {
-        showSuccessScreen("Assessment already submitted.");
+        showSuccessScreen("This assessment has already been submitted and concluded.");
         return;
     }
 
     try {
-        // 🛡️ FIXED: Using simple + for URL combination
         const response = await fetch(BACKEND_URL + "/getSecureTest", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ testId, batchId })
         });
 
-                if (response.ok) {
+        if (response.ok) {
             testData = await response.json();
-            testData.docId = testId; // 👈 JADOO KI LINE (Test ID set kar rahe hain)
+            testData.docId = testId; 
             
             if(!testData.questions || testData.questions.length === 0) {
-                
-                alert("Error: Assessment contains no questions."); window.close(); return;
+                alert("Assessment structural error: No questions populated."); window.close(); return;
             }
             initializePortal();
         } else {
-            alert("Assessment not found or Access Denied."); window.close();
+            alert("Assessment not found or Authorization Denied."); window.close();
         }
     } catch (err) { 
         console.error("Fetch error:", err);
-        alert("Network Error: Failed to load secure assessment."); window.close();
+        alert("Network Error: Failed to establish secure connection to the assessment server."); window.close();
     }
 });
 
 function saveProgressLocally() {
-    if(!testData || !testData.docId) return;
+    if(!testData || !testData.docId || isSubmitting) return;
     const progressState = {
         userAnswers: userAnswers,
         timeRemaining: timeRemaining,
@@ -96,19 +147,31 @@ function initializePortal() {
         selector.innerHTML += `<option value="${sec}">${sec}</option>`;
     });
 
+    SecurityModule.init(); // Activate Anti-Cheat
     startTimer();
     renderQuestion();
     renderPalette();
 }
 
 function startTimer() {
+    // 🚨 SMART TIMER: Absolute time anchoring
+    examEndTime = Date.now() + (timeRemaining * 1000);
+
     timerInterval = setInterval(() => {
+        if(isSubmitting) {
+            clearInterval(timerInterval);
+            return;
+        }
+
+        const now = Date.now();
+        timeRemaining = Math.max(0, Math.floor((examEndTime - now) / 1000));
+
         if (timeRemaining <= 0) {
             clearInterval(timerInterval);
             autoSubmit(); 
             return;
         }
-        timeRemaining--;
+        
         const hrs = Math.floor(timeRemaining / 3600);
         const mins = Math.floor((timeRemaining % 3600) / 60);
         const secs = timeRemaining % 60;
@@ -119,7 +182,9 @@ function startTimer() {
             document.getElementById('timer-val').style.color = '#ef4444';
         }
 
-        saveProgressLocally();
+        // Optimization: Save progress only every 5 seconds instead of 1
+        if (timeRemaining % 5 === 0) saveProgressLocally();
+
     }, 1000);
 }
 
@@ -149,7 +214,8 @@ window.renderQuestion = () => {
     const nM = q.marks?.incorrect || 1;
     document.getElementById('q-marks').innerText = `[+${pM}, -${nM}]`;
     
-    document.getElementById('q-text').innerText = q.questionText || "Missing content";
+    // Using textContent for safe injection (XSS Prevention)
+    document.getElementById('q-text').textContent = q.questionText || "Missing content";
     
     const optContainer = document.getElementById('q-options');
     optContainer.innerHTML = '';
@@ -160,18 +226,29 @@ window.renderQuestion = () => {
         const options = q.options || [];
         options.forEach((opt, idx) => {
             const isSelected = saved.answer.includes(idx);
-            optContainer.innerHTML += `
-                <div class="option-row ${isSelected ? 'selected' : ''}" onclick="selectOption(${idx}, '${q.type}')">
-                    <span class="opt-radio"></span>
-                    <div style="flex: 1; font-weight: 500;">${opt}</div>
-                </div>`;
+            
+            // XSS Safe option rendering
+            const optRow = document.createElement('div');
+            optRow.className = `option-row ${isSelected ? 'selected' : ''}`;
+            optRow.onclick = () => selectOption(idx, q.type);
+            
+            const radioSpan = document.createElement('span');
+            radioSpan.className = 'opt-radio';
+            
+            const textDiv = document.createElement('div');
+            textDiv.style.cssText = 'flex: 1; font-weight: 500;';
+            textDiv.textContent = opt; 
+
+            optRow.appendChild(radioSpan);
+            optRow.appendChild(textDiv);
+            optContainer.appendChild(optRow);
         });
     } else if (q.type === 'numerical') {
         optContainer.innerHTML = `
             <div style="padding: 10px 0;">
                 <input type="number" step="any" class="num-input" id="num-ans" 
                        value="${saved.answer[0] !== undefined ? saved.answer[0] : ''}" 
-                       oninput="saveNumerical(this.value)" placeholder="Type exact answer">
+                       oninput="saveNumerical(this.value)" placeholder="Enter precise numerical value">
             </div>`;
     }
     updatePaletteUI();
@@ -188,7 +265,6 @@ window.selectOption = (idx, type) => {
         if (pos > -1) userAnswers[qId].answer.splice(pos, 1);
         else userAnswers[qId].answer.push(idx);
     }
-    saveProgressLocally(); 
     renderQuestion();
 };
 
@@ -199,7 +275,6 @@ window.saveNumerical = (val) => {
     } else {
         userAnswers[qId] = { answer: [parseFloat(val)], status: 'visited' };
     }
-    saveProgressLocally(); 
 };
 
 window.saveAndNext = () => {
@@ -209,6 +284,7 @@ window.saveAndNext = () => {
     } else if (!userAnswers[qId]) {
         userAnswers[qId] = { answer: [], status: 'visited' };
     }
+    saveProgressLocally(); 
     navigateQ(1);
 };
 
@@ -216,13 +292,13 @@ window.markForReview = () => {
     const qId = testData.questions[currentQIdx].id;
     if (!userAnswers[qId]) userAnswers[qId] = { answer: [], status: 'review' };
     else userAnswers[qId].status = 'review';
+    saveProgressLocally();
     navigateQ(1);
 };
 
 window.clearResponse = () => {
     const qId = testData.questions[currentQIdx].id;
     delete userAnswers[qId];
-    saveProgressLocally(); 
     renderQuestion();
 };
 
@@ -230,14 +306,12 @@ window.navigateQ = (step) => {
     const newIdx = currentQIdx + step;
     if (newIdx >= 0 && newIdx < testData.questions.length) {
         currentQIdx = newIdx;
-        saveProgressLocally(); 
         renderQuestion();
     }
 };
 
 window.jumpToQ = (idx) => {
     currentQIdx = idx;
-    saveProgressLocally(); 
     renderQuestion();
     if(window.innerWidth < 900) {
         document.getElementById('p-panel').classList.remove('open');
@@ -272,7 +346,7 @@ function updatePaletteUI() {
 
 window.confirmSubmit = () => {
     if(isSubmitting) return;
-    if (confirm("Are you sure you want to final submit the assessment? You cannot modify your answers later.")) {
+    if (confirm("Confirm Final Submission? Once submitted, assessment responses cannot be modified.")) {
         autoSubmit();
     }
 };
@@ -280,12 +354,13 @@ window.confirmSubmit = () => {
 async function autoSubmit() {
     if(isSubmitting) return;
     isSubmitting = true;
+    SecurityModule.isActive = false; // Turn off warnings during submission
     clearInterval(timerInterval);
     
     document.body.innerHTML = `
         <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc;">
             <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: #1d4ed8; margin-bottom: 20px;"></i>
-            <h2 style="color: #0f172a; font-weight: 700;">Evaluating & Securing Responses...</h2>
+            <h2 style="color: #0f172a; font-weight: 700;">Transmitting Responses Securely...</h2>
         </div>
     `;
 
@@ -293,12 +368,11 @@ async function autoSubmit() {
     const timeSpent = (testData.duration * 60) - timeRemaining;
 
     try {
-        // 🛡️ FIXED: Using simple + for URL combination
         const response = await fetch(BACKEND_URL + "/submitAssessment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                testId: testId, // 👈 DIRECT ID use karenge taaki fail hone ka chance hi na rahe
+            body: JSON.stringify({
+                testId: testId, 
                 batchId: batchId,
                 userAnswers: safeUserAnswers,
                 timeSpent: timeSpent,
@@ -306,23 +380,23 @@ async function autoSubmit() {
             })
         });
 
-        if (!response.ok) throw new Error("Server submission failed");
+        if (!response.ok) throw new Error("Server communication failure");
         
-        const result = await response.json();
+        await response.json();
         
         sessionStorage.setItem('submitted_' + testData.docId, 'true'); 
         localStorage.removeItem('vp_exam_progress_' + testData.docId);
         
-        showSuccessScreen(`Your responses have been successfully evaluated and securely saved.`);
+        showSuccessScreen("Assessment data successfully received and verified by the evaluation server.");
         
     } catch (err) { 
         console.error("Submission Error:", err); 
         document.body.innerHTML = `
             <div style="text-align:center; padding: 50px;">
                 <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 3rem; margin-bottom:15px;"></i>
-                <h3 style="color: #0f172a; margin-bottom: 10px;">Network Error</h3>
-                <p>Failed to submit assessment securely. Please check your internet connection.</p>
-                <button onclick="location.reload()" style="margin-top:20px; padding: 10px 20px; background: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: 600; cursor:pointer;">Retry Submission</button>
+                <h3 style="color: #0f172a; margin-bottom: 10px;">Network Timeout</h3>
+                <p>Failed to establish a secure connection for submission. Please check your network stability.</p>
+                <button onclick="location.reload()" style="margin-top:20px; padding: 10px 20px; background: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: 600; cursor:pointer;">Retry Transmission</button>
             </div>
         `;
     }
@@ -334,8 +408,8 @@ function showSuccessScreen(msg) {
             <div style="background: white; padding: 40px; border-radius: 12px; border: 1px solid #cbd5e1; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 400px; width: 90%;">
                 <i class="fas fa-shield-check" style="color: #16a34a; font-size: 4rem; margin-bottom: 20px;"></i>
                 <h2 style="color: #0f172a; font-weight: 800; font-size: 1.5rem; margin-bottom: 10px;">Assessment Concluded</h2>
-                <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now close this tab and return to the main dashboard.</p>
-                <button onclick="window.close()" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Close Tab</button>
+                <p style="color: #475569; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6;">${msg}<br>You may now close this secure window and return to the main dashboard.</p>
+                <button onclick="window.close()" style="width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s;">Exit Environment</button>
             </div>
         </div>
     `;
