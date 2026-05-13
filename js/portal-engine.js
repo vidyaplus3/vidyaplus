@@ -44,10 +44,12 @@ onAuthStateChanged(auth, async (user) => {
             body: JSON.stringify({ testId, batchId })
         });
 
-        if (response.ok) {
+                if (response.ok) {
             testData = await response.json();
+            testData.docId = testId; // 👈 JADOO KI LINE (Test ID set kar rahe hain)
             
             if(!testData.questions || testData.questions.length === 0) {
+                
                 alert("Error: Assessment contains no questions."); window.close(); return;
             }
             initializePortal();
@@ -295,8 +297,8 @@ async function autoSubmit() {
         const response = await fetch(BACKEND_URL + "/submitAssessment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                testId: testData.docId,
+                        body: JSON.stringify({
+                testId: testId, // 👈 DIRECT ID use karenge taaki fail hone ka chance hi na rahe
                 batchId: batchId,
                 userAnswers: safeUserAnswers,
                 timeSpent: timeSpent,
