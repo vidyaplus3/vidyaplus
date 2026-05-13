@@ -74,13 +74,10 @@ function startTimer() {
         const hrs = Math.floor(timeRemaining / 3600);
         const mins = Math.floor((timeRemaining % 3600) / 60);
         const secs = timeRemaining % 60;
-        document.getElementById('exam-timer').innerText = `Time Left: ${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
-        // Red color warning in last 5 minutes
-        if(timeRemaining < 300) {
-            document.getElementById('exam-timer').style.background = '#ef4444';
-            document.getElementById('exam-timer').style.color = 'white';
-        }
+        // Sleek UI update (Faaltu red background hata diya)
+        document.getElementById('exam-timer').innerHTML = `<i class="far fa-clock" style="font-size: 1.1rem;"></i> Time Left: ${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        
     }, 1000);
 }
 
