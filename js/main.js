@@ -41,6 +41,9 @@ window.handleScreenRender = (screenId) => {
     if (screenId === 'subjects') window.renderSubjects();
     if (screenId === 'chapters' && AppState.currentSubject) window.renderChapters(AppState.currentSubject);
     if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
+    
+    // 🚨 NAYA: Test list ko route karna
+    if (screenId === 'tests') window.renderTestsList('live'); 
 };
 
 window.addEventListener('hashchange', () => { 
