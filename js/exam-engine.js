@@ -3,56 +3,79 @@ import { db, auth } from './firebase-init.js';
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// STATE MANAGEMENT
 let testData = null;
 let currentQIdx = 0;
-let userAnswers = {}; // { qId: { answer: [], status: 'answered'/'review' } }
+let userAnswers = {}; 
 let timeRemaining = 0;
 let timerInterval = null;
 let sections = [];
 let currentSection = "";
+let isSubmitting = false;
 
-// 1. INITIALIZE EXAM
+// 🚨 1. BACK BUTTON TRAP (Anti-Exit)
+window.history.pushState(null, null, window.location.href);
+window.onpopstate = function () {
+    window.history.pushState(null, null, window.location.href);
+    if(confirm("⚠️ Warning! Pressing back will auto-submit your test. Do you want to submit?")) {
+        autoSubmit();
+    }
+};
+
+// 2. INITIALIZE
 onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'index.html'; return; }
+    if (!user) { alert("Auth Error! Please login again."); window.location.href = 'login.html'; return; }
     
-    // URL madhun testId ani batchId ghet aahe
     const urlParams = new URLSearchParams(window.location.search);
     const testId = urlParams.get('testId');
     const batchId = urlParams.get('batchId');
 
-    if(!testId || !batchId) { alert("Invalid Test Session!"); window.location.href = 'dashboard.html'; return; }
+    if(!testId || !batchId) { alert("Invalid Session!"); window.location.href = 'index.html#tests'; return; }
 
     try {
         const testSnap = await getDoc(doc(db, "batches", batchId, "materials", testId));
         if (testSnap.exists()) {
             testData = testSnap.data();
             testData.docId = testSnap.id;
+            
+            // Failsafe
+            if(!testData.questions || testData.questions.length === 0) {
+                alert("Error: This test has no questions."); window.location.href = 'index.html#tests'; return;
+            }
+
+            document.getElementById('loader').style.display = 'none'; // Hide loader
             initializeTestUI();
+        } else {
+            alert("Test not found in database."); window.location.href = 'index.html#tests';
         }
-    } catch (err) { console.error(err); alert("Failed to load test data."); }
+    } catch (err) { 
+        console.error(err); 
+        alert("Failed to load test. Please check internet connection."); 
+        window.location.href = 'index.html#tests'; 
+    }
 });
 
 function initializeTestUI() {
     document.getElementById('exam-title').innerText = testData.title;
     timeRemaining = testData.duration * 60;
     
-    // Identify Sections
     sections = [...new Set(testData.questions.map(q => q.section))];
-    currentSection = sections[0];
+    currentSection = sections[0] || "General";
     
     renderSectionTabs();
     startTimer();
     renderQuestion();
     renderPalette();
-    
-    // SECURITY: Tab switch detection
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) alert("WARNING: Tab switching is strictly prohibited during the exam!");
-    });
 }
 
-// 2. TIMER LOGIC
+// 3. UI TOGGLES (Mobile)
+window.togglePalette = () => {
+    const drawer = document.getElementById('palette-drawer');
+    const overlay = document.getElementById('palette-overlay');
+    drawer.classList.toggle('open');
+    overlay.classList.toggle('open');
+};
+
+// 4. TIMER
 function startTimer() {
     timerInterval = setInterval(() => {
         if (timeRemaining <= 0) {
@@ -61,23 +84,25 @@ function startTimer() {
             return;
         }
         timeRemaining--;
-        updateTimerDisplay();
+        const hrs = Math.floor(timeRemaining / 3600);
+        const mins = Math.floor((timeRemaining % 3600) / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('exam-timer').innerHTML = `<i class="fas fa-clock"></i> ${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }, 1000);
 }
 
-function updateTimerDisplay() {
-    const hrs = Math.floor(timeRemaining / 3600);
-    const mins = Math.floor((timeRemaining % 3600) / 60);
-    const secs = timeRemaining % 60;
-    document.getElementById('exam-timer').innerText = 
-        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-// 3. RENDER QUESTION
+// 5. RENDERING QUESTION
 window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
-    document.getElementById('q-meta').innerText = `${q.section} | Question ${currentQIdx + 1}`;
-    document.getElementById('q-text').innerText = q.questionText;
+    if(!q) return;
+
+    document.getElementById('q-meta').innerText = `Q. ${currentQIdx + 1}`;
+    
+    const pM = q.marks?.correct || 4;
+    const nM = q.marks?.incorrect || 1;
+    document.getElementById('q-marks-display').innerText = `+${pM} / -${nM}`;
+    
+    document.getElementById('q-text').innerText = q.questionText || "Question text missing";
     
     const optContainer = document.getElementById('q-options');
     optContainer.innerHTML = '';
@@ -85,19 +110,22 @@ window.renderQuestion = () => {
     const saved = userAnswers[q.id] || { answer: [] };
 
     if (q.type === 'single' || q.type === 'multiple') {
-        q.options.forEach((opt, idx) => {
+        const options = q.options || [];
+        options.forEach((opt, idx) => {
             const isSelected = saved.answer.includes(idx);
             optContainer.innerHTML += `
                 <div class="option-card ${isSelected ? 'selected' : ''}" onclick="selectOption(${idx}, '${q.type}')">
                     <div class="opt-id">${String.fromCharCode(65 + idx)}</div>
-                    <div>${opt}</div>
+                    <div style="flex: 1;">${opt}</div>
+                    ${isSelected ? '<i class="fas fa-check-circle" style="color:var(--primary); font-size:1.2rem;"></i>' : ''}
                 </div>`;
         });
     } else if (q.type === 'numerical') {
         optContainer.innerHTML = `
-            <div style="padding: 20px 0;">
+            <div style="padding: 10px 0;">
                 <input type="number" step="any" class="num-input" id="num-ans" 
-                       value="${saved.answer[0] || ''}" onchange="saveNumerical(this.value)" placeholder="Type Answer">
+                       value="${saved.answer[0] !== undefined ? saved.answer[0] : ''}" 
+                       oninput="saveNumerical(this.value)" placeholder="Type exact answer here">
             </div>`;
     }
     
@@ -120,14 +148,20 @@ window.selectOption = (idx, type) => {
 
 window.saveNumerical = (val) => {
     const qId = testData.questions[currentQIdx].id;
-    userAnswers[qId] = { answer: [parseFloat(val)], status: 'visited' };
+    if(val === "") {
+        delete userAnswers[qId];
+    } else {
+        userAnswers[qId] = { answer: [parseFloat(val)], status: 'visited' };
+    }
 };
 
-// 4. NAVIGATION & PALETTE
+// 6. NAVIGATION
 window.saveAndNext = () => {
     const qId = testData.questions[currentQIdx].id;
     if (userAnswers[qId] && userAnswers[qId].answer.length > 0) {
         userAnswers[qId].status = 'answered';
+    } else if (!userAnswers[qId]) {
+        userAnswers[qId] = { answer: [], status: 'visited' };
     }
     navigateQ(1);
 };
@@ -149,15 +183,29 @@ window.navigateQ = (step) => {
     const newIdx = currentQIdx + step;
     if (newIdx >= 0 && newIdx < testData.questions.length) {
         currentQIdx = newIdx;
+        
+        // Auto-switch section
+        const newSec = testData.questions[currentQIdx].section;
+        if(newSec !== currentSection) {
+            currentSection = newSec;
+            renderSectionTabs();
+        }
         renderQuestion();
     }
 };
 
 window.jumpToQ = (idx) => {
     currentQIdx = idx;
+    const newSec = testData.questions[currentQIdx].section;
+    if(newSec !== currentSection) {
+        currentSection = newSec;
+        renderSectionTabs();
+    }
     renderQuestion();
+    if(window.innerWidth < 900) togglePalette(); // Close drawer on mobile
 };
 
+// 7. PALETTE & TABS
 function renderPalette() {
     const container = document.getElementById('palette-container');
     container.innerHTML = '';
@@ -169,9 +217,12 @@ function renderPalette() {
 function updatePaletteUI() {
     testData.questions.forEach((q, idx) => {
         const btn = document.getElementById(`p-btn-${idx}`);
+        if(!btn) return;
         const state = userAnswers[q.id];
+        
         btn.className = 'p-btn';
         if (idx === currentQIdx) btn.classList.add('current');
+        
         if (state) {
             if (state.status === 'answered') btn.classList.add('answered');
             else if (state.status === 'review') btn.classList.add('review');
@@ -186,28 +237,40 @@ function renderSectionTabs() {
     sections.forEach(sec => {
         container.innerHTML += `<button class="sec-tab ${sec === currentSection ? 'active' : ''}" onclick="switchSection('${sec}')">${sec}</button>`;
     });
+    const activeTab = container.querySelector('.active');
+    if(activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 
 window.switchSection = (secName) => {
     currentSection = secName;
     const firstQOfSec = testData.questions.findIndex(q => q.section === secName);
-    currentQIdx = firstQOfSec;
-    renderSectionTabs();
-    renderQuestion();
+    if(firstQOfSec !== -1) {
+        currentQIdx = firstQOfSec;
+        renderSectionTabs();
+        renderQuestion();
+    }
 };
 
-// 5. SUBMISSION & SCORING (The God Memory)
+// 8. FINAL SUBMISSION ENGINE
 window.confirmSubmit = () => {
-    if (confirm("Are you sure you want to submit the test?")) autoSubmit();
+    if(isSubmitting) return;
+    if (confirm("Are you sure you want to final submit the test? You cannot undo this.")) {
+        autoSubmit();
+    }
 };
 
 async function autoSubmit() {
+    if(isSubmitting) return;
+    isSubmitting = true;
     clearInterval(timerInterval);
+    
+    document.getElementById('loader').style.display = 'flex';
+    document.getElementById('loader').innerHTML = `<div class="spinner"></div><h3 style="color: var(--navy); font-weight: 800;">Evaluating Answers...</h3>`;
+
     const userId = auth.currentUser.uid;
     const result = calculateScore();
     
     try {
-        // Saving to Users -> Results (God Memory)
         const resultRef = doc(db, "users", userId, "exam_results", testData.docId);
         await setDoc(resultRef, {
             testTitle: testData.title,
@@ -217,12 +280,18 @@ async function autoSubmit() {
             timeSpent: (testData.duration * 60) - timeRemaining,
             sectionWise: result.sectionWise,
             submittedAt: serverTimestamp(),
-            userAnswers: userAnswers // For detailed review
+            userAnswers: userAnswers 
         });
         
-        alert(`Test Submitted! Score: ${result.totalScore} / ${testData.maxMarks}`);
-        window.location.href = 'dashboard.html';
-    } catch (err) { console.error(err); alert("Submission failed. Error logged."); }
+        alert(`Test Submitted Successfully!\nYour Score: ${result.totalScore} / ${testData.maxMarks}`);
+        window.onpopstate = null; // Trap hatado
+        window.location.href = 'index.html#tests'; // Dashboard ke tests section pe jao
+    } catch (err) { 
+        console.error("Submission DB Error:", err); 
+        alert("Network Error: Could not submit test."); 
+        isSubmitting = false;
+        document.getElementById('loader').style.display = 'none';
+    }
 }
 
 function calculateScore() {
@@ -234,29 +303,31 @@ function calculateScore() {
         if (!sectionWise[q.section]) sectionWise[q.section] = { score: 0, correct: 0, wrong: 0 };
         
         const userAns = userAnswers[q.id]?.answer || [];
-        const correctAns = q.correctAnswers;
+        const correctAns = q.correctAnswers || [];
         
-        if (userAns.length === 0) return; // Unattempted
+        if (userAns.length === 0) return; 
+
+        const plusM = q.marks?.correct || 4;
+        const minusM = q.marks?.incorrect || 1;
 
         const isCorrect = JSON.stringify(userAns.sort()) === JSON.stringify(correctAns.sort());
         
         if (isCorrect) {
-            totalScore += q.marks.correct;
+            totalScore += plusM;
             correctCount++;
-            sectionWise[q.section].score += q.marks.correct;
+            sectionWise[q.section].score += plusM;
             sectionWise[q.section].correct++;
         } else {
-            totalScore -= q.marks.incorrect;
-            sectionWise[q.section].score -= q.marks.incorrect;
+            totalScore -= minusM;
+            sectionWise[q.section].score -= minusM;
             sectionWise[q.section].wrong++;
         }
     });
 
-    const attempted = Object.keys(userAnswers).length;
+    const attempted = Object.keys(userAnswers).filter(k => userAnswers[k].answer.length > 0).length;
     return {
         totalScore,
-        accuracy: attempted > 0 ? (correctCount / attempted) * 100 : 0,
+        accuracy: attempted > 0 ? ((correctCount / attempted) * 100).toFixed(2) : 0,
         sectionWise
     };
-}
-
+                                         }
