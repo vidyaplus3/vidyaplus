@@ -323,10 +323,20 @@ window.renderTestsList = (type = 'live') => {
     const container = document.getElementById('test-list-container');
     if(!container) return;
     
+    // Analytics Dashboard View
+    if (type === 'dashboard') {
+        container.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: #64748b;">
+            <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 10px;"></i>
+            <h3 style="font-weight: 600; color: #1e293b;">Performance Analytics</h3>
+            <p style="font-size: 0.85rem; margin-top: 5px;">Detailed subject-wise reports and historical data will be mapped here.</p>
+        </div>`;
+        return;
+    }
+
     const allTests = AppState.quizzes || [];
     
     if(allTests.length === 0) {
-        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="font-size:3rem; opacity:0.2;"></i><h4 style="margin-top:15px;">No tests available right now.</h4></div>`;
+        container.innerHTML = `<div class="empty-box"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No assessments scheduled.</h4></div>`;
         return;
     }
 
@@ -334,39 +344,37 @@ window.renderTestsList = (type = 'live') => {
     
     allTests.forEach(test => {
         window.testsDataCache[test.id] = test;
-        const isAttempted = window.userAttemptedQuizzes[test.id] ? true : false;
+        const isAttempted = window.userAttemptedQuizzes[test.id] || sessionStorage.getItem('submitted_' + test.id) ? true : false;
         
         if(type === 'live' && isAttempted) return;
         if(type === 'attempted' && !isAttempted) return;
 
         let statusBadge = isAttempted 
-            ? `<span style="background: #fee2e2; color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-lock"></i> Completed</span>`
-            : `<span style="background: #ecfdf5; color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 4px; vertical-align: middle;"></i> Live</span>`;
+            ? `<span style="color: #059669; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-check-circle"></i> Submitted</span>`
+            : `<span style="color: #2563eb; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-circle" style="font-size: 0.4rem; vertical-align: middle; margin-right:4px;"></i> Active</span>`;
 
         let actionButtons = isAttempted
-            ? `<button onclick="alert('Result Dashboard Coming Soon!')" style="flex: 1; padding: 10px; border-radius: 8px; background: #f1f5f9; color: var(--navy); border: 1px solid #cbd5e1; font-weight: 700; cursor: pointer;"><i class="fas fa-chart-bar"></i> View Result</button>
-               <button onclick="openInstructions('${test.id}')" style="flex: 1; padding: 10px; border-radius: 8px; background: white; color: var(--primary); border: 1px solid var(--primary); font-weight: 700; cursor: pointer;"><i class="fas fa-redo"></i> Reattempt</button>`
-            : `<button onclick="openInstructions('${test.id}')" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--primary); color: white; border: none; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.2);">Start Test <i class="fas fa-arrow-right"></i></button>`;
+            ? `<button onclick="alert('Analytics mapping in progress.')" style="padding: 8px 16px; background: white; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Report</button>`
+            : `<button onclick="openInstructions('${test.id}')" style="padding: 8px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Begin Assessment</button>`;
 
+        // STRICT PROFESSIONAL CARD UI
         let cardHtml = `
-            <div class="premium-card" style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                    <div style="width: 75%;">
-                        <span style="font-size:0.7rem; font-weight:800; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:6px; margin-bottom:10px; display:inline-block; text-transform: uppercase;">${test.subject || 'Full Mock Test'}</span>
-                        <h3 style="font-size: 1.15rem; color: var(--navy); font-weight: 800; line-height: 1.4;">${test.title}</h3>
+            <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">${test.subject || 'Standard Assessment'}</div>
+                        <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700; margin-bottom: 12px;">${test.title}</h3>
                     </div>
                     <div>${statusBadge}</div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; font-size: 0.8rem; color: var(--text-light); font-weight: 700; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #f1f5f9; justify-content: space-around;">
-                    <div style="text-align: center;"><i class="fas fa-clock" style="color: var(--primary); font-size: 1rem; margin-bottom: 5px; display: block;"></i> ${test.duration} Min</div>
-                    <div style="width: 1px; background: #e2e8f0;"></div>
-                    <div style="text-align: center;"><i class="fas fa-question-circle" style="color: #f59e0b; font-size: 1rem; margin-bottom: 5px; display: block;"></i> ${test.totalQuestions} Qs</div>
-                    <div style="width: 1px; background: #e2e8f0;"></div>
-                    <div style="text-align: center;"><i class="fas fa-star" style="color: #10b981; font-size: 1rem; margin-bottom: 5px; display: block;"></i> ${test.maxMarks} Marks</div>
+                <div style="display: flex; gap: 20px; font-size: 0.8rem; color: #475569; font-weight: 500; margin-bottom: 16px;">
+                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-clock" style="color: #94a3b8;"></i> ${test.duration} Mins</span>
+                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-list-ol" style="color: #94a3b8;"></i> ${test.totalQuestions} Questions</span>
+                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-bullseye" style="color: #94a3b8;"></i> ${test.maxMarks} Marks</span>
                 </div>
                 
-                <div style="display: flex; gap: 10px;">
+                <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
                     ${actionButtons}
                 </div>
             </div>
@@ -403,21 +411,14 @@ window.closeInstructions = () => {
     window.currentActiveTestId = null;
 };
 
-// 🚨 UPDATE THIS FUNCTION IN js/main.js
 window.startTestPlayer = () => {
     if(!window.currentActiveTestId || !AppState.currentBatchId) {
-        alert("Session validation failed. Please refresh."); return;
+        alert("System validation failed. Please refresh the page."); return;
     }
+    document.getElementById('instruction-mode').style.display = 'none';
     
-    // 1. Session Lock Hatao (Taaki Test Reattempt / Start ho sake)
-    sessionStorage.removeItem('submitted_' + window.currentActiveTestId);
-    
-    // 2. Ghost Modal Fix (Test me jaane se pehle isko chhupa do)
-    const instModal = document.getElementById('instruction-mode');
-    if(instModal) instModal.style.display = 'none';
-    
-    // 3. Navigate to Exam Player
-    window.location.href = `exam.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`;
+    // NAYA: Isolated tab me open karna (No Back Button issue)
+    window.open(`portal.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`, '_blank');
 };
 
 // ==========================================
