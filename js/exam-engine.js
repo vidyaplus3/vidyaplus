@@ -3,6 +3,14 @@ import { db, auth } from './firebase-init.js';
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+// 🚨 1. ZOMBIE KILLER (Anti-Loop System)
+// Agar koi back button dabakar is page par wapas aaya hai, toh use turant bahar pheko!
+const navEntries = performance.getEntriesByType("navigation");
+if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+    window.location.replace('study.html#tests');
+    throw new Error("Zombie page killed"); // Yahan code block ho jayega aur test dubara start nahi hoga
+}
+
 let testData = null;
 let currentQIdx = 0;
 let userAnswers = {}; 
@@ -11,27 +19,28 @@ let timerInterval = null;
 let sections = [];
 let currentSection = "";
 let isSubmitting = false;
-let currentUserId = null; // 🚨 NAYA: Global user ID taaki submit ke waqt null na ho
+let currentUserId = null; 
 
-// 1. BACK BUTTON TRAP
-window.history.pushState(null, null, window.location.href);
-window.onpopstate = function () {
-    window.history.pushState(null, null, window.location.href);
+// 🚨 2. BACK BUTTON TRAP
+window.history.pushState({ trap: true }, null, window.location.href);
+window.onpopstate = function (e) {
     if(confirm("⚠️ Pressing back will submit your test! Do you want to submit?")) {
         autoSubmit();
+    } else {
+        window.history.pushState({ trap: true }, null, window.location.href);
     }
 };
 
-// 2. INITIALIZE
+// 3. INITIALIZE
 onAuthStateChanged(auth, async (user) => {
     if (!user) { alert("Auth Error! Login again."); window.location.href = 'index.html'; return; }
-    currentUserId = user.uid; // Store UID securely
+    currentUserId = user.uid; 
     
     const urlParams = new URLSearchParams(window.location.search);
     const testId = urlParams.get('testId');
     const batchId = urlParams.get('batchId');
 
-    if(!testId || !batchId) { alert("Invalid Session!"); window.location.href = 'index.html#tests'; return; }
+    if(!testId || !batchId) { window.location.replace('study.html#tests'); return; }
 
     try {
         const testSnap = await getDoc(doc(db, "batches", batchId, "materials", testId));
@@ -40,17 +49,17 @@ onAuthStateChanged(auth, async (user) => {
             testData.docId = testSnap.id;
             
             if(!testData.questions || testData.questions.length === 0) {
-                alert("This test has no questions."); window.location.href = 'index.html#tests'; return;
+                alert("This test has no questions."); window.location.replace('study.html#tests'); return;
             }
 
             document.getElementById('loader').style.display = 'none';
             initializeTestUI();
         } else {
-            alert("Test not found in database."); window.location.href = 'index.html#tests';
+            alert("Test not found in database."); window.location.replace('study.html#tests');
         }
     } catch (err) { 
         alert("Failed to load test. Check network."); 
-        window.location.href = 'index.html#tests'; 
+        window.location.replace('study.html#tests'); 
     }
 });
 
@@ -76,7 +85,7 @@ function startTimer() {
     timerInterval = setInterval(() => {
         if (timeRemaining <= 0) {
             clearInterval(timerInterval);
-            autoSubmit(); // Auto Submit if time ends
+            autoSubmit(); 
             return;
         }
         timeRemaining--;
@@ -244,10 +253,10 @@ window.switchSection = (secName) => {
     }
 };
 
-// 🚨 8. FAIL-SAFE SUBMISSION ENGINE
+// 🚨 4. FINAL SUBMISSION ENGINE
 window.confirmSubmit = () => {
     if(isSubmitting) return;
-    if (confirm("Are you sure you want to final submit the test? You cannot undo this.")) {
+    if (confirm("Are you sure you want to submit the test? You cannot change your answers later.")) {
         autoSubmit();
     }
 };
@@ -278,12 +287,8 @@ async function autoSubmit() {
         });
         
         alert(`Test Submitted Successfully!\nYour Score: ${result.totalScore} / ${testData.maxMarks}`);
-        window.onpopstate = null; // Back button trap hataya
-        
-        // 🚨 THE ZOMBIE KILLER FIX: href ki jagah 'replace' use kiya
-        // Ab back button dabane par exam.html kabhi nahi khulega!
+        window.onpopstate = null; 
         window.location.replace('study.html#tests'); 
-        
     } catch (err) { 
         console.error("Submission DB Error:", err); 
         alert("Database Error: " + err.message + "\n\n(Check Firebase Firestore Rules if it says 'Missing Permissions')"); 
