@@ -17,6 +17,62 @@ let currentUserId = null;
 let sections = []; 
 
 const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
+const DASHBOARD_URL = "/study#tests"; 
+
+// ==========================================
+// 🕵️ TELEMETRY ENGINE (The Ultimate Data Tracker)
+// ==========================================
+const Telemetry = {
+    questionEntryTime: 0,
+    systemLogs: [],
+
+    initQuestionRecord(qId) {
+        if (!userAnswers[qId]) {
+            userAnswers[qId] = { 
+                answer: [], 
+                status: 'visited', 
+                timeSpent: 0, // Total time spent in milliseconds
+                visits: 0,    // How many times user saw this question
+                actions: []   // Tracks every click, change, and clear
+            };
+        }
+    },
+
+    recordEntry() {
+        this.questionEntryTime = Date.now();
+        const qId = testData.questions[currentQIdx].id;
+        this.initQuestionRecord(qId);
+        userAnswers[qId].visits += 1;
+    },
+
+    recordExit() {
+        if (this.questionEntryTime === 0) return;
+        const qId = testData.questions[currentQIdx].id;
+        const timeSpentNow = Date.now() - this.questionEntryTime;
+        
+        this.initQuestionRecord(qId);
+        userAnswers[qId].timeSpent += timeSpentNow;
+        this.questionEntryTime = 0; // Reset for next
+    },
+
+    logAction(actionType, value = null) {
+        const qId = testData.questions[currentQIdx].id;
+        this.initQuestionRecord(qId);
+        userAnswers[qId].actions.push({
+            type: actionType,
+            val: value,
+            timestamp: Date.now()
+        });
+    },
+
+    logSystemEvent(eventName) {
+        this.systemLogs.push({
+            event: eventName,
+            timestamp: Date.now()
+        });
+    }
+};
+// ==========================================
 
 // ==========================================
 // 🛡️ ADVANCED ACADEMIC SECURITY MODULE
@@ -30,7 +86,7 @@ const SecurityModule = {
         this.isActive = true;
         this.applyStrictEnvironment();
         this.monitorVisibility();
-        console.log("Secure Assessment Environment Activated.");
+        console.log("Secure Assessment & Telemetry Activated.");
     },
 
     applyStrictEnvironment() {
@@ -56,6 +112,7 @@ const SecurityModule = {
     triggerViolation(reason) {
         if (!this.isActive || isSubmitting) return;
         this.warnings++;
+        Telemetry.logSystemEvent(`Violation: ${reason} (Warning ${this.warnings})`); // 👈 Tracker
         
         if (this.warnings >= this.maxWarnings) {
             alert(`ACADEMIC INTEGRITY VIOLATION\n\nMaximum warnings exceeded (${this.maxWarnings}/${this.maxWarnings}).\nReason: ${reason}\n\nYour assessment is being automatically submitted for administrative review.`);
@@ -68,19 +125,27 @@ const SecurityModule = {
     monitorVisibility() {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !isSubmitting) {
+                Telemetry.logSystemEvent("Tab Minimized/Hidden"); // 👈 Tracker
                 saveProgressLocally(); 
                 if(this.isActive) this.triggerViolation("Navigated away from the active assessment window");
+            } else if (!document.hidden) {
+                Telemetry.logSystemEvent("Tab Restored"); // 👈 Tracker
             }
         });
 
         window.addEventListener('blur', () => {
             if (this.isActive && !isSubmitting) {
+                Telemetry.logSystemEvent("Window Blur (Focus Lost)"); // 👈 Tracker
                 setTimeout(() => {
                     if (!document.hasFocus() && !document.hidden) {
                         this.triggerViolation("Assessment window lost focus");
                     }
                 }, 2000); 
             }
+        });
+        
+        window.addEventListener('focus', () => {
+             if (this.isActive && !isSubmitting) Telemetry.logSystemEvent("Window Focus Restored");
         });
     }
 };
@@ -94,7 +159,6 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 onAuthStateChanged(auth, async (user) => {
-    // ⚡ FIX: Back to smooth window.close()
     if (!user) { alert("Authentication failed. Please log in again."); window.close(); return; }
     currentUserId = user.uid; 
 
@@ -134,7 +198,8 @@ function saveProgressLocally() {
     const progressState = {
         userAnswers: userAnswers,
         timeRemaining: timeRemaining,
-        currentQIdx: currentQIdx
+        currentQIdx: currentQIdx,
+        systemLogs: Telemetry.systemLogs // Save logs offline too
     };
     localStorage.setItem('vp_exam_progress_' + testData.docId, JSON.stringify(progressState));
 }
@@ -149,11 +214,14 @@ function initializePortal() {
             userAnswers = parsedState.userAnswers || {};
             timeRemaining = parsedState.timeRemaining || (testData.duration * 60);
             currentQIdx = parsedState.currentQIdx || 0;
+            Telemetry.systemLogs = parsedState.systemLogs || [];
+            Telemetry.logSystemEvent("Test Resumed from LocalStorage");
         } catch(e) {
             timeRemaining = testData.duration * 60; 
         }
     } else {
         timeRemaining = testData.duration * 60;
+        Telemetry.logSystemEvent("Test Started");
     }
     
     sections = [...new Set(testData.questions.map(q => q.section || "General"))];
@@ -203,8 +271,10 @@ function startTimer() {
 }
 
 window.jumpToSubject = (secName) => {
+    Telemetry.recordExit(); // 👈 Tracker
     const firstQOfSec = testData.questions.findIndex(q => (q.section || "General") === secName);
     if(firstQOfSec !== -1) {
+        Telemetry.logSystemEvent(`Jumped to Subject: ${secName}`);
         currentQIdx = firstQOfSec;
         saveProgressLocally(); 
         renderQuestion();
@@ -214,6 +284,8 @@ window.jumpToSubject = (secName) => {
 window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
     if(!q) return;
+
+    Telemetry.recordEntry(); // 👈 Tracker Starts Clock for this Question
 
     document.getElementById('q-meta').innerText = `Question ${currentQIdx + 1} of ${testData.questions.length}`;
     
@@ -233,7 +305,8 @@ window.renderQuestion = () => {
     const optContainer = document.getElementById('q-options');
     optContainer.innerHTML = ''; 
     
-    const saved = userAnswers[q.id] || { answer: [] };
+    Telemetry.initQuestionRecord(q.id); // Ensure record exists
+    const saved = userAnswers[q.id];
 
     if (q.type === 'single' || q.type === 'multiple') {
         const options = q.options || [];
@@ -272,15 +345,22 @@ window.renderQuestion = () => {
 
 window.selectOption = (idx, type) => {
     const qId = testData.questions[currentQIdx].id;
-    if (!userAnswers[qId]) userAnswers[qId] = { answer: [], status: 'visited' };
+    Telemetry.initQuestionRecord(qId);
+    Telemetry.logAction('select_option', idx); // 👈 Tracker
 
     if (type === 'single') {
         userAnswers[qId].answer = [idx];
     } else {
         const pos = userAnswers[qId].answer.indexOf(idx);
-        if (pos > -1) userAnswers[qId].answer.splice(pos, 1);
-        else userAnswers[qId].answer.push(idx);
+        if (pos > -1) {
+            userAnswers[qId].answer.splice(pos, 1);
+            Telemetry.logAction('deselect_option', idx); // 👈 Tracker
+        } else {
+            userAnswers[qId].answer.push(idx);
+        }
     }
+    
+    userAnswers[qId].status = 'visited'; // Keep logic intact
     
     const optContainer = document.getElementById('q-options');
     if (optContainer) {
@@ -302,35 +382,52 @@ window.saveNumerical = (val) => {
     const qId = testData.questions[currentQIdx].id;
     const num = parseFloat(val);
     
+    Telemetry.initQuestionRecord(qId);
+    Telemetry.logAction('numerical_input', val); // 👈 Tracker
+    
     if(val.trim() === "" || isNaN(num)) {
-        delete userAnswers[qId];
+        delete userAnswers[qId].answer;
+        userAnswers[qId].answer = [];
     } else {
-        userAnswers[qId] = { answer: [num], status: 'visited' };
+        userAnswers[qId].answer = [num];
+        userAnswers[qId].status = 'visited';
     }
 };
 
 window.saveAndNext = () => {
+    Telemetry.recordExit(); // 👈 Tracker
     const qId = testData.questions[currentQIdx].id;
-    if (userAnswers[qId] && userAnswers[qId].answer.length > 0) {
+    Telemetry.initQuestionRecord(qId);
+    
+    if (userAnswers[qId].answer && userAnswers[qId].answer.length > 0) {
         userAnswers[qId].status = 'answered';
-    } else if (!userAnswers[qId]) {
-        userAnswers[qId] = { answer: [], status: 'visited' };
+        Telemetry.logAction('status_change', 'answered');
+    } else {
+        userAnswers[qId].status = 'visited';
     }
     saveProgressLocally(); 
     navigateQ(1);
 };
 
 window.markForReview = () => {
+    Telemetry.recordExit(); // 👈 Tracker
     const qId = testData.questions[currentQIdx].id;
-    if (!userAnswers[qId]) userAnswers[qId] = { answer: [], status: 'review' };
-    else userAnswers[qId].status = 'review';
+    Telemetry.initQuestionRecord(qId);
+    
+    userAnswers[qId].status = 'review';
+    Telemetry.logAction('status_change', 'review');
+    
     saveProgressLocally();
     navigateQ(1);
 };
 
 window.clearResponse = () => {
     const qId = testData.questions[currentQIdx].id;
-    delete userAnswers[qId];
+    Telemetry.initQuestionRecord(qId);
+    Telemetry.logAction('clear_response'); // 👈 Tracker
+    
+    userAnswers[qId].answer = [];
+    userAnswers[qId].status = 'visited';
     
     const optContainer = document.getElementById('q-options');
     if (optContainer) {
@@ -351,12 +448,14 @@ window.clearResponse = () => {
 window.navigateQ = (step) => {
     const newIdx = currentQIdx + step;
     if (newIdx >= 0 && newIdx < testData.questions.length) {
+        if(step !== 0) Telemetry.recordExit(); // 👈 Tracker
         currentQIdx = newIdx;
         renderQuestion();
     }
 };
 
 window.jumpToQ = (idx) => {
+    Telemetry.recordExit(); // 👈 Tracker
     currentQIdx = idx;
     renderQuestion();
     if(window.innerWidth < 900) {
@@ -388,6 +487,8 @@ function updatePaletteUI() {
     testData.questions.forEach((q, idx) => {
         const btn = document.getElementById(`p-btn-${idx}`);
         if(!btn) return;
+        
+        // Use the safely initialized record
         const state = userAnswers[q.id];
         
         btn.className = 'p-btn';
@@ -414,10 +515,14 @@ async function autoSubmit() {
     SecurityModule.isActive = false; 
     clearInterval(timerInterval);
     
+    Telemetry.recordExit(); // Capture the last question's time!
+    Telemetry.logSystemEvent("Final Submit Triggered");
+
     document.body.innerHTML = `
         <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc;">
             <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: #1d4ed8; margin-bottom: 20px;"></i>
-            <h2 style="color: #0f172a; font-weight: 700;">Evaluating & Securing Responses...</h2>
+            <h2 style="color: #0f172a; font-weight: 700;">Transmitting Analytics & Responses...</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 10px;">Encrypting high-fidelity telemetry data.</p>
         </div>
     `;
 
@@ -431,9 +536,10 @@ async function autoSubmit() {
             body: JSON.stringify({
                 testId: testId, 
                 batchId: batchId,
-                userAnswers: safeUserAnswers,
+                userAnswers: safeUserAnswers, // Ab isme TimeSpent aur Actions bhi jayenge!
                 timeSpent: timeSpent,
-                uid: currentUserId
+                uid: currentUserId,
+                systemTelemetry: Telemetry.systemLogs // Extra Jasoosi Data
             })
         });
 
@@ -444,7 +550,7 @@ async function autoSubmit() {
         sessionStorage.setItem('submitted_' + testData.docId, 'true'); 
         localStorage.removeItem('vp_exam_progress_' + testData.docId);
         
-        showSuccessScreen("Assessment data successfully received and verified by the evaluation server.");
+        showSuccessScreen("Assessment data and behavioral telemetry successfully securely uploaded.");
         
     } catch (err) { 
         console.error("Submission Error:", err); 
