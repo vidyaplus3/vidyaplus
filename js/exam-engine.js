@@ -3,12 +3,13 @@ import { db, auth } from './firebase-init.js';
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// 🚨 1. ZOMBIE KILLER (Anti-Loop System)
-// Agar koi back button dabakar is page par wapas aaya hai, toh use turant bahar pheko!
-const navEntries = performance.getEntriesByType("navigation");
-if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+const urlParams = new URLSearchParams(window.location.search);
+const testId = urlParams.get('testId');
+const batchId = urlParams.get('batchId');
+
+// 🚨 1. THE LOOP KILLER: Agar test is session me submit ho chuka hai, toh sidha bahar pheko!
+if (sessionStorage.getItem('submitted_' + testId)) {
     window.location.replace('study.html#tests');
-    throw new Error("Zombie page killed"); // Yahan code block ho jayega aur test dubara start nahi hoga
 }
 
 let testData = null;
@@ -21,24 +22,18 @@ let currentSection = "";
 let isSubmitting = false;
 let currentUserId = null; 
 
-// 🚨 2. BACK BUTTON TRAP
-window.history.pushState({ trap: true }, null, window.location.href);
-window.onpopstate = function (e) {
-    if(confirm("⚠️ Pressing back will submit your test! Do you want to submit?")) {
-        autoSubmit();
-    } else {
-        window.history.pushState({ trap: true }, null, window.location.href);
+// 🚨 2. NATIVE BROWSER WARNING (No History Hacks/Loops)
+window.addEventListener('beforeunload', function (e) {
+    if (!isSubmitting) {
+        e.preventDefault();
+        e.returnValue = 'Are you sure you want to leave? Your progress might be lost.';
     }
-};
+});
 
 // 3. INITIALIZE
 onAuthStateChanged(auth, async (user) => {
     if (!user) { alert("Auth Error! Login again."); window.location.href = 'index.html'; return; }
     currentUserId = user.uid; 
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const testId = urlParams.get('testId');
-    const batchId = urlParams.get('batchId');
 
     if(!testId || !batchId) { window.location.replace('study.html#tests'); return; }
 
@@ -287,8 +282,13 @@ async function autoSubmit() {
         });
         
         alert(`Test Submitted Successfully!\nYour Score: ${result.totalScore} / ${testData.maxMarks}`);
-        window.onpopstate = null; 
+        
+        // 🚨 SESSION LOCK: Is browser session me ye test lock ho gaya
+        sessionStorage.setItem('submitted_' + testData.docId, 'true'); 
+        
+        // REPLACE ka use karke exam page ko history se hata diya
         window.location.replace('study.html#tests'); 
+        
     } catch (err) { 
         console.error("Submission DB Error:", err); 
         alert("Database Error: " + err.message + "\n\n(Check Firebase Firestore Rules if it says 'Missing Permissions')"); 
