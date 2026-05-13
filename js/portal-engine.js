@@ -17,7 +17,7 @@ let currentUserId = null;
 let sections = []; 
 
 const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
-const DASHBOARD_URL = "/dashboard"; // 👈 Sahi jagah redirect karega
+const DASHBOARD_URL = "/study#tests"; // 👈 Sahi jagah redirect karega
 
 // ==========================================
 // 🛡️ ADVANCED ACADEMIC SECURITY MODULE
