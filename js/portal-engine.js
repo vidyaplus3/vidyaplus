@@ -17,14 +17,14 @@ let currentUserId = null;
 let sections = []; 
 
 const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
-const DASHBOARD_URL = "/"; // 👈 Redirect URL when test finishes or fails
+const DASHBOARD_URL = "/dashboard"; // 👈 Sahi jagah redirect karega
 
 // ==========================================
-// 🛡️ ADVANCED ACADEMIC SECURITY MODULE (Updated)
+// 🛡️ ADVANCED ACADEMIC SECURITY MODULE
 // ==========================================
 const SecurityModule = {
     warnings: 0,
-    maxWarnings: 5, // 👈 Increased for Mobile Tolerance (Calls/Notifications)
+    maxWarnings: 5, // Mobile tolerance
     isActive: false,
 
     init() {
@@ -35,21 +35,25 @@ const SecurityModule = {
     },
 
     applyStrictEnvironment() {
+        // Block Right Click, Copy, Paste
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('copy', e => e.preventDefault());
         document.addEventListener('cut', e => e.preventDefault());
         document.addEventListener('paste', e => e.preventDefault());
         
         document.addEventListener('keydown', e => {
+            // Block DevTools
             if (e.key === 'F12' || 
                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
                (e.ctrlKey && e.key === 'U')) {
                 e.preventDefault();
             }
 
-            // ⚡ UX IMPROVEMENT: Keyboard Navigation (JEE CBT Feel)
-            if(e.key === 'ArrowRight' && !isSubmitting) window.saveAndNext();
-            if(e.key === 'ArrowLeft' && !isSubmitting) window.navigateQ(-1);
+            // ⚡ UX: Keyboard Navigation (Arrow Keys) - Ignore if typing in Numerical Input
+            if (e.target.tagName !== 'INPUT' && !isSubmitting) {
+                if(e.key === 'ArrowRight') window.saveAndNext();
+                if(e.key === 'ArrowLeft') window.navigateQ(-1);
+            }
         });
     },
 
@@ -61,26 +65,27 @@ const SecurityModule = {
             alert(`ACADEMIC INTEGRITY VIOLATION\n\nMaximum warnings exceeded (${this.maxWarnings}/${this.maxWarnings}).\nReason: ${reason}\n\nYour assessment is being automatically submitted for administrative review.`);
             autoSubmit();
         } else {
-            alert(`WARNING: ACADEMIC INTEGRITY MONITORING\n\nAction detected: ${reason}.\nPlease remain focused on the assessment window. Do not switch tabs or applications. Further violations will result in automatic submission.\n\nWarning ${this.warnings} of ${this.maxWarnings}.`);
+            alert(`WARNING: ACADEMIC INTEGRITY MONITORING\n\nAction detected: ${reason}.\nPlease remain focused on the assessment window. Do not switch tabs or applications.\n\nWarning ${this.warnings} of ${this.maxWarnings}.`);
         }
     },
 
     monitorVisibility() {
+        // Immediate save on minimize, trigger warning
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !isSubmitting) {
-                saveProgressLocally(); // 👈 Emergency save on minimize
+                saveProgressLocally(); 
                 if(this.isActive) this.triggerViolation("Navigated away from the active assessment window");
             }
         });
 
+        // 2-Second Delay for mobile blur (prevents accidental swipe penalties)
         window.addEventListener('blur', () => {
             if (this.isActive && !isSubmitting) {
-                // 👈 1.5s Delay for mobile notifications & accidental swipes
                 setTimeout(() => {
-                    if (!document.hasFocus()) {
-                        this.triggerViolation("Assessment window lost focus (Tab switch/App switch detected)");
+                    if (!document.hasFocus() && !document.hidden) {
+                        this.triggerViolation("Assessment window lost focus (Possible background app opened)");
                     }
-                }, 1500); 
+                }, 2000); 
             }
         });
     }
@@ -136,6 +141,7 @@ function saveProgressLocally() {
         timeRemaining: timeRemaining,
         currentQIdx: currentQIdx
     };
+    // Note: Backend validaton stops users from cheating by editing this localStorage
     localStorage.setItem('vp_exam_progress_' + testData.docId, JSON.stringify(progressState));
 }
 
@@ -166,7 +172,7 @@ function initializePortal() {
     SecurityModule.init(); 
     startTimer();
     renderQuestion();
-    renderPalette();
+    renderPalette(); // Render virtualized palette
 }
 
 function startTimer() {
@@ -231,12 +237,15 @@ window.renderQuestion = () => {
     document.getElementById('q-text').textContent = q.questionText || "Missing content";
     
     const optContainer = document.getElementById('q-options');
-    optContainer.innerHTML = '';
+    optContainer.innerHTML = ''; // Fast clear
     
     const saved = userAnswers[q.id] || { answer: [] };
 
     if (q.type === 'single' || q.type === 'multiple') {
         const options = q.options || [];
+        // DocumentFragment for faster rendering if options are large
+        const frag = document.createDocumentFragment(); 
+        
         options.forEach((opt, idx) => {
             const isSelected = saved.answer.includes(idx);
             
@@ -253,8 +262,10 @@ window.renderQuestion = () => {
 
             optRow.appendChild(radioSpan);
             optRow.appendChild(textDiv);
-            optContainer.appendChild(optRow);
+            frag.appendChild(optRow);
         });
+        optContainer.appendChild(frag);
+        
     } else if (q.type === 'numerical') {
         optContainer.innerHTML = `
             <div style="padding: 10px 0;">
@@ -294,12 +305,13 @@ window.selectOption = (idx, type) => {
     updatePaletteUI();
 };
 
-// ⚡ CRITICAL BUG FIXED: NaN Input filtering
+// ⚡ NaN Bug Fixed strictly
 window.saveNumerical = (val) => {
     const qId = testData.questions[currentQIdx].id;
     const num = parseFloat(val);
     
-    if(val === "" || isNaN(num)) {
+    // Check if input is empty, just a minus sign, or invalid
+    if(val.trim() === "" || isNaN(num)) {
         delete userAnswers[qId];
     } else {
         userAnswers[qId] = { answer: [num], status: 'visited' };
@@ -357,17 +369,29 @@ window.jumpToQ = (idx) => {
     currentQIdx = idx;
     renderQuestion();
     if(window.innerWidth < 900) {
-        document.getElementById('p-panel').classList.remove('open');
-        document.getElementById('palette-overlay').classList.remove('open');
+        const panel = document.getElementById('p-panel');
+        const overlay = document.getElementById('palette-overlay');
+        if(panel) panel.classList.remove('open');
+        if(overlay) overlay.classList.remove('open');
     }
 };
 
+// ⚡ UI UX Update: Virtualized Palette Rendering
 function renderPalette() {
     const container = document.getElementById('palette-container');
     container.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    
     testData.questions.forEach((q, idx) => {
-        container.innerHTML += `<button class="p-btn" id="p-btn-${idx}" onclick="jumpToQ(${idx})">${idx + 1}</button>`;
+        const btn = document.createElement('button');
+        btn.className = 'p-btn';
+        btn.id = `p-btn-${idx}`;
+        btn.textContent = idx + 1;
+        btn.onclick = () => jumpToQ(idx);
+        frag.appendChild(btn);
     });
+    
+    container.appendChild(frag);
 }
 
 function updatePaletteUI() {
@@ -446,7 +470,6 @@ async function autoSubmit() {
 }
 
 function showSuccessScreen(msg) {
-    // ⚡ BUG FIXED: window.close() removed. Replaced with redirection to Dashboard
     document.body.innerHTML = `
         <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; font-family: 'Inter', sans-serif;">
             <div style="background: white; padding: 40px; border-radius: 12px; border: 1px solid #cbd5e1; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 400px; width: 90%;">
