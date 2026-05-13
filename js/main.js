@@ -1,7 +1,7 @@
 // js/main.js
 import { db } from './firebase-init.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { initAuth, AppState, auth } from './auth.js';
+import { initAuth, AppState } from './auth.js'; // 🚨 FIX: auth removed to prevent crash
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
@@ -79,7 +79,7 @@ window.navigate = (screenId, payload = {}) => {
 };
 
 // ==========================================
-// BUSINESS LOGIC & SMART DATA FILTERING
+// BUSINESS LOGIC & DATA SYNC
 // ==========================================
 window.switchBatch = async (batchId) => {
     const batchNameEl = document.getElementById('current-batch-name');
@@ -139,79 +139,28 @@ window.switchBatch = async (batchId) => {
 
 window.switchTab = (btnElement, listId) => {
     UI.switchTabUI(btnElement);
-    if (listId === 'resource-list') { 
-        window.renderExtraMaterials('subject-list', AppState.globalResources, "No global resources available yet."); 
-    } 
-    else if (listId === 'subject-list') { window.renderSubjects(); } 
-    else if (listId === 'chapter-material') { 
-        const mats = AppState.subjectMaterials[AppState.currentSubject] || [];
-        window.renderExtraMaterials('chapter-list', mats, "No extra material found for this subject."); 
-    } 
-    else if (listId === 'chapter-list') { window.renderChapters(AppState.currentSubject); }
-};
-
-window.renderExtraMaterials = (containerId, items, emptyMsg) => {
-    const container = document.getElementById(containerId);
-    if(!container) return;
-    container.innerHTML = '';
-    
-    if(!items || items.length === 0) {
-        container.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>${emptyMsg}</h4></div>`;
-        return;
-    }
-    
-    items.forEach(mat => {
-        let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Resource";
-        let url = mat.pdfUrl || mat.linkUrl || mat.videoUrl || "";
-        let safeUrl = url.replace(/['"\\]/g, "");
-        
-        let icon = 'fa-link'; let color = '#3B82F6'; let badge = 'LINK';
-        if(mat.type === 'pdf') { icon = 'fa-file-pdf'; color = '#EF4444'; badge = 'PDF'; }
-        if(mat.type === 'dpp') { icon = 'fa-tasks'; color = '#F59E0B'; badge = 'DPP'; }
-
-        let btnHtml = `<button onclick="window.open('${safeUrl}', '_blank')" style="background: ${color}; border:none; padding: 6px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Open</button>`;
-        if(mat.type === 'pdf' || mat.type === 'dpp' || mat.pdfUrl) {
-            btnHtml = `<button onclick="openPDF('${safeUrl}', '${safeTitle}')" style="background: ${color}; border:none; padding: 6px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">View</button>`;
-        }
-
-        container.innerHTML += `
-            <div class="list-card">
-                <div class="card-icon" style="background: ${color}15; color: ${color};"><i class="fas ${icon}"></i></div>
-                <div class="card-info">
-                    <div class="card-title">${mat.title}</div>
-                    <div class="card-sub" style="margin-top:4px;"><span style="font-size:0.65rem; background:${color}20; color:${color}; padding:2px 6px; border-radius:4px; font-weight:800;">${badge}</span></div>
-                </div>
-                ${btnHtml}
-            </div>`;
-    });
+    if (listId === 'resource-list') window.renderExtraMaterials('subject-list', AppState.globalResources, "No global resources available."); 
+    else if (listId === 'subject-list') window.renderSubjects(); 
+    else if (listId === 'chapter-material') window.renderExtraMaterials('chapter-list', AppState.subjectMaterials[AppState.currentSubject] || [], "No extra material found."); 
+    else if (listId === 'chapter-list') window.renderChapters(AppState.currentSubject); 
 };
 
 window.renderSubjects = () => {
     const container = document.getElementById('subject-list');
     if(!container) return;
     container.innerHTML = ''; 
-
     const coreSubjects = Object.keys(AppState.materialsTree || {});
     const extraSubjects = Object.keys(AppState.subjectMaterials || {});
     const subjects = [...new Set([...coreSubjects, ...extraSubjects])];
-
-    if (subjects.length === 0) { 
-        container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; 
-        return; 
-    }
-    
-    subjects.forEach(subject => { 
-        container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials & lectures</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; 
-    });
+    if (subjects.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; return; }
+    subjects.forEach(subject => { container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials & lectures</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; });
 };
 
 window.renderChapters = (subjectName) => {
     const container = document.getElementById('chapter-list');
     if(!container) return;
-    
     const dynSub = document.getElementById('dyn-subject-title');
     if(dynSub) dynSub.innerText = subjectName;
-
     container.innerHTML = '';
     const chaptersObj = AppState.materialsTree[subjectName];
     if (!chaptersObj) { container.innerHTML = `<div class="empty-box"><i class="fas fa-layer-group"></i><h4>No chapters structured yet.</h4></div>`; return; }
@@ -226,92 +175,61 @@ window.filterClassroom = (filterType, btnElement = null) => {
     const container = document.getElementById('lecture-list');
     if(!container) return;
     if(btnElement) UI.switchTabUI(btnElement);
-    
     const dynChap = document.getElementById('dyn-chapter-title');
     if(dynChap) dynChap.innerText = AppState.currentChapter;
-
     container.innerHTML = '';
     const allMaterials = AppState.materialsTree[AppState.currentSubject]?.[AppState.currentChapter];
     if (!allMaterials) return;
-    
     let items = allMaterials;
-    
     if(filterType === 'lectures') items = allMaterials.filter(m => m.videoUrl);
     if(filterType === 'notes') items = allMaterials.filter(m => m.pdfUrl || m.attachedPdfUrl); 
-    
     if (items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-search"></i><h4>No relevant content found.</h4></div>`; return; }
-    
     items.forEach(mat => {
         let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Study Material";
         let actualPdfUrl = mat.pdfUrl || mat.attachedPdfUrl || ""; 
         let safePdf = actualPdfUrl.replace(/['"\\]/g, "");
         let safeVid = mat.videoUrl ? mat.videoUrl.replace(/['"\\]/g, "") : "";
-        
         let btns = '';
-        if (actualPdfUrl && (filterType === 'all' || filterType === 'notes')) {
-            btns += `<button class="action-btn" onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`;
-        }
-        if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) {
-            let attach = mat.attachedPdfUrl ? mat.attachedPdfUrl.replace(/['"\\]/g, "") : "";
-            btns += `<button class="action-btn play" onclick="openVideo('${safeVid}', '${safeTitle}', '${attach}')"><i class="fas fa-play"></i> Watch</button>`;
-        }
-        
+        if (actualPdfUrl && (filterType === 'all' || filterType === 'notes')) { btns += `<button class="action-btn" onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: transparent; color: inherit; border: 1px solid var(--border);"><i class="fas fa-file-pdf" style="color: #EF4444;"></i> Document</button>`; }
+        if (mat.videoUrl && (filterType === 'all' || filterType === 'lectures')) { let attach = mat.attachedPdfUrl ? mat.attachedPdfUrl.replace(/['"\\]/g, "") : ""; btns += `<button class="action-btn play" onclick="openVideo('${safeVid}', '${safeTitle}', '${attach}')"><i class="fas fa-play"></i> Watch</button>`; }
         container.innerHTML += `<div class="lecture-card"><div class="lec-top"><div class="card-info"><div class="card-title" style="white-space: normal;">${mat.title}</div><div class="card-sub" style="margin-top: 5px;"><i class="fas fa-bookmark"></i> Academic Material</div></div></div><div class="lec-actions">${btns}</div></div>`;
+    });
+};
+
+window.renderExtraMaterials = (containerId, items, emptyMsg) => {
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML = '';
+    if(!items || items.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><h4>${emptyMsg}</h4></div>`; return; }
+    items.forEach(mat => {
+        let safeTitle = mat.title ? mat.title.replace(/['"\\]/g, "") : "Resource"; let url = mat.pdfUrl || mat.linkUrl || mat.videoUrl || ""; let safeUrl = url.replace(/['"\\]/g, "");
+        let icon = 'fa-link'; let color = '#3B82F6'; let badge = 'LINK';
+        if(mat.type === 'pdf') { icon = 'fa-file-pdf'; color = '#EF4444'; badge = 'PDF'; }
+        if(mat.type === 'dpp') { icon = 'fa-tasks'; color = '#F59E0B'; badge = 'DPP'; }
+        let btnHtml = `<button onclick="window.open('${safeUrl}', '_blank')" style="background: ${color}; border:none; padding: 6px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Open</button>`;
+        if(mat.type === 'pdf' || mat.type === 'dpp' || mat.pdfUrl) { btnHtml = `<button onclick="openPDF('${safeUrl}', '${safeTitle}')" style="background: ${color}; border:none; padding: 6px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">View</button>`; }
+        container.innerHTML += `<div class="list-card"><div class="card-icon" style="background: ${color}15; color: ${color};"><i class="fas ${icon}"></i></div><div class="card-info"><div class="card-title">${mat.title}</div><div class="card-sub" style="margin-top:4px;"><span style="font-size:0.65rem; background:${color}20; color:${color}; padding:2px 6px; border-radius:4px; font-weight:800;">${badge}</span></div></div>${btnHtml}</div>`;
     });
 };
 
 window.switchClassroomTab = (type) => {
     const content = document.getElementById('classroom-dynamic-content');
     if(!content) return;
-    
-    const tabComm = document.getElementById('tab-comments');
-    const tabNotes = document.getElementById('tab-notes');
-    const targetTab = document.getElementById('tab-' + type);
-    
-    if(tabComm) tabComm.classList.remove('active');
-    if(tabNotes) tabNotes.classList.remove('active');
-    if(targetTab) targetTab.classList.add('active');
-
+    const tabComm = document.getElementById('tab-comments'); const tabNotes = document.getElementById('tab-notes'); const targetTab = document.getElementById('tab-' + type);
+    if(tabComm) tabComm.classList.remove('active'); if(tabNotes) tabNotes.classList.remove('active'); if(targetTab) targetTab.classList.add('active');
     if (type === 'comments') {
-        content.innerHTML = `
-            <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Academic Discussion</div>
-            <div class="comment-card">
-                <div class="user-avatar">AS</div>
-                <div class="comment-body">
-                    <div class="comment-user">Student <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div>
-                    <div class="comment-text">The conceptual breakdown in this lecture was highly effective.</div>
-                </div>
-            </div>
-            <div style="position: sticky; bottom: 0; background: white; padding-top: 10px;">
-                <input type="text" placeholder="Post a query..." style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid var(--border); outline: none;">
-            </div>
-        `;
+        content.innerHTML = `<div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Academic Discussion</div><div class="comment-card"><div class="user-avatar">AS</div><div class="comment-body"><div class="comment-user">Student <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div><div class="comment-text">The conceptual breakdown in this lecture was highly effective.</div></div></div><div style="position: sticky; bottom: 0; background: white; padding-top: 10px;"><input type="text" placeholder="Post a query..." style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid var(--border); outline: none;"></div>`;
     } else if (type === 'notes') {
         const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
-        
         if (pdf && pdf !== 'undefined' && pdf !== '') {
-            let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes";
-            let safePdf = pdf.replace(/['"\\]/g, "");
-            
-            content.innerHTML = `
-                <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div>
-                <div class="list-card" style="background: #fdf2f2; border-color: #fecaca;">
-                    <div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div>
-                    <div class="card-info">
-                        <div class="card-title">Class_Notes.pdf</div>
-                        <div class="card-sub">Select to view</div>
-                    </div>
-                    <button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button>
-                </div>
-            `;
-        } else {
-            content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`;
-        }
+            let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes"; let safePdf = pdf.replace(/['"\\]/g, "");
+            content.innerHTML = `<div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div><div class="list-card" style="background: #fdf2f2; border-color: #fecaca;"><div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div><div class="card-info"><div class="card-title">Class_Notes.pdf</div><div class="card-sub">Select to view</div></div><button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button></div>`;
+        } else { content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`; }
     }
 };
 
 // ==========================================
-// TEST ENGINE LOGIC (Updated to Professional UI)
+// 🚨 RESTORED: SECURE TEST PORTAL GATEWAY (Professional UI)
 // ==========================================
 window.testsDataCache = {};
 window.userAttemptedQuizzes = {}; 
@@ -338,7 +256,7 @@ window.renderTestsList = (type = 'live') => {
     const allTests = AppState.quizzes || [];
     
     if(allTests.length === 0) {
-        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="font-size:3rem; opacity:0.2;"></i><h4 style="margin-top:15px;">No assessments assigned.</h4></div>`;
+        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No assessments scheduled.</h4></div>`;
         return;
     }
 
@@ -395,7 +313,6 @@ window.openInstructions = (testId) => {
     
     document.getElementById('inst-title').innerText = test.title;
     
-    // Safety check for elements that might not exist in all versions of the HTML
     const instSubject = document.getElementById('inst-subject');
     if (instSubject) instSubject.innerText = test.subject || 'Standard Assessment';
     
@@ -418,16 +335,15 @@ window.closeInstructions = () => {
     window.currentActiveTestId = null;
 };
 
-// 🚨 NAYA: Redirect to Isolated Portal instead of exam.html
+// 🚨 REDIRECT TO ISOLATED PORTAL (NEW TAB)
 window.startTestPlayer = () => {
     if(!window.currentActiveTestId || !AppState.currentBatchId) {
         alert("Session error. Please reload the page."); return;
     }
     
-    // Hide instructions modal before opening new tab to prevent BFCache issues
     document.getElementById('instruction-mode').style.display = 'none';
     
-    // Open the new isolated portal in a new tab
+    // Naye tab me portal.html khulega (No Back Button Glitch)
     window.open(`portal.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`, '_blank');
 };
 
