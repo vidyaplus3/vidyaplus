@@ -247,7 +247,7 @@ window.switchSection = (secName) => {
 // 🚨 8. FAIL-SAFE SUBMISSION ENGINE
 window.confirmSubmit = () => {
     if(isSubmitting) return;
-    if (confirm("Are you sure you want to submit the test? You cannot change your answers later.")) {
+    if (confirm("Are you sure you want to final submit the test? You cannot undo this.")) {
         autoSubmit();
     }
 };
@@ -278,10 +278,11 @@ async function autoSubmit() {
         });
         
         alert(`Test Submitted Successfully!\nYour Score: ${result.totalScore} / ${testData.maxMarks}`);
-        window.onpopstate = null; 
+        window.onpopstate = null; // Back button trap hataya
         
-        // 🚨 THE FIX: index.html ki jagah study.html par bhejna hai
-        window.location.href = 'study.html#tests'; 
+        // 🚨 THE ZOMBIE KILLER FIX: href ki jagah 'replace' use kiya
+        // Ab back button dabane par exam.html kabhi nahi khulega!
+        window.location.replace('study.html#tests'); 
         
     } catch (err) { 
         console.error("Submission DB Error:", err); 
