@@ -37,8 +37,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     try {
-        // 🛡️ FETCHING FROM SECURE SERVER (Answers stripped out)
-        const response = await fetch(${BACKEND_URL}/getSecureTest, {
+        // 🛡️ FIXED: Using simple + for URL combination
+        const response = await fetch(BACKEND_URL + "/getSecureTest", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ testId, batchId })
@@ -55,6 +55,7 @@ onAuthStateChanged(auth, async (user) => {
             alert("Assessment not found or Access Denied."); window.close();
         }
     } catch (err) { 
+        console.error("Fetch error:", err);
         alert("Network Error: Failed to load secure assessment."); window.close();
     }
 });
@@ -290,8 +291,8 @@ async function autoSubmit() {
     const timeSpent = (testData.duration * 60) - timeRemaining;
 
     try {
-        // 🛡️ SENDING RESPONSES TO SERVER FOR SECURE EVALUATION
-        const response = await fetch(${BACKEND_URL}/submitAssessment, {
+        // 🛡️ FIXED: Using simple + for URL combination
+        const response = await fetch(BACKEND_URL + "/submitAssessment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -310,8 +311,6 @@ async function autoSubmit() {
         sessionStorage.setItem('submitted_' + testData.docId, 'true'); 
         localStorage.removeItem('vp_exam_progress_' + testData.docId);
         
-        // Response will only show completion to avoid showing immediate score if you want strict exam rules. 
-        // If you want to show the score, you can append `Result Score: ${result.score}` to this string.
         showSuccessScreen(`Your responses have been successfully evaluated and securely saved.`);
         
     } catch (err) { 
