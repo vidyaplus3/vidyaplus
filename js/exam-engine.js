@@ -261,10 +261,8 @@ async function autoSubmit() {
     document.getElementById('loader').innerHTML = `<div class="spinner"></div><h3 style="color: var(--navy); font-weight: 600;">Evaluating Answers...</h3>`;
 
     const result = calculateScore();
-    
-    // 🚨 FIREBASE CRASH FIX: Parse data properly so Firebase doesn't reject it
-    const cleanAccuracy = parseFloat(result.accuracy); // String se Number me change
-    const safeUserAnswers = JSON.parse(JSON.stringify(userAnswers)); // Remove undefined values
+    const cleanAccuracy = parseFloat(result.accuracy); 
+    const safeUserAnswers = JSON.parse(JSON.stringify(userAnswers)); 
 
     try {
         const resultRef = doc(db, "users", currentUserId, "exam_results", testData.docId);
@@ -281,10 +279,12 @@ async function autoSubmit() {
         
         alert(`Test Submitted Successfully!\nYour Score: ${result.totalScore} / ${testData.maxMarks}`);
         window.onpopstate = null; 
-        window.location.href = 'index.html#tests'; 
+        
+        // 🚨 THE FIX: index.html ki jagah study.html par bhejna hai
+        window.location.href = 'study.html#tests'; 
+        
     } catch (err) { 
         console.error("Submission DB Error:", err); 
-        // 🚨 NAYA: Exact error message dikhayega taaki hume reason pata chale
         alert("Database Error: " + err.message + "\n\n(Check Firebase Firestore Rules if it says 'Missing Permissions')"); 
         isSubmitting = false;
         document.getElementById('loader').style.display = 'none';
