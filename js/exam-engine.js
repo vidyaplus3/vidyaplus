@@ -11,19 +11,21 @@ let timerInterval = null;
 let sections = [];
 let currentSection = "";
 let isSubmitting = false;
+let currentUserId = null; // 🚨 NAYA: Global user ID taaki submit ke waqt null na ho
 
-// 🚨 1. BACK BUTTON TRAP (Anti-Exit)
+// 1. BACK BUTTON TRAP
 window.history.pushState(null, null, window.location.href);
 window.onpopstate = function () {
     window.history.pushState(null, null, window.location.href);
-    if(confirm("⚠️ Warning! Pressing back will auto-submit your test. Do you want to submit?")) {
+    if(confirm("⚠️ Pressing back will submit your test! Do you want to submit?")) {
         autoSubmit();
     }
 };
 
 // 2. INITIALIZE
 onAuthStateChanged(auth, async (user) => {
-    if (!user) { alert("Auth Error! Please login again."); window.location.href = 'login.html'; return; }
+    if (!user) { alert("Auth Error! Login again."); window.location.href = 'index.html'; return; }
+    currentUserId = user.uid; // Store UID securely
     
     const urlParams = new URLSearchParams(window.location.search);
     const testId = urlParams.get('testId');
@@ -37,19 +39,17 @@ onAuthStateChanged(auth, async (user) => {
             testData = testSnap.data();
             testData.docId = testSnap.id;
             
-            // Failsafe
             if(!testData.questions || testData.questions.length === 0) {
-                alert("Error: This test has no questions."); window.location.href = 'index.html#tests'; return;
+                alert("This test has no questions."); window.location.href = 'index.html#tests'; return;
             }
 
-            document.getElementById('loader').style.display = 'none'; // Hide loader
+            document.getElementById('loader').style.display = 'none';
             initializeTestUI();
         } else {
             alert("Test not found in database."); window.location.href = 'index.html#tests';
         }
     } catch (err) { 
-        console.error(err); 
-        alert("Failed to load test. Please check internet connection."); 
+        alert("Failed to load test. Check network."); 
         window.location.href = 'index.html#tests'; 
     }
 });
@@ -67,42 +67,37 @@ function initializeTestUI() {
     renderPalette();
 }
 
-// 3. UI TOGGLES (Mobile)
 window.togglePalette = () => {
-    const drawer = document.getElementById('palette-drawer');
-    const overlay = document.getElementById('palette-overlay');
-    drawer.classList.toggle('open');
-    overlay.classList.toggle('open');
+    document.getElementById('palette-drawer').classList.toggle('open');
+    document.getElementById('palette-overlay').classList.toggle('open');
 };
 
-// 4. TIMER
 function startTimer() {
     timerInterval = setInterval(() => {
         if (timeRemaining <= 0) {
             clearInterval(timerInterval);
-            autoSubmit();
+            autoSubmit(); // Auto Submit if time ends
             return;
         }
         timeRemaining--;
         const hrs = Math.floor(timeRemaining / 3600);
         const mins = Math.floor((timeRemaining % 3600) / 60);
         const secs = timeRemaining % 60;
-        document.getElementById('exam-timer').innerHTML = `<i class="fas fa-clock"></i> ${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        document.getElementById('exam-timer').innerText = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }, 1000);
 }
 
-// 5. RENDERING QUESTION
 window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
     if(!q) return;
 
-    document.getElementById('q-meta').innerText = `Q. ${currentQIdx + 1}`;
+    document.getElementById('q-meta').innerText = `Question ${currentQIdx + 1}`;
     
     const pM = q.marks?.correct || 4;
     const nM = q.marks?.incorrect || 1;
-    document.getElementById('q-marks-display').innerText = `+${pM} / -${nM}`;
+    document.getElementById('q-marks-display').innerText = `Marks: +${pM}, -${nM}`;
     
-    document.getElementById('q-text').innerText = q.questionText || "Question text missing";
+    document.getElementById('q-text').innerText = q.questionText || "Missing question";
     
     const optContainer = document.getElementById('q-options');
     optContainer.innerHTML = '';
@@ -117,7 +112,6 @@ window.renderQuestion = () => {
                 <div class="option-card ${isSelected ? 'selected' : ''}" onclick="selectOption(${idx}, '${q.type}')">
                     <div class="opt-id">${String.fromCharCode(65 + idx)}</div>
                     <div style="flex: 1;">${opt}</div>
-                    ${isSelected ? '<i class="fas fa-check-circle" style="color:var(--primary); font-size:1.2rem;"></i>' : ''}
                 </div>`;
         });
     } else if (q.type === 'numerical') {
@@ -125,7 +119,7 @@ window.renderQuestion = () => {
             <div style="padding: 10px 0;">
                 <input type="number" step="any" class="num-input" id="num-ans" 
                        value="${saved.answer[0] !== undefined ? saved.answer[0] : ''}" 
-                       oninput="saveNumerical(this.value)" placeholder="Type exact answer here">
+                       oninput="saveNumerical(this.value)" placeholder="Type exact answer">
             </div>`;
     }
     
@@ -155,7 +149,6 @@ window.saveNumerical = (val) => {
     }
 };
 
-// 6. NAVIGATION
 window.saveAndNext = () => {
     const qId = testData.questions[currentQIdx].id;
     if (userAnswers[qId] && userAnswers[qId].answer.length > 0) {
@@ -183,8 +176,6 @@ window.navigateQ = (step) => {
     const newIdx = currentQIdx + step;
     if (newIdx >= 0 && newIdx < testData.questions.length) {
         currentQIdx = newIdx;
-        
-        // Auto-switch section
         const newSec = testData.questions[currentQIdx].section;
         if(newSec !== currentSection) {
             currentSection = newSec;
@@ -202,10 +193,12 @@ window.jumpToQ = (idx) => {
         renderSectionTabs();
     }
     renderQuestion();
-    if(window.innerWidth < 900) togglePalette(); // Close drawer on mobile
+    if(window.innerWidth < 900) {
+        document.getElementById('palette-drawer').classList.remove('open');
+        document.getElementById('palette-overlay').classList.remove('open');
+    }
 };
 
-// 7. PALETTE & TABS
 function renderPalette() {
     const container = document.getElementById('palette-container');
     container.innerHTML = '';
@@ -251,10 +244,10 @@ window.switchSection = (secName) => {
     }
 };
 
-// 8. FINAL SUBMISSION ENGINE
+// 🚨 8. FAIL-SAFE SUBMISSION ENGINE
 window.confirmSubmit = () => {
     if(isSubmitting) return;
-    if (confirm("Are you sure you want to final submit the test? You cannot undo this.")) {
+    if (confirm("Are you sure you want to submit the test? You cannot change your answers later.")) {
         autoSubmit();
     }
 };
@@ -265,30 +258,34 @@ async function autoSubmit() {
     clearInterval(timerInterval);
     
     document.getElementById('loader').style.display = 'flex';
-    document.getElementById('loader').innerHTML = `<div class="spinner"></div><h3 style="color: var(--navy); font-weight: 800;">Evaluating Answers...</h3>`;
+    document.getElementById('loader').innerHTML = `<div class="spinner"></div><h3 style="color: var(--navy); font-weight: 600;">Evaluating Answers...</h3>`;
 
-    const userId = auth.currentUser.uid;
     const result = calculateScore();
     
+    // 🚨 FIREBASE CRASH FIX: Parse data properly so Firebase doesn't reject it
+    const cleanAccuracy = parseFloat(result.accuracy); // String se Number me change
+    const safeUserAnswers = JSON.parse(JSON.stringify(userAnswers)); // Remove undefined values
+
     try {
-        const resultRef = doc(db, "users", userId, "exam_results", testData.docId);
+        const resultRef = doc(db, "users", currentUserId, "exam_results", testData.docId);
         await setDoc(resultRef, {
             testTitle: testData.title,
             score: result.totalScore,
             maxMarks: testData.maxMarks,
-            accuracy: result.accuracy,
+            accuracy: cleanAccuracy,
             timeSpent: (testData.duration * 60) - timeRemaining,
             sectionWise: result.sectionWise,
             submittedAt: serverTimestamp(),
-            userAnswers: userAnswers 
+            userAnswers: safeUserAnswers 
         });
         
         alert(`Test Submitted Successfully!\nYour Score: ${result.totalScore} / ${testData.maxMarks}`);
-        window.onpopstate = null; // Trap hatado
-        window.location.href = 'index.html#tests'; // Dashboard ke tests section pe jao
+        window.onpopstate = null; 
+        window.location.href = 'index.html#tests'; 
     } catch (err) { 
         console.error("Submission DB Error:", err); 
-        alert("Network Error: Could not submit test."); 
+        // 🚨 NAYA: Exact error message dikhayega taaki hume reason pata chale
+        alert("Database Error: " + err.message + "\n\n(Check Firebase Firestore Rules if it says 'Missing Permissions')"); 
         isSubmitting = false;
         document.getElementById('loader').style.display = 'none';
     }
@@ -330,4 +327,4 @@ function calculateScore() {
         accuracy: attempted > 0 ? ((correctCount / attempted) * 100).toFixed(2) : 0,
         sectionWise
     };
-                                         }
+}
