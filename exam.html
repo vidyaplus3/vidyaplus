@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secure Assessment Portal | VidyaPlus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb; --navy: #0f172a; --bg: #f8fafc;
+            --ans: #10b981; --review: #8b5cf6; --not-visited: #e2e8f0; --not-ans: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER */
+        .exam-header { background: white; padding: 10px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .timer-box { background: #fee2e2; color: #ef4444; padding: 8px 15px; border-radius: 10px; font-weight: 800; font-size: 1.1rem; border: 1px solid #fecaca; }
+
+        /* SECTION TABS */
+        .section-bar { background: #f1f5f9; padding: 10px 20px; display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; overflow-x: auto; }
+        .sec-tab { padding: 8px 20px; border-radius: 8px; background: white; border: 1px solid #cbd5e1; cursor: pointer; font-weight: 700; font-size: 0.85rem; color: #64748b; white-space: nowrap; }
+        .sec-tab.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(37,99,235,0.2); }
+
+        /* MAIN CONTENT */
+        .exam-body { flex: 1; display: flex; overflow: hidden; }
+        .question-area { flex: 1; overflow-y: auto; padding: 30px; position: relative; }
+        .sidebar-palette { width: 320px; background: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+
+        /* QUESTION UI */
+        .q-tag { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .q-text { font-size: 1.2rem; font-weight: 700; color: var(--navy); line-height: 1.5; margin-bottom: 25px; }
+        .option-card { padding: 15px 20px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; font-weight: 600; }
+        .option-card:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .option-card.selected { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+        .opt-id { width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: 800; }
+        .selected .opt-id { background: var(--primary); color: white; }
+
+        /* PALETTE UI */
+        .palette-grid { padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; flex: 1; }
+        .p-btn { width: 45px; height: 45px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: 0.2s; display: flex; justify-content: center; align-items: center; color: white; background: var(--not-visited); color: #64748b; }
+        .p-btn.visited { background: var(--not-ans); color: white; }
+        .p-btn.answered { background: var(--ans); color: white; }
+        .p-btn.review { background: var(--review); color: white; }
+        .p-btn.current { border: 3px solid var(--navy); }
+
+        /* FOOTER ACTIONS */
+        .exam-footer { background: white; padding: 15px 25px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .f-btn { padding: 12px 25px; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.9rem; border: none; transition: 0.2s; }
+        .btn-prev { background: #f1f5f9; color: var(--navy); }
+        .btn-review { background: #ede9fe; color: var(--review); }
+        .btn-next { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(37,99,235,0.2); }
+
+        /* NUMERICAL INPUT */
+        .num-input { width: 100%; max-width: 300px; padding: 15px; font-size: 1.5rem; font-weight: 800; border-radius: 12px; border: 2px solid var(--primary); outline: none; text-align: center; color: var(--navy); }
+
+        @media (max-width: 900px) {
+            .sidebar-palette { display: none; } /* Mobile varti palette toggle karava lagel */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="exam-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" height="35" alt="VidyaPlus">
+            <h3 id="exam-title" style="font-weight: 800; font-size: 1.1rem; color: var(--navy);">Loading Test...</h3>
+        </div>
+        <div class="timer-box" id="exam-timer">--:--:--</div>
+        <button class="f-btn btn-next" onclick="confirmSubmit()" style="background: #ef4444; box-shadow: none;">Submit Test</button>
+    </header>
+
+    <div class="section-bar" id="section-tabs-container"></div>
+
+    <div class="exam-body">
+        <div class="question-area">
+            <span class="q-tag" id="q-meta">Question --</span>
+            <div id="q-content">
+                <p class="q-text" id="q-text">System initialize hot aahe, krupaya thamba...</p>
+                <div id="q-options"></div>
+            </div>
+        </div>
+
+        <aside class="sidebar-palette">
+            <div style="padding: 20px; border-bottom: 1px solid #f1f5f9;">
+                <h4 style="font-weight: 800; font-size: 0.9rem; color: var(--navy); margin-bottom: 10px;">Question Palette</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.7rem; font-weight: 700;">
+                    <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; background:var(--ans); border-radius:3px;"></span> Answered</div>
+                    <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; background:var(--not-ans); border-radius:3px;"></span> Unanswered</div>
+                    <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; background:var(--review); border-radius:3px;"></span> For Review</div>
+                    <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; background:var(--not-visited); border-radius:3px;"></span> Not Visited</div>
+                </div>
+            </div>
+            <div class="palette-grid" id="palette-container"></div>
+        </aside>
+    </div>
+
+    <footer class="exam-footer">
+        <div style="display: flex; gap: 10px;">
+            <button class="f-btn btn-prev" onclick="navigateQ(-1)"><i class="fas fa-chevron-left"></i> Previous</button>
+            <button class="f-btn btn-review" onclick="markForReview()">Mark for Review & Next</button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="f-btn btn-prev" onclick="clearResponse()" style="background: transparent; border: 1px solid #cbd5e1;">Clear Response</button>
+            <button class="f-btn btn-next" onclick="saveAndNext()">Save & Next <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </footer>
+
+    <script type="module" src="js/exam-engine.js"></script>
+</body>
+</html>
