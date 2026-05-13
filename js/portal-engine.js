@@ -14,12 +14,12 @@ let timeRemaining = 0;
 let timerInterval = null;
 let isSubmitting = false;
 let currentUserId = null; 
-let sections = []; // Subject list store karne ke liye
+let sections = []; 
 
 window.addEventListener('beforeunload', function (e) {
     if (!isSubmitting) {
         e.preventDefault();
-        e.returnValue = 'Are you sure you want to leave? Your exam progress will be lost.';
+        e.returnValue = 'Are you sure you want to leave? Your progress is saved automatically.';
     }
 });
 
@@ -52,11 +52,36 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
+// 🚨 AUTO-SAVE SYSTEM: LocalStorage me data save karne ka function
+function saveProgressLocally() {
+    if(!testData || !testData.docId) return;
+    const progressState = {
+        userAnswers: userAnswers,
+        timeRemaining: timeRemaining,
+        currentQIdx: currentQIdx
+    };
+    localStorage.setItem('vp_exam_progress_' + testData.docId, JSON.stringify(progressState));
+}
+
 function initializePortal() {
     document.getElementById('exam-title').innerText = testData.title;
-    timeRemaining = testData.duration * 60;
     
-    // 🚨 NAYA LOGIC: Subjects collect karke Dropdown me daalo
+    // 🚨 AUTO-RESUME SYSTEM: Check if previous progress exists
+    const savedState = localStorage.getItem('vp_exam_progress_' + testData.docId);
+    if(savedState) {
+        try {
+            const parsedState = JSON.parse(savedState);
+            userAnswers = parsedState.userAnswers || {};
+            timeRemaining = parsedState.timeRemaining || (testData.duration * 60);
+            currentQIdx = parsedState.currentQIdx || 0;
+            console.log("Exam Resumed from saved state!");
+        } catch(e) {
+            timeRemaining = testData.duration * 60; // Fallback
+        }
+    } else {
+        timeRemaining = testData.duration * 60;
+    }
+    
     sections = [...new Set(testData.questions.map(q => q.section || "General"))];
     const selector = document.getElementById('subject-selector');
     selector.innerHTML = '';
@@ -86,14 +111,17 @@ function startTimer() {
         if(timeRemaining < 300) {
             document.getElementById('timer-val').style.color = '#ef4444';
         }
+
+        // Har second timer tick hone par background me save karo
+        saveProgressLocally();
     }, 1000);
 }
 
-// 🚨 NAYA FUNCTION: Dropdown se Subject Jump karne ke liye
 window.jumpToSubject = (secName) => {
     const firstQOfSec = testData.questions.findIndex(q => (q.section || "General") === secName);
     if(firstQOfSec !== -1) {
         currentQIdx = firstQOfSec;
+        saveProgressLocally(); // 🚨 Save Progress
         renderQuestion();
     }
 };
@@ -104,13 +132,11 @@ window.renderQuestion = () => {
 
     document.getElementById('q-meta').innerText = `Question ${currentQIdx + 1} of ${testData.questions.length}`;
     
-    // 🚨 NAYA LOGIC: Question Type Badge Update
     let tText = "Single Correct";
     if(q.type === 'multiple') tText = "Multiple Correct";
     if(q.type === 'numerical') tText = "Numerical";
     document.getElementById('q-type-badge').innerText = `(${tText})`;
 
-    // 🚨 Dropdown ko current question ke subject ke sath sync karo
     document.getElementById('subject-selector').value = q.section || "General";
     
     const pM = q.marks?.correct || 4;
@@ -156,6 +182,7 @@ window.selectOption = (idx, type) => {
         if (pos > -1) userAnswers[qId].answer.splice(pos, 1);
         else userAnswers[qId].answer.push(idx);
     }
+    saveProgressLocally(); // 🚨 Save Progress
     renderQuestion();
 };
 
@@ -166,6 +193,7 @@ window.saveNumerical = (val) => {
     } else {
         userAnswers[qId] = { answer: [parseFloat(val)], status: 'visited' };
     }
+    saveProgressLocally(); // 🚨 Save Progress
 };
 
 window.saveAndNext = () => {
@@ -188,6 +216,7 @@ window.markForReview = () => {
 window.clearResponse = () => {
     const qId = testData.questions[currentQIdx].id;
     delete userAnswers[qId];
+    saveProgressLocally(); // 🚨 Save Progress
     renderQuestion();
 };
 
@@ -195,12 +224,14 @@ window.navigateQ = (step) => {
     const newIdx = currentQIdx + step;
     if (newIdx >= 0 && newIdx < testData.questions.length) {
         currentQIdx = newIdx;
+        saveProgressLocally(); // 🚨 Save Progress
         renderQuestion();
     }
 };
 
 window.jumpToQ = (idx) => {
     currentQIdx = idx;
+    saveProgressLocally(); // 🚨 Save Progress
     renderQuestion();
     if(window.innerWidth < 900) {
         document.getElementById('p-panel').classList.remove('open');
@@ -271,6 +302,9 @@ async function autoSubmit() {
         
         sessionStorage.setItem('submitted_' + testData.docId, 'true'); 
         
+        // 🚨 CLEANUP: Submit hone ke baad saved progress ko delete kar do
+        localStorage.removeItem('vp_exam_progress_' + testData.docId);
+        
         showSuccessScreen(`Score Captured: ${result.totalScore} / ${testData.maxMarks}`);
         
     } catch (err) { 
@@ -336,4 +370,3 @@ function calculateScore() {
         sectionWise
     };
 }
-    
