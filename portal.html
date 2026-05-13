@@ -13,10 +13,12 @@
             --border: #cbd5e1; --text: #334155;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); font-size: 14px; }
+        
+        /* 🚨 BULLETPROOF HEIGHT FIX: 100dvh ensures mobile browsers don't cut the bottom */
+        html, body { height: 100%; height: 100dvh; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; color: var(--text); font-size: 14px; }
 
         /* HEADER */
-        header { background: #ffffff; padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        header { background: #ffffff; padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; flex-shrink: 0; }
         .test-title { font-weight: 700; font-size: 1rem; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
         .header-actions { display: flex; align-items: center; gap: 8px; }
         
@@ -26,13 +28,14 @@
         .grid-toggle-btn { background: white; color: var(--navy); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: none; }
 
         /* MAIN LAYOUT */
-        .portal-body { flex: 1; display: flex; overflow: hidden; min-height: 0; position: relative; }
+        .portal-body { flex: 1; display: flex; overflow: hidden; position: relative; }
         
         /* LEFT: QUESTION PANEL */
-        .q-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--border); }
+        /* 🚨 FIX: Added overflow: hidden to force children to respect boundaries */
+        .q-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); background: white; }
         .q-header { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: #f8fafc; font-weight: 600; flex-shrink: 0; }
         
-        /* 🚨 Desktop Bug Fix: Content scroll karega, buttons nahi */
+        /* CONTENT SCROLL AREA (Sirf ye hissa scroll hoga) */
         .q-content { flex: 1; overflow-y: auto; padding: 20px 15px; }
         .q-text { font-size: 1.05rem; font-weight: 500; color: #000; line-height: 1.6; margin-bottom: 25px; word-wrap: break-word; }
         
@@ -45,11 +48,12 @@
         .num-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1.1rem; outline: none; }
         .num-input:focus { border-color: var(--primary); }
 
-        /* FOOTER ACTIONS (Fixed at bottom) */
-        .q-footer { padding: 10px 15px; border-top: 1px solid var(--border); background: white; display: flex; gap: 8px; flex-shrink: 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); }
+        /* FOOTER ACTIONS (Fixed at bottom permanently) */
+        /* 🚨 FIX: flex-shrink: 0 aur z-index ensure karta hai ye hamesha niche chipka rahe */
+        .q-footer { padding: 10px 15px; border-top: 1px solid var(--border); background: white; display: flex; gap: 8px; flex-shrink: 0; z-index: 10; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); }
         
-        /* 🚨 Mobile Bug Fix: 'flex: 1' ki wajah se teeno buttons ek line me hi rahenge */
-        .btn { flex: 1; padding: 12px 5px; border: 1px solid var(--border); border-radius: 6px; font-weight: 700; cursor: pointer; background: #f8fafc; font-size: 0.85rem; color: var(--navy); display: flex; justify-content: center; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; }
+        /* flex: 1 ki wajah se teeno buttons ek line me fixed rahenge */
+        .btn { flex: 1; padding: 12px 5px; border: 1px solid var(--border); border-radius: 6px; font-weight: 700; cursor: pointer; background: #f8fafc; font-size: 0.85rem; color: var(--navy); display: flex; justify-content: center; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
 
         /* RIGHT: PALETTE PANEL */
@@ -75,7 +79,7 @@
             .btn-text-hide { display: none; } /* Shrinks text for clear/review buttons on small screens */
             
             /* Slide-in Drawer Magic */
-            .p-panel { position: fixed; top: 0; right: -100%; height: 100vh; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.1); transition: right 0.3s ease; }
+            .p-panel { position: fixed; top: 0; right: -100%; height: 100%; height: 100dvh; z-index: 2000; box-shadow: -5px 0 25px rgba(0,0,0,0.1); transition: right 0.3s ease; }
             .p-panel.open { right: 0; }
             .palette-overlay.open { display: block; }
         }
