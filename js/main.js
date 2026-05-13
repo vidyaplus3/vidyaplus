@@ -332,3 +332,131 @@ initAuth((batches) => {
     let bToLoad = AppState.currentBatchId || batches[batches.length - 1];
     window.switchBatch(bToLoad); 
 });
+// ==========================================
+// 🚨 NAYA: TEST ENGINE & GOD MEMORY
+// ==========================================
+
+// 1. Update HandleScreenRender to support Tests
+const originalHandleScreenRender = window.handleScreenRender;
+window.handleScreenRender = (screenId) => {
+    originalHandleScreenRender(screenId); // Purana kaam karega
+    if (screenId === 'tests') window.renderTestsList('live'); // Naya kaam karega
+};
+
+// 2. Update switchBatch to collect quizzes smartly
+const originalSwitchBatch = window.switchBatch;
+window.switchBatch = async (batchId) => {
+    await originalSwitchBatch(batchId); // Pehle sab purana data load karega
+    
+    // Naya logic: Database me se quizzes dhoondh kar alag array me daalo
+    AppState.quizzes = [];
+    try {
+        const matRef = collection(db, "batches", batchId, "materials");
+        const q = query(matRef, where("status", "==", "Active"), where("type", "==", "quiz"));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => {
+            AppState.quizzes.push({ id: docSnap.id, ...docSnap.data() });
+        });
+    } catch(err) { console.error("Error fetching quizzes:", err); }
+};
+
+// 3. Render Test UI Logic
+window.testsDataCache = {};
+window.userAttemptedQuizzes = {}; // Future: Sync with Firebase user profile
+
+window.switchTestTab = (type, btn) => {
+    UI.switchTabUI(btn);
+    window.renderTestsList(type);
+};
+
+window.renderTestsList = (type = 'live') => {
+    const container = document.getElementById('test-list-container');
+    if(!container) return;
+    
+    const allTests = AppState.quizzes || [];
+    
+    if(allTests.length === 0) {
+        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="font-size:3rem; opacity:0.2;"></i><h4 style="margin-top:15px;">No tests available right now.</h4></div>`;
+        return;
+    }
+
+    container.innerHTML = '';
+    
+    allTests.forEach(test => {
+        window.testsDataCache[test.id] = test;
+        const isAttempted = window.userAttemptedQuizzes[test.id] ? true : false;
+        
+        if(type === 'live' && isAttempted) return;
+        if(type === 'attempted' && !isAttempted) return;
+
+        let statusBadge = isAttempted 
+            ? `<span style="background: #fee2e2; color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-lock"></i> Completed</span>`
+            : `<span style="background: #ecfdf5; color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 4px; vertical-align: middle;"></i> Live</span>`;
+
+        let actionButtons = isAttempted
+            ? `<button onclick="alert('Result Dashboard Coming Soon!')" style="flex: 1; padding: 10px; border-radius: 8px; background: #f1f5f9; color: var(--navy); border: 1px solid #cbd5e1; font-weight: 700; cursor: pointer;"><i class="fas fa-chart-bar"></i> View Result</button>
+               <button onclick="openInstructions('${test.id}')" style="flex: 1; padding: 10px; border-radius: 8px; background: white; color: var(--primary); border: 1px solid var(--primary); font-weight: 700; cursor: pointer;"><i class="fas fa-redo"></i> Reattempt</button>`
+            : `<button onclick="openInstructions('${test.id}')" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--primary); color: white; border: none; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.2);">Start Test <i class="fas fa-arrow-right"></i></button>`;
+
+        let cardHtml = `
+            <div class="premium-card" style="background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div style="width: 75%;">
+                        <span style="font-size:0.7rem; font-weight:800; background:#e0e7ff; color:#4f46e5; padding:4px 8px; border-radius:6px; margin-bottom:10px; display:inline-block; text-transform: uppercase;">${test.subject || 'Full Mock Test'}</span>
+                        <h3 style="font-size: 1.15rem; color: var(--navy); font-weight: 800; line-height: 1.4;">${test.title}</h3>
+                    </div>
+                    <div>${statusBadge}</div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; font-size: 0.8rem; color: var(--text-light); font-weight: 700; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #f1f5f9; justify-content: space-around;">
+                    <div style="text-align: center;"><i class="fas fa-clock" style="color: var(--primary); font-size: 1rem; margin-bottom: 5px; display: block;"></i> ${test.duration} Min</div>
+                    <div style="width: 1px; background: #e2e8f0;"></div>
+                    <div style="text-align: center;"><i class="fas fa-question-circle" style="color: #f59e0b; font-size: 1rem; margin-bottom: 5px; display: block;"></i> ${test.totalQuestions} Qs</div>
+                    <div style="width: 1px; background: #e2e8f0;"></div>
+                    <div style="text-align: center;"><i class="fas fa-star" style="color: #10b981; font-size: 1rem; margin-bottom: 5px; display: block;"></i> ${test.maxMarks} Marks</div>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    ${actionButtons}
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', cardHtml);
+    });
+};
+
+window.currentActiveTestId = null;
+
+window.openInstructions = (testId) => {
+    const test = window.testsDataCache[testId];
+    if(!test) return;
+    
+    window.currentActiveTestId = testId;
+    
+    document.getElementById('inst-title').innerText = test.title;
+    document.getElementById('inst-subject').innerText = test.subject || 'Full Mock Test';
+    document.getElementById('inst-time').innerText = test.duration + " Mins";
+    document.getElementById('inst-marks').innerText = test.maxMarks;
+    
+    if(test.questions && test.questions.length > 0) {
+        document.getElementById('inst-plus').innerText = `+${test.questions[0].marks.correct} Marks`;
+        document.getElementById('inst-minus').innerText = `-${test.questions[0].marks.incorrect} Mark`;
+    }
+
+    document.getElementById('instruction-mode').style.display = 'flex';
+};
+
+window.closeInstructions = () => {
+    document.getElementById('instruction-mode').style.display = 'none';
+    window.currentActiveTestId = null;
+};
+
+// 🚨 NAYA REDIRECT LOGIC TO ISOLATED EXAM UI
+window.startTestPlayer = () => {
+    if(!window.currentActiveTestId || !AppState.currentBatchId) {
+        alert("Session error. Please reload the page."); return;
+    }
+    // exam.html par redirect karega URL parameters ke sath!
+    window.location.href = `exam.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`;
+};
+
