@@ -93,10 +93,40 @@
                     <p class="text-sm text-emerald-400 font-medium"><i class="fas fa-robot mr-1"></i> AI Suggestion:</p>
                     <p class="text-sm mt-2 text-slate-300" id="ai-suggestion">Analyzing your data...</p>
                 </div>
-            </div>
-        </div>
 
-    </div>
+                        <div class="mt-8 mb-6">
+            <h2 class="text-2xl font-extrabold text-slate-900 mb-4"><i class="fas fa-microscope text-indigo-600 mr-2"></i> Telemetry Deep Dive</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="glass-card border-l-4 border-l-red-500">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Time Traps (Slow & Wrong)</h3>
+                    <p class="text-sm text-slate-500 mb-4">Questions where you wasted maximum time but still got them incorrect.</p>
+                    <div id="time-traps-container" class="space-y-3">
+                        </div>
+                </div>
+
+                <div class="glass-card border-l-4 border-l-purple-500">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Mind-Changer Analysis</h3>
+                    <p class="text-sm text-slate-500 mb-4">How often did you change your selected option?</p>
+                    <div class="flex justify-around items-center mt-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-slate-800" id="stat-swaps">0</div>
+                            <div class="text-xs font-bold text-slate-400 uppercase mt-1">Total Changes</div>
+                        </div>
+                        <div class="h-12 w-px bg-slate-200"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-emerald-500" id="stat-swap-right">0</div>
+                            <div class="text-xs font-bold text-slate-400 uppercase mt-1">Changed to Correct</div>
+                        </div>
+                        <div class="h-12 w-px bg-slate-200"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-red-500" id="stat-swap-wrong">0</div>
+                            <div class="text-xs font-bold text-slate-400 uppercase mt-1">Changed to Wrong</div>
+                        </div>
+                    </div>
+                </div>
+
 
     <script type="module">
         import { db, auth } from './js/firebase-init.js'; // Adjust path if needed
