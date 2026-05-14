@@ -2,239 +2,293 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VidyaPlus | Master Your Future, Zero Fees Required</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vidyaplus | Dominate Your Exams</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* 🎨 THE PREMIUM LIGHT THEME VARIABLES */
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg-color: #f1f5f9;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;      /* Royal Indigo */
+            --primary-hover: #4338ca;
+            --secondary: #0ea5e9;    /* Sky Blue */
+            --text-dark: #0f172a;
             --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.4);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-main); color: var(--text-dark); overflow-x: hidden; }
+
+        /* 🚀 1. FROSTED GLASS NAVBAR */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 75px;
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light); z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 5%;
+            transition: all 0.3s ease;
+        }
+        .nav-brand { font-size: 1.5rem; font-weight: 900; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-brand i { color: var(--primary); font-size: 1.8rem; }
         
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow-x: hidden; min-height: 100vh; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
+        .nav-links a:hover { color: var(--primary); }
 
-        /* --- 1. SUPER SLIM TOP BAR DESIGN --- */
-        .header {
-            background: #ffffff;
-            padding: 0.8rem 1rem; /* Super Slim padding */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 1001; /* Above everything */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow */
-            border-bottom: 1px solid #e2e8f0;
+        .btn-join {
+            background: var(--primary); color: white; padding: 10px 24px; border-radius: 12px;
+            font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); transition: 0.3s;
         }
+        .btn-join:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
+        .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; color: var(--text-dark); cursor: pointer; }
 
-        .header-left { display: flex; align-items: center; }
-        .menu-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; margin-right: 15px; }
-        .logo { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
-
-        .header-btn {
-            background: #000000;
-            color: #ffffff;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: 0.3s;
+        /* 🛡️ 2. BANK-LEVEL SECURE AUTH MODAL */
+        .auth-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px;
         }
-        .header-btn:hover { background: #333333; }
+        .auth-overlay.active { opacity: 1; pointer-events: auto; }
 
-        /* --- 2. SLIM & PROFESSIONAL SIDEBAR --- */
-        .sidebar {
-            width: 240px; /* Slimmer width */
-            height: 100vh;
-            background: var(--sidebar-bg);
-            position: fixed;
-            top: 0;
-            left: -240px; /* Hidden default */
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            transition: 0.3s ease;
-            z-index: 1002; /* Purely above content and header */
+        .auth-modal {
+            background: var(--bg-card); width: 100%; max-width: 420px; border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border);
+            transform: translateY(30px) scale(0.95); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden; position: relative;
         }
+        .auth-overlay.active .auth-modal { transform: translateY(0) scale(1); }
 
-        .brand-sidebar {
-            padding: 1.2rem;
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--primary);
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .close-btn { background: none; border: none; font-size: 1.3rem; color: var(--text-main); cursor: pointer; }
-
-        .nav-menu {
-            list-style: none;
-            padding: 1.2rem 1rem;
-            flex-grow: 1;
-        }
-
-        .nav-item { margin-bottom: 0.4rem; }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.7rem 0.9rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: 0.2s ease;
-            font-size: 0.95rem; /* Slimmer Font */
-        }
-
-        .nav-link i { margin-right: 12px; font-size: 1.1rem; width: 22px; text-align: center; }
+        .auth-header { padding: 30px 30px 15px; position: relative; }
+        .close-modal { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .close-modal:hover { background: #e2e8f0; color: var(--text-dark); }
         
-        .nav-link:hover, .nav-link.active {
-            background-color: #eff6ff;
-            color: var(--primary);
+        .auth-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin-bottom: 5px; }
+        .auth-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+
+        .auth-body { padding: 0 30px 30px; }
+        
+        /* Stripe-like Input Fields */
+        .input-group { margin-bottom: 18px; position: relative; }
+        .input-label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+        .input-control {
+            width: 100%; padding: 14px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0;
+            background: #f8fafc; font-size: 0.95rem; color: var(--text-dark); font-weight: 500;
+            outline: none; transition: all 0.2s;
+        }
+        .input-control:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+        .pwd-toggle { position: absolute; right: 16px; top: 38px; color: var(--text-muted); cursor: pointer; }
+
+        .btn-auth {
+            width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: white;
+            font-size: 1rem; font-weight: 800; border: none; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-auth:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
+
+        .btn-google {
+            width: 100%; padding: 14px; border-radius: 12px; background: white; color: var(--text-dark);
+            font-size: 0.95rem; font-weight: 700; border: 1.5px solid #e2e8f0; cursor: pointer; transition: 0.2s;
+            display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px;
+        }
+        .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .auth-switch { text-align: center; margin-top: 20px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .auth-switch span { color: var(--primary); cursor: pointer; transition: 0.2s; }
+        .auth-switch span:hover { text-decoration: underline; }
+
+        /* Security Badge */
+        .secure-badge { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+        /* 📱 MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .btn-join { display: none; }
+            .menu-btn { display: block; }
+            .auth-modal { max-width: 100%; border-radius: 24px 24px 0 0; position: absolute; bottom: 0; transform: translateY(100%); }
+            .auth-overlay.active .auth-modal { transform: translateY(0); }
         }
 
-        .sidebar.show { left: 0; }
-
-        /* Overlay for mobile */
-        .overlay { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 998; transition: 0.3s; }
-        .overlay.show { display: block; }
-
-        /* --- 3. MAIN CONTENT (From image_11.png) --- */
-        .main-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .badge-main {
-            background: #eff6ff;
-            color: var(--primary);
-            padding: 0.5rem 1.2rem;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-
-        .hero-h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 1.2rem;
-            color: var(--text-main);
-        }
-        .hero-h1 span { color: var(--primary); }
-
-        .hero-p {
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto 2.5rem auto;
-            line-height: 1.7;
-            font-size: 1rem;
-        }
-
-        .btn-gradient {
-            background: linear-gradient(45deg, var(--primary) 0%, #db2777 100%);
-            color: #ffffff;
-            padding: 0.9rem 2rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
-        .btn-gradient:hover { transform: translateY(-3px); }
-
-        @media (max-width: 600px) {
-            .hero-h1 { font-size: 1.8rem; }
-            .hero-p { font-size: 0.95rem; }
-        }
+        /* Hero Placeholder (So you can see the transparent nav) */
+        .hero-placeholder { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 20px; background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%); }
+        .hero-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: -1.5px; color: var(--text-dark); line-height: 1.1; margin-bottom: 20px; }
+        .hero-subtitle { font-size: 1.1rem; color: var(--text-muted); font-weight: 500; max-width: 500px; margin-bottom: 30px; }
     </style>
 </head>
 <body>
 
-    <div class="overlay" id="overlay"></div>
-
-    <nav class="sidebar" id="sidebar">
-        <div class="brand-sidebar">
-            VidyaPlus
-            <button class="close-btn" id="close-btn"><i class="fas fa-times"></i></button>
-        </div>
-
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fas fa-compass"></i> Explore Batches</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-book-open"></i> My Batches</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-play-circle"></i> Study</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-robot"></i> AI Guru</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-headset"></i> Support</a>
-            </li>
+    <nav class="navbar">
+        <a href="#" class="nav-brand"><i class="fas fa-layer-group"></i> Vidyaplus</a>
+        
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Test Series</a></li>
+            <li><a href="#">Wall of Fame</a></li>
         </ul>
+
+        <button class="btn-join" onclick="openAuthModal('login')">Join Now <i class="fas fa-arrow-right ml-1"></i></button>
+        <button class="menu-btn"><i class="fas fa-bars"></i></button>
     </nav>
 
-    <header class="header">
-        <div class="header-left">
-            <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
-            <div class="logo">VidyaPlus</div>
-        </div>
-        <a href="login.html" class="header-btn">Signup/login</a>
-    </header>
+    <section class="hero-placeholder">
+        <div style="background: #e0e7ff; color: #4338ca; font-size: 0.8rem; font-weight: 800; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">Vidyaplus PRO is Here</div>
+        <h1 class="hero-title">Dominate Your<br><span style="color: var(--primary);">Dream Exams.</span></h1>
+        <p class="hero-subtitle">India's most advanced learning platform. Bank-level secure testing, AI Guru, and X-Ray Analytics all in one place.</p>
+        <button class="btn-join" style="padding: 15px 35px; font-size: 1.1rem;" onclick="openAuthModal('register')">Start Your Journey</button>
+    </section>
 
-    <main class="main-container">
-        <div>
-            <div class="badge-main">NEXT-GEN EDUCATION PORTAL</div>
-            <h1 class="hero-h1">Master Your Future,<br><span>Zero Fees Required.</span></h1>
-            <p class="hero-p">
-                A luxurious, interactive learning experience strictly focused on structured syllabus dashboards and deep-dive conceptual mastery. Welcome to the introductory interface of future educational access.
-            </p>
-            <a href="login.html" class="btn-gradient">Explore Batches</a>
+    <div class="auth-overlay" id="auth-overlay" onclick="handleOverlayClick(event)">
+        <div class="auth-modal" id="auth-modal">
+            
+            <div class="auth-header">
+                <button class="close-modal" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
+                <h2 class="auth-title" id="auth-title">Welcome Back</h2>
+                <p class="auth-subtitle" id="auth-subtitle">Log in to access your dashboard.</p>
+            </div>
+
+            <div class="auth-body">
+                
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+                    
+                    <div class="input-group" id="name-group" style="display: none;">
+                        <label class="input-label">Full Name</label>
+                        <input type="text" class="input-control" id="auth-name" placeholder="Sudhir Anand">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Email Address</label>
+                        <input type="email" class="input-control" id="auth-email" required placeholder="you@example.com" autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Secure Password</label>
+                        <input type="password" class="input-control" id="auth-password" required placeholder="••••••••">
+                        <i class="fas fa-eye pwd-toggle" id="pwd-toggle" onclick="togglePassword()"></i>
+                    </div>
+
+                    <button type="submit" class="btn-auth" id="auth-submit-btn">
+                        <span>Secure Login</span> <i class="fas fa-lock"></i>
+                    </button>
+                </form>
+
+                <div style="display: flex; align-items: center; margin: 20px 0; color: #cbd5e1;">
+                    <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+                    <span style="padding: 0 10px; font-size: 0.8rem; font-weight: 600; color: #94a3b8;">OR</span>
+                    <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+                </div>
+
+                <button class="btn-google">
+                    <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" style="width: 18px;">
+                    Continue with Google
+                </button>
+
+                <div class="auth-switch" id="auth-switch-text">
+                    New here? <span onclick="switchAuthMode('register')">Create an account</span>
+                </div>
+
+                <div class="secure-badge">
+                    <i class="fas fa-shield-check"></i> Protected by AES-256 Encryption & reCAPTCHA v3
+                </div>
+
+            </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeBtn = document.getElementById('close-btn');
-        const overlay = document.getElementById('overlay');
+        const overlay = document.getElementById('auth-overlay');
+        const modal = document.getElementById('auth-modal');
+        const pwdInput = document.getElementById('auth-password');
+        const pwdToggle = document.getElementById('pwd-toggle');
+        
+        let currentMode = 'login'; // 'login' or 'register'
 
-        function toggleMenu() {
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
+        // Open Modal
+        function openAuthModal(mode = 'login') {
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Stop background scrolling
+            switchAuthMode(mode);
         }
 
-        menuToggle.addEventListener('click', toggleMenu);
-        closeBtn.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
+        // Close Modal
+        function closeAuthModal() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('auth-form').reset();
+            pwdInput.type = 'password';
+            pwdToggle.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+
+        // Click outside to close (Desktop) or swipe down logic (Future mobile feature)
+        function handleOverlayClick(e) {
+            if(e.target === overlay) closeAuthModal();
+        }
+
+        // Toggle Password Visibility
+        function togglePassword() {
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                pwdToggle.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                pwdToggle.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Switch between Login and Signup smoothly
+        function switchAuthMode(mode) {
+            currentMode = mode;
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const nameGroup = document.getElementById('name-group');
+            const nameInput = document.getElementById('auth-name');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchText = document.getElementById('auth-switch-text');
+
+            if (mode === 'register') {
+                title.innerText = "Join Vidyaplus";
+                subtitle.innerText = "Start your journey to dominate exams.";
+                nameGroup.style.display = 'block';
+                nameInput.required = true;
+                submitBtn.innerHTML = '<span>Create Account</span> <i class="fas fa-user-plus"></i>';
+                switchText.innerHTML = 'Already have an account? <span onclick="switchAuthMode(\'login\')">Log in</span>';
+            } else {
+                title.innerText = "Welcome Back";
+                subtitle.innerText = "Log in to access your dashboard.";
+                nameGroup.style.display = 'none';
+                nameInput.required = false;
+                submitBtn.innerHTML = '<span>Secure Login</span> <i class="fas fa-lock"></i>';
+                switchText.innerHTML = 'New here? <span onclick="switchAuthMode(\'register\')">Create an account</span>';
+            }
+        }
+
+        // Dummy Submit logic for UI testing
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('auth-submit-btn');
+            const originalText = btn.innerHTML;
+            
+            // Show Loading state
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Authenticating...';
+            btn.style.opacity = '0.8';
+            btn.disabled = true;
+
+            // Simulate Network Request (Remove this when connecting Firebase backend)
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+                btn.disabled = false;
+                alert("This is just the UI! We will connect Firebase Auth next.");
+                closeAuthModal();
+            }, 1500);
+        }
     </script>
-        <script type="module">
-        // Yahan hum sirf app ko initialize kar rahe hain, koi 'Security Guard' nahi lagayenge
-        import { app } from './firebase-init.js';
-        console.log("VidyaPlus Home Page Connected!");
-        </script>
-    
 </body>
 </html>
