@@ -415,10 +415,6 @@ window.renderTestsList = async (type = 'live') => {
     });
 };
 
-    if(!liveTestsFound) {
-        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No live assessments available.</h4></div>`;
-    }
-};
 
 window.currentActiveTestId = null;
 
