@@ -1,7 +1,7 @@
 // js/main.js
-import { db } from './firebase-init.js';
+import { db, auth } from './firebase-init.js'; // 👈 FIX: Added auth to fetch user data
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { initAuth, AppState } from './auth.js'; // 🚨 FIX: auth removed to prevent crash
+import { initAuth, AppState } from './auth.js'; 
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
@@ -229,7 +229,7 @@ window.switchClassroomTab = (type) => {
 };
 
 // ==========================================
-// 🚨 RESTORED: SECURE TEST PORTAL GATEWAY (Professional UI)
+// 🚨 GOD-LEVEL TEST PORTAL ENGINE (With Database Sync)
 // ==========================================
 window.testsDataCache = {};
 window.userAttemptedQuizzes = {}; 
@@ -239,7 +239,7 @@ window.switchTestTab = (type, btn) => {
     window.renderTestsList(type);
 };
 
-window.renderTestsList = (type = 'live') => {
+window.renderTestsList = async (type = 'live') => {
     const container = document.getElementById('test-list-container');
     if(!container) return;
     
@@ -253,31 +253,96 @@ window.renderTestsList = (type = 'live') => {
         return;
     }
 
-    const allTests = AppState.quizzes || [];
-    
-    if(allTests.length === 0) {
-        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No assessments scheduled.</h4></div>`;
-        return;
+    // Show Loading state before fetching
+    container.innerHTML = '<div style="text-align:center; padding: 40px;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: #2563eb;"></i><p style="margin-top:10px; font-weight:600; color:#64748b;">Syncing Assessment Data...</p></div>';
+
+    // 📡 FETCH USER ATTEMPTS FROM FIRESTORE (Rule 3 DB)
+    let attemptedMap = {};
+    if (auth && auth.currentUser) {
+        try {
+            const snapshot = await getDocs(collection(db, `users/${auth.currentUser.uid}/exam_results`));
+            snapshot.forEach(docSnap => {
+                attemptedMap[docSnap.id] = docSnap.data(); 
+                window.userAttemptedQuizzes[docSnap.id] = true; 
+            });
+        } catch (err) {
+            console.error("Failed to sync attempts from DB:", err);
+        }
     }
 
     container.innerHTML = '';
+
+    // =========================================
+    // RENDER: ATTEMPTED TESTS TAB
+    // =========================================
+    if (type === 'attempted') {
+        const attemptedIds = Object.keys(attemptedMap);
+        
+        if (attemptedIds.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 40px; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                    <i class="fas fa-clipboard-check" style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;"></i>
+                    <h4 style="color: #334155; font-size: 1.1rem; font-weight: 600;">No Attempted Tests</h4>
+                    <p style="color: #64748b; font-size: 0.9rem;">You haven't attempted any secure assessments yet.</p>
+                </div>`;
+            return;
+        }
+
+        attemptedIds.forEach(tId => {
+            const data = attemptedMap[tId];
+            const title = data.testTitle || 'Secure Assessment';
+            const score = data.latestScore !== undefined ? data.latestScore : (data.score || 0);
+            const maxMarks = data.maxMarks || '--';
+            const attempts = data.totalAttempts || 1;
+            const attemptId = data.latestAttemptId || '';
+
+            let cardHtml = `
+                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Assessment Completed</div>
+                            <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700; margin-bottom: 12px;">${title}</h3>
+                        </div>
+                        <div>
+                            <span style="color: #059669; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-check-circle"></i> Submitted</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; font-size: 0.8rem; color: #475569; font-weight: 500; margin-bottom: 16px; flex-wrap: wrap;">
+                        <span style="display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-redo-alt" style="color: #3b82f6;"></i> Attempts: ${attempts}</span>
+                        <span style="display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-star" style="color: #f59e0b;"></i> Score: ${score} / ${maxMarks}</span>
+                    </div>
+
+                    <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
+                        <button onclick="window.location.href='analytics.html?testId=${tId}&attemptId=${attemptId}'" style="padding: 8px 20px; background: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
+                            View Full Analytics <i class="fas fa-chart-pie ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+        return;
+    }
+
+    // =========================================
+    // RENDER: LIVE TESTS TAB
+    // =========================================
+    const allTests = AppState.quizzes || [];
+    let liveTestsFound = false;
     
     allTests.forEach(test => {
         window.testsDataCache[test.id] = test;
-        const isAttempted = window.userAttemptedQuizzes[test.id] || sessionStorage.getItem('submitted_' + test.id) ? true : false;
+        const isAttempted = attemptedMap[test.id] || sessionStorage.getItem('submitted_' + test.id);
         
-        if(type === 'live' && isAttempted) return;
-        if(type === 'attempted' && !isAttempted) return;
+        // Hide test if it's already attempted
+        if(isAttempted) return;
+        
+        liveTestsFound = true;
 
-        let statusBadge = isAttempted 
-            ? `<span style="color: #059669; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-check-circle"></i> Submitted</span>`
-            : `<span style="color: #2563eb; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-circle" style="font-size: 0.4rem; vertical-align: middle; margin-right:4px;"></i> Active</span>`;
+        let statusBadge = `<span style="color: #2563eb; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-circle" style="font-size: 0.4rem; vertical-align: middle; margin-right:4px;"></i> Active</span>`;
+        let actionButtons = `<button onclick="openInstructions('${test.id}')" style="padding: 8px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Begin Assessment</button>`;
 
-        let actionButtons = isAttempted
-            ? `<button onclick="alert('Analytics mapping in progress.')" style="padding: 8px 16px; background: white; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">View Report</button>`
-            : `<button onclick="openInstructions('${test.id}')" style="padding: 8px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Begin Assessment</button>`;
-
-        // STRICT PROFESSIONAL CARD UI
         let cardHtml = `
             <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin-bottom: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -301,6 +366,10 @@ window.renderTestsList = (type = 'live') => {
         `;
         container.insertAdjacentHTML('beforeend', cardHtml);
     });
+
+    if(!liveTestsFound) {
+        container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No live assessments available.</h4></div>`;
+    }
 };
 
 window.currentActiveTestId = null;
