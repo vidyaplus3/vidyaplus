@@ -246,13 +246,13 @@ window.renderTestsList = async (type = 'live') => {
     // Show Loading state before fetching
     container.innerHTML = '<div style="text-align:center; padding: 40px;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: #2563eb;"></i><p style="margin-top:10px; font-weight:600; color:#64748b;">Syncing Assessment Data...</p></div>';
 
-    // 📡 FETCH USER ATTEMPTS FROM FIRESTORE
-    let attemptedMap = {};
+    // 📡 FETCH ALL USER ATTEMPTS FROM FIRESTORE
+    let allAttemptsMap = {};
     if (auth && auth.currentUser) {
         try {
             const snapshot = await getDocs(collection(db, `users/${auth.currentUser.uid}/exam_results`));
             snapshot.forEach(docSnap => {
-                attemptedMap[docSnap.id] = docSnap.data(); 
+                allAttemptsMap[docSnap.id] = docSnap.data(); 
                 window.userAttemptedQuizzes[docSnap.id] = true; 
             });
         } catch (err) {
@@ -260,19 +260,30 @@ window.renderTestsList = async (type = 'live') => {
         }
     }
 
+    // 🚨 THE FIX: Filter attempts so ONLY THIS BATCH's tests show up!
+    const currentBatchQuizzes = AppState.quizzes || [];
+    const currentBatchTestIds = currentBatchQuizzes.map(q => q.id);
+    
+    let attemptedMap = {};
+    currentBatchTestIds.forEach(tId => {
+        if (allAttemptsMap[tId]) {
+            attemptedMap[tId] = allAttemptsMap[tId];
+        }
+    });
+
     container.innerHTML = '';
 
     // =========================================
-    // 📈 RENDER: OVERALL ANALYTICS TAB
+    // 📈 RENDER: OVERALL ANALYTICS TAB (Batch Specific)
     // =========================================
     if (type === 'dashboard') {
         const attemptedIds = Object.keys(attemptedMap);
         if (attemptedIds.length === 0) {
-            container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-chart-line" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No data to analyze yet.</h4></div>`;
+            container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-chart-line" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No data to analyze in this batch yet.</h4></div>`;
             return;
         }
 
-        // Calculate Overall Stats
+        // Calculate Overall Stats for Current Batch
         let totalTests = attemptedIds.length;
         let totalScore = 0;
         let totalMax = 0;
@@ -286,7 +297,6 @@ window.renderTestsList = async (type = 'live') => {
             totalScore += sc;
             totalMax += mx;
             
-            // Calculate percentage for fair comparison in graph
             let percent = mx > 0 ? ((sc / mx) * 100).toFixed(1) : 0;
             graphScores.push(percent);
             graphLabels.push(`Test ${index + 1}`);
@@ -312,7 +322,6 @@ window.renderTestsList = async (type = 'live') => {
             </div>
         `;
 
-        // Render Growth Graph
         if(window.ApexCharts) {
             new ApexCharts(document.querySelector("#overall-growth-chart"), {
                 series: [{ name: 'Accuracy %', data: graphScores }],
@@ -328,12 +337,12 @@ window.renderTestsList = async (type = 'live') => {
     }
 
     // =========================================
-    // RENDER: ATTEMPTED TESTS TAB
+    // RENDER: ATTEMPTED TESTS TAB (Batch Specific)
     // =========================================
     if (type === 'attempted') {
         const attemptedIds = Object.keys(attemptedMap);
         if (attemptedIds.length === 0) {
-            container.innerHTML = `<div class="empty-box"><i class="fas fa-clipboard-check"></i><h4 style="margin-top:10px;">No Attempted Tests</h4></div>`;
+            container.innerHTML = `<div class="empty-box"><i class="fas fa-clipboard-check"></i><h4 style="margin-top:10px;">No Attempted Tests in this Batch</h4></div>`;
             return;
         }
 
@@ -370,19 +379,16 @@ window.renderTestsList = async (type = 'live') => {
     }
 
     // =========================================
-    // 🔴 RENDER: LIVE TESTS TAB (FIXED FOR RE-ATTEMPTS)
+    // RENDER: LIVE TESTS TAB (Batch Specific)
     // =========================================
-    const allTests = AppState.quizzes || [];
-    if(allTests.length === 0) {
+    if(currentBatchQuizzes.length === 0) {
         container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No live assessments available.</h4></div>`;
         return;
     }
     
-    allTests.forEach(test => {
+    currentBatchQuizzes.forEach(test => {
         window.testsDataCache[test.id] = test;
-        const isAttempted = attemptedMap[test.id] || sessionStorage.getItem('submitted_' + test.id);
-        
-        // 🚨 FIX: Hum yahan return nahi karenge, taaki baccha dobara test de sake!
+        const isAttempted = attemptedMap[test.id];
         
         let statusBadge = isAttempted 
             ? `<span style="color: #f59e0b; font-size: 0.75rem; font-weight: 800; background: #fef3c7; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-redo"></i> Re-attempt Available</span>`
