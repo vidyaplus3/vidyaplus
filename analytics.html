@@ -17,7 +17,7 @@
         
         /* 👻 GHOST TIMELINE CSS */
         .timeline-node { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: white; cursor: pointer; position: relative; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .timeline-node:hover { transform: scale(1.15) translateY(-2px); z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .timeline-node:hover { transform: scale(1.15) translateY(-2px); z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
         /* Tooltip Magic */
         .tooltip-data { display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 10px 14px; border-radius: 8px; font-size: 0.75rem; white-space: nowrap; font-weight: 500; pointer-events: none; z-index: 50; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -66,7 +66,7 @@
                 <span class="w-3 h-3 rounded-full bg-slate-300 inline-block ml-4 mr-1"></span> Skipped
             </div>
 
-            <div id="ghost-timeline" class="flex items-center overflow-x-auto pb-6 pt-4 px-2" style="scroll-behavior: smooth;">
+            <div id="ghost-timeline" class="flex items-center overflow-x-auto pb-6 pt-32 px-2" style="scroll-behavior: smooth;">
                 </div>
         </div>
 
@@ -219,8 +219,11 @@
                 let sData = data.subjectWise[sub];
                 let attempted = sData.correct + sData.incorrect;
                 let acc = attempted > 0 ? ((sData.correct / attempted) * 100).toFixed(1) : 0;
-                let tMins = Math.floor(sData.timeSpent / 60);
-                let tSecs = sData.timeSpent % 60;
+                
+                // ⚡ FIXED: Milliseconds to Seconds Math Fix for Table
+                let totalSecsForSub = Math.floor((sData.timeSpent || 0) / 1000);
+                let tMins = Math.floor(totalSecsForSub / 60);
+                let tSecs = totalSecsForSub % 60;
                 
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
@@ -255,8 +258,9 @@
             window.activeCharts.donut.render();
 
             // 3. Time Bar Chart
+            // ⚡ FIXED: Milliseconds to Seconds fix for Graph
             window.activeCharts.time = new ApexCharts(document.querySelector("#time-chart"), {
-                series: [{ name: 'Time Spent (Seconds)', data: subjects.map(s => data.subjectWise[s].timeSpent) }],
+                series: [{ name: 'Time Spent (Seconds)', data: subjects.map(s => Math.floor((data.subjectWise[s].timeSpent || 0) / 1000)) }],
                 chart: { type: 'bar', height: 300, toolbar: { show: false } },
                 plotOptions: { bar: { borderRadius: 4, horizontal: true } }, dataLabels: { enabled: true },
                 xaxis: { categories: subjects }, colors: ['#f97316']
