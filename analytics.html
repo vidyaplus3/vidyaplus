@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div class="glass-card md:col-span-2">
                 <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fas fa-hourglass-half text-orange-500 mr-2"></i> Time Management (Seconds)</h3>
                 <div id="time-chart"></div>
@@ -93,12 +93,13 @@
                     <p class="text-sm text-emerald-400 font-medium"><i class="fas fa-robot mr-1"></i> AI Suggestion:</p>
                     <p class="text-sm mt-2 text-slate-300" id="ai-suggestion">Analyzing your data...</p>
                 </div>
+            </div>
+        </div>
 
-                        <div class="mt-8 mb-6">
+        <div class="mt-8 mb-6">
             <h2 class="text-2xl font-extrabold text-slate-900 mb-4"><i class="fas fa-microscope text-indigo-600 mr-2"></i> Telemetry Deep Dive</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
                 <div class="glass-card border-l-4 border-l-red-500">
                     <h3 class="text-lg font-bold text-slate-800 mb-2">Time Traps (Slow & Wrong)</h3>
                     <p class="text-sm text-slate-500 mb-4">Questions where you wasted maximum time but still got them incorrect.</p>
@@ -126,14 +127,15 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-
-    <script type="module">
-        import { db, auth } from './js/firebase-init.js'; // Adjust path if needed
+    </div>
+     <script type="module">
+        import { db, auth } from './js/firebase-init.js'; 
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Get testId and attemptId from URL (e.g., analytics.html?testId=123&attemptId=abc)
         const urlParams = new URLSearchParams(window.location.search);
         const testId = urlParams.get('testId');
         const attemptId = urlParams.get('attemptId');
@@ -143,7 +145,6 @@
             if (!testId || !attemptId) { alert("Invalid Report URL."); return; }
 
             try {
-                // Fetch God-Level Data from our new Rule 3 Database Structure
                 const attemptRef = doc(db, `users/${user.uid}/exam_results/${testId}/attempts/${attemptId}`);
                 const attemptSnap = await getDoc(attemptRef);
 
@@ -186,9 +187,9 @@
             document.getElementById('ai-suggestion').innerText = suggestion;
 
             // Prepare Subject Data for Charts
-            const subjects = Object.keys(data.subjectWise);
+            const subjects = Object.keys(data.subjectWise || {});
             const subjectScores = subjects.map(s => data.subjectWise[s].score);
-            const subjectTimes = subjects.map(s => data.subjectWise[s].timeSpent); // In Seconds
+            const subjectTimes = subjects.map(s => data.subjectWise[s].timeSpent);
 
             // --- CHART 1: Subject Radar Chart (Strengths & Weaknesses) ---
             var radarOptions = {
@@ -198,13 +199,13 @@
                 stroke: { width: 2, colors: ['#6366f1'] },
                 fill: { opacity: 0.2, colors: ['#6366f1'] },
                 markers: { size: 4, colors: ['#fff'], strokeColors: '#6366f1', strokeWidth: 2 },
-                yaxis: { show: false } // Hide numbers on web for clean look
+                yaxis: { show: false }
             };
             new ApexCharts(document.querySelector("#radar-chart"), radarOptions).render();
 
             // --- CHART 2: Attempt Breakdown (Donut) ---
             var donutOptions = {
-                series: [data.correctCount, data.incorrectCount, data.unattemptedCount],
+                series: [data.correctCount || 0, data.incorrectCount || 0, data.unattemptedCount || 0],
                 chart: { type: 'donut', height: 300 },
                 labels: ['Correct', 'Incorrect', 'Unattempted'],
                 colors: ['#22c55e', '#ef4444', '#cbd5e1'],
@@ -224,21 +225,18 @@
                 colors: ['#f97316']
             };
             new ApexCharts(document.querySelector("#time-chart"), timeOptions).render();
-        }
-                    // --- TELEMETRY ENGINE PROCESSING ---
+
+            // --- TELEMETRY ENGINE PROCESSING ---
             const telemetry = data.detailedTelemetry || {};
             let timeTraps = [];
             let totalSwaps = 0;
             let swapToRight = 0;
             let swapToWrong = 0;
 
-            // Analyze every question's telemetry
             Object.keys(telemetry).forEach(qId => {
                 const qData = telemetry[qId];
                 
-                // 1. Time Trap Detection (Spent > 60s and Wrong)
-                // Assuming status is 'answered' but they didn't get marks (need to check against cAns if available, 
-                // but since backend evaluates, we estimate based on time & status for now, or just show top time consuming)
+                // 1. Time Trap Detection
                 if(qData.timeSpent > 0) {
                     timeTraps.push({ id: qId, time: Math.floor(qData.timeSpent / 1000), visits: qData.visits });
                 }
@@ -248,8 +246,6 @@
                     let selects = qData.actions.filter(a => a.type === 'select_option');
                     if(selects.length > 1) {
                         totalSwaps += (selects.length - 1);
-                        // Complex logic to determine if final was right/wrong requires answer key, 
-                        // but we will show overall swap tendency.
                     }
                 }
             });
@@ -275,10 +271,11 @@
                 });
             }
 
+            // Simulated swap correctness analysis
             document.getElementById('stat-swaps').innerText = totalSwaps;
-            document.getElementById('stat-swap-right').innerText = Math.floor(totalSwaps * 0.4); // Simulated for now
-            document.getElementById('stat-swap-wrong').innerText = Math.ceil(totalSwaps * 0.6); // Simulated for now
-        
+            document.getElementById('stat-swap-right').innerText = Math.floor(totalSwaps * 0.4); 
+            document.getElementById('stat-swap-wrong').innerText = Math.ceil(totalSwaps * 0.6); 
+        }
     </script>
 </body>
 </html>
