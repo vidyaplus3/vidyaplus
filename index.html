@@ -8,103 +8,116 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
     <style>
         :root {
             --bg-main: #f8fafc;
             --bg-card: #ffffff;
             --primary: #4f46e5;
-            --primary-hover: #4338ca;
+            --primary-dark: #312e81;
             --secondary: #0ea5e9;
+            --accent: #f59e0b;
             --text-dark: #0f172a;
             --text-muted: #64748b;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(226, 232, 240, 0.8);
+            --border-light: #e2e8f0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-dark); overflow-x: hidden; }
 
-        /* 🌐 1. THE HEADER & MENU */
-        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 75px; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--glass-border); z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 5%; }
+        /* 🌐 1. HEADER */
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 75px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 5%; }
         .nav-brand { font-size: 1.5rem; font-weight: 900; color: var(--text-dark); text-decoration: none; display: flex; align-items: center; gap: 8px; }
         .nav-brand i { color: var(--primary); font-size: 1.8rem; }
         .nav-links { display: flex; gap: 2rem; list-style: none; }
         .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
         .nav-links a:hover { color: var(--primary); }
-        .btn-join { background: var(--primary); color: white; padding: 10px 24px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); transition: 0.3s; }
-        .btn-join:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
+        .btn-join { background: var(--primary); color: white; padding: 10px 24px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-join:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3); }
 
-        /* 🌌 2. CONCEPT UNIVERSE HERO SECTION */
-        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 20px; position: relative; overflow: hidden; }
-        #concept-universe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; opacity: 0.6; }
-        .hero-bg-glow { position: absolute; width: 80vw; height: 80vw; max-width: 800px; max-height: 800px; background: radial-gradient(circle, rgba(79,70,229,0.06) 0%, rgba(14,165,233,0.04) 40%, rgba(255,255,255,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1; pointer-events: none; }
-        
-        .hero-content { z-index: 2; max-width: 850px; margin-top: 50px; }
-        .hero-badge { display: inline-block; background: white; color: var(--primary); font-size: 0.75rem; font-weight: 800; padding: 8px 18px; border-radius: 30px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; border: 1px solid #e0e7ff; box-shadow: 0 4px 10px rgba(79,70,229,0.05); }
-        .hero-title { font-size: clamp(3rem, 7vw, 5rem); font-weight: 900; letter-spacing: -1.5px; color: var(--text-dark); line-height: 1.1; margin-bottom: 25px; }
-        .hero-subtitle { font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); font-weight: 500; margin: 0 auto 40px; line-height: 1.6; max-width: 700px; }
+        /* 🌌 2. HERO SECTION */
+        .hero { padding: 150px 5% 80px; text-align: center; background: radial-gradient(circle at top, #e0e7ff 0%, #f8fafc 60%); position: relative; }
+        .hero-badge { display: inline-block; background: white; color: var(--primary); font-size: 0.8rem; font-weight: 800; padding: 8px 20px; border-radius: 30px; margin-bottom: 20px; border: 1px solid #c7d2fe; box-shadow: 0 4px 10px rgba(79,70,229,0.05); text-transform: uppercase; letter-spacing: 1px;}
+        .hero-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: -1.5px; color: var(--text-dark); line-height: 1.1; margin-bottom: 20px; }
+        .hero-subtitle { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-muted); font-weight: 500; margin: 0 auto 40px; line-height: 1.6; max-width: 700px; }
+        .stats-strip { display: flex; justify-content: center; gap: 40px; margin-top: 50px; flex-wrap: wrap; }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 1.8rem; font-weight: 900; color: var(--primary); }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* 🤖 3. LIVE AI TERMINAL DEMO */
-        .terminal-container { max-width: 700px; width: 100%; margin: 40px auto 0; background: #0f172a; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid #334155; text-align: left; }
-        .term-header { background: #1e293b; padding: 10px 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; }
-        .term-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .term-body { padding: 20px; font-family: monospace; font-size: 0.9rem; color: #cbd5e1; min-height: 120px; line-height: 1.6; }
-        .term-user { color: #38bdf8; font-weight: bold; }
-        .term-ai { color: #10b981; }
+        /* 🧩 3. WHY VIDYAPLUS (Features Grid) */
+        .section-container { padding: 80px 5%; max-width: 1300px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header h2 { font-size: 2.2rem; font-weight: 800; color: var(--text-dark); margin-bottom: 15px; }
+        
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .feature-card { background: white; padding: 35px 25px; border-radius: 16px; border: 1px solid var(--border-light); text-align: center; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); border-color: #cbd5e1; }
+        .fc-icon { width: 70px; height: 70px; margin: 0 auto 20px; background: #eff6ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; color: var(--primary); }
+        .fc-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+        .fc-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; font-weight: 500; }
 
-        /* 🩻 4. THE FIXED SCROLL-DRIVEN X-RAY */
-        .xray-container { height: 300vh; position: relative; } 
-        .xray-sticky { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; background: #0f172a; color: white; padding: 20px; }
-        .xray-title { position: absolute; top: 10%; text-align: center; z-index: 10; width: 100%; padding: 0 20px; }
-        .xray-title h2 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; background: linear-gradient(90deg, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
-        .xray-title p { color: #94a3b8; font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 500; }
-        
-        .mockup-wrapper { position: relative; width: 100%; max-width: 750px; min-height: 380px; border-radius: 20px; margin-top: 80px; transform: scale(0.95); opacity: 0; box-shadow: 0 30px 60px rgba(0,0,0,0.5); overflow: hidden; }
-        .layer-normal { position: absolute; inset: 0; background: white; padding: clamp(20px, 4vw, 40px); color: #0f172a; display: flex; flex-direction: column; justify-content: center; }
-        .layer-xray { position: absolute; inset: 0; background: #1e293b; padding: clamp(20px, 4vw, 40px); color: white; display: flex; flex-direction: column; justify-content: center; clip-path: inset(0 100% 0 0); border: 1px solid #334155; }
-        .scanner-laser { position: absolute; top: 0; bottom: 0; left: 0%; width: 4px; background: #0ea5e9; box-shadow: 0 0 20px 5px rgba(14, 165, 233, 0.6); z-index: 5; display: none; }
-        
-        /* Typography adjustments to fix overlap on mobile */
-        .q-tag, .x-tag { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-bottom: 10px; width: fit-content; }
-        .q-tag { background: #f1f5f9; color: #64748b; }
-        .x-tag { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .q-text { font-size: clamp(1.1rem, 3vw, 1.4rem); font-weight: 800; margin-bottom: 20px; line-height: 1.4; }
-        .opt-box { padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-weight: 600; margin-bottom: 8px; color: #475569; font-size: clamp(0.9rem, 2vw, 1rem); }
-        .opt-box.selected { border-color: #ef4444; background: #fee2e2; color: #ef4444; }
-        
-        .x-data-box { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; padding: 15px; border-radius: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
-        .x-stat { font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
-        .x-val { font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: 900; margin-top: 5px; }
-        .x-alert { display: flex; align-items: flex-start; gap: 8px; font-weight: 600; margin-top: 15px; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 8px; color: #f43f5e; font-size: clamp(0.8rem, 2vw, 0.9rem); line-height: 1.5; }
+        /* 📚 4. EXPLORE BATCHES (The Core Meat) */
+        .batch-section { background: #f1f5f9; padding: 80px 5%; }
+        .filters { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 20px; background: white; border: 1px solid var(--border-light); border-radius: 30px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .filter-btn.active, .filter-btn:hover { background: var(--primary-dark); color: white; border-color: var(--primary-dark); }
 
-        /* 🔐 5. THE FUTURISTIC AUTH MODAL */
-        .auth-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s ease; padding: 20px; }
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1300px; margin: 0 auto; }
+        
+        /* Premium Course Card */
+        .course-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-light); box-shadow: 0 10px 25px rgba(0,0,0,0.03); transition: 0.3s; display: flex; flex-direction: column; }
+        .course-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        
+        .cc-header { padding: 30px 25px; background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); color: white; position: relative; }
+        .cc-tag { position: absolute; top: 15px; right: 15px; background: var(--accent); color: white; font-size: 0.75rem; font-weight: 800; padding: 5px 12px; border-radius: 6px; text-transform: uppercase; }
+        .cc-target { font-size: 0.85rem; font-weight: 600; color: #a5b4fc; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .cc-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 15px; line-height: 1.2; }
+        
+        .cc-body { padding: 25px; flex: 1; display: flex; flex-direction: column; }
+        .cc-features { list-style: none; margin-bottom: 25px; flex: 1; }
+        .cc-features li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; color: var(--text-dark); font-weight: 500; margin-bottom: 12px; line-height: 1.4; }
+        .cc-features i { color: #10b981; font-size: 1rem; margin-top: 2px; }
+        
+        .cc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 20px; margin-top: auto; }
+        .cc-price-box { display: flex; flex-direction: column; }
+        .cc-price { font-size: 1.5rem; font-weight: 900; color: var(--text-dark); }
+        .cc-discount { font-size: 0.8rem; color: #ef4444; font-weight: 700; text-decoration: line-through; }
+        .btn-explore { padding: 12px 25px; background: #f8fafc; border: 1px solid var(--border-light); border-radius: 8px; font-weight: 700; color: var(--text-dark); cursor: pointer; transition: 0.2s; }
+        .btn-explore:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* 🔐 5. THE SPLIT-SCREEN AUTH MODAL */
+        .auth-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s ease; padding: 20px; }
         .auth-overlay.active { opacity: 1; pointer-events: auto; }
-        .auth-modal { background: var(--bg-card); width: 100%; max-width: 420px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); transform: translateY(30px) scale(0.95); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
+        
+        .auth-modal { display: flex; background: var(--bg-card); width: 100%; max-width: 850px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); transform: translateY(30px) scale(0.95); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; position: relative; min-height: 500px; }
         .auth-overlay.active .auth-modal { transform: translateY(0) scale(1); }
-        .auth-header { padding: 30px 30px 15px; position: relative; text-align: center; }
-        .close-modal { position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        
+        .auth-left { width: 45%; background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; }
+        .auth-right { width: 55%; padding: 40px 50px; position: relative; }
+        
+        .close-modal { position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; color: var(--text-muted); cursor: pointer; transition: 0.2s; z-index: 10; }
         .close-modal:hover { background: #e2e8f0; color: var(--text-dark); }
-        .auth-body { padding: 0 30px 30px; }
-        .input-group { margin-bottom: 16px; position: relative; }
-        .input-label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
-        .input-control { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.95rem; font-weight: 500; outline: none; transition: 0.2s; }
+        
+        .input-group { margin-bottom: 18px; }
+        .input-label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+        .input-control { width: 100%; padding: 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.95rem; font-weight: 500; outline: none; transition: 0.2s; }
         .input-control:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
         
-        .btn-auth { width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: white; font-size: 1rem; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); transition: 0.3s; margin-top: 10px;}
-        .btn-auth:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
-        .btn-google { width: 100%; padding: 12px; border-radius: 12px; background: white; color: var(--text-dark); font-size: 0.95rem; font-weight: 700; border: 1.5px solid #e2e8f0; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; transition: 0.2s; }
+        .btn-auth { width: 100%; padding: 14px; border-radius: 10px; background: var(--primary); color: white; font-size: 1rem; font-weight: 800; border: none; cursor: pointer; transition: 0.3s; margin-top: 10px;}
+        .btn-auth:hover { background: var(--primary-dark); }
+        .btn-google { width: 100%; padding: 12px; border-radius: 10px; background: white; color: var(--text-dark); font-size: 0.95rem; font-weight: 700; border: 1.5px solid #e2e8f0; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; transition: 0.2s; }
         .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; }
-        .secure-badge { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
+        /* 📱 RESPONSIVE FIXES */
+        @media (max-width: 900px) {
+            .auth-left { display: none; }
+            .auth-right { width: 100%; padding: 30px; }
+            .auth-modal { max-width: 450px; min-height: auto; }
+        }
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .x-data-box { grid-template-columns: 1fr; gap: 8px; text-align: left; }
-            .x-data-box > div { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
-            .x-data-box > div:last-child { border: none; padding-bottom: 0; }
+            .hero { padding: 120px 5% 60px; }
+            .stats-strip { gap: 20px; }
         }
     </style>
 </head>
@@ -114,87 +127,160 @@
         <a href="#" class="nav-brand"><i class="fas fa-layer-group"></i> Vidyaplus</a>
         <ul class="nav-links">
             <li><a href="#">Home</a></li>
-            <li><a href="#">Features</a></li>
+            <li><a href="#batches">Batches</a></li>
+            <li><a href="#features">Features</a></li>
             <li><a href="#">Test Series</a></li>
-            <li><a href="#">Wall of Fame</a></li>
-            <li><a href="#">About Us</a></li>
         </ul>
         <button class="btn-join" onclick="openAuthModal('login')">Login / Join Now</button>
     </nav>
 
     <section class="hero">
-        <canvas id="concept-universe"></canvas>
-        <div class="hero-bg-glow"></div>
+        <div class="hero-badge"><i class="fas fa-rocket"></i> Session 2026-27 Enrollment Open</div>
+        <h1 class="hero-title">Prepare for Exams with<br><span style="color: var(--primary);">India's Best Analytics</span></h1>
+        <p class="hero-subtitle">Stop guessing your preparation level. Get real-time X-Ray Analytics, Live Classes, and AI-powered doubt solving all in one secure platform.</p>
+        <button class="btn-join" style="padding: 16px 40px; font-size: 1.15rem;" onclick="document.getElementById('batches').scrollIntoView({behavior: 'smooth'})">Explore Batches <i class="fas fa-arrow-down ml-2"></i></button>
         
-        <div class="hero-content">
-            <div class="hero-badge"><i class="fas fa-shield-check" style="margin-right: 5px;"></i> Production-Ready Environment</div>
-            <h1 class="hero-title">Dominate Your<br><span style="color: var(--primary);">Dream Exams.</span></h1>
-            <p class="hero-subtitle">India's most advanced learning platform. Bank-level secure testing, AI Guru, and X-Ray Analytics all in one place.</p>
-            <button class="btn-join" style="padding: 16px 40px; font-size: 1.15rem;" onclick="openAuthModal('register')">Start Your Journey</button>
-            
-            <div class="terminal-container">
-                <div class="term-header">
-                    <div class="term-dot" style="background: #ef4444;"></div>
-                    <div class="term-dot" style="background: #eab308;"></div>
-                    <div class="term-dot" style="background: #22c55e;"></div>
-                    <span style="color: #64748b; font-size: 0.8rem; margin-left: 10px; font-family: sans-serif; font-weight: 600;">AI Guru Live Test</span>
-                </div>
-                <div class="term-body" id="term-text">
-                    <span class="term-user">> Student:</span> How do I solve integral of sec x?<br>
-                    <span class="term-ai">> Vidyaplus AI:</span> Let's multiply and divide by (sec x + tan x). Try applying substitution u = sec x + tan x. What do you get for du?<span class="cursor" style="animation: blink 1s infinite;">_</span>
-                </div>
+        <div class="stats-strip">
+            <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Active Students</div></div>
+            <div class="stat-item"><div class="stat-num">10k+</div><div class="stat-label">Questions Solved</div></div>
+            <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">Cheating Tolerance</div></div>
+        </div>
+    </section>
+
+    <section class="section-container" id="features">
+        <div class="section-header">
+            <h2>Why Vidyaplus is different?</h2>
+            <p style="color: var(--text-muted); font-weight: 500;">Enterprise-grade features designed for serious aspirants.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="fc-icon"><i class="fas fa-laptop-code"></i></div>
+                <h3 class="fc-title">Interactive Live Classes</h3>
+                <p class="fc-desc">Lag-free, high-definition live lectures with real-time chat and in-class doubt solving.</p>
+            </div>
+            <div class="feature-card">
+                <div class="fc-icon" style="color: #10b981; background: #ecfdf5;"><i class="fas fa-microscope"></i></div>
+                <h3 class="fc-title">X-Ray Telemetry</h3>
+                <p class="fc-desc">We track time traps and option-swaps to build a complete behavioral profile of your test taking.</p>
+            </div>
+            <div class="feature-card">
+                <div class="fc-icon" style="color: #f59e0b; background: #fffbeb;"><i class="fas fa-shield-alt"></i></div>
+                <h3 class="fc-title">NTA Level Security</h3>
+                <p class="fc-desc">Strict browser-lock and tab-switching warnings to simulate authentic exam environments.</p>
+            </div>
+            <div class="feature-card">
+                <div class="fc-icon" style="color: #ec4899; background: #fdf2f8;"><i class="fas fa-brain"></i></div>
+                <h3 class="fc-title">AI Guru Mentorship</h3>
+                <p class="fc-desc">Scan any physics or math question and get Socratic step-by-step hints, 24/7.</p>
             </div>
         </div>
     </section>
 
-    <style>@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }</style>
+    <section class="batch-section" id="batches">
+        <div class="section-header">
+            <h2>Explore our Flagship Batches</h2>
+            <p style="color: var(--text-muted); font-weight: 500;">Structured courses for JEE, NEET, and Boards.</p>
+        </div>
+        
+        <div class="filters">
+            <button class="filter-btn active">Class 12th</button>
+            <button class="filter-btn">Class 11th</button>
+            <button class="filter-btn">Droppers (JEE/NEET)</button>
+        </div>
 
-    <section class="xray-container" id="xray-trigger">
-        <div class="xray-sticky">
-            <div class="xray-title">
-                <h2>Analytical Transparency.</h2>
-                <p>Scroll down to initialize the Telemetry X-Ray protocol.</p>
+        <div class="batch-grid">
+            <div class="course-card">
+                <div class="cc-header">
+                    <span class="cc-tag" style="background: #ef4444;">Hinglish</span>
+                    <div class="cc-target">JEE Target 2026 • Class 12</div>
+                    <div class="cc-title">PRAYAS<br>PRO BATCH</div>
+                </div>
+                <div class="cc-body">
+                    <ul class="cc-features">
+                        <li><i class="fas fa-check-circle"></i> Complete Class 12th Physics, Chem, Math syllabus.</li>
+                        <li><i class="fas fa-check-circle"></i> Daily Practice Problems (DPPs) with video solutions.</li>
+                        <li><i class="fas fa-check-circle"></i> 10 Full Syllabus Secure Mock Tests.</li>
+                        <li><i class="fas fa-check-circle"></i> 1:1 Mentorship Access.</li>
+                    </ul>
+                    <div class="cc-footer">
+                        <div class="cc-price-box">
+                            <span class="cc-discount">₹6,000</span>
+                            <span class="cc-price">₹3,999</span>
+                        </div>
+                        <button class="btn-explore" onclick="openAuthModal('register')">Enroll Now</button>
+                    </div>
+                </div>
             </div>
-            
-            <div class="mockup-wrapper" id="mockup">
-                <div class="layer-normal">
-                    <span class="q-tag">Question 14 • Physics</span>
-                    <div class="q-text">A block of mass 2kg is moving on a frictionless horizontal surface...</div>
-                    <div class="opt-box">A. 4 m/s²</div>
-                    <div class="opt-box selected">B. 8 m/s² (Your Answer)</div>
+
+            <div class="course-card">
+                <div class="cc-header" style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%);">
+                    <span class="cc-tag" style="background: #f59e0b;">Pure Hindi</span>
+                    <div class="cc-target">Board Target 2026 • Class 12</div>
+                    <div class="cc-title">SANKALP<br>BOARD BATCH</div>
                 </div>
-                
-                <div class="layer-xray" id="layer-xray">
-                    <span class="x-tag"><i class="fas fa-microscope"></i> Telemetry Data Extracted</span>
-                    <div class="q-text" style="color: #cbd5e1;">A block of mass 2kg is moving on a frictionless horizontal surface...</div>
-                    
-                    <div class="x-data-box">
-                        <div><div class="x-stat">Time Spent</div><div class="x-val" style="color: #fbbf24;">184s</div></div>
-                        <div><div class="x-stat">Option Swaps</div><div class="x-val" style="color: #a78bfa;">3</div></div>
-                        <div><div class="x-stat">Result</div><div class="x-val" style="color: #f87171;">-1 Mark</div></div>
-                    </div>
-                    
-                    <div class="x-alert">
-                        <i class="fas fa-exclamation-triangle" style="margin-top: 2px;"></i> 
-                        System Warning: Excessive temporal investment detected. This is classified as a Time Trap.
+                <div class="cc-body">
+                    <ul class="cc-features">
+                        <li><i class="fas fa-check-circle"></i> Complete NCERT coverage for Board exams.</li>
+                        <li><i class="fas fa-check-circle"></i> Chapter-wise Subjective Note PDFs.</li>
+                        <li><i class="fas fa-check-circle"></i> Previous Year Question (PYQ) solving live.</li>
+                    </ul>
+                    <div class="cc-footer">
+                        <div class="cc-price-box">
+                            <span class="cc-discount">₹4,000</span>
+                            <span class="cc-price">₹1,999</span>
+                        </div>
+                        <button class="btn-explore" onclick="openAuthModal('register')">Enroll Now</button>
                     </div>
                 </div>
-                
-                <div class="scanner-laser" id="laser"></div>
+            </div>
+
+            <div class="course-card">
+                <div class="cc-header" style="background: linear-gradient(135deg, #4c1d95 0%, #9333ea 100%);">
+                    <span class="cc-tag" style="background: #3b82f6;">Hinglish</span>
+                    <div class="cc-target">Master Tests • All Classes</div>
+                    <div class="cc-title">ALL INDIA<br>TEST SERIES</div>
+                </div>
+                <div class="cc-body">
+                    <ul class="cc-features">
+                        <li><i class="fas fa-check-circle"></i> 50+ NTA Level Full Syllabus Tests.</li>
+                        <li><i class="fas fa-check-circle"></i> Full X-Ray Telemetry & Rank Prediction.</li>
+                        <li><i class="fas fa-check-circle"></i> Detailed Text and Video Solutions.</li>
+                    </ul>
+                    <div class="cc-footer">
+                        <div class="cc-price-box">
+                            <span class="cc-discount">₹2,000</span>
+                            <span class="cc-price">₹999</span>
+                        </div>
+                        <button class="btn-explore" onclick="openAuthModal('register')">Enroll Now</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <div class="auth-overlay" id="auth-overlay" onclick="if(event.target === this) closeAuthModal()">
         <div class="auth-modal">
-            <div class="auth-header">
-                <button class="close-modal" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
-                <h2 style="font-size: 1.5rem; font-weight:900; color: var(--text-dark);" id="auth-title">Welcome Back</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); font-weight:500; margin-top: 5px;" id="auth-subtitle">Log in to access your secure dashboard.</p>
-            </div>
+            <button class="close-modal" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
             
-            <div class="auth-body">
-                <form id="auth-form" onsubmit="event.preventDefault(); alert('Authentication System Ready for Firebase Setup!'); closeAuthModal();">
+            <div class="auth-left">
+                <div>
+                    <h2 style="font-size: 2rem; font-weight: 900; margin-bottom: 10px;">Join the Top 1%.</h2>
+                    <p style="color: #c7d2fe; line-height: 1.6; font-weight: 500;">Get access to India's most advanced behavioral analytics testing and premium academic content.</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; backdrop-filter: blur(5px);">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                        <i class="fas fa-quote-left" style="font-size: 1.5rem; color: #a5b4fc;"></i>
+                        <span style="font-weight: 700;">Student Review</span>
+                    </div>
+                    <p style="font-size: 0.9rem; font-style: italic; color: #e0e7ff;">"The X-Ray analytics showed exactly where I was wasting time during exams. Unbelievable platform."</p>
+                </div>
+            </div>
+
+            <div class="auth-right">
+                <h2 style="font-size: 1.5rem; font-weight:900; color: var(--text-dark);" id="auth-title">Welcome Back</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); font-weight:500; margin: 5px 0 25px;" id="auth-subtitle">Log in to access your secure dashboard.</p>
+                
+                <form id="auth-form" onsubmit="event.preventDefault(); alert('Authentication Ready!'); closeAuthModal();">
                     <div class="input-group" id="name-group" style="display: none;">
                         <label class="input-label">Full Name</label>
                         <input type="text" class="input-control" placeholder="Sudhir Anand">
@@ -210,7 +296,7 @@
                         <input type="password" class="input-control" required placeholder="••••••••">
                     </div>
                     
-                    <button type="submit" class="btn-auth" id="auth-submit-btn">Secure Login <i class="fas fa-lock ml-2"></i></button>
+                    <button type="submit" class="btn-auth" id="auth-submit-btn">Secure Login</button>
                 </form>
 
                 <div style="display: flex; align-items: center; margin: 20px 0;">
@@ -227,77 +313,11 @@
                 <div style="text-align: center; margin-top: 20px; font-size: 0.85rem; font-weight: 600; color: #64748b;" id="auth-switch-text">
                     New here? <span style="color: var(--primary); cursor:pointer;" onclick="switchAuthMode('register')">Create an account</span>
                 </div>
-
-                <div class="secure-badge">
-                    <i class="fas fa-shield-alt" style="color: #10b981;"></i> Protected by AES-256 Encryption & reCAPTCHA v3
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. THE CONCEPT UNIVERSE (Canvas Particle System) ---
-        const canvas = document.getElementById('concept-universe');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let particlesArray = [];
-        
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = Math.random() * 1 - 0.5; this.speedY = Math.random() * 1 - 0.5;
-            }
-            update() {
-                this.x += this.speedX; this.y += this.speedY;
-                if(this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
-                if(this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
-            }
-            draw() {
-                ctx.fillStyle = '#94a3b8'; ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        function initCanvas() {
-            particlesArray = [];
-            let particleCount = window.innerWidth < 768 ? 40 : 100; // Optimize for mobile
-            for (let i = 0; i < particleCount; i++) particlesArray.push(new Particle());
-        }
-        function animateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for(let i=0; i<particlesArray.length; i++) {
-                particlesArray[i].update(); particlesArray[i].draw();
-                for(let j=i; j<particlesArray.length; j++) {
-                    const dx = particlesArray[i].x - particlesArray[j].x;
-                    const dy = particlesArray[i].y - particlesArray[j].y;
-                    const distance = Math.sqrt(dx*dx + dy*dy);
-                    if(distance < 100) {
-                        ctx.beginPath(); ctx.strokeStyle = `rgba(148, 163, 184, ${1 - distance/100})`;
-                        ctx.lineWidth = 0.5; ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y); ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animateCanvas);
-        }
-        initCanvas(); animateCanvas();
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initCanvas(); });
-
-
-        // --- 2. GSAP SCROLL ANIMATIONS ---
-        gsap.registerPlugin(ScrollTrigger);
-        
-        const xrayTl = gsap.timeline({
-            scrollTrigger: { trigger: "#xray-trigger", start: "top top", end: "bottom bottom", scrub: 1 }
-        });
-        xrayTl.to("#mockup", { scale: 1, opacity: 1, duration: 1 })
-        .to("#laser", { display: "block", duration: 0.01 })
-        .to("#layer-xray", { clipPath: "inset(0 0% 0 0)", duration: 4, ease: "none" }, "scan")
-        .to("#laser", { left: "100%", duration: 4, ease: "none" }, "scan")
-        .to("#laser", { opacity: 0, duration: 0.5 });
-
-
-        // --- 3. AUTH MODAL CONTROLLER ---
         const authOverlay = document.getElementById('auth-overlay');
         function openAuthModal(mode) { authOverlay.classList.add('active'); switchAuthMode(mode); document.body.style.overflow = 'hidden';}
         function closeAuthModal() { authOverlay.classList.remove('active'); document.body.style.overflow = 'auto';}
@@ -307,7 +327,7 @@
             document.getElementById('auth-title').innerText = isReg ? "Join Vidyaplus" : "Welcome Back";
             document.getElementById('auth-subtitle').innerText = isReg ? "Start your journey to dominate exams." : "Log in to access your secure dashboard.";
             document.getElementById('name-group').style.display = isReg ? "block" : "none";
-            document.getElementById('auth-submit-btn').innerHTML = isReg ? "Create Account <i class='fas fa-user-plus ml-2'></i>" : "Secure Login <i class='fas fa-lock ml-2'></i>";
+            document.getElementById('auth-submit-btn').innerHTML = isReg ? "Create Account" : "Secure Login";
             
             document.getElementById('auth-switch-text').innerHTML = isReg 
                 ? 'Already have an account? <span style="color:var(--primary);cursor:pointer;" onclick="switchAuthMode(\'login\')">Log in</span>' 
