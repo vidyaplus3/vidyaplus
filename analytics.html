@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidyaplus | Advanced Analytics</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; padding: 24px; }
+        .gradient-text { background: linear-gradient(90deg, #1d4ed8, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Performance <span class="gradient-text">X-Ray</span></h1>
+            <p class="text-slate-500 mt-1" id="test-title-display">Loading Assessment Data...</p>
+        </div>
+        <button onclick="window.location.replace('/study#tests')" class="bg-slate-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </button>
+    </header>
+
+    <div id="loader" class="flex justify-center items-center h-64">
+        <i class="fas fa-circle-notch fa-spin text-blue-600 text-4xl"></i>
+    </div>
+
+    <div id="analytics-content" class="hidden">
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="glass-card text-center">
+                <i class="fas fa-trophy text-yellow-500 text-2xl mb-2"></i>
+                <p class="text-slate-500 text-sm font-medium">Score Achieved</p>
+                <h2 class="text-3xl font-bold text-slate-800" id="stat-score">--/--</h2>
+            </div>
+            <div class="glass-card text-center">
+                <i class="fas fa-bullseye text-green-500 text-2xl mb-2"></i>
+                <p class="text-slate-500 text-sm font-medium">Accuracy</p>
+                <h2 class="text-3xl font-bold text-slate-800" id="stat-accuracy">--%</h2>
+            </div>
+            <div class="glass-card text-center">
+                <i class="fas fa-minus-circle text-red-500 text-2xl mb-2"></i>
+                <p class="text-slate-500 text-sm font-medium">Negative Impact</p>
+                <h2 class="text-3xl font-bold text-slate-800" id="stat-negative">--</h2>
+            </div>
+            <div class="glass-card text-center">
+                <i class="fas fa-stopwatch text-purple-500 text-2xl mb-2"></i>
+                <p class="text-slate-500 text-sm font-medium">Time Consumed</p>
+                <h2 class="text-3xl font-bold text-slate-800" id="stat-time">--:--</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="glass-card">
+                <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fas fa-spider text-indigo-500 mr-2"></i> Subject Strengths (Radar)</h3>
+                <div id="radar-chart"></div>
+            </div>
+            
+            <div class="glass-card">
+                <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fas fa-chart-pie text-blue-500 mr-2"></i> Attempt Breakdown</h3>
+                <div id="donut-chart"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card md:col-span-2">
+                <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fas fa-hourglass-half text-orange-500 mr-2"></i> Time Management (Seconds)</h3>
+                <div id="time-chart"></div>
+            </div>
+
+            <div class="glass-card bg-slate-900 text-white">
+                <h3 class="text-lg font-bold text-white mb-4"><i class="fas fa-user-secret text-emerald-400 mr-2"></i> Behavioral Insights</h3>
+                
+                <div class="mb-4">
+                    <p class="text-slate-400 text-sm">System Warnings Triggered</p>
+                    <p class="text-2xl font-bold text-red-400" id="beh-warnings">0</p>
+                    <p class="text-xs text-slate-500 mt-1">Tab switches or loss of focus</p>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-slate-400 text-sm">Unattempted Questions</p>
+                    <p class="text-2xl font-bold text-yellow-400" id="beh-unattempted">0</p>
+                    <p class="text-xs text-slate-500 mt-1">Missed opportunities</p>
+                </div>
+
+                <div class="mt-6 p-4 bg-slate-800 rounded-lg border border-slate-700">
+                    <p class="text-sm text-emerald-400 font-medium"><i class="fas fa-robot mr-1"></i> AI Suggestion:</p>
+                    <p class="text-sm mt-2 text-slate-300" id="ai-suggestion">Analyzing your data...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { db, auth } from './js/firebase-init.js'; // Adjust path if needed
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Get testId and attemptId from URL (e.g., analytics.html?testId=123&attemptId=abc)
+        const urlParams = new URLSearchParams(window.location.search);
+        const testId = urlParams.get('testId');
+        const attemptId = urlParams.get('attemptId');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { alert("Please login first."); window.location.replace('/'); return; }
+            if (!testId || !attemptId) { alert("Invalid Report URL."); return; }
+
+            try {
+                // Fetch God-Level Data from our new Rule 3 Database Structure
+                const attemptRef = doc(db, `users/${user.uid}/exam_results/${testId}/attempts/${attemptId}`);
+                const attemptSnap = await getDoc(attemptRef);
+
+                if (attemptSnap.exists()) {
+                    const data = attemptSnap.data();
+                    renderDashboard(data);
+                } else {
+                    alert("Report not found!");
+                }
+            } catch (err) {
+                console.error("Error fetching analytics:", err);
+                alert("Failed to load analytics.");
+            }
+        });
+
+        function renderDashboard(data) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('analytics-content').style.display = 'block';
+
+            // 1. Fill Top Stats
+            document.getElementById('test-title-display').innerText = data.testTitle || "Assessment Report";
+            document.getElementById('stat-score').innerText = `${data.score}/${data.maxMarks}`;
+            document.getElementById('stat-accuracy').innerText = `${data.overallAccuracy}%`;
+            document.getElementById('stat-negative').innerText = `-${data.totalNegativeMarks}`;
+            
+            const mins = Math.floor(data.timeSpentSeconds / 60);
+            const secs = data.timeSpentSeconds % 60;
+            document.getElementById('stat-time').innerText = `${mins}m ${secs}s`;
+
+            // Behavioral Stats
+            document.getElementById('beh-unattempted').innerText = data.unattemptedCount;
+            const warnings = data.systemEvents ? data.systemEvents.filter(e => e.event.includes('Violation')).length : 0;
+            document.getElementById('beh-warnings').innerText = warnings;
+
+            // AI Suggestion Logic
+            let suggestion = "Great effort! Keep practicing consistently.";
+            if (data.overallAccuracy < 50) suggestion = "Your accuracy is low. Focus on concepts instead of guessing. Avoid negative marking traps.";
+            if (warnings > 0) suggestion = "Maintain strict focus during the exam. Tab switching triggers system warnings and breaks your concentration.";
+            if (data.totalNegativeMarks > (data.score * 0.2)) suggestion = "You are losing too many marks to negative scoring. Only attempt questions you are 80%+ sure about.";
+            document.getElementById('ai-suggestion').innerText = suggestion;
+
+            // Prepare Subject Data for Charts
+            const subjects = Object.keys(data.subjectWise);
+            const subjectScores = subjects.map(s => data.subjectWise[s].score);
+            const subjectTimes = subjects.map(s => data.subjectWise[s].timeSpent); // In Seconds
+
+            // --- CHART 1: Subject Radar Chart (Strengths & Weaknesses) ---
+            var radarOptions = {
+                series: [{ name: 'Marks Scored', data: subjectScores }],
+                chart: { height: 350, type: 'radar', toolbar: { show: false } },
+                labels: subjects,
+                stroke: { width: 2, colors: ['#6366f1'] },
+                fill: { opacity: 0.2, colors: ['#6366f1'] },
+                markers: { size: 4, colors: ['#fff'], strokeColors: '#6366f1', strokeWidth: 2 },
+                yaxis: { show: false } // Hide numbers on web for clean look
+            };
+            new ApexCharts(document.querySelector("#radar-chart"), radarOptions).render();
+
+            // --- CHART 2: Attempt Breakdown (Donut) ---
+            var donutOptions = {
+                series: [data.correctCount, data.incorrectCount, data.unattemptedCount],
+                chart: { type: 'donut', height: 300 },
+                labels: ['Correct', 'Incorrect', 'Unattempted'],
+                colors: ['#22c55e', '#ef4444', '#cbd5e1'],
+                dataLabels: { enabled: false },
+                plotOptions: { pie: { donut: { size: '70%' } } },
+                legend: { position: 'bottom' }
+            };
+            new ApexCharts(document.querySelector("#donut-chart"), donutOptions).render();
+
+            // --- CHART 3: Time Management (Bar Chart) ---
+            var timeOptions = {
+                series: [{ name: 'Time Spent (Seconds)', data: subjectTimes }],
+                chart: { type: 'bar', height: 300, toolbar: { show: false } },
+                plotOptions: { bar: { borderRadius: 4, horizontal: true } },
+                dataLabels: { enabled: true },
+                xaxis: { categories: subjects },
+                colors: ['#f97316']
+            };
+            new ApexCharts(document.querySelector("#time-chart"), timeOptions).render();
+        }
+    </script>
+</body>
+</html>
