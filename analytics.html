@@ -13,18 +13,25 @@
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
         .glass-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; padding: 24px; }
         .gradient-text { background: linear-gradient(90deg, #1d4ed8, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .attempt-select { appearance: none; background: white url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 12px center; background-size: 16px; padding: 10px 40px 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #0f172a; outline: none; cursor: pointer; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <header class="mb-8 flex justify-between items-center">
+    <header class="mb-8 flex flex-wrap justify-between items-center gap-4">
         <div>
             <h1 class="text-3xl font-extrabold text-slate-900">Performance <span class="gradient-text">X-Ray</span></h1>
             <p class="text-slate-500 mt-1" id="test-title-display">Loading Assessment Data...</p>
         </div>
-        <button onclick="window.location.replace('/study#tests')" class="bg-slate-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
-        </button>
+        
+        <div class="flex items-center gap-4">
+            <select id="attempt-dropdown" class="attempt-select hidden" onchange="switchAttempt(this.value)">
+                </select>
+
+            <button onclick="window.location.replace('/study#tests')" class="bg-slate-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            </button>
+        </div>
     </header>
 
     <div id="loader" class="flex justify-center items-center h-64">
@@ -66,6 +73,23 @@
                 <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fas fa-chart-pie text-blue-500 mr-2"></i> Attempt Breakdown</h3>
                 <div id="donut-chart"></div>
             </div>
+        </div>
+
+        <div class="glass-card mb-6 overflow-x-auto">
+            <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fas fa-table text-blue-500 mr-2"></i> Subject-wise Analysis</h3>
+            <table class="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                        <th class="p-4 border-b font-bold">Subject</th>
+                        <th class="p-4 border-b text-center font-bold">Score</th>
+                        <th class="p-4 border-b text-center font-bold">Accuracy</th>
+                        <th class="p-4 border-b text-center font-bold">Incorrect Qs</th>
+                        <th class="p-4 border-b text-right font-bold">Time Spent</th>
+                    </tr>
+                </thead>
+                <tbody id="subject-table-body">
+                    </tbody>
+            </table>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -131,34 +155,76 @@
         </div>
 
     </div>
-     <script type="module">
+
+        <script type="module">
         import { db, auth } from './js/firebase-init.js'; 
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const urlParams = new URLSearchParams(window.location.search);
         const testId = urlParams.get('testId');
-        const attemptId = urlParams.get('attemptId');
+        let currentAttemptId = urlParams.get('attemptId');
+
+        window.allAttemptsData = []; // Store all history locally for instant switching
+        window.activeCharts = {}; // Track charts to destroy before re-rendering
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) { alert("Please login first."); window.location.replace('/'); return; }
-            if (!testId || !attemptId) { alert("Invalid Report URL."); return; }
+            if (!testId) { alert("Invalid Report URL."); return; }
 
             try {
-                const attemptRef = doc(db, `users/${user.uid}/exam_results/${testId}/attempts/${attemptId}`);
-                const attemptSnap = await getDoc(attemptRef);
+                // Fetch ALL attempts for this test
+                const attemptsRef = collection(db, `users/${user.uid}/exam_results/${testId}/attempts`);
+                const attemptsSnap = await getDocs(attemptsRef);
 
-                if (attemptSnap.exists()) {
-                    const data = attemptSnap.data();
-                    renderDashboard(data);
+                if (!attemptsSnap.empty) {
+                    attemptsSnap.forEach(doc => {
+                        window.allAttemptsData.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    // Sort by submission time (oldest first)
+                    window.allAttemptsData.sort((a, b) => a.submittedAt?.toMillis() - b.submittedAt?.toMillis());
+
+                    setupAttemptDropdown();
+                    
+                    // Render requested attempt, or the latest one if not found
+                    let dataToRender = window.allAttemptsData.find(a => a.id === currentAttemptId);
+                    if(!dataToRender) dataToRender = window.allAttemptsData[window.allAttemptsData.length - 1];
+                    
+                    renderDashboard(dataToRender);
                 } else {
-                    alert("Report not found!");
+                    alert("No attempt records found for this test!");
                 }
             } catch (err) {
                 console.error("Error fetching analytics:", err);
                 alert("Failed to load analytics.");
             }
         });
+
+        function setupAttemptDropdown() {
+            const dropdown = document.getElementById('attempt-dropdown');
+            dropdown.innerHTML = '';
+            
+            if(window.allAttemptsData.length > 1) {
+                dropdown.classList.remove('hidden');
+                window.allAttemptsData.forEach((att, idx) => {
+                    let isSelected = att.id === currentAttemptId ? 'selected' : '';
+                    let label = `Attempt ${idx + 1}`;
+                    if(idx === window.allAttemptsData.length - 1) label += " (Latest)";
+                    
+                    dropdown.innerHTML += `<option value="${att.id}" ${isSelected}>${label}</option>`;
+                });
+            }
+        }
+
+        // Global function to trigger switch
+        window.switchAttempt = (newAttemptId) => {
+            currentAttemptId = newAttemptId;
+            const dataToRender = window.allAttemptsData.find(a => a.id === newAttemptId);
+            if(dataToRender) {
+                renderDashboard(dataToRender);
+            }
+        };
 
         function renderDashboard(data) {
             document.getElementById('loader').style.display = 'none';
@@ -179,19 +245,50 @@
             const warnings = data.systemEvents ? data.systemEvents.filter(e => e.event.includes('Violation')).length : 0;
             document.getElementById('beh-warnings').innerText = warnings;
 
-            // AI Suggestion Logic
+            // AI Suggestion
             let suggestion = "Great effort! Keep practicing consistently.";
             if (data.overallAccuracy < 50) suggestion = "Your accuracy is low. Focus on concepts instead of guessing. Avoid negative marking traps.";
             if (warnings > 0) suggestion = "Maintain strict focus during the exam. Tab switching triggers system warnings and breaks your concentration.";
             if (data.totalNegativeMarks > (data.score * 0.2)) suggestion = "You are losing too many marks to negative scoring. Only attempt questions you are 80%+ sure about.";
             document.getElementById('ai-suggestion').innerText = suggestion;
 
-            // Prepare Subject Data for Charts
+            // Prepare Data Arrays
             const subjects = Object.keys(data.subjectWise || {});
             const subjectScores = subjects.map(s => data.subjectWise[s].score);
             const subjectTimes = subjects.map(s => data.subjectWise[s].timeSpent);
 
-            // --- CHART 1: Subject Radar Chart (Strengths & Weaknesses) ---
+            // ==========================================
+            // 📊 FILL SUBJECT-WISE DEEP DIVE TABLE
+            // ==========================================
+            const tbody = document.getElementById('subject-table-body');
+            tbody.innerHTML = '';
+            
+            subjects.forEach(sub => {
+                let sData = data.subjectWise[sub];
+                let attempted = sData.correct + sData.incorrect;
+                let acc = attempted > 0 ? ((sData.correct / attempted) * 100).toFixed(1) : 0;
+                let tMins = Math.floor(sData.timeSpent / 60);
+                let tSecs = sData.timeSpent % 60;
+                
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                        <td class="p-4 font-bold text-slate-700">${sub}</td>
+                        <td class="p-4 text-center font-black text-blue-600">${sData.score}</td>
+                        <td class="p-4 text-center font-semibold text-emerald-500">${acc}%</td>
+                        <td class="p-4 text-center font-semibold text-red-500">${sData.incorrect}</td>
+                        <td class="p-4 text-right font-medium text-slate-600">${tMins}m ${tSecs}s</td>
+                    </tr>
+                `;
+            });
+
+            // ==========================================
+            // Destroy Old Charts (to prevent overlap on Time-Travel)
+            // ==========================================
+            if(window.activeCharts.radar) window.activeCharts.radar.destroy();
+            if(window.activeCharts.donut) window.activeCharts.donut.destroy();
+            if(window.activeCharts.time) window.activeCharts.time.destroy();
+
+            // --- CHART 1: Subject Radar Chart ---
             var radarOptions = {
                 series: [{ name: 'Marks Scored', data: subjectScores }],
                 chart: { height: 350, type: 'radar', toolbar: { show: false } },
@@ -201,7 +298,8 @@
                 markers: { size: 4, colors: ['#fff'], strokeColors: '#6366f1', strokeWidth: 2 },
                 yaxis: { show: false }
             };
-            new ApexCharts(document.querySelector("#radar-chart"), radarOptions).render();
+            window.activeCharts.radar = new ApexCharts(document.querySelector("#radar-chart"), radarOptions);
+            window.activeCharts.radar.render();
 
             // --- CHART 2: Attempt Breakdown (Donut) ---
             var donutOptions = {
@@ -213,7 +311,8 @@
                 plotOptions: { pie: { donut: { size: '70%' } } },
                 legend: { position: 'bottom' }
             };
-            new ApexCharts(document.querySelector("#donut-chart"), donutOptions).render();
+            window.activeCharts.donut = new ApexCharts(document.querySelector("#donut-chart"), donutOptions);
+            window.activeCharts.donut.render();
 
             // --- CHART 3: Time Management (Bar Chart) ---
             var timeOptions = {
@@ -224,33 +323,24 @@
                 xaxis: { categories: subjects },
                 colors: ['#f97316']
             };
-            new ApexCharts(document.querySelector("#time-chart"), timeOptions).render();
+            window.activeCharts.time = new ApexCharts(document.querySelector("#time-chart"), timeOptions);
+            window.activeCharts.time.render();
 
             // --- TELEMETRY ENGINE PROCESSING ---
             const telemetry = data.detailedTelemetry || {};
             let timeTraps = [];
             let totalSwaps = 0;
-            let swapToRight = 0;
-            let swapToWrong = 0;
 
             Object.keys(telemetry).forEach(qId => {
                 const qData = telemetry[qId];
+                if(qData.timeSpent > 0) timeTraps.push({ id: qId, time: Math.floor(qData.timeSpent / 1000), visits: qData.visits });
                 
-                // 1. Time Trap Detection
-                if(qData.timeSpent > 0) {
-                    timeTraps.push({ id: qId, time: Math.floor(qData.timeSpent / 1000), visits: qData.visits });
-                }
-
-                // 2. Mind Changing Detection
                 if(qData.actions && qData.actions.length > 0) {
                     let selects = qData.actions.filter(a => a.type === 'select_option');
-                    if(selects.length > 1) {
-                        totalSwaps += (selects.length - 1);
-                    }
+                    if(selects.length > 1) totalSwaps += (selects.length - 1);
                 }
             });
 
-            // Sort and display top 3 time traps
             timeTraps.sort((a, b) => b.time - a.time);
             const trapContainer = document.getElementById('time-traps-container');
             trapContainer.innerHTML = '';
@@ -271,7 +361,6 @@
                 });
             }
 
-            // Simulated swap correctness analysis
             document.getElementById('stat-swaps').innerText = totalSwaps;
             document.getElementById('stat-swap-right').innerText = Math.floor(totalSwaps * 0.4); 
             document.getElementById('stat-swap-wrong').innerText = Math.ceil(totalSwaps * 0.6); 
