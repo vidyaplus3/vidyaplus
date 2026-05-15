@@ -2,8 +2,8 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VidyaPlus | Premium Learning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VidyaPlus | Academic Infrastructure</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,9 +11,10 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: '#000000',
-                        surface: 'rgba(255, 255, 255, 0.7)',
+                        brand: '#09090B',
+                        surface: '#FFFFFF',
                         accent: '#2563EB',
+                        surfaceAlt: '#F8FAFC',
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -30,56 +31,71 @@
             background-color: #FDFDFD; 
             color: #09090B; 
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
+            -webkit-font-smoothing: antialiased;
         }
         
-        /* Premium Frosted Glass */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.02);
+        /* Premium Floating Header */
+        .header-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.03);
         }
         
+        /* Bento Box Grid Items */
         .bento-card {
             background: #FFFFFF;
             border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.015);
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         .bento-card:hover {
             box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08);
             transform: translateY(-4px);
+            border-color: rgba(37, 99, 235, 0.15);
         }
 
-        /* Ambient background glow */
-        .ambient-glow {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: linear-gradient(140deg, rgba(37, 99, 235, 0.15), rgba(147, 51, 234, 0.1));
-            filter: blur(100px);
-            border-radius: 50%;
-            z-index: -1;
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            .bento-card { border-radius: 16px; }
+            .hero-title { font-size: 2.5rem; line-height: 1.1; }
         }
+
+        /* Custom Input Styling */
+        .premium-input {
+            width: 100%;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #09090B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .premium-input:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            background: #FFFFFF;
+        }
+
+        /* Smooth reveal animation for elements */
+        .reveal-hidden { opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body class="antialiased selection:bg-accent selection:text-white">
+<body class="selection:bg-accent selection:text-white">
 
-    <div class="ambient-glow top-[-10%] left-[-10%]"></div>
-    <div class="ambient-glow bottom-[20%] right-[-10%] opacity-50"></div>
-
-    <div class="fixed top-6 w-full z-50 flex justify-center px-4">
-        <header class="glass-panel w-full max-w-5xl rounded-full py-3 px-6 md:px-8 flex justify-between items-center transition-all duration-300">
-            <div class="flex items-center gap-4">
-                <div class="text-xl font-extrabold tracking-tighter cursor-pointer text-brand">
-                    VidyaPlus.
+    <div class="fixed top-4 w-full z-40 flex justify-center px-4 pointer-events-none">
+        <header class="header-glass w-full max-w-6xl rounded-full py-3 px-5 md:px-8 flex justify-between items-center pointer-events-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white font-bold text-sm">V.</div>
+                <div class="text-xl font-bold tracking-tight cursor-pointer text-brand hidden sm:block">
+                    VidyaPlus
                 </div>
             </div>
             
@@ -89,60 +105,49 @@
                 <a href="#" class="hover:text-brand transition">Analytics</a>
             </nav>
 
-            <div class="flex gap-3 items-center">
+            <div class="flex gap-2 sm:gap-3 items-center">
                 <div id="userState" class="hidden flex items-center gap-3">
-                    <span id="userName" class="text-sm font-semibold text-brand"></span>
-                    <div id="userIcon" class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center font-bold text-xs"></div>
+                    <span id="userName" class="text-sm font-semibold text-brand hidden sm:block"></span>
+                    <div id="userIcon" class="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-bold text-sm shadow-sm cursor-pointer hover:opacity-90 transition"></div>
                 </div>
                 <div id="guestState" class="flex gap-2">
-                    <button onclick="openAuth('login')" class="text-sm font-semibold text-gray-600 hover:text-brand transition px-4 py-2">Log In</button>
-                    <button onclick="openAuth('signup')" class="text-sm font-semibold bg-brand text-white px-5 py-2.5 rounded-full hover:bg-gray-800 transition shadow-md">Get Started</button>
+                    <button onclick="openAuth('login')" class="text-sm font-semibold text-gray-600 hover:text-brand transition px-3 sm:px-4 py-2">Log In</button>
+                    <button onclick="openAuth('signup')" class="text-sm font-semibold bg-brand text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full hover:bg-gray-800 transition shadow-md">Get Started</button>
                 </div>
             </div>
         </header>
     </div>
 
-    <main class="pt-32 pb-20">
-        <section class="w-full max-w-7xl mx-auto px-4 md:px-8 mb-24 relative">
-            <div class="text-center max-w-4xl mx-auto mb-12 mt-10">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-600 mb-6 gs-reveal">
+    <main class="pt-28 pb-20">
+        <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mb-16 md:mb-24">
+            <div class="text-center max-w-4xl mx-auto mb-10 md:mb-14 mt-6 md:mt-10 reveal-hidden">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 border border-gray-200 text-[10px] sm:text-xs font-semibold text-gray-600 mb-6">
                     <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-                    Admissions open for 2026 Batch
+                    Registration active for 2026 Academic Session
                 </div>
-                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] text-brand mb-6 gs-reveal">
-                    Engineering your academic <br class="hidden md:block" /> 
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-600">mastery.</span>
+                <h1 class="hero-title text-5xl md:text-7xl font-extrabold tracking-tight text-brand mb-6">
+                    Structured infrastructure for <br class="hidden md:block" /> 
+                    <span class="text-accent">academic excellence.</span>
                 </h1>
-                <p class="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto gs-reveal">
-                    Strictly academic, rigorously structured. Prepare for top-tier engineering institutions with zero distractions.
+                <p class="text-base sm:text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto px-2">
+                    Rigorous curriculum delivery, zero-latency live environments, and deterministic performance analytics for competitive examinations.
                 </p>
             </div>
 
-            <div class="swiper heroSwiper w-full h-[50vh] md:h-[60vh] rounded-[2rem] overflow-hidden bento-card gs-reveal">
+            <div class="swiper heroSwiper w-full h-[40vh] sm:h-[50vh] md:h-[60vh] rounded-2xl md:rounded-[2rem] overflow-hidden bento-card reveal-hidden relative">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide relative flex items-end p-8 md:p-12">
+                    <div class="swiper-slide relative flex items-end p-6 sm:p-8 md:p-12">
                         <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
-                             class="absolute inset-0 w-full h-full object-cover z-0" alt="Learning">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-10"></div>
+                             class="absolute inset-0 w-full h-full object-cover z-0" alt="Cohort">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand/80 via-brand/20 to-transparent z-10"></div>
                         
-                        <div class="relative z-20 w-full flex justify-between items-end">
+                        <div class="relative z-20 w-full flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                             <div>
-                                <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">Live Physics Cohort</h2>
-                                <p class="text-gray-200 font-medium">Master advanced mechanics and electromagnetism.</p>
+                                <span class="text-accent font-bold text-xs uppercase tracking-wider mb-2 block">Live Sessions</span>
+                                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Advanced Physics Cohort</h2>
+                                <p class="text-gray-300 font-medium text-sm sm:text-base hidden sm:block">Master mechanics and electromagnetism with real-time derivation analysis.</p>
                             </div>
-                            <button class="hidden md:block bg-white text-brand px-6 py-3 rounded-full font-bold hover:scale-105 transition">View Syllabus</button>
-                        </div>
-                    </div>
-                    <div class="swiper-slide relative flex items-end p-8 md:p-12">
-                        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop" 
-                             class="absolute inset-0 w-full h-full object-cover z-0" alt="Code">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-10"></div>
-                        
-                        <div class="relative z-20 w-full flex justify-between items-end">
-                            <div>
-                                <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">JEE Advanced Mock Tests</h2>
-                                <p class="text-gray-200 font-medium">Simulated testing environments with AI analytics.</p>
-                            </div>
+                            <button class="bg-white text-brand px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-sm sm:text-base hover:bg-gray-100 transition whitespace-nowrap">View Syllabus</button>
                         </div>
                     </div>
                 </div>
@@ -150,130 +155,238 @@
             </div>
         </section>
 
-        <section class="max-w-7xl mx-auto px-4 md:px-8 py-10">
-            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-10 text-brand">System Architecture</h2>
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 md:py-16">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4 reveal-hidden">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-brand mb-2">System Architecture</h2>
+                    <p class="text-gray-500 font-medium text-sm md:text-base">Designed for zero distractions and maximum retention.</p>
+                </div>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[280px]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[220px] md:auto-rows-[280px]">
                 
-                <div class="bento-card md:col-span-2 md:row-span-2 p-8 flex flex-col justify-between gs-feature group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -mr-20 -mt-20 transition-all duration-500 group-hover:bg-blue-100"></div>
-                    <div class="relative z-10">
-                        <div class="w-12 h-12 bg-white border border-gray-100 rounded-2xl flex items-center justify-center shadow-sm mb-6 text-accent">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <div class="bento-card col-span-1 sm:col-span-2 md:col-span-2 md:row-span-2 p-6 md:p-8 flex flex-col justify-between relative overflow-hidden reveal-hidden">
+                    <div class="absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-blue-50 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                    <div class="relative z-10 h-full flex flex-col justify-between">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-white border border-gray-100 rounded-xl md:rounded-2xl flex items-center justify-center shadow-sm mb-6 text-accent">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                         </div>
-                        <h3 class="text-2xl font-bold mb-3 tracking-tight">Zero-Latency Streaming</h3>
-                        <p class="text-gray-500 font-medium leading-relaxed max-w-sm">Built on enterprise CDNs. Crystal clear 4K lecture delivery with real-time doubt resolution protocols.</p>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold mb-2 md:mb-3 tracking-tight">Zero-Latency Streaming</h3>
+                            <p class="text-gray-500 font-medium leading-relaxed text-sm md:text-base max-w-sm">Built on distributed infrastructure. 4K lecture delivery integrated with synchronous doubt resolution.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bento-card md:col-span-2 p-8 gs-feature flex items-center justify-between">
+                <div class="bento-card col-span-1 sm:col-span-2 md:col-span-2 p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between reveal-hidden gap-4">
                     <div>
-                        <h3 class="text-xl font-bold mb-2 tracking-tight">Smart Analytics</h3>
-                        <p class="text-gray-500 text-sm font-medium">Performance tracking matrices.</p>
+                        <h3 class="text-lg md:text-xl font-bold mb-1 md:mb-2 tracking-tight">Deterministic Analytics</h3>
+                        <p class="text-gray-500 text-xs md:text-sm font-medium">Algorithmic tracking of assessment accuracy.</p>
                     </div>
-                    <div class="w-16 h-16 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 text-brand">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-brand shrink-0">
+                        <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                 </div>
 
-                <div class="bento-card p-8 gs-feature">
-                    <h3 class="text-lg font-bold mb-2 tracking-tight">Structured Notes</h3>
-                    <p class="text-gray-500 text-sm font-medium">Downloadable academic PDFs.</p>
+                <div class="bento-card col-span-1 p-6 md:p-8 flex flex-col justify-end reveal-hidden bg-surfaceAlt">
+                    <h3 class="text-base md:text-lg font-bold mb-1 md:mb-2 tracking-tight">Encrypted Materials</h3>
+                    <p class="text-gray-500 text-xs md:text-sm font-medium">Secured PDF academic notes.</p>
                 </div>
 
-                <div class="bento-card p-8 gs-feature bg-brand text-white">
-                    <h3 class="text-lg font-bold mb-2 tracking-tight text-white">Mock Exams</h3>
-                    <p class="text-gray-400 text-sm font-medium">Simulated testing UI.</p>
+                <div class="bento-card col-span-1 p-6 md:p-8 flex flex-col justify-end reveal-hidden bg-brand text-white">
+                    <h3 class="text-base md:text-lg font-bold mb-1 md:mb-2 tracking-tight">Mock Examinations</h3>
+                    <p class="text-gray-400 text-xs md:text-sm font-medium">Standardized testing UI protocols.</p>
                 </div>
             </div>
         </section>
-
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 md:py-16">
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-brand mb-8 md:mb-10 reveal-hidden">Academic Cohorts</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <div class="bento-card flex flex-col overflow-hidden reveal-hidden group">
+                    <div class="h-40 md:h-48 bg-gray-100 relative overflow-hidden">
+                        <div class="absolute top-3 right-3 bg-white text-brand text-xs font-bold px-3 py-1.5 rounded-full shadow-sm z-10">2026 Batch</div>
+                        <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 transition duration-500 group-hover:scale-105"></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold tracking-tight text-brand">Joint Entrance Exam Prep</h3>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-6 font-medium">Comprehensive coverage of Physics, Chemistry, and Mathematics parameters.</p>
+                        <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-brand">₹4,999</span>
+                            </div>
+                            <button class="bg-gray-50 text-brand border border-gray-200 hover:bg-brand hover:text-white hover:border-brand px-4 py-2 rounded-lg transition font-semibold text-sm">Review Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <dialog id="authModal" class="bg-transparent m-0 p-0 fixed inset-0 w-full h-full z-[100] flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-white/40 backdrop-blur-md" onclick="closeAuth()"></div>
-        
-        <div class="auth-modal-content relative z-10 bg-white w-[90%] max-w-lg rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-gray-100 scale-95 opacity-0 transition-all duration-300 p-8 md:p-10" id="modalContent">
-            
-            <button onclick="closeAuth()" class="absolute top-6 right-6 text-gray-400 hover:text-brand transition bg-gray-50 rounded-full p-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center font-bold text-xl mb-6">
-                V.
-            </div>
-            
-            <h3 id="authTitle" class="text-2xl font-bold tracking-tight mb-2 text-brand">Secure Access</h3>
-            <p class="text-sm text-gray-500 font-medium mb-8">Authenticate to access your workspace.</p>
-            
-            <form id="authForm" class="space-y-4">
-                <div>
-                    <input type="email" id="email" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition font-medium text-sm" required placeholder="Email address">
+    <footer class="border-t border-gray-200 bg-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white font-bold text-sm mb-4">V.</div>
+                    <p class="text-gray-500 text-sm font-medium max-w-xs">Dedicated to providing rigorous academic infrastructure for dedicated learners.</p>
                 </div>
                 <div>
-                    <input type="password" id="password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition font-medium text-sm" required placeholder="Password">
+                    <h4 class="font-bold text-brand mb-4 text-sm">Infrastructure</h4>
+                    <ul class="space-y-2 text-sm text-gray-500 font-medium">
+                        <li><a href="#" class="hover:text-brand transition">Live Cohorts</a></li>
+                        <li><a href="#" class="hover:text-brand transition">Examination UI</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-brand mb-4 text-sm">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-500 font-medium">
+                        <li><a href="#" class="hover:text-brand transition">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-brand transition">Privacy Protocol</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center md:text-left text-xs text-gray-400 font-medium pt-8 border-t border-gray-100">
+                © 2026 VidyaPlus Academic Systems. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <div id="authModalOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="absolute inset-0 bg-brand/40 backdrop-blur-sm" onclick="closeAuth()"></div>
+        
+        <div id="authModalCard" class="relative w-full max-w-4xl bg-white rounded-2xl sm:rounded-[24px] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px] md:min-h-[600px] transform scale-95 transition-transform duration-300">
+            
+            <button onclick="closeAuth()" class="absolute top-4 right-4 md:top-6 md:right-6 z-50 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="hidden md:flex flex-col bg-brand text-white w-1/2 p-12 relative overflow-hidden justify-between">
+                <div class="absolute -top-24 -left-24 w-64 h-64 bg-accent rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse"></div>
+                <div class="absolute bottom-0 right-0 w-80 h-80 bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
+
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-8 backdrop-blur-md">V.</div>
+                    <h2 class="text-3xl font-bold tracking-tight mb-4">Academic <br/>Authentication Protocol.</h2>
+                    <p class="text-gray-400 font-medium text-sm leading-relaxed max-w-sm">Secure authorization is required to access examination modules, live cohorts, and personal performance analytics.</p>
                 </div>
                 
-                <button type="submit" id="submitBtn" class="w-full bg-brand text-white font-semibold py-3.5 rounded-xl hover:bg-gray-800 transition mt-2 text-sm">
-                    Authenticate
-                </button>
-            </form>
-
-            <div class="mt-6 flex items-center gap-4 before:h-px before:flex-1 before:bg-gray-100 after:h-px after:flex-1 after:bg-gray-100">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">OR</span>
+                <div class="relative z-10 text-xs text-gray-500 font-semibold uppercase tracking-widest">
+                    System Secured • AES-256
+                </div>
             </div>
 
-            <button id="googleBtn" class="mt-6 w-full bg-white border border-gray-200 hover:bg-gray-50 text-brand font-semibold py-3.5 rounded-xl flex items-center justify-center gap-3 transition text-sm">
-                <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Continue with Google
-            </button>
+            <div class="w-full md:w-1/2 p-6 sm:p-10 md:p-12 bg-white flex flex-col justify-center relative">
+                
+                <div class="flex items-center gap-4 mb-8 border-b border-gray-100 pb-4">
+                    <button id="tabLogin" onclick="switchAuthMode('login')" class="text-sm font-bold text-brand border-b-2 border-brand pb-1 transition-colors">Secure Access</button>
+                    <button id="tabSignup" onclick="switchAuthMode('signup')" class="text-sm font-bold text-gray-400 hover:text-brand pb-1 transition-colors">Initialize Profile</button>
+                </div>
+
+                <h3 id="authTitle" class="text-2xl font-bold tracking-tight text-brand mb-1">Authenticate</h3>
+                <p id="authSubtitle" class="text-sm text-gray-500 font-medium mb-6">Enter credentials to proceed.</p>
+                
+                <form id="authForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 ml-1">Email Identification</label>
+                        <input type="email" id="email" class="premium-input" required placeholder="student@domain.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 ml-1">Security Key (Password)</label>
+                        <input type="password" id="password" class="premium-input" required placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="w-full bg-brand text-white font-bold py-3.5 rounded-xl hover:bg-gray-800 transition shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] mt-4">
+                        Authorize Entry
+                    </button>
+                </form>
+
+                <div class="mt-8 flex items-center gap-4 before:h-px before:flex-1 before:bg-gray-200 after:h-px after:flex-1 after:bg-gray-200">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Alternative Protocols</span>
+                </div>
+
+                <button id="googleBtn" class="mt-6 w-full bg-surfaceAlt border border-gray-200 hover:bg-gray-100 text-brand font-semibold py-3.5 rounded-xl flex items-center justify-center gap-3 transition text-sm">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Continue via Google Auth
+                </button>
+            </div>
         </div>
-    </dialog>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <script>
         // Swiper Logic
         new Swiper('.heroSwiper', {
             loop: true,
-            autoplay: { delay: 4000, disableOnInteraction: false },
+            autoplay: { delay: 5000, disableOnInteraction: false },
             pagination: { el: '.swiper-pagination', clickable: true },
         });
 
-        // Animations
-        gsap.registerPlugin(ScrollTrigger);
-        gsap.from(".gs-reveal", { y: 20, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" });
-        gsap.from(".gs-feature", {
-            scrollTrigger: { trigger: ".gs-feature", start: "top 90%" },
-            y: 30, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power2.out"
+        // Intersection Observer for Scroll Animations
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-hidden').forEach((el, index) => {
+            // Slight delay for staggered effect
+            el.style.transitionDelay = `${index * 0.05}s`;
+            observer.observe(el);
         });
 
-        // Auth Modal Logic
-        const modal = document.getElementById('authModal');
-        const modalContent = document.getElementById('modalContent');
-        let authMode = 'login'; 
+        // Advanced Auth Modal Logic
+        const overlay = document.getElementById('authModalOverlay');
+        const card = document.getElementById('authModalCard');
+        let currentAuthMode = 'login'; 
 
         function openAuth(mode) {
-            authMode = mode;
-            document.getElementById('authTitle').innerText = mode === 'login' ? 'Secure Access' : 'Initialize Account';
-            document.getElementById('submitBtn').innerText = mode === 'login' ? 'Authenticate' : 'Create Profile';
+            switchAuthMode(mode);
+            overlay.classList.remove('pointer-events-none');
+            // Trigger reflow
+            void overlay.offsetWidth;
+            overlay.classList.remove('opacity-0');
+            card.classList.remove('scale-95');
             
-            modal.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            });
+            // Prevent body scroll when modal is open on mobile
+            document.body.style.overflow = 'hidden';
         }
 
         function closeAuth() {
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+            overlay.classList.add('opacity-0');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                overlay.classList.add('pointer-events-none');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function switchAuthMode(mode) {
+            currentAuthMode = mode;
+            const tabLogin = document.getElementById('tabLogin');
+            const tabSignup = document.getElementById('tabSignup');
+            
+            if (mode === 'login') {
+                tabLogin.className = "text-sm font-bold text-brand border-b-2 border-brand pb-1 transition-colors";
+                tabSignup.className = "text-sm font-bold text-gray-400 hover:text-brand pb-1 transition-colors border-b-2 border-transparent";
+                document.getElementById('authTitle').innerText = 'Authenticate';
+                document.getElementById('authSubtitle').innerText = 'Enter credentials to proceed.';
+                document.getElementById('submitBtn').innerText = 'Authorize Entry';
+            } else {
+                tabSignup.className = "text-sm font-bold text-brand border-b-2 border-brand pb-1 transition-colors";
+                tabLogin.className = "text-sm font-bold text-gray-400 hover:text-brand pb-1 transition-colors border-b-2 border-transparent";
+                document.getElementById('authTitle').innerText = 'Initialize Profile';
+                document.getElementById('authSubtitle').innerText = 'Establish system credentials.';
+                document.getElementById('submitBtn').innerText = 'Register Profile';
+            }
         }
     </script>
-
     <script type="module">
         import { auth } from './firebase-init.js';
         import { initAuth } from './auth.js';
@@ -282,6 +395,9 @@
         initAuth((batches) => {
             document.getElementById('guestState').classList.add('hidden');
             document.getElementById('userState').classList.remove('hidden');
+            // Assuming name comes from auth.js logic, else fallback
+            document.getElementById('userName').innerText = auth.currentUser?.displayName || 'User';
+            document.getElementById('userIcon').innerText = (auth.currentUser?.displayName || 'U').charAt(0).toUpperCase();
             closeAuth();
         });
 
@@ -292,18 +408,18 @@
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
             
-            btn.innerText = "Processing...";
+            btn.innerText = "Processing Request...";
             btn.disabled = true;
 
             try {
-                if (authMode === 'login') {
+                if (currentAuthMode === 'login') {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
             } catch (error) {
-                console.error("Auth Error:", error.message);
-                alert("Authentication failed.");
+                console.error("Auth System Error:", error.message);
+                alert("Authorization failed. Verify credentials.");
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -315,7 +431,7 @@
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                console.error("Google Auth Error:", error);
+                console.error("External Auth Error:", error);
             }
         });
     </script>
