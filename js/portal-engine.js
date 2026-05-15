@@ -170,7 +170,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     try {
-        // 🚨 NAYA CODE: Token nikalna aur headers me bhejna
+        // 🚨 Token nikalna aur headers me bhejna
         const idToken = await user.getIdToken();
 
         const response = await fetch(BACKEND_URL + "/getSecureTest", {
@@ -348,7 +348,6 @@ window.renderQuestion = () => {
     }
     updatePaletteUI();
 };
-
 window.selectOption = (idx, type) => {
     const qId = testData.questions[currentQIdx].id;
     Telemetry.initQuestionRecord(qId);
@@ -535,7 +534,6 @@ async function autoSubmit() {
     const timeSpent = (testData.duration * 60) - timeRemaining;
 
     try {
-        // 🚨 NAYA CODE: Submit karte waqt bhi Token bhejna hai
         const idToken = await auth.currentUser.getIdToken();
 
         const response = await fetch(BACKEND_URL + "/submitAssessment", {
@@ -544,12 +542,12 @@ async function autoSubmit() {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${idToken}` 
             },
+            // 🚨 FIX: Yahan se uid nikal diya gaya hai! Ab backend sirf JWT par rely karega
             body: JSON.stringify({
                 testId: testId, 
                 batchId: batchId,
                 userAnswers: safeUserAnswers, 
                 timeSpent: timeSpent,
-                uid: currentUserId,
                 systemTelemetry: Telemetry.systemLogs 
             })
         });
