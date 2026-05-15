@@ -1,209 +1,230 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vidyaplus | The Secure Standard</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --vp-accent: #4F46E5;
-            --vp-surface: rgba(255, 255, 255, 0.7);
-            --vp-text: #0F172A;
-            --vp-muted: #64748B;
-            --vp-glass: blur(16px) saturate(180%);
-        }
+export default function VidyaPlusIndexPage() { const features = [ { title: 'Ghost Replay Engine', desc: 'Replay your entire exam behavior second-by-second. Watch hesitation, panic, confidence spikes, and momentum drops.', icon: '👻' }, { title: 'Brain Pressure Heatmap', desc: 'AI detects where your mind starts collapsing during tests using pacing, swaps, and revisit behavior.', icon: '🧠' }, { title: 'Confidence Intelligence', desc: 'Not just marks. VidyaPlus measures confidence stability and decision quality.', icon: '⚡' }, { title: 'Comeback Graph', desc: 'Track your evolution from weak attempts to mastery with emotional progression analytics.', icon: '📈' } ];
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background: #f8fafc;
-            color: var(--vp-text);
-            overflow-x: hidden;
-            /* Background Mesh Gradient Animation */
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
-        }
+const stats = [ { label: 'Telemetry Points Tracked', value: '140+' }, { label: 'Behavior Signals', value: '32' }, { label: 'Average Analysis Time', value: '0.7s' }, { label: 'Student Focus Mapping', value: 'Realtime' } ];
 
-        /* 🚀 HIGH-END FLOATING NAVBAR */
-        .navbar {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 1200px; padding: 12px 24px;
-            background: var(--vp-surface); backdrop-filter: var(--vp-glass);
-            border: 1px solid rgba(255,255,255,0.3); border-radius: 100px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-        }
+return ( <div className="min-h-screen bg-[#050816] text-white overflow-hidden"> {/* Background Effects */} <div className="absolute inset-0 overflow-hidden pointer-events-none"> <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 blur-3xl rounded-full" /> <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/20 blur-3xl rounded-full" /> </div>
 
-        .nav-logo { font-weight: 900; font-size: 1.4rem; color: var(--vp-text); letter-spacing: -1px; }
-        .nav-logo span { color: var(--vp-accent); }
-
-        .btn-auth-trigger {
-            background: var(--vp-text); color: white; padding: 10px 24px;
-            border-radius: 50px; font-weight: 700; font-size: 0.9rem; border: none;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-auth-trigger:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-
-        /* 🌌 ASYMMETRIC HERO SECTION */
-        .hero {
-            padding: 180px 10% 100px;
-            display: flex; align-items: center; min-height: 90vh; gap: 50px;
-        }
-
-        .hero-content { flex: 1.2; text-align: left; }
-        .hero-tag { 
-            display: inline-block; padding: 6px 16px; background: #EEF2FF;
-            color: var(--vp-accent); border-radius: 50px; font-weight: 800;
-            font-size: 0.75rem; margin-bottom: 24px; letter-spacing: 1px;
-        }
-
-        .hero-title { 
-            font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; line-height: 0.95;
-            letter-spacing: -4px; margin-bottom: 30px; 
-        }
-
-        /* 📡 LIVE TELEMETRY ANIMATION (The "Impressive" Part) */
-        .hero-visual {
-            flex: 0.8; position: relative; height: 400px;
-            background: white; border-radius: 24px; border: 1px solid #E2E8F0;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.05); overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-        }
-        
-        .pulse-core {
-            width: 100px; height: 100px; background: var(--vp-accent);
-            border-radius: 50%; filter: blur(40px); opacity: 0.3;
-            animation: pulse 4s infinite;
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
-
-        /* 🔓 BOTTOM SHEET AUTH (The Bank-Level Experience) */
-        .vault-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(8px); z-index: 2000;
-            opacity: 0; pointer-events: none; transition: 0.4s ease;
-        }
-        .vault-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .vault-sheet {
-            position: fixed; bottom: -100%; left: 0; width: 100%;
-            background: white; border-top-left-radius: 32px; border-top-right-radius: 32px;
-            padding: 40px; z-index: 2001; transition: 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-            max-width: 600px; left: 50%; transform: translateX(-50%);
-        }
-        .vault-overlay.active .vault-sheet { bottom: 0; }
-
-        .sheet-handle { width: 40px; height: 5px; background: #E2E8F0; border-radius: 10px; margin: 0 auto 30px; }
-        
-        .form-input {
-            width: 100%; padding: 18px; border-radius: 16px; border: 1px solid #E2E8F0;
-            background: #F8FAFC; margin-bottom: 16px; font-size: 1rem; outline: none;
-            transition: 0.2s;
-        }
-        .form-input:focus { border-color: var(--vp-accent); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
-
-        .btn-vault {
-            width: 100%; padding: 18px; background: var(--vp-text); color: white;
-            border-radius: 16px; font-weight: 800; border: none; cursor: pointer;
-            margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-
-        /* Reveal Animation Classes */
-        .reveal { opacity: 0; transform: translateY(30px); transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        @media (max-width: 768px) {
-            .hero { flex-direction: column; padding-top: 140px; text-align: center; }
-            .hero-title { letter-spacing: -2px; }
-            .hero-visual { width: 100%; height: 300px; }
-        }
-    </style>
-</head>
-<body>
-
-    <nav class="navbar">
-        <div class="nav-logo">VIDYA<span>PLUS</span></div>
-        <button class="btn-auth-trigger" onclick="Vault.open()">Access Dashboard</button>
-    </nav>
-
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <div class="hero-tag">AES-256 ENCRYPTED LEARNING</div>
-                <h1 class="hero-title reveal">Built for the<br><span style="color:var(--vp-accent)">Smarter</span> 1%.</h1>
-                <p class="hero-subtitle reveal" style="color:var(--vp-muted); font-weight:500; font-size:1.1rem; margin-bottom:40px; max-width:500px;">
-                    Ditch the standard test portals. Experience world-class telemetry that tracks your logic, not just your marks.
-                </p>
-                <div class="reveal">
-                    <button class="btn-auth-trigger" style="padding: 16px 40px; font-size: 1rem;" onclick="Vault.open()">Get Started Free</button>
-                </div>
-            </div>
-
-            <div class="hero-visual reveal">
-                <div class="pulse-core"></div>
-                <div style="position:absolute; bottom:20px; font-size:0.7rem; font-weight:800; color:#CBD5E1; letter-spacing:2px;">SECURE TELEMETRY LINK ACTIVE</div>
-            </div>
-        </section>
-    </main>
-
-    <div class="vault-overlay" id="vault-overlay">
-        <div class="vault-sheet">
-            <div class="sheet-handle"></div>
-            <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; letter-spacing: -1px;">Secure Authentication</h2>
-            <p style="color: var(--vp-muted); font-size: 0.9rem; margin-bottom: 30px; font-weight: 500;">Please verify your identity to access your encrypted study zone.</p>
-            
-            <form id="vault-form">
-                <input type="email" class="form-input" placeholder="Email Address" required>
-                <input type="password" class="form-input" placeholder="Secure Password" required>
-                <button type="submit" class="btn-vault">Unlock Vault <i class="fas fa-shield-alt"></i></button>
-            </form>
-            
-            <div style="text-align: center; margin-top: 25px; font-size: 0.85rem; font-weight: 600; color: var(--vp-muted);">
-                Encryption Protocol: JWT over TLS 1.3
-            </div>
-        </div>
+{/* NAVBAR */}
+  <nav className="relative z-10 flex items-center justify-between px-6 md:px-14 py-6 border-b border-white/10 backdrop-blur-xl">
+    <div>
+      <h1 className="text-2xl md:text-3xl font-black tracking-tight">
+        Vidya<span className="text-blue-400">Plus</span>
+      </h1>
+      <p className="text-xs text-slate-400 mt-1">Performance Intelligence Platform</p>
     </div>
 
-    <script type="module">
-        // 🛡️ MODERN STATE PROXY (Bank-Level Coding Style)
-        const UIState = new Proxy({ vaultOpen: false }, {
-            set(target, prop, value) {
-                target[prop] = value;
-                if (prop === 'vaultOpen') {
-                    const overlay = document.getElementById('vault-overlay');
-                    value ? overlay.classList.add('active') : overlay.classList.remove('active');
-                    document.body.style.overflow = value ? 'hidden' : 'auto';
-                }
-                return true;
-            }
-        });
+    <div className="hidden md:flex items-center gap-8 text-sm text-slate-300 font-medium">
+      <a href="#features" className="hover:text-white transition">Features</a>
+      <a href="#analytics" className="hover:text-white transition">Analytics</a>
+      <a href="#vision" className="hover:text-white transition">Vision</a>
+    </div>
 
-        window.Vault = {
-            open: () => UIState.vaultOpen = true,
-            close: () => UIState.vaultOpen = false
-        };
+    <button className="bg-white text-black px-5 py-2.5 rounded-xl font-bold hover:scale-105 transition-all duration-300 shadow-2xl">
+      Enter Platform
+    </button>
+  </nav>
 
-        // Click outside to close
-        document.getElementById('vault-overlay').addEventListener('click', (e) => {
-            if(e.target.id === 'vault-overlay') Vault.close();
-        });
+  {/* HERO SECTION */}
+  <section className="relative z-10 px-6 md:px-14 pt-20 md:pt-28 pb-20">
+    <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-4 py-2 text-sm text-blue-300 mb-6 backdrop-blur-xl">
+          <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+          India’s First Behavioral Test Analytics System
+        </div>
 
-        // 🌊 INTERSECTION OBSERVER (For World-Class Scroll Reveal)
-        const observerOptions = { threshold: 0.1 };
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
+        <h1 className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight">
+          Your Exam
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">
+            Has A Brainprint.
+          </span>
+        </h1>
 
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-    </script>
-</body>
-</html>
+        <p className="text-slate-300 text-lg md:text-xl mt-8 leading-relaxed max-w-2xl">
+          VidyaPlus does not just calculate marks.
+          <br />
+          It maps hesitation, confidence, pressure, overthinking, pacing, and decision quality.
+        </p>
+
+        <div className="flex flex-wrap gap-4 mt-10">
+          <button className="bg-blue-500 hover:bg-blue-400 px-7 py-4 rounded-2xl font-bold text-lg shadow-[0_0_40px_rgba(59,130,246,0.4)] hover:scale-105 transition-all duration-300">
+            Start Analysis
+          </button>
+
+          <button className="border border-white/20 hover:border-white/40 bg-white/5 px-7 py-4 rounded-2xl font-bold text-lg backdrop-blur-xl transition-all duration-300 hover:bg-white/10">
+            Watch Demo
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+          {stats.map((item, idx) => (
+            <div
+              key={idx}
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl"
+            >
+              <div className="text-2xl font-black text-blue-300">{item.value}</div>
+              <div className="text-xs text-slate-400 mt-2 leading-relaxed">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ANALYTICS VISUAL */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-2xl rounded-[40px]" />
+
+        <div className="relative bg-white/5 border border-white/10 rounded-[32px] p-6 backdrop-blur-2xl shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-slate-400 text-sm">Live Cognitive Scan</p>
+              <h3 className="text-2xl font-black mt-1">Performance X-Ray</h3>
+            </div>
+
+            <div className="bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 px-4 py-2 rounded-full text-sm font-bold">
+              Stable Focus
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <div className="bg-[#0f172a] rounded-2xl p-5 border border-white/5">
+              <div className="text-slate-400 text-sm">Confidence</div>
+              <div className="text-4xl font-black mt-2">87%</div>
+              <div className="w-full h-2 bg-slate-700 rounded-full mt-4 overflow-hidden">
+                <div className="h-full w-[87%] bg-gradient-to-r from-blue-400 to-cyan-300 rounded-full" />
+              </div>
+            </div>
+
+            <div className="bg-[#0f172a] rounded-2xl p-5 border border-white/5">
+              <div className="text-slate-400 text-sm">Panic Zones</div>
+              <div className="text-4xl font-black mt-2 text-red-400">03</div>
+              <p className="text-xs text-slate-500 mt-3">Detected in Physics section</p>
+            </div>
+          </div>
+
+          <div className="bg-[#0f172a] rounded-2xl p-5 border border-white/5 mb-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-sm text-slate-400">Ghost Timeline</div>
+                <div className="font-bold text-lg mt-1">Behavior Replay</div>
+              </div>
+
+              <div className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/20">
+                AI Tracking
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 overflow-hidden py-4">
+              {[1,2,3,4,5,6,7,8].map((n) => (
+                <>
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-black ${n % 3 === 0 ? 'bg-red-500' : n % 2 === 0 ? 'bg-purple-500' : 'bg-blue-500'}`}>
+                    {n}
+                  </div>
+                  {n !== 8 && <div className="w-8 h-1 bg-white/10 rounded-full" />}
+                </>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl p-5">
+            <div className="text-sm opacity-80">AI Insight</div>
+            <div className="text-lg font-bold mt-2 leading-relaxed">
+              Your speed is improving, but decision confidence drops after long calculation questions.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* FEATURES */}
+  <section id="features" className="relative z-10 px-6 md:px-14 py-24 border-t border-white/10">
+    <div className="max-w-3xl mb-14">
+      <p className="text-blue-400 font-bold uppercase tracking-[0.3em] text-xs mb-4">
+        NEXT GENERATION ANALYTICS
+      </p>
+
+      <h2 className="text-4xl md:text-6xl font-black leading-tight">
+        Not a Test Platform.
+        <br />
+        A Student Intelligence Engine.
+      </h2>
+    </div>
+
+    <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {features.map((feature, idx) => (
+        <div
+          key={idx}
+          className="group bg-white/5 border border-white/10 rounded-[28px] p-8 backdrop-blur-xl hover:-translate-y-2 transition-all duration-500 hover:border-blue-400/30"
+        >
+          <div className="text-5xl mb-6">{feature.icon}</div>
+
+          <h3 className="text-2xl font-black mb-4 group-hover:text-blue-300 transition">
+            {feature.title}
+          </h3>
+
+          <p className="text-slate-400 leading-relaxed text-sm">
+            {feature.desc}
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* VISION */}
+  <section id="vision" className="relative z-10 px-6 md:px-14 py-24">
+    <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 rounded-[40px] p-10 md:p-16 backdrop-blur-2xl overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 blur-3xl rounded-full" />
+
+      <div className="relative z-10 max-w-4xl">
+        <p className="text-blue-300 font-bold tracking-[0.3em] uppercase text-xs mb-5">
+          The Vision
+        </p>
+
+        <h2 className="text-4xl md:text-6xl font-black leading-tight mb-8">
+          India tracks marks.
+          <br />
+          VidyaPlus tracks the mind.
+        </h2>
+
+        <p className="text-slate-300 text-lg md:text-xl leading-relaxed max-w-3xl">
+          Every student has hidden behavioral patterns during exams.
+          Some panic under pressure.
+          Some overthink.
+          Some lose focus after difficult sections.
+          Some guess aggressively.
+          
+          VidyaPlus turns invisible behavior into visible intelligence.
+        </p>
+
+        <div className="flex flex-wrap gap-5 mt-12">
+          <button className="bg-white text-black px-8 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-all duration-300">
+            Experience The System
+          </button>
+
+          <button className="border border-white/20 bg-white/5 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/10 transition-all duration-300">
+            Explore Analytics
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* FOOTER */}
+  <footer className="relative z-10 border-t border-white/10 px-6 md:px-14 py-10 flex flex-col md:flex-row justify-between gap-5 text-sm text-slate-500">
+    <div>
+      <div className="text-xl font-black text-white mb-2">
+        Vidya<span className="text-blue-400">Plus</span>
+      </div>
+      <p>Built for serious students.</p>
+    </div>
+
+    <div className="flex gap-8">
+      <a href="#" className="hover:text-white transition">Platform</a>
+      <a href="#" className="hover:text-white transition">Analytics</a>
+      <a href="#" className="hover:text-white transition">Vision</a>
+    </div>
+  </footer>
+</div>
+
+); }
