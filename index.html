@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vidyaplus | Cognitive Evolution System</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Lenis, GSAP, ScrollTrigger, Three.js -->
     <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -33,13 +30,15 @@
                         silver: '#e2e8f0',
                         glass: 'rgba(255, 255, 255, 0.6)',
                         dark: '#0f172a',
+                        electric: '#2563eb', /* NEW ATTRACTIVE BLUE */
+                        electricDark: '#1d4ed8',
                         cyan: {
                             glow: '#00f0ff'
                         }
                     },
                     boxShadow: {
                         'glass': '0 8px 32px 0 rgba(148, 163, 184, 0.1)',
-                        'glow': '0 0 40px 0 rgba(200, 210, 220, 0.4)',
+                        'glow': '0 0 40px 0 rgba(37, 99, 235, 0.4)', /* Blue Glow */
                         'blue-glow': '0 0 30px 0 rgba(0, 240, 255, 0.3)',
                     }
                 }
@@ -48,244 +47,106 @@
     </script>
 
     <style>
-        :root {
-            --cursor-size: 20px;
-        }
+        :root { --cursor-size: 20px; }
+        body { background-color: #ffffff; color: #0f172a; overflow-x: hidden; cursor: none; }
+        ::-webkit-scrollbar { display: none; }
+
+        #cursor-dot, #cursor-outline { position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
+        #cursor-dot { width: 5px; height: 5px; background-color: #2563eb; } /* Changed to Electric Blue */
+        #cursor-outline { width: 40px; height: 40px; border: 1px solid rgba(37, 99, 235, 0.4); transition: width 0.2s, height 0.2s, background-color 0.2s; }
+
+        input, button, a { cursor: none; }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); }
+        .glass-modal { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 1); box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5); }
+        .glass-text { background: linear-gradient(180deg, #2563eb 0%, #0f172a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+
+        .reveal-text { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
+        .char { transform: translateY(110%); display: inline-block; }
+
+        .holo-grid { background-image: linear-gradient(to right, rgba(37, 99, 235, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(37, 99, 235, 0.04) 1px, transparent 1px); background-size: 50px 50px; }
+
+        .feature-card { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .feature-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(37,99,235,0.08); border-color: rgba(37, 99, 235, 0.2); }
+
+        @keyframes float-bot { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+        @keyframes ring-spin { 0% { transform: rotateX(70deg) rotateZ(0deg); } 100% { transform: rotateX(70deg) rotateZ(360deg); } }
+        .animate-float-bot { animation: float-bot 4s ease-in-out infinite; }
+        .animate-ring { animation: ring-spin 8s linear infinite; }
         
-        body {
-            background-color: #ffffff;
-            color: #0f172a;
-            overflow-x: hidden;
-            cursor: none; /* Custom cursor */
-        }
-
-        /* Hide scrollbar for seamless cinematic feel */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Custom Magnetic Cursor */
-        #cursor-dot,
-        #cursor-outline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            z-index: 9999;
-            pointer-events: none;
-        }
-
-        #cursor-dot {
-            width: 5px;
-            height: 5px;
-            background-color: #0f172a;
-        }
-
-        #cursor-outline {
-            width: 40px;
-            height: 40px;
-            border: 1px solid rgba(15, 23, 42, 0.3);
-            transition: width 0.2s, height 0.2s, background-color 0.2s;
-        }
-
-        /* Input specific cursors to bypass global none */
-        input, button, a {
-            cursor: none;
-        }
-
-        /* Glassmorphism Utilities */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-        }
+        .mascot-eye { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .mascot-face { transition: transform 0.2s ease-out; }
         
-        .glass-modal {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-        }
-
-        .glass-text {
-            background: linear-gradient(180deg, #0f172a 0%, #64748b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* UI Overlays */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Typography Animation Prep */
-        .reveal-text {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-        }
+        .futuristic-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(226, 232, 240, 0.8); transition: all 0.3s ease; }
+        .futuristic-input:focus { background: rgba(255, 255, 255, 0.9); border-color: #2563eb; box-shadow: 0 0 20px rgba(37, 99, 235, 0.1); outline: none; }
         
-        .char {
-            transform: translateY(110%);
-            display: inline-block;
-        }
-
-        /* Grid specific */
-        .holo-grid {
-            background-image: 
-                linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
-
-        .feature-card {
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .feature-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            border-color: rgba(15, 23, 42, 0.2);
-        }
-
-        /* AI Mascot Animations */
-        @keyframes float-bot {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-        }
-        @keyframes ring-spin {
-            0% { transform: rotateX(70deg) rotateZ(0deg); }
-            100% { transform: rotateX(70deg) rotateZ(360deg); }
-        }
-        .animate-float-bot {
-            animation: float-bot 4s ease-in-out infinite;
-        }
-        .animate-ring {
-            animation: ring-spin 8s linear infinite;
-        }
+        .btn-shimmer { position: relative; overflow: hidden; }
+        .btn-shimmer::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-20deg); transition: left 0.7s ease; }
+        .btn-shimmer:hover::before { left: 150%; }
         
-        .mascot-eye {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .mascot-face {
-            transition: transform 0.2s ease-out;
-        }
-        
-        /* Auth Form Inputs */
-        .futuristic-input {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            transition: all 0.3s ease;
-        }
-        .futuristic-input:focus {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: #0f172a;
-            box-shadow: 0 0 20px rgba(15, 23, 42, 0.05);
-            outline: none;
-        }
-        
-        /* Interactive Shimmer Button */
-        .btn-shimmer {
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-shimmer::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: skewX(-20deg);
-            transition: left 0.7s ease;
-        }
-        .btn-shimmer:hover::before {
-            left: 150%;
-        }
-        </style>
+        /* Mobile Scroll Fix for Auth */
+        .auth-scroll-container { overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+        .auth-scroll-container::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="selection:bg-dark selection:text-white">
+<body class="selection:bg-electric selection:text-white">
+        <canvas id="bg-canvas"></canvas>
 
-    <!-- WebGL Background -->
-    <canvas id="bg-canvas"></canvas>
-
-    <!-- Custom Cursor -->
     <div id="cursor-dot"></div>
     <div id="cursor-outline"></div>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-40 glass-panel border-b-0 py-4 px-8 mix-blend-luminosity">
+    <nav class="fixed top-0 w-full z-40 glass-panel border-b-0 py-4 px-4 md:px-8 mix-blend-luminosity">
         <div class="max-w-screen-2xl mx-auto flex justify-between items-center">
-            <div class="font-cinematic font-bold text-xl tracking-widest text-dark">
-                VIDYAPLUS <span class="text-xs font-sans tracking-normal opacity-50 ml-2">v3.1</span>
+            <div class="font-cinematic font-bold text-lg md:text-xl tracking-widest text-dark">
+                VIDYAPLUS <span class="text-[10px] font-sans tracking-normal opacity-50 ml-1 md:ml-2">v3.1</span>
             </div>
             <div class="hidden md:flex gap-8 font-display text-xs tracking-[0.2em] uppercase font-semibold text-slate-500">
-                <a href="#revolution" class="hover:text-dark transition-colors" data-cursor="hover">Architecture</a>
-                <a href="#engine" class="hover:text-dark transition-colors" data-cursor="hover">Cognitive Engine</a>
-                <a href="#features" class="hover:text-dark transition-colors" data-cursor="hover">Systems</a>
+                <a href="#revolution" class="hover:text-electric transition-colors" data-cursor="hover">Architecture</a>
+                <a href="#engine" class="hover:text-electric transition-colors" data-cursor="hover">Cognitive Engine</a>
+                <a href="#features" class="hover:text-electric transition-colors" data-cursor="hover">Systems</a>
             </div>
             
-            <!-- NEW: Premium Auth Buttons -->
-            <div class="flex items-center gap-3">
-                <button onclick="openAuthModal('login')" data-cursor="hover" class="relative group glass-panel px-6 py-2.5 rounded-full font-display text-[11px] font-bold uppercase tracking-[0.15em] text-slate-600 hover:text-dark transition-all duration-300 border border-slate-200 hover:border-slate-300 hover:shadow-glass overflow-hidden">
+            <div class="flex items-center gap-2 md:gap-3">
+                <button id="nav-login-btn" data-cursor="hover" class="relative group glass-panel px-4 md:px-6 py-2 md:py-2.5 rounded-full font-display text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-slate-600 hover:text-electric transition-all duration-300 border border-slate-200 hover:border-blue-300 hover:shadow-glass overflow-hidden">
                     <span class="relative z-10">Login</span>
                     <div class="absolute inset-0 bg-white/40 transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300"></div>
                 </button>
-                <button onclick="openAuthModal('signup')" data-cursor="hover" class="btn-shimmer relative glass-panel px-6 py-2.5 rounded-full font-display text-[11px] font-bold uppercase tracking-[0.15em] bg-dark text-white hover:bg-slate-800 transition-all duration-500 shadow-lg hover:shadow-glow border border-transparent">
+                <button id="nav-signup-btn" data-cursor="hover" class="btn-shimmer relative glass-panel px-4 md:px-6 py-2 md:py-2.5 rounded-full font-display text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] bg-electric text-white hover:bg-electricDark transition-all duration-500 shadow-lg hover:shadow-glow border border-transparent">
                     <span class="relative z-10 flex items-center gap-2">
                         Sign Up
-                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-glow animate-pulse"></div>
+                        <div class="hidden md:block w-1.5 h-1.5 rounded-full bg-cyan-glow animate-pulse"></div>
                     </span>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- AUTHENTICATION MODAL SYSTEM -->
     <div id="auth-wrapper" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none opacity-0">
-        <!-- Blurred Background Overlay -->
-        <div id="auth-backdrop" class="absolute inset-0 bg-white/20 backdrop-blur-xl" onclick="closeAuthModal()"></div>
+        <div id="auth-backdrop" class="absolute inset-0 bg-white/20 backdrop-blur-xl"></div>
         
-        <!-- Modal Container -->
-        <div id="auth-modal" class="relative w-full max-w-4xl h-[650px] max-h-[90vh] mx-4 rounded-[2rem] glass-modal flex overflow-hidden scale-95 opacity-0">
+        <div id="auth-modal" class="relative w-full max-w-4xl h-[95vh] md:h-[650px] mx-4 rounded-3xl md:rounded-[2rem] glass-modal flex flex-col md:flex-row overflow-hidden scale-95 opacity-0">
             
-            <!-- Close Button -->
-            <button onclick="closeAuthModal()" data-cursor="hover" class="absolute top-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full glass-panel hover:bg-white transition-colors border border-slate-200 group">
-                <svg class="w-4 h-4 text-slate-500 group-hover:text-dark transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <button id="close-modal-btn" data-cursor="hover" class="absolute top-4 right-4 md:top-6 md:right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full glass-panel hover:bg-white transition-colors border border-slate-200 group">
+                <svg class="w-4 h-4 text-slate-500 group-hover:text-electric transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
 
-            <!-- Left Side: AI Mascot (Desktop Only) -->
-            <div class="hidden md:flex w-[45%] relative bg-gradient-to-br from-slate-50/80 to-slate-200/80 items-center justify-center border-r border-white/60 overflow-hidden group">
-                <!-- Ambient Background Glows -->
+            <div class="hidden md:flex w-[45%] relative bg-gradient-to-br from-slate-50/80 to-blue-50/80 items-center justify-center border-r border-white/60 overflow-hidden group">
                 <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-glow/10 rounded-full blur-[80px]"></div>
-                <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px]"></div>
+                <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-electric/10 rounded-full blur-[80px]"></div>
                 
-                <!-- Holographic Grid -->
                 <div class="absolute inset-0 holo-grid opacity-20"></div>
 
-                <!-- AI Robot Mascot -->
                 <div id="mascot-container" class="relative z-10 animate-float-bot">
-                    <!-- Holographic Rings -->
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-cyan-glow/20 rounded-full animate-ring pointer-events-none"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-electric/30 rounded-full animate-ring pointer-events-none"></div>
                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-slate-300/30 rounded-full animate-ring" style="animation-direction: reverse; animation-duration: 12s;"></div>
                     
-                    <!-- Robot Head -->
                     <div class="w-36 h-36 bg-white/90 backdrop-blur-md rounded-[2.5rem] shadow-2xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-blue-glow transition-shadow duration-500">
-                        <!-- Internal machinery hint -->
                         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
-                        
-                        <!-- Visor / Face -->
                         <div id="mascot-visor" class="w-28 h-16 bg-slate-900 rounded-2xl flex items-center justify-center gap-5 relative overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] mascot-face">
-                            <!-- Reflection on glass -->
                             <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent"></div>
                             
-                            <!-- Eyes -->
                             <div class="mascot-eye w-4 h-5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] flex items-center justify-center overflow-hidden">
                                 <div class="w-full h-[2px] bg-cyan-glow opacity-0 transition-opacity" id="eye-left-scan"></div>
                             </div>
@@ -295,559 +156,504 @@
                         </div>
                     </div>
                     
-                    <!-- Floating Elements around mascot -->
                     <div class="absolute -top-4 -right-4 w-3 h-3 bg-cyan-glow rounded-full blur-[2px] animate-pulse"></div>
                     <div class="absolute -bottom-6 -left-2 w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                 </div>
 
-                <!-- Status Text -->
-                <div class="absolute bottom-10 text-center w-full font-mono text-[10px] text-slate-500 tracking-[0.2em] uppercase" id="mascot-status">
+                <div class="absolute bottom-10 text-center w-full font-mono text-[10px] text-electric tracking-[0.2em] uppercase" id="mascot-status">
                     Awaiting Input...
                 </div>
             </div>
-
-            <!-- Right Side: Forms -->
-            <div class="w-full md:w-[55%] relative flex flex-col justify-center px-8 sm:px-16 py-12 bg-white/40">
+                        <div class="w-full md:w-[55%] h-full relative flex flex-col justify-center px-6 sm:px-16 py-8 md:py-12 bg-white/40 auth-scroll-container">
                 
-                <!-- Dynamic Header -->
-                <div class="mb-10 text-center md:text-left relative z-10">
-                    <div class="font-display text-[10px] font-bold tracking-[0.3em] text-slate-400 mb-2 uppercase" id="auth-subtitle">Welcome Back</div>
-                    <h2 class="font-cinematic text-3xl md:text-4xl text-dark uppercase tracking-tighter" id="auth-title">
+                <div class="mb-8 md:mb-10 text-center md:text-left relative z-10 pt-4 md:pt-0">
+                    <div class="font-display text-[10px] font-bold tracking-[0.3em] text-electric mb-2 uppercase" id="auth-subtitle">Welcome Back</div>
+                    <h2 class="font-cinematic text-2xl md:text-4xl text-dark uppercase tracking-tighter" id="auth-title">
                         Access Core
                     </h2>
                 </div>
 
-                <!-- Forms Container (Relative for absolute positioning of forms) -->
-                <div class="relative w-full h-[320px]">
-                    
-                    <!-- LOGIN FORM -->
-                    <form id="form-login" class="absolute top-0 left-0 w-full transition-all duration-500" onsubmit="event.preventDefault(); authSuccess();">
-                        <div class="space-y-5">
+                <div class="relative w-full h-[420px] md:h-[400px]"> <form id="form-login" class="absolute top-0 left-0 w-full transition-all duration-500">
+                        <div class="space-y-4">
                             <div class="relative group">
-                                <input type="email" id="login-email" required data-cursor="text" placeholder="Identity Sequence (Email)" class="futuristic-input w-full px-5 py-4 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                <input type="email" id="login-email" required data-cursor="text" placeholder="Identity Sequence (Email)" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-electric group-focus-within:w-full transition-all duration-300"></div>
                             </div>
                             
                             <div class="relative group">
-                                <input type="password" id="login-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-4 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                <input type="password" id="login-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-electric group-focus-within:w-full transition-all duration-300"></div>
                             </div>
 
-                            <div class="flex items-center justify-between text-xs font-sans">
+                            <div class="flex items-center justify-between text-xs font-sans pb-1">
                                 <label class="flex items-center gap-2 cursor-none" data-cursor="hover">
-                                    <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-dark focus:ring-dark cursor-none">
+                                    <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-electric focus:ring-electric cursor-none">
                                     <span class="text-slate-500">Remember sequence</span>
                                 </label>
-                                <a href="#" data-cursor="hover" class="text-slate-500 hover:text-dark transition-colors font-medium">Lost Code?</a>
+                                <a href="#" id="forgot-pass-btn" data-cursor="hover" class="text-electric hover:text-electricDark transition-colors font-semibold">Lost Code?</a>
                             </div>
 
-                            <button type="submit" data-cursor="hover" class="btn-shimmer w-full mt-4 bg-dark text-white px-8 py-4 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-slate-900 transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
+                            <button type="submit" id="btn-login-submit" data-cursor="hover" class="btn-shimmer w-full bg-electric text-white px-8 py-3.5 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-electricDark transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
                                 Initialize Link
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                             </button>
+
+                            <div class="flex items-center my-3">
+                                <div class="flex-1 border-t border-slate-200"></div>
+                                <span class="px-3 text-[10px] uppercase tracking-widest text-slate-400 font-display">OR</span>
+                                <div class="flex-1 border-t border-slate-200"></div>
+                            </div>
+                            <button type="button" id="btn-google-login" data-cursor="hover" class="w-full glass-panel flex items-center justify-center gap-3 py-3 rounded-xl border border-slate-200 hover:bg-white transition-colors text-xs font-bold text-dark shadow-sm hover:shadow-md">
+                                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" class="w-4 h-4">
+                                Continue with Google
+                            </button>
                         </div>
                     </form>
 
-                    <!-- SIGN UP FORM -->
-                    <form id="form-signup" class="absolute top-0 left-0 w-full opacity-0 pointer-events-none translate-y-4 transition-all duration-500" onsubmit="event.preventDefault(); authSuccess();">
-                        <div class="space-y-4">
+                    <form id="form-signup" class="absolute top-0 left-0 w-full opacity-0 pointer-events-none translate-y-4 transition-all duration-500">
+                        <div class="space-y-3.5">
                             <div class="relative group">
-                                <input type="text" id="signup-name" required data-cursor="text" placeholder="Full Designation (Name)" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                <input type="text" id="signup-name" required data-cursor="text" placeholder="Full Designation (Name)" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-electric group-focus-within:w-full transition-all duration-300"></div>
                             </div>
 
                             <div class="relative group">
-                                <input type="email" id="signup-email" required data-cursor="text" placeholder="Comm Link (Email)" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                <input type="email" id="signup-email" required data-cursor="text" placeholder="Comm Link (Email)" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-electric group-focus-within:w-full transition-all duration-300"></div>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-2 gap-3">
                                 <div class="relative group">
-                                    <input type="password" id="signup-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                    <input type="password" id="signup-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-electric group-focus-within:w-full transition-all duration-300"></div>
                                 </div>
                                 <div class="relative group">
-                                    <input type="password" id="signup-confirm" required data-cursor="text" placeholder="Verify" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                    <input type="password" id="signup-confirm" required data-cursor="text" placeholder="Verify" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-electric group-focus-within:w-full transition-all duration-300"></div>
                                 </div>
                             </div>
 
-                            <button type="submit" data-cursor="hover" class="btn-shimmer w-full mt-4 bg-dark text-white px-8 py-4 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-slate-900 transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
+                            <button type="submit" id="btn-signup-submit" data-cursor="hover" class="btn-shimmer w-full mt-2 bg-electric text-white px-8 py-3.5 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-electricDark transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
                                 Construct Profile
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </button>
+
+                            <div class="flex items-center my-2">
+                                <div class="flex-1 border-t border-slate-200"></div>
+                                <span class="px-2 text-[9px] uppercase tracking-widest text-slate-400 font-display">OR</span>
+                                <div class="flex-1 border-t border-slate-200"></div>
+                            </div>
+                            <button type="button" id="btn-google-signup" data-cursor="hover" class="w-full glass-panel flex items-center justify-center gap-3 py-2.5 rounded-xl border border-slate-200 hover:bg-white transition-colors text-xs font-bold text-dark shadow-sm">
+                                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" class="w-4 h-4">
+                                Google Sign Up
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Toggle Mode -->
-                <div class="mt-auto text-center z-10 pt-4">
+                <div class="mt-auto text-center z-10 pt-2 pb-4">
                     <p class="font-sans text-xs text-slate-500">
                         <span id="toggle-text">Require an entity link?</span> 
-                        <button onclick="toggleAuthMode()" data-cursor="hover" class="ml-1 font-bold text-dark hover:text-cyan-600 transition-colors uppercase tracking-wider font-display border-b border-dark/20 hover:border-cyan-600" id="toggle-btn">Sign Up</button>
+                        <button id="mode-toggle-btn" data-cursor="hover" class="ml-1 font-bold text-electric hover:text-electricDark transition-colors uppercase tracking-wider font-display border-b border-electric/30 hover:border-electricDark">Sign Up</button>
                     </p>
                 </div>
                 
-                <!-- Success Overlay (Hidden by default) -->
-                <div id="auth-success-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 rounded-[2rem]">
-                    <div class="w-16 h-16 rounded-full border-2 border-dark flex items-center justify-center mb-4 relative">
-                        <div class="absolute inset-0 rounded-full border-2 border-t-cyan-glow animate-spin"></div>
-                        <svg class="w-6 h-6 text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div id="auth-success-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 rounded-3xl md:rounded-[2rem]">
+                    <div class="w-16 h-16 rounded-full border-2 border-slate-200 flex items-center justify-center mb-4 relative">
+                        <div class="absolute inset-0 rounded-full border-2 border-t-electric animate-spin"></div>
+                        <svg class="w-6 h-6 text-electric" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                     <h3 class="font-cinematic text-xl text-dark">Link Established</h3>
-                    <p class="font-mono text-[10px] text-slate-500 tracking-widest mt-2 uppercase">Redirecting to interface...</p>
+                    <p class="font-mono text-[10px] text-electric tracking-widest mt-2 uppercase">Redirecting to interface...</p>
                 </div>
-
             </div>
         </div>
     </div>
-    <!-- Main Content Wrapper for Smooth Scroll -->
+
     <main id="smooth-wrapper" class="w-full relative">
-        
-        <!-- 1. HERO SECTION -->
-        <section id="hero" class="relative h-screen w-full flex items-center justify-center overflow-hidden holo-grid pt-20">
+        <section id="hero" class="relative h-[100svh] min-h-[600px] w-full flex items-center justify-center overflow-hidden holo-grid pt-16 md:pt-20">
             <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 z-0"></div>
             
-            <div class="relative z-10 text-center flex flex-col items-center px-4 max-w-7xl mx-auto">
-                <div class="glass-panel px-4 py-1 rounded-full mb-8 inline-block animate-pulse">
-                    <p class="font-display text-xs font-semibold tracking-widest text-slate-500 uppercase">System Active • Neural Uplink Established</p>
+            <div class="relative z-10 text-center flex flex-col items-center px-4 max-w-7xl mx-auto w-full">
+                <div class="glass-panel px-4 py-1.5 rounded-full mb-6 md:mb-8 inline-block animate-pulse border-electric/30">
+                    <p class="font-display text-[9px] md:text-xs font-semibold tracking-widest text-electric uppercase">System Active • Neural Uplink Established</p>
                 </div>
                 
-                <h1 class="font-cinematic text-6xl md:text-8xl lg:text-[9rem] leading-[0.85] tracking-tighter text-dark mb-8 reveal-text">
+                <h1 class="font-cinematic text-4xl sm:text-6xl md:text-8xl lg:text-[9rem] leading-[0.9] md:leading-[0.85] tracking-tighter text-dark mb-6 md:mb-8 reveal-text w-full">
                     <span class="block overflow-hidden"><span class="hero-line block">HUMAN</span></span>
                     <span class="block overflow-hidden"><span class="hero-line block text-slate-400">LEARNING IS</span></span>
-                    <span class="block overflow-hidden"><span class="hero-line block">OBSOLETE.</span></span>
+                    <span class="block overflow-hidden"><span class="hero-line block text-electric">OBSOLETE.</span></span>
                 </h1>
                 
-                <p class="font-sans text-lg md:text-2xl text-slate-600 max-w-2xl font-light tracking-wide mb-12 opacity-0 hero-sub">
+                <p class="font-sans text-sm md:text-xl lg:text-2xl text-slate-600 max-w-2xl font-light tracking-wide mb-8 md:mb-12 opacity-0 hero-sub px-4">
                     Your brain deserves better software. Upgrade your cognition with advanced AI architecture designed for absolute academic superiority.
                 </p>
 
-                <div class="flex gap-6 opacity-0 hero-cta">
-                    <button data-cursor="hover" class="bg-dark text-white px-8 py-4 rounded-none font-display uppercase tracking-[0.2em] text-sm hover:bg-slate-800 transition-colors shadow-2xl hover:shadow-glow relative overflow-hidden group">
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 opacity-0 hero-cta w-full sm:w-auto px-6">
+                    <button id="hero-start-btn" data-cursor="hover" class="w-full sm:w-auto bg-electric text-white px-8 py-4 rounded-xl md:rounded-none font-display uppercase tracking-[0.2em] text-xs md:text-sm hover:bg-electricDark transition-colors shadow-2xl hover:shadow-glow relative overflow-hidden group">
                         <span class="relative z-10">Commence Evolution</span>
-                        <div class="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 opacity-10"></div>
                     </button>
-                    <button data-cursor="hover" class="glass-panel text-dark px-8 py-4 rounded-none font-display uppercase tracking-[0.2em] text-sm hover:bg-white transition-colors">
+                    <button data-cursor="hover" class="w-full sm:w-auto glass-panel text-dark px-8 py-4 rounded-xl md:rounded-none font-display uppercase tracking-[0.2em] text-xs md:text-sm hover:bg-white transition-colors border-electric/20">
                         View Architecture
                     </button>
                 </div>
             </div>
 
-            <!-- Scroll Indicator -->
-            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-                <span class="font-display text-[10px] uppercase tracking-widest">Scroll Sequence</span>
-                <div class="w-[1px] h-12 bg-dark/20 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-full bg-dark transform -translate-y-full animate-[scrolldown_1.5s_ease-in-out_infinite]"></div>
+            <div class="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+                <span class="font-display text-[8px] md:text-[10px] uppercase tracking-widest">Scroll Sequence</span>
+                <div class="w-[1px] h-8 md:h-12 bg-dark/20 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-full bg-electric transform -translate-y-full animate-[scrolldown_1.5s_ease-in-out_infinite]"></div>
                 </div>
             </div>
         </section>
-
-        <!-- 2. COGNITIVE REVOLUTION -->
-        <section id="revolution" class="min-h-screen w-full relative flex items-center py-32 px-8 bg-white z-10">
-            <div class="max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-20 items-center">
-                <div class="w-full md:w-1/2" data-speed="0.9">
-                    <div class="font-display text-xs font-bold tracking-[0.3em] text-slate-400 mb-6 uppercase">01 / The Paradigm Shift</div>
-                    <h2 class="font-display text-5xl md:text-7xl font-bold tracking-tight text-dark mb-8 leading-none section-title">
-                        THE <br> INDUSTRIAL <br> FAILURE.
+                <section id="revolution" class="min-h-screen w-full relative flex items-center py-20 md:py-32 px-6 md:px-8 bg-white z-10">
+            <div class="max-w-6xl mx-auto w-full flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+                <div class="w-full lg:w-1/2" data-speed="0.9">
+                    <div class="font-display text-[10px] md:text-xs font-bold tracking-[0.3em] text-electric mb-4 md:mb-6 uppercase">01 / The Paradigm Shift</div>
+                    <h2 class="font-display text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-dark mb-6 md:mb-8 leading-none section-title">
+                        THE <br> INDUSTRIAL <br> <span class="text-slate-400">FAILURE.</span>
                     </h2>
-                    <div class="w-24 h-[1px] bg-dark/20 mb-8"></div>
-                    <p class="font-sans text-xl text-slate-600 font-light leading-relaxed mb-6">
+                    <div class="w-16 md:w-24 h-[2px] bg-electric mb-6 md:mb-8"></div>
+                    <p class="font-sans text-base md:text-xl text-slate-600 font-light leading-relaxed mb-4 md:mb-6">
                         Legacy education systems are fundamentally broken. They rely on outdated memorization protocols, mass-produced coaching factories, and distraction loops that degrade attention spans.
                     </p>
-                    <p class="font-sans text-xl text-slate-600 font-light leading-relaxed">
-                        Don’t prepare for exams. <strong class="font-medium text-dark">Upgrade cognition.</strong> Vidyaplus introduces a systematic, AI-driven methodology to rewire academic absorption.
+                    <p class="font-sans text-base md:text-xl text-slate-600 font-light leading-relaxed">
+                        Don’t prepare for exams. <strong class="font-medium text-electric">Upgrade cognition.</strong> Vidyaplus introduces a systematic, AI-driven methodology to rewire academic absorption.
                     </p>
                 </div>
-                <div class="w-full md:w-1/2 relative h-[600px] flex items-center justify-center" data-speed="1.1">
-                    <!-- Abstract Glass Object -->
-                    <div class="absolute w-96 h-96 rounded-full border border-slate-200 animate-[spin_20s_linear_infinite]"></div>
-                    <div class="absolute w-64 h-64 rounded-full border border-slate-300 animate-[spin_15s_linear_infinite_reverse]"></div>
-                    <div class="glass-panel w-80 h-96 relative z-10 flex flex-col justify-between p-8 backdrop-blur-3xl border-white shadow-2xl">
+                <div class="w-full lg:w-1/2 relative h-[400px] md:h-[600px] flex items-center justify-center mt-10 lg:mt-0" data-speed="1.1">
+                    <div class="absolute w-64 md:w-96 h-64 md:h-96 rounded-full border border-electric/30 animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute w-48 md:w-64 h-48 md:h-64 rounded-full border border-cyan-glow/40 animate-[spin_15s_linear_infinite_reverse]"></div>
+                    <div class="glass-panel w-full max-w-[320px] h-72 md:h-96 relative z-10 flex flex-col justify-between p-6 md:p-8 backdrop-blur-3xl border-white/80 shadow-2xl rounded-3xl">
                         <div class="flex justify-between items-start">
-                            <span class="font-display text-xs tracking-widest uppercase">System Status</span>
-                            <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="font-display text-[10px] md:text-xs tracking-widest uppercase font-bold text-electric">System Status</span>
+                            <span class="h-2 w-2 rounded-full bg-electric animate-pulse shadow-[0_0_10px_rgba(37,99,235,0.8)]"></span>
                         </div>
-                        <div class="font-display text-4xl font-light text-dark">
-                            DOPAMINE<br>RECALIBRATION<br>ACTIVE.
+                        <div class="font-display text-2xl md:text-4xl font-light text-dark">
+                            DOPAMINE<br><span class="font-bold text-electric">RECALIBRATION</span><br>ACTIVE.
                         </div>
-                        <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-dark/20 to-transparent"></div>
+                        <div class="h-[2px] w-full bg-gradient-to-r from-electric via-cyan-glow to-transparent"></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 3. AI INTELLIGENCE ENGINE & 6. NEXT-GEN FEATURE SYSTEM -->
-        <section id="engine" class="py-32 px-8 bg-slate-50 relative z-10 border-y border-slate-200 overflow-hidden">
-            <!-- Decorative background elements -->
-            <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white to-transparent opacity-50 pointer-events-none"></div>
+        <section id="engine" class="py-20 md:py-32 px-6 md:px-8 bg-slate-50 relative z-10 border-y border-slate-200 overflow-hidden">
+            <div class="absolute top-0 right-0 w-full md:w-1/2 h-full bg-gradient-to-l from-blue-50 to-transparent opacity-50 pointer-events-none"></div>
             
-            <div class="max-w-7xl mx-auto">
-                <div class="mb-20 text-center">
-                    <div class="font-display text-xs font-bold tracking-[0.3em] text-slate-400 mb-6 uppercase">02 / Architecture</div>
-                    <h2 class="font-cinematic text-4xl md:text-6xl text-dark uppercase tracking-tighter">
+            <div class="max-w-7xl mx-auto relative z-10">
+                <div class="mb-12 md:mb-20 text-center md:text-left">
+                    <div class="font-display text-[10px] md:text-xs font-bold tracking-[0.3em] text-electric mb-4 md:mb-6 uppercase">02 / Architecture</div>
+                    <h2 class="font-cinematic text-3xl md:text-5xl lg:text-6xl text-dark uppercase tracking-tighter">
                         Intelligence Engine
                     </h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Feature 1: Academic -->
-                    <div class="glass-panel feature-card p-10 col-span-1 md:col-span-2 relative overflow-hidden bg-white/50">
-                        <div class="absolute top-0 right-0 p-6 opacity-10 font-cinematic text-6xl">PCME</div>
-                        <h3 class="font-display text-2xl font-bold mb-4">Advanced Analytics Core</h3>
-                        <p class="font-sans text-slate-600 font-light mb-8 max-w-md">Predictive scoring models mapped directly to structural frameworks of Physics, Chemistry, and Mathematics.</p>
-                        <div class="flex gap-4">
-                            <div class="h-1 flex-1 bg-slate-100 overflow-hidden rounded"><div class="h-full bg-dark w-[85%]"></div></div>
-                            <span class="font-display text-xs font-bold">85% OPTIMIZED</span>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div class="glass-panel feature-card p-6 md:p-10 col-span-1 md:col-span-2 relative overflow-hidden bg-white/70 rounded-3xl border-electric/10">
+                        <div class="absolute top-0 right-0 p-4 md:p-6 opacity-[0.03] font-cinematic text-5xl md:text-8xl text-electric">PCME</div>
+                        <h3 class="font-display text-xl md:text-2xl font-bold mb-3 md:mb-4 text-dark">Advanced Analytics Core</h3>
+                        <p class="font-sans text-sm md:text-base text-slate-600 font-light mb-6 md:mb-8 max-w-md">Predictive scoring models mapped directly to structural frameworks of Physics, Chemistry, and Mathematics.</p>
+                        <div class="flex gap-4 items-center">
+                            <div class="h-1.5 flex-1 bg-slate-200 overflow-hidden rounded-full"><div class="h-full bg-electric w-[85%] shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div></div>
+                            <span class="font-display text-[10px] md:text-xs font-bold text-electric">85% OPTIMIZED</span>
                         </div>
                     </div>
 
-                    <!-- Feature 2 -->
-                    <div class="glass-panel feature-card p-10 bg-white/50 flex flex-col justify-between">
+                    <div class="glass-panel feature-card p-6 md:p-10 bg-white/70 flex flex-col justify-between rounded-3xl border-electric/10">
                         <div>
-                            <h3 class="font-display text-xl font-bold mb-2">Neural Routing</h3>
-                            <p class="font-sans text-sm text-slate-600 font-light">Adaptive difficulty scaling in real-time.</p>
+                            <h3 class="font-display text-lg md:text-xl font-bold mb-2 text-dark">Neural Routing</h3>
+                            <p class="font-sans text-xs md:text-sm text-slate-600 font-light">Adaptive difficulty scaling in real-time.</p>
                         </div>
-                        <div class="w-full h-24 border border-slate-200 mt-6 relative overflow-hidden flex items-end">
-                            <!-- Abstract bar chart -->
-                            <div class="w-1/4 h-[40%] bg-slate-200 mx-1"></div>
-                            <div class="w-1/4 h-[70%] bg-slate-300 mx-1"></div>
-                            <div class="w-1/4 h-[50%] bg-slate-400 mx-1"></div>
-                            <div class="w-1/4 h-[90%] bg-dark mx-1"></div>
-                        </div>
-                    </div>
-
-                    <!-- Feature 3 -->
-                    <div class="glass-panel feature-card p-10 bg-white/50">
-                        <h3 class="font-display text-xl font-bold mb-4">Focus Isolation</h3>
-                        <p class="font-sans text-sm text-slate-600 font-light mb-6">Eliminates UI friction. Minimalist interfaces designed for prolonged deep work without digital fatigue.</p>
-                        <div class="w-12 h-12 rounded-full border border-dark flex items-center justify-center">
-                            <div class="w-2 h-2 bg-dark rounded-full"></div>
+                        <div class="w-full h-16 md:h-24 border-b border-electric/20 mt-6 relative overflow-hidden flex items-end justify-between px-2">
+                            <div class="w-[20%] h-[40%] bg-blue-200 rounded-t-sm"></div>
+                            <div class="w-[20%] h-[70%] bg-blue-300 rounded-t-sm"></div>
+                            <div class="w-[20%] h-[50%] bg-blue-400 rounded-t-sm"></div>
+                            <div class="w-[20%] h-[90%] bg-electric rounded-t-sm shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
                         </div>
                     </div>
 
-                    <!-- Feature 4 -->
-                    <div class="glass-panel feature-card p-10 bg-dark text-white col-span-1 md:col-span-2 group">
-                        <div class="flex justify-between items-start mb-12">
-                            <h3 class="font-display text-2xl font-bold">Weakness Heatmaps</h3>
-                            <span class="font-mono text-xs opacity-50 border border-white/20 px-2 py-1">LIVE DATA</span>
+                    <div class="glass-panel feature-card p-6 md:p-10 bg-white/70 rounded-3xl border-electric/10">
+                        <h3 class="font-display text-lg md:text-xl font-bold mb-3 md:mb-4 text-dark">Focus Isolation</h3>
+                        <p class="font-sans text-xs md:text-sm text-slate-600 font-light mb-6">Eliminates UI friction. Minimalist interfaces designed for prolonged deep work without digital fatigue.</p>
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-electric flex items-center justify-center">
+                            <div class="w-2 h-2 bg-electric rounded-full animate-ping"></div>
                         </div>
-                        <p class="font-sans text-slate-400 font-light max-w-md">Algorithmic identification of conceptual gaps before they manifest in examination scenarios.</p>
-                        <div class="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-tl-full transform translate-x-10 translate-y-10 group-hover:scale-110 transition-transform duration-700"></div>
+                    </div>
+
+                    <div class="glass-panel feature-card p-6 md:p-10 bg-dark text-white col-span-1 md:col-span-2 group rounded-3xl overflow-hidden border-electric/30">
+                        <div class="flex justify-between items-start mb-8 md:mb-12 relative z-10">
+                            <h3 class="font-display text-xl md:text-2xl font-bold text-white">Weakness Heatmaps</h3>
+                            <span class="font-mono text-[9px] md:text-xs text-electric border border-electric/50 bg-electric/10 px-2 md:px-3 py-1 rounded">LIVE DATA</span>
+                        </div>
+                        <p class="font-sans text-sm md:text-base text-slate-300 font-light max-w-md relative z-10">Algorithmic identification of conceptual gaps before they manifest in examination scenarios.</p>
+                        <div class="absolute bottom-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-electric/20 blur-[40px] rounded-full transform translate-x-10 translate-y-10 group-hover:scale-125 transition-transform duration-700"></div>
                     </div>
                 </div>
             </div>
         </section>
-        <!-- 4. IMMERSIVE DATA EXPERIENCE -->
-        <section id="data" class="py-40 bg-white relative z-10">
-            <div class="max-w-7xl mx-auto px-8">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-12 border-t border-b border-slate-100 py-16">
+                <section id="data" class="py-24 md:py-40 bg-white relative z-10">
+            <div class="max-w-7xl mx-auto px-6 md:px-8">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 border-y border-slate-100 py-12 md:py-16">
                     <div class="text-center" data-speed="1.1">
-                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">3.4</div>
-                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Million Parameters</div>
+                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-electric mb-2 counter">3.4</div>
+                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-500 uppercase font-bold">Million Parameters</div>
                     </div>
                     <div class="text-center" data-speed="0.9">
-                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">94</div>
-                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Retention Rate (%)</div>
+                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-dark mb-2 counter">94</div>
+                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-500 uppercase font-bold">Retention Rate (%)</div>
                     </div>
                     <div class="text-center" data-speed="1.15">
-                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">0.2</div>
-                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Latency (ms)</div>
+                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-dark mb-2 counter">0.2</div>
+                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-500 uppercase font-bold">Latency (ms)</div>
                     </div>
                     <div class="text-center" data-speed="0.85">
-                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">10</div>
-                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Cognitive Multiplier (x)</div>
+                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-electric mb-2 counter">10</div>
+                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-500 uppercase font-bold">Cognitive Multiplier (x)</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. EVOLUTION TIMELINE -->
-        <section id="timeline" class="py-32 bg-slate-50 relative z-10 border-t border-slate-200">
-            <div class="max-w-4xl mx-auto px-8 relative">
-                <!-- Vertical Line -->
-                <div class="absolute left-[39px] md:left-1/2 top-0 bottom-0 w-[1px] bg-slate-300 transform md:-translate-x-1/2">
-                    <div class="timeline-progress w-full h-0 bg-dark"></div>
+        <section id="timeline" class="py-20 md:py-32 bg-slate-50 relative z-10 border-t border-slate-200">
+            <div class="max-w-4xl mx-auto px-6 md:px-8 relative">
+                <div class="absolute left-[31px] md:left-1/2 top-0 bottom-0 w-[2px] bg-slate-200 transform md:-translate-x-1/2">
+                    <div class="timeline-progress w-full h-0 bg-electric shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
                 </div>
 
-                <!-- Items -->
-                <div class="relative z-10 space-y-32">
-                    
+                <div class="relative z-10 space-y-20 md:space-y-32">
                     <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
-                        <div class="w-full md:w-5/12 text-left md:text-right pl-20 md:pl-0 pr-0 md:pr-12">
-                            <h4 class="font-display text-xl font-bold text-dark mb-2">Industrial Education</h4>
-                            <p class="font-sans text-sm text-slate-500">Standardized output. Mass production of identical academic profiles. High inefficiency.</p>
+                        <div class="w-full md:w-5/12 text-left md:text-right pl-16 md:pl-0 pr-0 md:pr-12">
+                            <h4 class="font-display text-lg md:text-xl font-bold text-dark mb-2">Industrial Education</h4>
+                            <p class="font-sans text-xs md:text-sm text-slate-500">Standardized output. Mass production of identical academic profiles. High inefficiency.</p>
                         </div>
-                        <div class="absolute left-10 md:left-1/2 w-3 h-3 bg-white border-2 border-slate-400 rounded-full transform -translate-x-1/2 mt-6 md:mt-0 shadow-[0_0_0_8px_rgba(248,250,252,1)]"></div>
+                        <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white border-[3px] border-slate-300 rounded-full transform -translate-x-1/2 mt-[2px] md:mt-0 shadow-[0_0_0_6px_rgba(248,250,252,1)]"></div>
                         <div class="w-full md:w-5/12 hidden md:block"></div>
                     </div>
 
                     <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
                         <div class="w-full md:w-5/12 hidden md:block"></div>
-                        <div class="absolute left-10 md:left-1/2 w-3 h-3 bg-white border-2 border-slate-400 rounded-full transform -translate-x-1/2 mt-6 md:mt-0 shadow-[0_0_0_8px_rgba(248,250,252,1)]"></div>
-                        <div class="w-full md:w-5/12 text-left pl-20 md:pl-12">
-                            <h4 class="font-display text-xl font-bold text-dark mb-2">Coaching Factories</h4>
-                            <p class="font-sans text-sm text-slate-500">Brute-force memorization. Extreme psychological pressure. Diminishing returns on time invested.</p>
+                        <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white border-[3px] border-slate-300 rounded-full transform -translate-x-1/2 mt-[2px] md:mt-0 shadow-[0_0_0_6px_rgba(248,250,252,1)]"></div>
+                        <div class="w-full md:w-5/12 text-left pl-16 md:pl-12">
+                            <h4 class="font-display text-lg md:text-xl font-bold text-dark mb-2">Coaching Factories</h4>
+                            <p class="font-sans text-xs md:text-sm text-slate-500">Brute-force memorization. Extreme psychological pressure. Diminishing returns on time invested.</p>
                         </div>
                     </div>
 
                     <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
-                        <div class="w-full md:w-5/12 text-left md:text-right pl-20 md:pl-0 pr-0 md:pr-12">
-                            <div class="inline-block border border-dark text-dark text-xs px-2 py-1 mb-2 font-mono">CURRENT ERA</div>
-                            <h4 class="font-display text-2xl font-bold text-dark mb-2">AI Intelligence Era</h4>
-                            <p class="font-sans text-sm text-slate-700 font-medium">Hyper-personalized algorithms. Deep cognitive analysis. The future topper is AI-assisted.</p>
+                        <div class="w-full md:w-5/12 text-left md:text-right pl-16 md:pl-0 pr-0 md:pr-12">
+                            <div class="inline-block border border-electric text-electric bg-blue-50 text-[9px] md:text-xs px-2 py-1 mb-2 font-mono font-bold rounded">CURRENT ERA</div>
+                            <h4 class="font-display text-xl md:text-2xl font-bold text-dark mb-2">AI Intelligence Era</h4>
+                            <p class="font-sans text-xs md:text-sm text-slate-700 font-medium">Hyper-personalized algorithms. Deep cognitive analysis. The future topper is AI-assisted.</p>
                         </div>
-                        <div class="absolute left-10 md:left-1/2 w-5 h-5 bg-dark border-4 border-white rounded-full transform -translate-x-1/2 mt-6 md:mt-0 shadow-[0_0_20px_rgba(15,23,42,0.4)]"></div>
+                        <div class="absolute left-8 md:left-1/2 w-6 h-6 bg-electric border-4 border-white rounded-full transform -translate-x-1/2 mt-[2px] md:mt-0 shadow-[0_0_15px_rgba(37,99,235,0.6)]"></div>
                         <div class="w-full md:w-5/12 hidden md:block"></div>
                     </div>
-
                 </div>
             </div>
         </section>
 
-        <!-- 7. FUTURE TESTIMONIALS (AI LOGS) -->
-        <section id="testimonials" class="py-40 bg-white relative z-10 overflow-hidden">
-            <div class="max-w-7xl mx-auto px-8 relative">
-                <div class="font-display text-xs font-bold tracking-[0.3em] text-slate-400 mb-16 uppercase text-center">03 / Intercepted Transmissions</div>
+        <section id="testimonials" class="py-24 md:py-40 bg-white relative z-10 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 md:px-8 relative">
+                <div class="font-display text-[10px] md:text-xs font-bold tracking-[0.3em] text-electric mb-12 md:mb-16 uppercase text-center">03 / Intercepted Transmissions</div>
                 
-                <div class="flex flex-col md:flex-row gap-8 justify-center">
-                    <!-- Log 1 -->
-                    <div class="glass-panel p-8 w-full md:w-1/3 border border-slate-200 relative group">
-                        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-dark/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
-                        <div class="flex justify-between items-center mb-6 font-mono text-[10px] text-slate-400">
+                <div class="flex flex-col md:flex-row gap-6 md:gap-8 justify-center items-center">
+                    <div class="glass-panel p-6 md:p-8 w-full md:w-1/3 border border-blue-100 rounded-3xl relative group shadow-lg hover:shadow-xl">
+                        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-electric to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
+                        <div class="flex justify-between items-center mb-6 font-mono text-[9px] md:text-[10px] text-slate-500 font-bold">
                             <span>LOG ID: 894.A2</span>
-                            <span class="text-green-600 animate-pulse">VERIFIED</span>
+                            <span class="text-electric animate-pulse">VERIFIED</span>
                         </div>
-                        <div class="font-sans text-lg text-slate-700 mb-8 leading-relaxed">
+                        <div class="font-sans text-base md:text-lg text-slate-700 mb-8 leading-relaxed italic">
                             "Cognitive load reduced by 40% within three weeks. Focus retention during complex calculus derivations increased exponentially."
                         </div>
-                        <div class="font-display text-sm font-bold uppercase tracking-wider text-dark">Subject: Alpha-9</div>
+                        <div class="font-display text-xs md:text-sm font-bold uppercase tracking-wider text-dark border-t border-slate-100 pt-4">Subject: Alpha-9</div>
                     </div>
 
-                    <!-- Log 2 -->
-                    <div class="glass-panel p-8 w-full md:w-1/3 border border-slate-200 relative group md:transform md:translate-y-8">
-                        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-dark/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
-                        <div class="flex justify-between items-center mb-6 font-mono text-[10px] text-slate-400">
+                    <div class="glass-panel p-6 md:p-8 w-full md:w-1/3 border border-blue-100 rounded-3xl relative group shadow-lg hover:shadow-xl md:transform md:translate-y-8 mt-6 md:mt-0">
+                        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-electric to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
+                        <div class="flex justify-between items-center mb-6 font-mono text-[9px] md:text-[10px] text-slate-500 font-bold">
                             <span>LOG ID: 912.B7</span>
-                            <span class="text-green-600 animate-pulse">VERIFIED</span>
+                            <span class="text-electric animate-pulse">VERIFIED</span>
                         </div>
-                        <div class="font-sans text-lg text-slate-700 mb-8 leading-relaxed">
+                        <div class="font-sans text-base md:text-lg text-slate-700 mb-8 leading-relaxed italic">
                             "The predictive scoring module accurately mapped my structural weaknesses in Organic Chemistry. Admission probability stabilized at 99.8%."
                         </div>
-                        <div class="font-display text-sm font-bold uppercase tracking-wider text-dark">Subject: Delta-4</div>
+                        <div class="font-display text-xs md:text-sm font-bold uppercase tracking-wider text-dark border-t border-slate-100 pt-4">Subject: Delta-4</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 8. FINAL CINEMATIC CTA -->
-        <section id="cta" class="min-h-screen relative flex items-center justify-center bg-transparent z-10 pointer-events-none">
-            <!-- The background canvas shows through here -->
-            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
+        <section id="cta" class="min-h-[80vh] relative flex items-center justify-center bg-transparent z-10 pointer-events-none">
+            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
             
-            <div class="relative z-20 text-center max-w-4xl mx-auto px-4 pointer-events-auto">
-                <h2 class="font-cinematic text-4xl md:text-6xl text-dark tracking-tighter mb-8 cta-text opacity-0 transform translate-y-10">
+            <div class="relative z-20 text-center max-w-4xl mx-auto px-6 pointer-events-auto w-full">
+                <h2 class="font-cinematic text-3xl sm:text-4xl md:text-6xl text-dark tracking-tighter mb-8 md:mb-10 cta-text opacity-0 transform translate-y-10 leading-tight">
                     THE NEXT GENERATION <br>
                     <span class="text-slate-400">WON'T STUDY HARDER.</span> <br>
-                    THEY'LL EVOLVE FASTER.
+                    <span class="text-electric">THEY'LL EVOLVE FASTER.</span>
                 </h2>
                 
-                <div class="mt-16 cta-btn opacity-0">
-                    <button data-cursor="hover" onclick="openAuthModal('signup')" class="group relative px-12 py-6 bg-transparent overflow-hidden">
-                        <div class="absolute inset-0 border border-dark transition-all duration-300 group-hover:border-transparent"></div>
-                        <div class="absolute inset-0 bg-dark transform scale-y-0 origin-bottom transition-transform duration-500 group-hover:scale-y-100"></div>
-                        <span class="relative z-10 font-display text-sm uppercase tracking-[0.3em] font-bold text-dark group-hover:text-white transition-colors duration-300">
+                <div class="mt-12 md:mt-16 cta-btn opacity-0">
+                    <button id="cta-start-btn" data-cursor="hover" class="group relative px-8 md:px-12 py-5 md:py-6 bg-transparent overflow-hidden rounded-xl md:rounded-none w-full sm:w-auto">
+                        <div class="absolute inset-0 border-2 border-electric transition-all duration-300 group-hover:border-transparent rounded-xl md:rounded-none"></div>
+                        <div class="absolute inset-0 bg-electric transform scale-y-0 origin-bottom transition-transform duration-500 group-hover:scale-y-100 rounded-xl md:rounded-none"></div>
+                        <span class="relative z-10 font-display text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] font-bold text-electric group-hover:text-white transition-colors duration-300">
                             Initialize Vidyaplus Core
                         </span>
                     </button>
                 </div>
             </div>
         </section>
-        <!-- Minimal Footer -->
-        <footer class="py-8 border-t border-slate-100 bg-white relative z-10 text-center">
-            <div class="font-display text-[10px] uppercase tracking-widest text-slate-400">
+
+        <footer class="py-8 border-t border-slate-200 bg-white relative z-10 text-center">
+            <div class="font-display text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">
                 &copy; 2026 Vidyaplus Systems. All cognitive rights reserved.
             </div>
         </footer>
 
     </main>
+        <script type="module">
+        // 🔒 FIREBASE INTEGRATION (Vidyaplus Config)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrrYpYvUdahsOtI4",
+            authDomain: "vidyaplus-d9c3b.firebaseapp.com",
+            projectId: "vidyaplus-d9c3b",
+            storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
+            messagingSenderId: "492916889178",
+            appId: "1:492916889178:web:a3d3f3737b1236167caa63"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
         // --- 1. Custom Magnetic Cursor ---
         const cursorDot = document.getElementById('cursor-dot');
         const cursorOutline = document.getElementById('cursor-outline');
         let mouseX = 0, mouseY = 0;
         let outlineX = 0, outlineY = 0;
-        let cursorHoverState = false;
+        
+        // Disable custom cursor on mobile devices for better touch experience
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        
+        if(!isTouchDevice) {
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX; mouseY = e.clientY;
+                cursorDot.style.left = `${mouseX}px`; cursorDot.style.top = `${mouseY}px`;
+            });
 
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            
-            cursorDot.style.left = `${mouseX}px`;
-            cursorDot.style.top = `${mouseY}px`;
-        });
+            function animateCursor() {
+                let distX = mouseX - outlineX; let distY = mouseY - outlineY;
+                outlineX += distX * 0.15; outlineY += distY * 0.15;
+                cursorOutline.style.left = `${outlineX}px`; cursorOutline.style.top = `${outlineY}px`;
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
 
-        // Smooth outline follow
-        function animateCursor() {
-            let distX = mouseX - outlineX;
-            let distY = mouseY - outlineY;
-            
-            outlineX += distX * 0.15;
-            outlineY += distY * 0.15;
-            
-            cursorOutline.style.left = `${outlineX}px`;
-            cursorOutline.style.top = `${outlineY}px`;
-            
-            requestAnimationFrame(animateCursor);
+            document.body.addEventListener('mouseover', (e) => {
+                const interactable = e.target.closest('[data-cursor="hover"], button, a');
+                const textInput = e.target.closest('input[type="text"], input[type="email"], input[type="password"]');
+                if (interactable && !textInput) {
+                    cursorOutline.style.width = '60px'; cursorOutline.style.height = '60px';
+                    cursorOutline.style.backgroundColor = 'rgba(37, 99, 235, 0.05)';
+                    cursorDot.style.transform = 'scale(0.5)';
+                } else if (textInput) {
+                    cursorOutline.style.width = '24px'; cursorOutline.style.height = '40px';
+                    cursorOutline.style.borderRadius = '4px'; cursorOutline.style.backgroundColor = 'transparent';
+                    cursorOutline.style.borderColor = '#2563eb'; cursorDot.style.opacity = '0';
+                }
+            });
+
+            document.body.addEventListener('mouseout', (e) => {
+                const interactable = e.target.closest('[data-cursor="hover"], button, a, input');
+                if (interactable) {
+                    cursorOutline.style.width = '40px'; cursorOutline.style.height = '40px';
+                    cursorOutline.style.borderRadius = '50%'; cursorOutline.style.backgroundColor = 'transparent';
+                    cursorOutline.style.borderColor = 'rgba(37, 99, 235, 0.4)';
+                    cursorDot.style.transform = 'scale(1)'; cursorDot.style.opacity = '1';
+                }
+            });
+        } else {
+            if(cursorDot) cursorDot.style.display = 'none';
+            if(cursorOutline) cursorOutline.style.display = 'none';
+            document.body.style.cursor = 'auto';
         }
-        animateCursor();
-
-        // Hover effects for designated elements
-        document.body.addEventListener('mouseover', (e) => {
-            const interactable = e.target.closest('[data-cursor="hover"], button, a');
-            const textInput = e.target.closest('input[type="text"], input[type="email"], input[type="password"]');
-            
-            if (interactable && !textInput) {
-                cursorOutline.style.width = '60px';
-                cursorOutline.style.height = '60px';
-                cursorOutline.style.backgroundColor = 'rgba(15, 23, 42, 0.05)';
-                cursorDot.style.transform = 'scale(0.5)';
-            } else if (textInput) {
-                // Text input cursor style
-                cursorOutline.style.width = '24px';
-                cursorOutline.style.height = '40px';
-                cursorOutline.style.borderRadius = '4px';
-                cursorOutline.style.backgroundColor = 'transparent';
-                cursorOutline.style.borderColor = '#0f172a';
-                cursorDot.style.opacity = '0';
-            }
-        });
-
-        document.body.addEventListener('mouseout', (e) => {
-            const interactable = e.target.closest('[data-cursor="hover"], button, a, input');
-            if (interactable) {
-                cursorOutline.style.width = '40px';
-                cursorOutline.style.height = '40px';
-                cursorOutline.style.borderRadius = '50%';
-                cursorOutline.style.backgroundColor = 'transparent';
-                cursorOutline.style.borderColor = 'rgba(15, 23, 42, 0.3)';
-                cursorDot.style.transform = 'scale(1)';
-                cursorDot.style.opacity = '1';
-            }
-        });
 
         // --- 2. Lenis Smooth Scrolling ---
         const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smooth: true,
-            mouseMultiplier: 1,
-            smoothTouch: false,
-            touchMultiplier: 2,
-            infinite: false,
-        })
-
-        function raf(time) {
-            lenis.raf(time)
-            requestAnimationFrame(raf)
-        }
-        requestAnimationFrame(raf)
-
-        // --- 3. Three.js Background (AI Energy Waves) ---
+            duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical', gestureDirection: 'vertical', smooth: true,
+            mouseMultiplier: 1, smoothTouch: false, touchMultiplier: 2, infinite: false,
+        });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+                    // --- 3. Three.js Background (Electric Waves) ---
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff);
-        // Add subtle fog for depth
         scene.fog = new THREE.FogExp2(0xffffff, 0.02);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Create Particles
-        const particleCount = 3000;
+        const particleCount = window.innerWidth < 768 ? 1500 : 3000; // Less particles on mobile
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
         const initialPositions = new Float32Array(particleCount * 3);
 
         for(let i = 0; i < particleCount * 3; i+=3) {
-            // Spread across a wide area
             const x = (Math.random() - 0.5) * 50;
-            const y = (Math.random() - 0.5) * 20 - 5; // Lower down
+            const y = (Math.random() - 0.5) * 20 - 5;
             const z = (Math.random() - 0.5) * 40 - 10;
-            
-            positions[i] = x;
-            positions[i+1] = y;
-            positions[i+2] = z;
-            
-            initialPositions[i] = x;
-            initialPositions[i+1] = y;
-            initialPositions[i+2] = z;
+            positions[i] = x; positions[i+1] = y; positions[i+2] = z;
+            initialPositions[i] = x; initialPositions[i+1] = y; initialPositions[i+2] = z;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
         const material = new THREE.PointsMaterial({
-            color: 0x94a3b8, // Slate 400
-            size: 0.08,
-            transparent: true,
-            opacity: 0.6,
-            blending: THREE.AdditiveBlending
+            color: 0x3b82f6, // Switched to Blue tint
+            size: window.innerWidth < 768 ? 0.12 : 0.08,
+            transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending
         });
 
         const particles = new THREE.Points(geometry, material);
         scene.add(particles);
+        camera.position.z = 15; camera.position.y = 2;
 
-        camera.position.z = 15;
-        camera.position.y = 2;
+        const cameraRig = new THREE.Group(); cameraRig.add(camera); scene.add(cameraRig);
+        let targetX = 0; let targetY = 0;
 
-        // Camera rig for mouse interaction
-        const cameraRig = new THREE.Group();
-        cameraRig.add(camera);
-        scene.add(cameraRig);
-
-        let targetX = 0;
-        let targetY = 0;
-
-        window.addEventListener('mousemove', (e) => {
-            targetX = (e.clientX / window.innerWidth - 0.5) * 2;
-            targetY = (e.clientY / window.innerHeight - 0.5) * 2;
-        });
+        if(!isTouchDevice) {
+            window.addEventListener('mousemove', (e) => {
+                targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+                targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+        }
+        
         const clock = new THREE.Clock();
-
         function animateThree() {
             requestAnimationFrame(animateThree);
             const time = clock.getElapsedTime();
-
-            // Wave animation
             const posAttribute = geometry.attributes.position;
             for(let i = 0; i < particleCount; i++) {
-                const i3 = i * 3;
-                const ix = initialPositions[i3];
-                const iz = initialPositions[i3+2];
-                
-                // Complex wave math based on initial positions
+                const i3 = i * 3; const ix = initialPositions[i3]; const iz = initialPositions[i3+2];
                 posAttribute.array[i3+1] = initialPositions[i3+1] + Math.sin(ix * 0.5 + time) * 1.5 + Math.cos(iz * 0.3 + time * 0.8) * 1.5;
             }
             posAttribute.needsUpdate = true;
-
-            // Parallax mouse effect
             cameraRig.position.x += (targetX * 2 - cameraRig.position.x) * 0.02;
             cameraRig.position.y += (-targetY * 2 - cameraRig.position.y) * 0.02;
-            
-            // Slowly rotate scene
             particles.rotation.y = time * 0.05;
-
             renderer.render(scene, camera);
         }
         animateThree();
 
-        // Handle resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -856,154 +662,69 @@
 
         // --- 4. GSAP Animations Main Site ---
         gsap.registerPlugin(ScrollTrigger);
-
-        // Synchronize ScrollTrigger with Lenis
         lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time)=>{
-            lenis.raf(time * 1000);
-        });
+        gsap.ticker.add((time)=>{ lenis.raf(time * 1000); });
         gsap.ticker.lagSmoothing(0);
 
-        // Hero Sequence
         const tlHero = gsap.timeline({ defaults: { ease: "power4.out" }});
-        
-        // Split text simulation for hero
         const heroLines = document.querySelectorAll('.hero-line');
-        heroLines.forEach(line => {
-            line.innerHTML = `<span class="char">${line.innerHTML}</span>`;
-        });
+        heroLines.forEach(line => { line.innerHTML = `<span class="char">${line.innerHTML}</span>`; });
         
-        tlHero.to('.hero-line .char', {
-            y: "0%",
-            duration: 1.5,
-            stagger: 0.1,
-            delay: 0.5
-        })
-        .to('.hero-sub', {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: "power2.out"
-        }, "-=1")
-        .to('.hero-cta', {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: "power2.out"
-        }, "-=0.8");
+        tlHero.to('.hero-line .char', { y: "0%", duration: 1.5, stagger: 0.1, delay: 0.5 })
+        .to('.hero-sub', { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "-=1")
+        .to('.hero-cta', { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "-=0.8");
 
-        // Section Parallax
         document.querySelectorAll('[data-speed]').forEach(elem => {
-            gsap.to(elem, {
-                y: (i, el) => (1 - parseFloat(el.getAttribute('data-speed'))) * (ScrollTrigger.maxScroll(window) - (this.scrollY || 0)),
-                ease: "none",
-                scrollTrigger: {
-                    trigger: elem,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: 0.5
+            if(window.innerWidth > 768) { // Only do parallax on desktop
+                gsap.to(elem, {
+                    y: (i, el) => (1 - parseFloat(el.getAttribute('data-speed'))) * (ScrollTrigger.maxScroll(window) - (this.scrollY || 0)),
+                    ease: "none",
+                    scrollTrigger: { trigger: elem, start: "top bottom", end: "bottom top", scrub: 0.5 }
+                });
+            }
+        });
+
+        gsap.utils.toArray('.section-title').forEach(title => {
+            gsap.from(title, {
+                scrollTrigger: { trigger: title, start: "top 85%" },
+                y: 40, opacity: 0, duration: 1, ease: "power3.out"
+            });
+        });
+
+        gsap.utils.toArray('.counter').forEach(counter => {
+            let target = parseFloat(counter.innerText); let isInt = target % 1 === 0;
+            ScrollTrigger.create({
+                trigger: counter, start: "top 85%", once: true,
+                onEnter: () => {
+                    gsap.fromTo(counter, { innerText: 0 }, { 
+                        innerText: target, duration: 2, ease: "power2.out", snap: { innerText: isInt ? 1 : 0.1 },
+                        onUpdate: function() { counter.innerText = Number(this.targets()[0].innerText).toFixed(isInt ? 0 : 1); }
+                    });
                 }
             });
         });
 
-        // Section Title Reveal
-        gsap.utils.toArray('.section-title').forEach(title => {
-            gsap.from(title, {
-                scrollTrigger: {
-                    trigger: title,
-                    start: "top 80%",
-                },
-                y: 50,
-                opacity: 0,
-                duration: 1,
-                ease: "power3.out"
-            });
-        });
-
-        // Counters
-        gsap.utils.toArray('.counter').forEach(counter => {
-            let target = parseFloat(counter.innerText);
-            let isInt = target % 1 === 0;
-            
-            ScrollTrigger.create({
-                trigger: counter,
-                start: "top 85%",
-                onEnter: () => {
-                    gsap.fromTo(counter, 
-                        { innerText: 0 }, 
-                        { 
-                            innerText: target, 
-                            duration: 2, 
-                            ease: "power2.out",
-                            snap: { innerText: isInt ? 1 : 0.1 },
-                            onUpdate: function() {
-                                counter.innerText = Number(this.targets()[0].innerText).toFixed(isInt ? 0 : 1);
-                            }
-                        }
-                    );
-                },
-                once: true
-            });
-        });
-        // Timeline Animation
         const timelineItems = gsap.utils.toArray('.timeline-item');
-        gsap.to('.timeline-progress', {
-            height: "100%",
-            ease: "none",
-            scrollTrigger: {
-                trigger: "#timeline",
-                start: "top center",
-                end: "bottom center",
-                scrub: true
-            }
-        });
-
+        gsap.to('.timeline-progress', { height: "100%", ease: "none", scrollTrigger: { trigger: "#timeline", start: "top center", end: "bottom center", scrub: true }});
         timelineItems.forEach((item, i) => {
             ScrollTrigger.create({
-                trigger: item,
-                start: "top 60%",
+                trigger: item, start: "top 70%",
                 onEnter: () => {
-                    item.classList.remove('opacity-30');
-                    item.classList.add('opacity-100');
-                    
+                    item.classList.remove('opacity-30'); item.classList.add('opacity-100');
                     const dot = item.querySelector('div[class*="rounded-full"]');
                     if(dot) {
                         gsap.to(dot, { scale: 1.2, duration: 0.3, yoyo: true, repeat: 1 });
-                        if(i === timelineItems.length - 1) {
-                            dot.classList.add('bg-dark');
-                            dot.classList.remove('bg-white');
-                        }
+                        if(i === timelineItems.length - 1) { dot.classList.add('bg-electric'); dot.classList.remove('bg-white'); }
                     }
                 },
-                onLeaveBack: () => {
-                    item.classList.add('opacity-30');
-                    item.classList.remove('opacity-100');
-                }
+                onLeaveBack: () => { item.classList.add('opacity-30'); item.classList.remove('opacity-100'); }
             });
         });
 
-        // Final CTA
-        const ctaTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#cta",
-                start: "top 60%",
-            }
-        });
-
-        ctaTl.to('.cta-text', {
-            opacity: 1,
-            y: 0,
-            duration: 1.5,
-            ease: "power4.out"
-        }).to('.cta-btn', {
-            opacity: 1,
-            duration: 1,
-            ease: "power2.out"
-        }, "-=0.5");
-
-
-        // --- 5. PREMIUM AUTHENTICATION MODAL SYSTEM ---
-
+        gsap.timeline({ scrollTrigger: { trigger: "#cta", start: "top 70%" }})
+            .to('.cta-text', { opacity: 1, y: 0, duration: 1.5, ease: "power4.out" })
+            .to('.cta-btn', { opacity: 1, duration: 1, ease: "power2.out" }, "-=0.5");
+                    // --- 5. PREMIUM AUTHENTICATION MODAL SYSTEM ---
         let currentAuthMode = 'login';
         const authWrapper = document.getElementById('auth-wrapper');
         const authModal = document.getElementById('auth-modal');
@@ -1012,7 +733,6 @@
         const authTitle = document.getElementById('auth-title');
         const authSubtitle = document.getElementById('auth-subtitle');
         const toggleText = document.getElementById('toggle-text');
-        const toggleBtn = document.getElementById('toggle-btn');
         
         // Mascot Elements
         const mascotFace = document.querySelector('.mascot-face');
@@ -1021,56 +741,35 @@
         const leftScan = document.getElementById('eye-left-scan');
         const rightScan = document.getElementById('eye-right-scan');
 
-        function openAuthModal(mode) {
-            lenis.stop(); // Pause background scrolling
-            
-            // Set initial mode
-            if(mode !== currentAuthMode) {
-                switchMode(mode, false);
-            }
-            // Cinematic Entrance Animation
-            const tl = gsap.timeline();
-            tl.to(authWrapper, {
-                opacity: 1,
-                pointerEvents: 'auto',
-                duration: 0.3,
-                ease: "power2.out"
-            })
-            .fromTo(authModal, 
-                { scale: 0.9, y: 40, opacity: 0 },
-                { scale: 1, y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.2)" },
-                "-=0.1"
-            );
+        // Wiring Buttons manually since functions in modules aren't global
+        document.getElementById('nav-login-btn').addEventListener('click', () => openAuthModal('login'));
+        document.getElementById('nav-signup-btn').addEventListener('click', () => openAuthModal('signup'));
+        document.getElementById('hero-start-btn').addEventListener('click', () => openAuthModal('signup'));
+        document.getElementById('cta-start-btn').addEventListener('click', () => openAuthModal('signup'));
+        document.getElementById('close-modal-btn').addEventListener('click', closeAuthModal);
+        document.getElementById('auth-backdrop').addEventListener('click', closeAuthModal);
+        document.getElementById('mode-toggle-btn').addEventListener('click', toggleAuthMode);
 
-            // Mascot awake animation
-            gsap.fromTo(mascotEyes, 
-                { height: 2 },
-                { height: 20, duration: 0.5, ease: "elastic.out(1, 0.5)", delay: 0.5 }
-            );
-            mascotStatus.innerText = "System Online";
+        function openAuthModal(mode) {
+            lenis.stop(); 
+            if(mode !== currentAuthMode) switchMode(mode, false);
+            
+            const tl = gsap.timeline();
+            tl.to(authWrapper, { opacity: 1, pointerEvents: 'auto', duration: 0.3, ease: "power2.out" })
+              .fromTo(authModal, { scale: 0.9, y: 40, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.2)" }, "-=0.1");
+
+            gsap.fromTo(mascotEyes, { height: 2 }, { height: 20, duration: 0.5, ease: "elastic.out(1, 0.5)", delay: 0.5 });
+            if(mascotStatus) mascotStatus.innerText = "System Online";
         }
 
         function closeAuthModal() {
             lenis.start();
-            
-            // Mascot sleep animation
+            if(mascotStatus) mascotStatus.innerText = "Shutting down...";
             gsap.to(mascotEyes, { height: 2, duration: 0.3 });
-            mascotStatus.innerText = "Shutting down...";
 
             const tl = gsap.timeline();
-            tl.to(authModal, {
-                scale: 0.95,
-                y: 20,
-                opacity: 0,
-                duration: 0.4,
-                ease: "power3.in"
-            })
-            .to(authWrapper, {
-                opacity: 0,
-                pointerEvents: 'none',
-                duration: 0.3,
-                ease: "power2.in"
-            }, "-=0.2");
+            tl.to(authModal, { scale: 0.95, y: 20, opacity: 0, duration: 0.4, ease: "power3.in" })
+              .to(authWrapper, { opacity: 0, pointerEvents: 'none', duration: 0.3, ease: "power2.in" }, "-=0.2");
         }
 
         function toggleAuthMode() {
@@ -1080,12 +779,11 @@
 
         function switchMode(mode, animate = true) {
             currentAuthMode = mode;
+            const toggleBtnEl = document.getElementById('mode-toggle-btn');
             
             if (mode === 'signup') {
-                authTitle.innerText = "Initialize Entity";
-                authSubtitle.innerText = "New Connection";
-                toggleText.innerText = "Already linked?";
-                toggleBtn.innerText = "Login";
+                authTitle.innerText = "Initialize Entity"; authSubtitle.innerText = "New Connection";
+                toggleText.innerText = "Already linked?"; toggleBtnEl.innerText = "Login";
 
                 if(animate) {
                     gsap.to(formLogin, { opacity: 0, y: -20, pointerEvents: 'none', duration: 0.4, ease: "power2.inOut" });
@@ -1094,16 +792,11 @@
                     gsap.set(formLogin, { opacity: 0, y: -20, pointerEvents: 'none' });
                     gsap.set(formSignup, { opacity: 1, y: 0, pointerEvents: 'auto' });
                 }
-                
-                mascotStatus.innerText = "Ready to register";
-                // Mascot curious look
+                if(mascotStatus) mascotStatus.innerText = "Ready to register";
                 gsap.to(mascotFace, { rotate: 5, duration: 0.3 });
-
             } else {
-                authTitle.innerText = "Access Core";
-                authSubtitle.innerText = "Welcome Back";
-                toggleText.innerText = "Require an entity link?";
-                toggleBtn.innerText = "Sign Up";
+                authTitle.innerText = "Access Core"; authSubtitle.innerText = "Welcome Back";
+                toggleText.innerText = "Require an entity link?"; toggleBtnEl.innerText = "Sign Up";
 
                 if(animate) {
                     gsap.to(formSignup, { opacity: 0, y: 20, pointerEvents: 'none', duration: 0.4, ease: "power2.inOut" });
@@ -1112,81 +805,122 @@
                     gsap.set(formSignup, { opacity: 0, y: 20, pointerEvents: 'none' });
                     gsap.set(formLogin, { opacity: 1, y: 0, pointerEvents: 'auto' });
                 }
-
-                mascotStatus.innerText = "Awaiting Credentials";
-                // Mascot reset look
+                if(mascotStatus) mascotStatus.innerText = "Awaiting Credentials";
                 gsap.to(mascotFace, { rotate: 0, duration: 0.3 });
             }
         }
 
-        // --- Mascot Interactions based on Form Inputs ---
-        
+        // --- Mascot Interactions ---
         const inputs = document.querySelectorAll('.futuristic-input');
-        
         inputs.forEach(input => {
             input.addEventListener('focus', (e) => {
-                const type = e.target.type;
-                const id = e.target.id;
-
-                if (type === 'password') {
-                    // Mascot hides/squints eyes for privacy
+                if (e.target.type === 'password') {
                     gsap.to(mascotEyes, { height: 2, width: 12, borderRadius: "4px", duration: 0.3 });
-                    mascotStatus.innerText = "Privacy mode enabled";
-                } else if (type === 'email' || type === 'text') {
-                    // Mascot opens eyes wide and shows scanning line
+                    if(mascotStatus) mascotStatus.innerText = "Privacy mode enabled";
+                } else {
                     gsap.to(mascotEyes, { height: 24, width: 20, borderRadius: "50%", duration: 0.3 });
                     gsap.to([leftScan, rightScan], { opacity: 1, yoyo: true, repeat: -1, y: 20, duration: 1.5, ease: "linear" });
-                    mascotStatus.innerText = "Analyzing input...";
+                    if(mascotStatus) mascotStatus.innerText = "Analyzing input...";
                 }
             });
-
-            input.addEventListener('blur', (e) => {
-                // Reset mascot eyes
+            input.addEventListener('blur', () => {
                 gsap.to(mascotEyes, { height: 20, width: 16, borderRadius: "50%", duration: 0.3 });
-                gsap.killTweensOf([leftScan, rightScan]);
-                gsap.set([leftScan, rightScan], { opacity: 0, y: 0 });
-                mascotStatus.innerText = "Awaiting input...";
+                gsap.killTweensOf([leftScan, rightScan]); gsap.set([leftScan, rightScan], { opacity: 0, y: 0 });
+                if(mascotStatus) mascotStatus.innerText = "Awaiting input...";
             });
-
             input.addEventListener('input', (e) => {
                 if (e.target.type !== 'password') {
-                    // Simulate eye tracking while typing (subtle face movement)
-                    const valLength = e.target.value.length;
-                    const maxMovement = 15;
-                    const moveX = Math.min((valLength * 1.5), maxMovement) - (maxMovement/2);
+                    const moveX = Math.min((e.target.value.length * 1.5), 15) - 7.5;
                     gsap.to(mascotFace, { x: moveX, duration: 0.1 });
                 }
             });
         });
-        // Handle Form Success Animation
-        function authSuccess() {
-            // Hide forms, show success overlay
-            const successOverlay = document.getElementById('auth-success-overlay');
-            
-            // Mascot Happy Animation
-            gsap.to(mascotFace, { x: 0, rotate: 0, duration: 0.2 });
-            gsap.to(mascotEyes, { height: 4, width: 20, borderRadius: "50% 50% 0 0", duration: 0.2 }); // Happy squint
-            mascotStatus.innerText = "Access Granted.";
 
-            gsap.to(successOverlay, { opacity: 1, pointerEvents: 'auto', duration: 0.5, delay: 0.3 });
-            
-            // Close after delay
-            setTimeout(() => {
-                closeAuthModal();
-                // Reset state
-                setTimeout(() => {
-                    gsap.set(successOverlay, { opacity: 0, pointerEvents: 'none' });
-                    inputs.forEach(i => i.value = '');
-                }, 500);
-            }, 2500);
-        }
-
-        // Mascot Random Blinking
         setInterval(() => {
-            if(Math.random() > 0.6 && mascotStatus.innerText !== "Privacy mode enabled") {
+            if(Math.random() > 0.6 && mascotStatus && mascotStatus.innerText !== "Privacy mode enabled") {
                 gsap.to(mascotEyes, { height: 2, duration: 0.1, yoyo: true, repeat: 1 });
             }
         }, 3000);
+
+        // --- REAL FIREBASE AUTH LOGIC ---
+        function triggerSuccessAnimation() {
+            const successOverlay = document.getElementById('auth-success-overlay');
+            gsap.to(mascotFace, { x: 0, rotate: 0, duration: 0.2 });
+            gsap.to(mascotEyes, { height: 4, width: 20, borderRadius: "50% 50% 0 0", duration: 0.2 }); 
+            if(mascotStatus) mascotStatus.innerText = "Access Granted.";
+            gsap.to(successOverlay, { opacity: 1, pointerEvents: 'auto', duration: 0.5, delay: 0.3 });
+            
+            setTimeout(() => { window.location.href = "explore.html"; }, 2000); // Redirect to platform
+        }
+
+        function restoreButton(btnId, originalText) {
+            const btn = document.getElementById(btnId);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        // Handle Login
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login-submit');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Authenticating..."; btn.disabled = true;
+
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                triggerSuccessAnimation();
+            } catch (err) {
+                alert("Login Failed: " + err.message.replace("Firebase: ", ""));
+                restoreButton('btn-login-submit', originalText);
+            }
+        });
+
+        // Handle Signup
+        document.getElementById('form-signup').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            
+            if(pass !== confirm) return alert("Security Error: Passcodes do not match.");
+
+            const btn = document.getElementById('btn-signup-submit');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Constructing..."; btn.disabled = true;
+
+            const email = document.getElementById('signup-email').value;
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                triggerSuccessAnimation();
+            } catch (err) {
+                alert("Creation Failed: " + err.message.replace("Firebase: ", ""));
+                restoreButton('btn-signup-submit', originalText);
+            }
+        });
+
+        // Handle Google Auth
+        const handleGoogleLogin = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                triggerSuccessAnimation();
+            } catch(err) { alert("Google Link Failed: " + err.message); }
+        };
+        document.getElementById('btn-google-login').addEventListener('click', handleGoogleLogin);
+        document.getElementById('btn-google-signup').addEventListener('click', handleGoogleLogin);
+
+        // Forgot Password 
+        document.getElementById('forgot-pass-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            if(!email) return alert("System requires your Identity Sequence (Email) first to send the reset link.");
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Password reset sequence transmitted to your comm link!");
+            } catch(err) { alert("Error: " + err.message); }
+        });
 
     </script>
 </body>
