@@ -66,8 +66,9 @@ return ( <div className="min-h-screen bg-[#050816] text-white overflow-hidden"> 
               <div className="text-2xl font-black text-blue-300">{item.value}</div>
               <div className="text-xs text-slate-400 mt-2 leading-relaxed">{item.label}</div>
             </div>
-          ))}
-        </div>
+                              </div>
+              ))}
+            </div>
       </div>
 
       {/* ANALYTICS VISUAL */}
@@ -116,7 +117,7 @@ return ( <div className="min-h-screen bg-[#050816] text-white overflow-hidden"> 
 
             <div className="flex items-center gap-2 overflow-hidden py-4">
               {[1,2,3,4,5,6,7,8].map((n) => (
-                <>
+                <div key={n} className="flex items-center gap-2">
                   <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-black ${n % 3 === 0 ? 'bg-red-500' : n % 2 === 0 ? 'bg-purple-500' : 'bg-blue-500'}`}>
                     {n}
                   </div>
