@@ -3,99 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vidyaplus | The Future of Academic Intelligence</title>
+    <title>Vidyaplus | The Secure Standard</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link rel="stylesheet" href="css/modern-index.css">
+    <style>
+        :root {
+            --vp-accent: #4F46E5;
+            --vp-surface: rgba(255, 255, 255, 0.7);
+            --vp-text: #0F172A;
+            --vp-muted: #64748B;
+            --vp-glass: blur(16px) saturate(180%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: #f8fafc;
+            color: var(--vp-text);
+            overflow-x: hidden;
+            /* Background Mesh Gradient Animation */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
+        }
+
+        /* 🚀 HIGH-END FLOATING NAVBAR */
+        .navbar {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 1200px; padding: 12px 24px;
+            background: var(--vp-surface); backdrop-filter: var(--vp-glass);
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 100px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-logo { font-weight: 900; font-size: 1.4rem; color: var(--vp-text); letter-spacing: -1px; }
+        .nav-logo span { color: var(--vp-accent); }
+
+        .btn-auth-trigger {
+            background: var(--vp-text); color: white; padding: 10px 24px;
+            border-radius: 50px; font-weight: 700; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-auth-trigger:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        /* 🌌 ASYMMETRIC HERO SECTION */
+        .hero {
+            padding: 180px 10% 100px;
+            display: flex; align-items: center; min-height: 90vh; gap: 50px;
+        }
+
+        .hero-content { flex: 1.2; text-align: left; }
+        .hero-tag { 
+            display: inline-block; padding: 6px 16px; background: #EEF2FF;
+            color: var(--vp-accent); border-radius: 50px; font-weight: 800;
+            font-size: 0.75rem; margin-bottom: 24px; letter-spacing: 1px;
+        }
+
+        .hero-title { 
+            font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; line-height: 0.95;
+            letter-spacing: -4px; margin-bottom: 30px; 
+        }
+
+        /* 📡 LIVE TELEMETRY ANIMATION (The "Impressive" Part) */
+        .hero-visual {
+            flex: 0.8; position: relative; height: 400px;
+            background: white; border-radius: 24px; border: 1px solid #E2E8F0;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05); overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .pulse-core {
+            width: 100px; height: 100px; background: var(--vp-accent);
+            border-radius: 50%; filter: blur(40px); opacity: 0.3;
+            animation: pulse 4s infinite;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+
+        /* 🔓 BOTTOM SHEET AUTH (The Bank-Level Experience) */
+        .vault-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px); z-index: 2000;
+            opacity: 0; pointer-events: none; transition: 0.4s ease;
+        }
+        .vault-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .vault-sheet {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background: white; border-top-left-radius: 32px; border-top-right-radius: 32px;
+            padding: 40px; z-index: 2001; transition: 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+            max-width: 600px; left: 50%; transform: translateX(-50%);
+        }
+        .vault-overlay.active .vault-sheet { bottom: 0; }
+
+        .sheet-handle { width: 40px; height: 5px; background: #E2E8F0; border-radius: 10px; margin: 0 auto 30px; }
+        
+        .form-input {
+            width: 100%; padding: 18px; border-radius: 16px; border: 1px solid #E2E8F0;
+            background: #F8FAFC; margin-bottom: 16px; font-size: 1rem; outline: none;
+            transition: 0.2s;
+        }
+        .form-input:focus { border-color: var(--vp-accent); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+
+        .btn-vault {
+            width: 100%; padding: 18px; background: var(--vp-text); color: white;
+            border-radius: 16px; font-weight: 800; border: none; cursor: pointer;
+            margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+
+        /* Reveal Animation Classes */
+        .reveal { opacity: 0; transform: translateY(30px); transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; padding-top: 140px; text-align: center; }
+            .hero-title { letter-spacing: -2px; }
+            .hero-visual { width: 100%; height: 300px; }
+        }
+    </style>
 </head>
 <body>
 
-    <nav class="glass-nav">
-        <div class="nav-container">
-            <div class="logo-group">
-                <div class="logo-box"><i class="fas fa-bolt"></i></div>
-                <span class="brand-name">Vidyaplus</span>
-            </div>
-            <div class="nav-actions">
-                <button class="btn-ghost" onclick="openBottomSheet('login')">Sign In</button>
-                <button class="btn-prime" onclick="openBottomSheet('register')">Get Started</button>
-            </div>
-        </div>
+    <nav class="navbar">
+        <div class="nav-logo">VIDYA<span>PLUS</span></div>
+        <button class="btn-auth-trigger" onclick="Vault.open()">Access Dashboard</button>
     </nav>
 
-    <main class="hero-section">
-        <div class="hero-content">
-            <div class="hero-badge animate-in"><span>NEW</span> Secure Assessment Engine 2.0</div>
-            <h1 class="hero-main-title animate-in">Dominate Exams with <br><span class="gradient-text">Precision Analytics.</span></h1>
-            <p class="hero-desc animate-in">Vidyaplus goes beyond teaching. We track time-traps, behavioral telemetry, and X-Ray analytics to build your winning profile.</p>
-            
-            <div class="hero-btns animate-in">
-                <button class="btn-xl-prime" onclick="scrollToBatches()">Explore Batches</button>
-                <button class="btn-xl-outline">Watch Demo</button>
-            </div>
-        </div>
-
-        <div class="hero-visual animate-in">
-            <div class="floating-card telemetry-card">
-                <div class="card-head">Telemetry Live</div>
-                <div class="telemetry-bars">
-                    <div class="bar" style="height: 60%;"></div>
-                    <div class="bar" style="height: 80%;"></div>
-                    <div class="bar" style="height: 40%;"></div>
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-tag">AES-256 ENCRYPTED LEARNING</div>
+                <h1 class="hero-title reveal">Built for the<br><span style="color:var(--vp-accent)">Smarter</span> 1%.</h1>
+                <p class="hero-subtitle reveal" style="color:var(--vp-muted); font-weight:500; font-size:1.1rem; margin-bottom:40px; max-width:500px;">
+                    Ditch the standard test portals. Experience world-class telemetry that tracks your logic, not just your marks.
+                </p>
+                <div class="reveal">
+                    <button class="btn-auth-trigger" style="padding: 16px 40px; font-size: 1rem;" onclick="Vault.open()">Get Started Free</button>
                 </div>
-                <div class="card-foot">99.8% Security Sync</div>
             </div>
-            <div class="floating-card score-card">
-                <div class="score-val">+4</div>
-                <div class="score-label">Precision</div>
+
+            <div class="hero-visual reveal">
+                <div class="pulse-core"></div>
+                <div style="position:absolute; bottom:20px; font-size:0.7rem; font-weight:800; color:#CBD5E1; letter-spacing:2px;">SECURE TELEMETRY LINK ACTIVE</div>
             </div>
-        </div>
+        </section>
     </main>
 
-    <div class="sheet-overlay" id="sheetOverlay" onclick="closeBottomSheet()"></div>
-    <div class="bottom-sheet" id="authSheet">
-        <div class="sheet-handle"></div>
-        
-        <div class="sheet-body">
-            <div class="auth-header">
-                <h2 id="sheetTitle">Welcome Back</h2>
-                <p id="sheetSubtitle">Access your secure academic dashboard.</p>
-            </div>
-
-            <form class="modern-form" id="authForm">
-                <div class="input-group" id="nameField" style="display:none;">
-                    <input type="text" placeholder="Full Name" required>
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="input-group">
-                    <input type="email" placeholder="Email Address" required>
-                    <i class="fas fa-envelope"></i>
-                </div>
-                <div class="input-group">
-                    <input type="password" placeholder="Password" required>
-                    <i class="fas fa-lock"></i>
-                </div>
-                
-                <button type="submit" class="btn-xl-prime full-width">Secure Authentication</button>
-            </form>
-
-            <div class="auth-divider"><span>OR CONTINUE WITH</span></div>
+    <div class="vault-overlay" id="vault-overlay">
+        <div class="vault-sheet">
+            <div class="sheet-handle"></div>
+            <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; letter-spacing: -1px;">Secure Authentication</h2>
+            <p style="color: var(--vp-muted); font-size: 0.9rem; margin-bottom: 30px; font-weight: 500;">Please verify your identity to access your encrypted study zone.</p>
             
-            <button class="btn-google full-width">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" alt="G">
-                Continue with Google
-            </button>
-
-            <p class="auth-toggle">
-                New to Vidyaplus? <span onclick="toggleAuthMode()">Create an account</span>
-            </p>
+            <form id="vault-form">
+                <input type="email" class="form-input" placeholder="Email Address" required>
+                <input type="password" class="form-input" placeholder="Secure Password" required>
+                <button type="submit" class="btn-vault">Unlock Vault <i class="fas fa-shield-alt"></i></button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 25px; font-size: 0.85rem; font-weight: 600; color: var(--vp-muted);">
+                Encryption Protocol: JWT over TLS 1.3
+            </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script type="module" src="js/modern-index.js"></script>
+    <script type="module">
+        // 🛡️ MODERN STATE PROXY (Bank-Level Coding Style)
+        const UIState = new Proxy({ vaultOpen: false }, {
+            set(target, prop, value) {
+                target[prop] = value;
+                if (prop === 'vaultOpen') {
+                    const overlay = document.getElementById('vault-overlay');
+                    value ? overlay.classList.add('active') : overlay.classList.remove('active');
+                    document.body.style.overflow = value ? 'hidden' : 'auto';
+                }
+                return true;
+            }
+        });
+
+        window.Vault = {
+            open: () => UIState.vaultOpen = true,
+            close: () => UIState.vaultOpen = false
+        };
+
+        // Click outside to close
+        document.getElementById('vault-overlay').addEventListener('click', (e) => {
+            if(e.target.id === 'vault-overlay') Vault.close();
+        });
+
+        // 🌊 INTERSECTION OBSERVER (For World-Class Scroll Reveal)
+        const observerOptions = { threshold: 0.1 };
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    </script>
 </body>
 </html>
-
