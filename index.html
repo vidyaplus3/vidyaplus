@@ -1,813 +1,304 @@
 <!DOCTYPE html>
-<html lang="en" class="antialiased">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vidyaplus | Cognitive Evolution System</title>
+    <title>VidyaPlus | Elite Ed-Tech</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <meta name="description" content="Premium AI-driven learning platform.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     
-    <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Space Grotesk', 'sans-serif'],
-                        cinematic: ['Syncopate', 'sans-serif'],
-                    },
                     colors: {
-                        pure: '#ffffff',
-                        silver: '#e2e8f0',
-                        glass: 'rgba(255, 255, 255, 0.6)',
-                        dark: '#081229', /* Deep Space Blue - Attractive Theme */
-                        accent: '#2563eb', /* Royal Blue */
-                        cyan: {
-                            glow: '#00f0ff'
-                        }
+                        midnight: '#050B14',
+                        neonBlue: '#00F0FF',
+                        royalBlue: '#1A365D',
                     },
-                    boxShadow: {
-                        'glass': '0 8px 32px 0 rgba(8, 18, 41, 0.1)',
-                        'glow': '0 0 40px 0 rgba(37, 99, 235, 0.4)',
-                        'blue-glow': '0 0 30px 0 rgba(0, 240, 255, 0.3)',
+                    backgroundImage: {
+                        'glass': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
                     }
                 }
             }
         }
     </script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    
     <style>
-        :root { --cursor-size: 20px; }
-        body { background-color: #ffffff; color: #081229; overflow-x: hidden; cursor: none; }
-        ::-webkit-scrollbar { display: none; }
-
-        /* Custom Magnetic Cursor - Updated to Blue Theme */
-        #cursor-dot, #cursor-outline { position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
-        #cursor-dot { width: 5px; height: 5px; background-color: #2563eb; }
-        #cursor-outline { width: 40px; height: 40px; border: 1px solid rgba(37, 99, 235, 0.5); transition: width 0.2s, height 0.2s, background-color 0.2s; }
-        input, button, a { cursor: none; }
-
-        /* Glassmorphism Utilities */
-        .glass-panel { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); }
-        .glass-modal { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 1); box-shadow: 0 30px 60px rgba(8, 18, 41, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5); }
-        .glass-text { background: linear-gradient(180deg, #081229 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* UI Overlays & Animations */
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
-        .reveal-text { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
-        .char { transform: translateY(110%); display: inline-block; }
-        .holo-grid { background-image: linear-gradient(to right, rgba(8, 18, 41, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(8, 18, 41, 0.04) 1px, transparent 1px); background-size: 50px 50px; }
-
-        .feature-card { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        .feature-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(37,99,235,0.1); border-color: rgba(37, 99, 235, 0.3); }
-
-        @keyframes float-bot { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
-        @keyframes ring-spin { 0% { transform: rotateX(70deg) rotateZ(0deg); } 100% { transform: rotateX(70deg) rotateZ(360deg); } }
-        .animate-float-bot { animation: float-bot 4s ease-in-out infinite; }
-        .animate-ring { animation: ring-spin 8s linear infinite; }
+        body { background-color: #050B14; color: white; overflow-x: hidden; }
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        .neon-glow { text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .hover-lift:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,240,255,0.2); }
         
-        .mascot-eye { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .mascot-face { transition: transform 0.2s ease-out; }
-        
-        .futuristic-input { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(226, 232, 240, 0.8); transition: all 0.3s ease; }
-        .futuristic-input:focus { background: rgba(255, 255, 255, 0.9); border-color: #2563eb; box-shadow: 0 0 20px rgba(37, 99, 235, 0.1); outline: none; }
-        
-        .btn-shimmer { position: relative; overflow: hidden; }
-        .btn-shimmer::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-20deg); transition: left 0.7s ease; }
-        .btn-shimmer:hover::before { left: 150%; }
-
-        /* Mobile Adjustments */
-        @media (max-width: 768px) { #cursor-dot, #cursor-outline { display: none !important; } input, button, a, body { cursor: auto !important; } }
+        /* Modal split layout for desktop */
+        @media (min-width: 768px) {
+            .auth-modal-content { display: grid; grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
-<body class="selection:bg-accent selection:text-white">
-        <canvas id="bg-canvas"></canvas>
-    <div id="cursor-dot"></div>
-    <div id="cursor-outline"></div>
+<body class="antialiased selection:bg-neonBlue selection:text-midnight font-sans">
 
-    <nav class="fixed top-0 w-full z-40 glass-panel border-b-0 py-3 md:py-4 px-4 md:px-8 mix-blend-luminosity">
-        <div class="max-w-screen-2xl mx-auto flex justify-between items-center">
-            <div class="font-cinematic font-bold text-lg md:text-xl tracking-widest text-dark">
-                VIDYAPLUS <span class="text-[10px] md:text-xs font-sans tracking-normal opacity-50 ml-1 md:ml-2">v3.1</span>
-            </div>
-            <div class="hidden md:flex gap-8 font-display text-xs tracking-[0.2em] uppercase font-semibold text-slate-500">
-                <a href="#revolution" class="hover:text-accent transition-colors" data-cursor="hover">Architecture</a>
-                <a href="#engine" class="hover:text-accent transition-colors" data-cursor="hover">Cognitive Engine</a>
-                <a href="#features" class="hover:text-accent transition-colors" data-cursor="hover">Systems</a>
-            </div>
-            <div class="flex items-center gap-2 md:gap-3">
-                <button onclick="openAuthModal('login')" data-cursor="hover" class="relative group glass-panel px-4 md:px-6 py-2 md:py-2.5 rounded-full font-display text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] text-slate-600 hover:text-accent transition-all duration-300 border border-slate-200 hover:border-blue-300 hover:shadow-glass overflow-hidden">
-                    <span class="relative z-10">Login</span>
-                    <div class="absolute inset-0 bg-white/40 transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300"></div>
-                </button>
-                <button onclick="openAuthModal('signup')" data-cursor="hover" class="btn-shimmer relative glass-panel px-4 md:px-6 py-2 md:py-2.5 rounded-full font-display text-[10px] md:text-[11px] font-bold uppercase tracking-[0.15em] bg-dark text-white hover:bg-accent transition-all duration-500 shadow-lg hover:shadow-glow border border-transparent">
-                    <span class="relative z-10 flex items-center gap-2">Sign Up<div class="w-1.5 h-1.5 rounded-full bg-cyan-glow animate-pulse hidden md:block"></div></span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <div id="auth-wrapper" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none opacity-0">
-        <div id="auth-backdrop" class="absolute inset-0 bg-white/20 backdrop-blur-xl" onclick="closeAuthModal()"></div>
-        
-        <div id="auth-modal" class="relative w-full max-w-4xl h-[95vh] md:h-[680px] mx-4 rounded-3xl md:rounded-[2rem] glass-modal flex flex-col md:flex-row overflow-hidden scale-95 opacity-0">
-            <button onclick="closeAuthModal()" data-cursor="hover" class="absolute top-4 right-4 md:top-6 md:right-6 z-50 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full glass-panel hover:bg-white transition-colors border border-slate-200 group">
-                <svg class="w-4 h-4 text-slate-500 group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <header class="fixed top-0 w-full z-40 glass-panel border-b-0 transition-all duration-300 py-4 px-6 md:px-12 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <button class="text-white hover:text-neonBlue transition lg:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
+            <div class="text-2xl font-bold tracking-tighter cursor-pointer">
+                Vidya<span class="text-neonBlue neon-glow">Plus</span>
+            </div>
+        </div>
+        
+        <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-300">
+            <a href="#" class="hover:text-neonBlue transition">Explore</a>
+            <a href="#" class="hover:text-neonBlue transition">Live Classes</a>
+            <a href="#" class="hover:text-neonBlue transition">Test Series</a>
+        </nav>
 
-            <div class="hidden md:flex w-[45%] relative bg-gradient-to-br from-slate-50/80 to-blue-50/80 items-center justify-center border-r border-white/60 overflow-hidden group">
-                <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-glow/10 rounded-full blur-[80px]"></div>
-                <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/10 rounded-full blur-[80px]"></div>
-                <div class="absolute inset-0 holo-grid opacity-20"></div>
+        <div class="flex gap-4 items-center">
+            <div id="userState" class="hidden flex items-center gap-3">
+                <span id="userName" class="text-sm font-medium text-gray-300"></span>
+                <div id="userIcon" class="w-8 h-8 rounded-full bg-neonBlue text-midnight flex items-center justify-center font-bold"></div>
+            </div>
+            <div id="guestState" class="flex gap-3">
+                <button onclick="openAuth('login')" class="text-sm font-medium hover:text-neonBlue transition px-4 py-2">Log In</button>
+                <button onclick="openAuth('signup')" class="text-sm font-bold bg-neonBlue text-midnight px-5 py-2 rounded-full hover:bg-white transition hover:shadow-[0_0_15px_rgba(0,240,255,0.5)]">Sign Up</button>
+            </div>
+        </div>
+    </header>
 
-                <div id="mascot-container" class="relative z-10 animate-float-bot">
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-cyan-glow/30 rounded-full animate-ring pointer-events-none"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-slate-300/30 rounded-full animate-ring" style="animation-direction: reverse; animation-duration: 12s;"></div>
-                    
-                    <div class="w-36 h-36 bg-white/90 backdrop-blur-md rounded-[2.5rem] shadow-2xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-blue-glow transition-shadow duration-500">
-                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
-                        <div id="mascot-visor" class="w-28 h-16 bg-slate-900 rounded-2xl flex items-center justify-center gap-5 relative overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] mascot-face">
-                            <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent"></div>
-                            <div class="mascot-eye w-4 h-5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] flex items-center justify-center overflow-hidden"><div class="w-full h-[2px] bg-cyan-glow opacity-0 transition-opacity" id="eye-left-scan"></div></div>
-                            <div class="mascot-eye w-4 h-5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] flex items-center justify-center overflow-hidden"><div class="w-full h-[2px] bg-cyan-glow opacity-0 transition-opacity" id="eye-right-scan"></div></div>
+    <main class="pt-24">
+        <section class="w-full h-[70vh] md:h-[85vh] relative px-4 md:px-12 mb-20">
+            <div class="swiper heroSwiper w-full h-full rounded-3xl overflow-hidden glass-panel">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide relative flex items-center px-8 md:px-20 bg-gradient-to-r from-midnight to-royalBlue/40">
+                        <div class="z-10 max-w-2xl">
+                            <span class="text-neonBlue font-mono text-sm tracking-widest uppercase mb-4 block">Next-Gen Learning</span>
+                            <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6 gs-reveal">Master the Future of Code</h1>
+                            <p class="text-gray-400 text-lg md:text-xl mb-8 gs-reveal">Join premium live cohorts powered by AI doubt-solving and industry experts.</p>
+                            <button class="bg-neonBlue text-midnight px-8 py-3 rounded-full font-bold hover:scale-105 transition gs-reveal">Explore Batches</button>
+                        </div>
+                        <div class="absolute right-10 top-1/2 -translate-y-1/2 w-1/3 h-2/3 bg-gradient-to-tr from-neonBlue/20 to-transparent blur-3xl rounded-full"></div>
+                    </div>
+                    <div class="swiper-slide relative flex items-center px-8 md:px-20 bg-gradient-to-r from-midnight to-purple-900/40">
+                        <div class="z-10 max-w-2xl">
+                            <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6">AI-Driven Test Series</h1>
+                            <p class="text-gray-400 text-lg md:text-xl mb-8">Pinpoint your weaknesses with our deep-learning analytics engine.</p>
                         </div>
                     </div>
-                    <div class="absolute -top-4 -right-4 w-3 h-3 bg-cyan-glow rounded-full blur-[2px] animate-pulse"></div>
-                    <div class="absolute -bottom-6 -left-2 w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                 </div>
-                <div class="absolute bottom-10 text-center w-full font-mono text-[10px] text-accent tracking-[0.2em] uppercase" id="mascot-status">Awaiting Input...</div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next text-neonBlue"></div>
+                <div class="swiper-button-prev text-neonBlue"></div>
             </div>
-                        <div class="w-full md:w-[55%] h-full overflow-y-auto relative flex flex-col px-6 md:px-16 py-10 md:py-12 bg-white/40">
-                <div class="mb-8 md:mb-10 text-center md:text-left relative z-10 pt-4 md:pt-0">
-                    <div class="font-display text-[10px] font-bold tracking-[0.3em] text-accent mb-2 uppercase" id="auth-subtitle">Welcome Back</div>
-                    <h2 class="font-cinematic text-3xl md:text-4xl text-dark uppercase tracking-tighter" id="auth-title">Access Core</h2>
+        </section>
+        <section class="py-20 px-4 md:px-12 max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Why VidyaPlus?</h2>
+                <p class="text-gray-400 max-w-xl mx-auto">An ecosystem designed for ultimate focus and performance.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature">
+                    <div class="w-12 h-12 bg-neonBlue/10 rounded-lg flex items-center justify-center mb-6 text-neonBlue">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9a1 1 0 012 0v3a1 1 0 11-2 0V9zm1-4a1 1 0 110 2 1 1 0 010-2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Live Interactive Classes</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Latency-free 4K streaming with real-time doubt polling.</p>
                 </div>
+                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature">
+                    <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-6 text-purple-400">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Smart Analytics</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">AI tracks your retention rate and suggests custom revision paths.</p>
+                </div>
+                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature">
+                    <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-6 text-green-400">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Encrypted Notes</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Downloadable, DRM-protected study materials.</p>
+                </div>
+            </div>
+        </section>
 
-                <div class="relative w-full h-[380px] md:h-[400px]">
-                    <form id="form-login" class="absolute top-0 left-0 w-full transition-all duration-500">
-                        <div class="space-y-4">
-                            <div class="relative group">
-                                <input type="email" id="login-email" required data-cursor="text" placeholder="Identity Sequence (Email)" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-accent group-focus-within:w-full transition-all duration-300"></div>
+        <section class="py-20 px-4 md:px-12 bg-gradient-to-b from-transparent to-royalBlue/10">
+            <h2 class="text-4xl font-bold mb-12 text-center">Trending Cohorts</h2>
+            <div class="flex flex-wrap justify-center gap-8">
+                <div class="glass-panel w-full max-w-sm rounded-2xl overflow-hidden hover-lift flex flex-col">
+                    <div class="h-48 bg-gray-800 relative">
+                        <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">-20% OFF</div>
+                        <div class="w-full h-full bg-gradient-to-tr from-midnight to-blue-900"></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-2xl font-bold mb-2">Alpha Web 3.0</h3>
+                        <p class="text-gray-400 text-sm mb-4">By Sarah Jenkins • 6 Months</p>
+                        <div class="mt-auto flex justify-between items-center">
+                            <div>
+                                <span class="text-2xl font-bold text-white">₹4,999</span>
+                                <span class="text-sm text-gray-500 line-through ml-2">₹6,500</span>
                             </div>
-                            <div class="relative group">
-                                <input type="password" id="login-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-accent group-focus-within:w-full transition-all duration-300"></div>
-                            </div>
-
-                            <div class="flex items-center justify-between text-xs font-sans px-1">
-                                <label class="flex items-center gap-2 cursor-none" data-cursor="hover">
-                                    <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-accent focus:ring-accent cursor-none">
-                                    <span class="text-slate-500">Remember sequence</span>
-                                </label>
-                                <a href="#" id="forgot-password-btn" data-cursor="hover" class="text-accent hover:text-dark transition-colors font-semibold">Lost Code?</a>
-                            </div>
-
-                            <button type="submit" id="btn-login" data-cursor="hover" class="btn-shimmer w-full bg-dark text-white px-8 py-3.5 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-accent transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
-                                Initialize Link
-                            </button>
-                            
-                            <div class="flex items-center my-3">
-                                <div class="flex-1 border-t border-slate-300"></div>
-                                <span class="px-3 text-[10px] text-slate-400 uppercase tracking-widest">OR</span>
-                                <div class="flex-1 border-t border-slate-300"></div>
-                            </div>
-                            <button type="button" id="btn-google-login" data-cursor="hover" class="w-full bg-white text-dark px-8 py-3 rounded-xl font-display text-[11px] font-bold border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm flex justify-center items-center gap-3">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                                Continue with Google
-                            </button>
+                            <button class="bg-white/10 hover:bg-neonBlue hover:text-midnight border border-white/20 px-4 py-2 rounded-lg transition font-medium">Enroll</button>
                         </div>
-                    </form>
-
-                    <form id="form-signup" class="absolute top-0 left-0 w-full opacity-0 pointer-events-none translate-y-4 transition-all duration-500">
-                        <div class="space-y-3">
-                            <input type="text" id="signup-name" required data-cursor="text" placeholder="Full Designation (Name)" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                            <input type="email" id="signup-email" required data-cursor="text" placeholder="Comm Link (Email)" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                            
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="password" id="signup-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                                <input type="password" id="signup-confirm" required data-cursor="text" placeholder="Verify" class="futuristic-input w-full px-5 py-3 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
-                            </div>
-
-                            <button type="submit" id="btn-signup" data-cursor="hover" class="btn-shimmer w-full mt-2 bg-dark text-white px-8 py-3.5 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-accent transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
-                                Construct Profile
-                            </button>
-                            
-                            <button type="button" id="btn-google-signup" data-cursor="hover" class="w-full mt-2 bg-white text-dark px-8 py-2.5 rounded-xl font-display text-[11px] font-bold border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm flex justify-center items-center gap-3">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                                Sign Up with Google
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
+            </div>
+        </section>
+    </main>
 
-                <div class="mt-auto text-center z-10 pt-4 pb-4">
-                    <p class="font-sans text-xs text-slate-500">
-                        <span id="toggle-text">Require an entity link?</span> 
-                        <button onclick="toggleAuthMode()" data-cursor="hover" class="ml-1 font-bold text-accent hover:text-dark transition-colors uppercase tracking-wider font-display border-b border-accent/20 hover:border-dark" id="toggle-btn">Sign Up</button>
-                    </p>
-                </div>
+    <dialog id="authModal" class="bg-transparent m-0 p-0 fixed inset-0 w-full h-full z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-midnight/80 backdrop-blur-sm" onclick="closeAuth()"></div>
+        <div class="auth-modal-content relative z-10 glass-panel w-[90%] max-w-4xl min-h-[500px] rounded-3xl overflow-hidden shadow-2xl scale-95 opacity-0 transition-all duration-300" id="modalContent">
+            
+            <div class="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-royalBlue to-midnight p-10 relative overflow-hidden">
+                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20"></div>
+                <h2 class="text-3xl font-bold text-white z-10 mb-4 text-center text-balance">Unlock Your Potential</h2>
+                <p class="text-blue-200 z-10 text-center mb-8">Join thousands of elite learners mastering the future.</p>
+                <div class="w-48 h-48 bg-neonBlue/20 rounded-full blur-2xl absolute"></div>
+                <div class="w-32 h-32 border-4 border-neonBlue/50 rounded-lg rotate-12 z-10 animate-[spin_10s_linear_infinite]"></div>
+            </div>
+
+            <div class="p-8 md:p-12 flex flex-col justify-center bg-midnight/90">
+                <button onclick="closeAuth()" class="absolute top-6 right-6 text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
                 
-                <div id="auth-success-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 rounded-3xl md:rounded-[2rem]">
-                    <div class="w-16 h-16 rounded-full border-2 border-dark flex items-center justify-center mb-4 relative"><div class="absolute inset-0 rounded-full border-2 border-t-accent animate-spin"></div><svg class="w-6 h-6 text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                    <h3 class="font-cinematic text-xl text-dark">Link Established</h3>
-                    <p class="font-mono text-[10px] text-accent tracking-widest mt-2 uppercase">Redirecting to interface...</p>
+                <h3 id="authTitle" class="text-2xl font-bold mb-6 text-white">Welcome Back</h3>
+                
+                <form id="authForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                        <input type="email" id="email" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neonBlue transition" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                        <input type="password" id="password" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neonBlue transition" required>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="w-full bg-neonBlue text-midnight font-bold py-3 rounded-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] transition mt-6">
+                        Log In
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 text-sm">Or continue with</p>
+                    <button id="googleBtn" class="mt-4 w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-3 transition">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Google
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
-        <main id="smooth-wrapper" class="w-full relative">
-        <section id="hero" class="relative h-[100svh] min-h-[600px] w-full flex items-center justify-center overflow-hidden holo-grid pt-16 md:pt-20">
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 z-0"></div>
-            
-            <div class="relative z-10 text-center flex flex-col items-center px-4 max-w-7xl mx-auto">
-                <div class="glass-panel px-4 py-1.5 rounded-full mb-6 md:mb-8 inline-block animate-pulse border-accent/30">
-                    <p class="font-display text-[9px] md:text-xs font-semibold tracking-widest text-accent uppercase">System Active • Neural Uplink Established</p>
-                </div>
-                
-                <h1 class="font-cinematic text-4xl sm:text-6xl md:text-8xl lg:text-[9rem] leading-[0.9] md:leading-[0.85] tracking-tighter text-dark mb-6 md:mb-8 reveal-text w-full">
-                    <span class="block overflow-hidden"><span class="hero-line block">HUMAN</span></span>
-                    <span class="block overflow-hidden"><span class="hero-line block text-slate-400">LEARNING IS</span></span>
-                    <span class="block overflow-hidden"><span class="hero-line block">OBSOLETE.</span></span>
-                </h1>
-                
-                <p class="font-sans text-sm md:text-xl lg:text-2xl text-slate-600 max-w-2xl font-light tracking-wide mb-8 md:mb-12 opacity-0 hero-sub px-4">
-                    Your brain deserves better software. Upgrade your cognition with advanced AI architecture designed for absolute academic superiority.
-                </p>
+    </dialog>
 
-                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 opacity-0 hero-cta w-full sm:w-auto px-6">
-                    <button data-cursor="hover" onclick="openAuthModal('signup')" class="w-full sm:w-auto bg-dark text-white px-8 py-4 rounded-xl md:rounded-none font-display uppercase tracking-[0.2em] text-xs md:text-sm hover:bg-accent transition-colors shadow-2xl hover:shadow-glow relative overflow-hidden group">
-                        <span class="relative z-10">Commence Evolution</span>
-                        <div class="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 opacity-10"></div>
-                    </button>
-                    <button data-cursor="hover" class="w-full sm:w-auto glass-panel text-dark px-8 py-4 rounded-xl md:rounded-none font-display uppercase tracking-[0.2em] text-xs md:text-sm hover:bg-white transition-colors border-accent/20">
-                        View Architecture
-                    </button>
-                </div>
-            </div>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
-            <div class="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-                <span class="font-display text-[8px] md:text-[10px] uppercase tracking-widest">Scroll Sequence</span>
-                <div class="w-[1px] h-8 md:h-12 bg-dark/20 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-full bg-accent transform -translate-y-full animate-[scrolldown_1.5s_ease-in-out_infinite]"></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="revolution" class="min-h-screen w-full relative flex items-center py-20 md:py-32 px-6 md:px-8 bg-white z-10">
-            <div class="max-w-6xl mx-auto w-full flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
-                <div class="w-full lg:w-1/2" data-speed="0.9">
-                    <div class="font-display text-[10px] md:text-xs font-bold tracking-[0.3em] text-accent mb-4 md:mb-6 uppercase">01 / The Paradigm Shift</div>
-                    <h2 class="font-display text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-dark mb-6 md:mb-8 leading-none section-title">
-                        THE <br> INDUSTRIAL <br> FAILURE.
-                    </h2>
-                    <div class="w-16 md:w-24 h-[2px] bg-accent mb-6 md:mb-8"></div>
-                    <p class="font-sans text-base md:text-xl text-slate-600 font-light leading-relaxed mb-4 md:mb-6">
-                        Legacy education systems are fundamentally broken. They rely on outdated memorization protocols, mass-produced coaching factories, and distraction loops that degrade attention spans.
-                    </p>
-                    <p class="font-sans text-base md:text-xl text-slate-600 font-light leading-relaxed">
-                        Don’t prepare for exams. <strong class="font-medium text-dark">Upgrade cognition.</strong> Vidyaplus introduces a systematic, AI-driven methodology to rewire academic absorption.
-                    </p>
-                </div>
-                <div class="w-full lg:w-1/2 relative h-[400px] md:h-[600px] flex items-center justify-center mt-10 lg:mt-0" data-speed="1.1">
-                    <div class="absolute w-64 md:w-96 h-64 md:h-96 rounded-full border border-slate-200 animate-[spin_20s_linear_infinite]"></div>
-                    <div class="absolute w-48 md:w-64 h-48 md:h-64 rounded-full border border-accent/30 animate-[spin_15s_linear_infinite_reverse]"></div>
-                    <div class="glass-panel w-full max-w-[320px] h-72 md:h-96 relative z-10 flex flex-col justify-between p-6 md:p-8 backdrop-blur-3xl border-white shadow-2xl rounded-3xl">
-                        <div class="flex justify-between items-start">
-                            <span class="font-display text-[10px] md:text-xs tracking-widest uppercase font-bold text-accent">System Status</span>
-                            <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(37,99,235,0.8)]"></span>
-                        </div>
-                        <div class="font-display text-2xl md:text-4xl font-light text-dark">DOPAMINE<br>RECALIBRATION<br>ACTIVE.</div>
-                        <div class="h-[2px] w-full bg-gradient-to-r from-transparent via-accent to-transparent"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-                <section id="engine" class="py-20 md:py-32 px-6 md:px-8 bg-slate-50 relative z-10 border-y border-slate-200 overflow-hidden">
-            <div class="absolute top-0 right-0 w-full md:w-1/2 h-full bg-gradient-to-l from-white to-transparent opacity-50 pointer-events-none"></div>
-            
-            <div class="max-w-7xl mx-auto relative z-10">
-                <div class="mb-12 md:mb-20 text-center md:text-left">
-                    <div class="font-display text-[10px] md:text-xs font-bold tracking-[0.3em] text-accent mb-4 md:mb-6 uppercase">02 / Architecture</div>
-                    <h2 class="font-cinematic text-3xl md:text-4xl lg:text-6xl text-dark uppercase tracking-tighter">
-                        Intelligence Engine
-                    </h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                    <div class="glass-panel feature-card p-6 md:p-10 col-span-1 md:col-span-2 relative overflow-hidden bg-white/50 rounded-3xl border-accent/10">
-                        <div class="absolute top-0 right-0 p-4 md:p-6 opacity-10 font-cinematic text-5xl md:text-6xl">PCME</div>
-                        <h3 class="font-display text-xl md:text-2xl font-bold mb-3 md:mb-4 text-dark">Advanced Analytics Core</h3>
-                        <p class="font-sans text-sm md:text-base text-slate-600 font-light mb-6 md:mb-8 max-w-md">Predictive scoring models mapped directly to structural frameworks of Physics, Chemistry, and Mathematics.</p>
-                        <div class="flex gap-4 items-center">
-                            <div class="h-1.5 flex-1 bg-slate-200 overflow-hidden rounded-full"><div class="h-full bg-dark w-[85%]"></div></div>
-                            <span class="font-display text-[10px] md:text-xs font-bold text-dark">85% OPTIMIZED</span>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel feature-card p-6 md:p-10 bg-white/50 flex flex-col justify-between rounded-3xl border-accent/10">
-                        <div>
-                            <h3 class="font-display text-lg md:text-xl font-bold mb-2 text-dark">Neural Routing</h3>
-                            <p class="font-sans text-xs md:text-sm text-slate-600 font-light">Adaptive difficulty scaling in real-time.</p>
-                        </div>
-                        <div class="w-full h-16 md:h-24 border-b border-accent/20 mt-6 relative overflow-hidden flex items-end justify-between px-1">
-                            <div class="w-[20%] h-[40%] bg-slate-200 rounded-t-sm"></div>
-                            <div class="w-[20%] h-[70%] bg-slate-300 rounded-t-sm"></div>
-                            <div class="w-[20%] h-[50%] bg-slate-400 rounded-t-sm"></div>
-                            <div class="w-[20%] h-[90%] bg-dark rounded-t-sm"></div>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel feature-card p-6 md:p-10 bg-white/50 rounded-3xl border-accent/10">
-                        <h3 class="font-display text-lg md:text-xl font-bold mb-3 md:mb-4 text-dark">Focus Isolation</h3>
-                        <p class="font-sans text-xs md:text-sm text-slate-600 font-light mb-6">Eliminates UI friction. Minimalist interfaces designed for prolonged deep work without digital fatigue.</p>
-                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-dark flex items-center justify-center">
-                            <div class="w-2 h-2 bg-dark rounded-full animate-ping"></div>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel feature-card p-6 md:p-10 bg-dark text-white col-span-1 md:col-span-2 group rounded-3xl overflow-hidden border-accent/30">
-                        <div class="flex justify-between items-start mb-8 md:mb-12 relative z-10">
-                            <h3 class="font-display text-xl md:text-2xl font-bold text-white">Weakness Heatmaps</h3>
-                            <span class="font-mono text-[9px] md:text-xs text-accent border border-accent/50 bg-accent/10 px-2 md:px-3 py-1 rounded">LIVE DATA</span>
-                        </div>
-                        <p class="font-sans text-sm md:text-base text-slate-300 font-light max-w-md relative z-10">Algorithmic identification of conceptual gaps before they manifest in examination scenarios.</p>
-                        <div class="absolute bottom-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-accent/20 blur-[40px] rounded-full transform translate-x-10 translate-y-10 group-hover:scale-125 transition-transform duration-700"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="data" class="py-24 md:py-40 bg-white relative z-10">
-            <div class="max-w-7xl mx-auto px-6 md:px-8">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 border-y border-slate-100 py-12 md:py-16">
-                    <div class="text-center" data-speed="1.1">
-                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-dark mb-2 counter">3.4</div>
-                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-bold">Million Parameters</div>
-                    </div>
-                    <div class="text-center" data-speed="0.9">
-                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-dark mb-2 counter">94</div>
-                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-bold">Retention Rate (%)</div>
-                    </div>
-                    <div class="text-center" data-speed="1.15">
-                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-dark mb-2 counter">0.2</div>
-                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-bold">Latency (ms)</div>
-                    </div>
-                    <div class="text-center" data-speed="0.85">
-                        <div class="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-dark mb-2 counter">10</div>
-                        <div class="font-display text-[9px] md:text-xs tracking-[0.2em] text-slate-400 uppercase font-bold">Cognitive Multiplier (x)</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-                <section id="timeline" class="py-20 md:py-32 bg-slate-50 relative z-10 border-t border-slate-200">
-            <div class="max-w-4xl mx-auto px-6 md:px-8 relative">
-                <div class="absolute left-[31px] md:left-1/2 top-0 bottom-0 w-[2px] bg-slate-300 transform md:-translate-x-1/2">
-                    <div class="timeline-progress w-full h-0 bg-dark shadow-[0_0_10px_rgba(8,18,41,0.5)]"></div>
-                </div>
-
-                <div class="relative z-10 space-y-20 md:space-y-32">
-                    <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
-                        <div class="w-full md:w-5/12 text-left md:text-right pl-16 md:pl-0 pr-0 md:pr-12">
-                            <h4 class="font-display text-lg md:text-xl font-bold text-dark mb-2">Industrial Education</h4>
-                            <p class="font-sans text-xs md:text-sm text-slate-500">Standardized output. Mass production of identical academic profiles. High inefficiency.</p>
-                        </div>
-                        <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white border-[3px] border-slate-400 rounded-full transform -translate-x-1/2 mt-[2px] md:mt-0 shadow-[0_0_0_6px_rgba(248,250,252,1)]"></div>
-                        <div class="w-full md:w-5/12 hidden md:block"></div>
-                    </div>
-
-                    <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
-                        <div class="w-full md:w-5/12 hidden md:block"></div>
-                        <div class="absolute left-8 md:left-1/2 w-4 h-4 bg-white border-[3px] border-slate-400 rounded-full transform -translate-x-1/2 mt-[2px] md:mt-0 shadow-[0_0_0_6px_rgba(248,250,252,1)]"></div>
-                        <div class="w-full md:w-5/12 text-left pl-16 md:pl-12">
-                            <h4 class="font-display text-lg md:text-xl font-bold text-dark mb-2">Coaching Factories</h4>
-                            <p class="font-sans text-xs md:text-sm text-slate-500">Brute-force memorization. Extreme psychological pressure. Diminishing returns on time invested.</p>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
-                        <div class="w-full md:w-5/12 text-left md:text-right pl-16 md:pl-0 pr-0 md:pr-12">
-                            <div class="inline-block border border-dark text-dark bg-white text-[9px] md:text-xs px-2 py-1 mb-2 font-mono font-bold rounded">CURRENT ERA</div>
-                            <h4 class="font-display text-xl md:text-2xl font-bold text-dark mb-2">AI Intelligence Era</h4>
-                            <p class="font-sans text-xs md:text-sm text-slate-700 font-medium">Hyper-personalized algorithms. Deep cognitive analysis. The future topper is AI-assisted.</p>
-                        </div>
-                        <div class="absolute left-8 md:left-1/2 w-6 h-6 bg-dark border-4 border-white rounded-full transform -translate-x-1/2 mt-[2px] md:mt-0 shadow-[0_0_15px_rgba(8,18,41,0.4)]"></div>
-                        <div class="w-full md:w-5/12 hidden md:block"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="testimonials" class="py-24 md:py-40 bg-white relative z-10 overflow-hidden">
-            <div class="max-w-7xl mx-auto px-6 md:px-8 relative">
-                <div class="font-display text-[10px] md:text-xs font-bold tracking-[0.3em] text-accent mb-12 md:mb-16 uppercase text-center">03 / Intercepted Transmissions</div>
-                
-                <div class="flex flex-col md:flex-row gap-6 md:gap-8 justify-center items-center">
-                    <div class="glass-panel p-6 md:p-8 w-full md:w-1/3 border border-slate-200 rounded-3xl relative group shadow-lg hover:shadow-xl">
-                        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-dark/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
-                        <div class="flex justify-between items-center mb-6 font-mono text-[9px] md:text-[10px] text-slate-400 font-bold">
-                            <span>LOG ID: 894.A2</span><span class="text-green-600 animate-pulse">VERIFIED</span>
-                        </div>
-                        <div class="font-sans text-base md:text-lg text-slate-700 mb-8 leading-relaxed italic">"Cognitive load reduced by 40% within three weeks. Focus retention during complex calculus derivations increased exponentially."</div>
-                        <div class="font-display text-xs md:text-sm font-bold uppercase tracking-wider text-dark border-t border-slate-100 pt-4">Subject: Alpha-9</div>
-                    </div>
-
-                    <div class="glass-panel p-6 md:p-8 w-full md:w-1/3 border border-slate-200 rounded-3xl relative group shadow-lg hover:shadow-xl md:transform md:translate-y-8 mt-6 md:mt-0">
-                        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-dark/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
-                        <div class="flex justify-between items-center mb-6 font-mono text-[9px] md:text-[10px] text-slate-400 font-bold">
-                            <span>LOG ID: 912.B7</span><span class="text-green-600 animate-pulse">VERIFIED</span>
-                        </div>
-                        <div class="font-sans text-base md:text-lg text-slate-700 mb-8 leading-relaxed italic">"The predictive scoring module accurately mapped my structural weaknesses in Organic Chemistry. Admission probability stabilized at 99.8%."</div>
-                        <div class="font-display text-xs md:text-sm font-bold uppercase tracking-wider text-dark border-t border-slate-100 pt-4">Subject: Delta-4</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="cta" class="min-h-[80vh] relative flex items-center justify-center bg-transparent z-10 pointer-events-none">
-            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
-            <div class="relative z-20 text-center max-w-4xl mx-auto px-6 pointer-events-auto w-full">
-                <h2 class="font-cinematic text-3xl sm:text-4xl md:text-6xl text-dark tracking-tighter mb-8 md:mb-10 cta-text opacity-0 transform translate-y-10 leading-tight">
-                    THE NEXT GENERATION <br><span class="text-slate-400">WON'T STUDY HARDER.</span> <br>THEY'LL EVOLVE FASTER.
-                </h2>
-                <div class="mt-12 md:mt-16 cta-btn opacity-0">
-                    <button onclick="openAuthModal('signup')" data-cursor="hover" class="group relative px-8 md:px-12 py-5 md:py-6 bg-transparent overflow-hidden rounded-xl md:rounded-none w-full sm:w-auto">
-                        <div class="absolute inset-0 border-2 border-dark transition-all duration-300 group-hover:border-transparent rounded-xl md:rounded-none"></div>
-                        <div class="absolute inset-0 bg-dark transform scale-y-0 origin-bottom transition-transform duration-500 group-hover:scale-y-100 rounded-xl md:rounded-none"></div>
-                        <span class="relative z-10 font-display text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] font-bold text-dark group-hover:text-white transition-colors duration-300">Initialize Vidyaplus Core</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <footer class="py-8 border-t border-slate-100 bg-white relative z-10 text-center">
-            <div class="font-display text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">&copy; 2026 Vidyaplus Systems. All cognitive rights reserved.</div>
-        </footer>
-        </main>
-            <script type="module">
-        // Firebase Setup - Integrated via ESM directly inside the main script block
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Tumhara configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB6s4SQloHdaPU8EVvkrrYpYvUdahsOtI4",
-            authDomain: "vidyaplus-d9c3b.firebaseapp.com",
-            projectId: "vidyaplus-d9c3b",
-            storageBucket: "vidyaplus-d9c3b.firebasestorage.app",
-            messagingSenderId: "492916889178",
-            appId: "1:492916889178:web:a3d3f3737b1236167caa63"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        // --- 1. Custom Magnetic Cursor ---
-        const cursorDot = document.getElementById('cursor-dot');
-        const cursorOutline = document.getElementById('cursor-outline');
-        let mouseX = 0, mouseY = 0;
-        let outlineX = 0, outlineY = 0;
-        
-        // Prevent cursor code from breaking mobile
-        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        
-        if(!isTouchDevice) {
-            window.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX; mouseY = e.clientY;
-                cursorDot.style.left = `${mouseX}px`; cursorDot.style.top = `${mouseY}px`;
-            });
-            function animateCursor() {
-                let distX = mouseX - outlineX; let distY = mouseY - outlineY;
-                outlineX += distX * 0.15; outlineY += distY * 0.15;
-                cursorOutline.style.left = `${outlineX}px`; cursorOutline.style.top = `${outlineY}px`;
-                requestAnimationFrame(animateCursor);
-            }
-            animateCursor();
-            document.body.addEventListener('mouseover', (e) => {
-                const interactable = e.target.closest('[data-cursor="hover"], button, a');
-                const textInput = e.target.closest('input[type="text"], input[type="email"], input[type="password"]');
-                if (interactable && !textInput) {
-                    cursorOutline.style.width = '60px'; cursorOutline.style.height = '60px';
-                    cursorOutline.style.backgroundColor = 'rgba(8, 18, 41, 0.05)';
-                    cursorDot.style.transform = 'scale(0.5)';
-                } else if (textInput) {
-                    cursorOutline.style.width = '24px'; cursorOutline.style.height = '40px';
-                    cursorOutline.style.borderRadius = '4px'; cursorOutline.style.backgroundColor = 'transparent';
-                    cursorOutline.style.borderColor = '#081229'; cursorDot.style.opacity = '0';
-                }
-            });
-            document.body.addEventListener('mouseout', (e) => {
-                const interactable = e.target.closest('[data-cursor="hover"], button, a, input');
-                if (interactable) {
-                    cursorOutline.style.width = '40px'; cursorOutline.style.height = '40px';
-                    cursorOutline.style.borderRadius = '50%'; cursorOutline.style.backgroundColor = 'transparent';
-                    cursorOutline.style.borderColor = 'rgba(8, 18, 41, 0.3)';
-                    cursorDot.style.transform = 'scale(1)'; cursorDot.style.opacity = '1';
-                }
-            });
-        }
-
-        // --- 2. Lenis Smooth Scrolling ---
-        const lenis = new Lenis({
-            duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical', gestureDirection: 'vertical', smooth: true,
-            mouseMultiplier: 1, smoothTouch: false, touchMultiplier: 2, infinite: false,
+    <script>
+        // Swiper Init
+        const swiper = new Swiper('.heroSwiper', {
+            loop: true,
+            autoplay: { delay: 5000, disableOnInteraction: false },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            effect: 'fade',
+            fadeEffect: { crossFade: true }
         });
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-        requestAnimationFrame(raf);
 
-        // --- 3. Three.js Background ---
-        const canvas = document.getElementById('bg-canvas');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
-        scene.fog = new THREE.FogExp2(0xffffff, 0.02);
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const particleCount = 3000;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const initialPositions = new Float32Array(particleCount * 3);
-
-        for(let i = 0; i < particleCount * 3; i+=3) {
-            const x = (Math.random() - 0.5) * 50; const y = (Math.random() - 0.5) * 20 - 5; const z = (Math.random() - 0.5) * 40 - 10;
-            positions[i] = x; positions[i+1] = y; positions[i+2] = z;
-            initialPositions[i] = x; initialPositions[i+1] = y; initialPositions[i+2] = z;
-        }
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.08, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
-        const particles = new THREE.Points(geometry, material);
-        scene.add(particles);
-
-        camera.position.z = 15; camera.position.y = 2;
-        const cameraRig = new THREE.Group(); cameraRig.add(camera); scene.add(cameraRig);
-        let targetX = 0; let targetY = 0;
-        if(!isTouchDevice) {
-            window.addEventListener('mousemove', (e) => {
-                targetX = (e.clientX / window.innerWidth - 0.5) * 2; targetY = (e.clientY / window.innerHeight - 0.5) * 2;
-            });
-        }
-        
-        const clock = new THREE.Clock();
-        function animateThree() {
-            requestAnimationFrame(animateThree);
-            const time = clock.getElapsedTime();
-            const posAttribute = geometry.attributes.position;
-            for(let i = 0; i < particleCount; i++) {
-                const i3 = i * 3; const ix = initialPositions[i3]; const iz = initialPositions[i3+2];
-                posAttribute.array[i3+1] = initialPositions[i3+1] + Math.sin(ix * 0.5 + time) * 1.5 + Math.cos(iz * 0.3 + time * 0.8) * 1.5;
-            }
-            posAttribute.needsUpdate = true;
-            cameraRig.position.x += (targetX * 2 - cameraRig.position.x) * 0.02; cameraRig.position.y += (-targetY * 2 - cameraRig.position.y) * 0.02;
-            particles.rotation.y = time * 0.05;
-            renderer.render(scene, camera);
-        }
-        animateThree();
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-                        // --- 4. GSAP Animations Main Site ---
+        // GSAP Animations
         gsap.registerPlugin(ScrollTrigger);
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time)=>{ lenis.raf(time * 1000); });
-        gsap.ticker.lagSmoothing(0);
-
-        const tlHero = gsap.timeline({ defaults: { ease: "power4.out" }});
-        const heroLines = document.querySelectorAll('.hero-line');
-        heroLines.forEach(line => { line.innerHTML = `<span class="char">${line.innerHTML}</span>`; });
-        tlHero.to('.hero-line .char', { y: "0%", duration: 1.5, stagger: 0.1, delay: 0.5 })
-        .to('.hero-sub', { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "-=1")
-        .to('.hero-cta', { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "-=0.8");
-
-        document.querySelectorAll('[data-speed]').forEach(elem => {
-            if(window.innerWidth > 768) {
-                gsap.to(elem, {
-                    y: (i, el) => (1 - parseFloat(el.getAttribute('data-speed'))) * (ScrollTrigger.maxScroll(window) - (this.scrollY || 0)),
-                    ease: "none", scrollTrigger: { trigger: elem, start: "top bottom", end: "bottom top", scrub: 0.5 }
-                });
-            }
+        gsap.from(".gs-reveal", { y: 30, opacity: 0, duration: 1, stagger: 0.2, ease: "power3.out" });
+        gsap.from(".gs-feature", {
+            scrollTrigger: { trigger: ".gs-feature", start: "top 80%" },
+            y: 50, opacity: 0, duration: 0.8, stagger: 0.15, ease: "back.out(1.7)"
         });
 
-        gsap.utils.toArray('.section-title').forEach(title => {
-            gsap.from(title, { scrollTrigger: { trigger: title, start: "top 80%" }, y: 50, opacity: 0, duration: 1, ease: "power3.out" });
-        });
+        // Auth Modal Logic
+        const modal = document.getElementById('authModal');
+        const modalContent = document.getElementById('modalContent');
+        let authMode = 'login'; // 'login' or 'signup'
 
-        gsap.utils.toArray('.counter').forEach(counter => {
-            let target = parseFloat(counter.innerText); let isInt = target % 1 === 0;
-            ScrollTrigger.create({ trigger: counter, start: "top 85%", once: true,
-                onEnter: () => {
-                    gsap.fromTo(counter, { innerText: 0 }, { 
-                        innerText: target, duration: 2, ease: "power2.out", snap: { innerText: isInt ? 1 : 0.1 },
-                        onUpdate: function() { counter.innerText = Number(this.targets()[0].innerText).toFixed(isInt ? 0 : 1); }
-                    });
-                }
+        function openAuth(mode) {
+            authMode = mode;
+            document.getElementById('authTitle').innerText = mode === 'login' ? 'Welcome Back' : 'Create Account';
+            document.getElementById('submitBtn').innerText = mode === 'login' ? 'Log In' : 'Sign Up';
+            
+            modal.classList.remove('hidden');
+            // Trigger animation frame for CSS transition
+            requestAnimationFrame(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
             });
-        });
-
-        const timelineItems = gsap.utils.toArray('.timeline-item');
-        gsap.to('.timeline-progress', { height: "100%", ease: "none", scrollTrigger: { trigger: "#timeline", start: "top center", end: "bottom center", scrub: true }});
-        timelineItems.forEach((item, i) => {
-            ScrollTrigger.create({ trigger: item, start: "top 60%",
-                onEnter: () => {
-                    item.classList.remove('opacity-30'); item.classList.add('opacity-100');
-                    const dot = item.querySelector('div[class*="rounded-full"]');
-                    if(dot) { gsap.to(dot, { scale: 1.2, duration: 0.3, yoyo: true, repeat: 1 });
-                        if(i === timelineItems.length - 1) { dot.classList.add('bg-dark'); dot.classList.remove('bg-white'); }
-                    }
-                },
-                onLeaveBack: () => { item.classList.add('opacity-30'); item.classList.remove('opacity-100'); }
-            });
-        });
-
-        gsap.timeline({ scrollTrigger: { trigger: "#cta", start: "top 60%" }})
-            .to('.cta-text', { opacity: 1, y: 0, duration: 1.5, ease: "power4.out" })
-            .to('.cta-btn', { opacity: 1, duration: 1, ease: "power2.out" }, "-=0.5");
-
-        // --- 5. PREMIUM AUTHENTICATION MODAL SYSTEM ---
-        let currentAuthMode = 'login';
-        const authWrapper = document.getElementById('auth-wrapper');
-        const authModal = document.getElementById('auth-modal');
-        const formLogin = document.getElementById('form-login');
-        const formSignup = document.getElementById('form-signup');
-        const authTitle = document.getElementById('auth-title');
-        const authSubtitle = document.getElementById('auth-subtitle');
-        const toggleText = document.getElementById('toggle-text');
-        const toggleBtn = document.getElementById('toggle-btn');
-        
-        const mascotFace = document.querySelector('.mascot-face');
-        const mascotEyes = document.querySelectorAll('.mascot-eye');
-        const mascotStatus = document.getElementById('mascot-status');
-        const leftScan = document.getElementById('eye-left-scan');
-        const rightScan = document.getElementById('eye-right-scan');
-
-        // Exposing globally for onclick events in HTML
-        window.openAuthModal = function(mode) {
-            lenis.stop();
-            if(mode !== currentAuthMode) { switchMode(mode, false); }
-            const tl = gsap.timeline();
-            tl.to(authWrapper, { opacity: 1, pointerEvents: 'auto', duration: 0.3, ease: "power2.out" })
-            .fromTo(authModal, { scale: 0.9, y: 40, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.2)" }, "-=0.1");
-            gsap.fromTo(mascotEyes, { height: 2 }, { height: 20, duration: 0.5, ease: "elastic.out(1, 0.5)", delay: 0.5 });
-            if(mascotStatus) mascotStatus.innerText = "System Online";
-        };
-
-        window.closeAuthModal = function() {
-            lenis.start();
-            gsap.to(mascotEyes, { height: 2, duration: 0.3 });
-            if(mascotStatus) mascotStatus.innerText = "Shutting down...";
-            const tl = gsap.timeline();
-            tl.to(authModal, { scale: 0.95, y: 20, opacity: 0, duration: 0.4, ease: "power3.in" })
-            .to(authWrapper, { opacity: 0, pointerEvents: 'none', duration: 0.3, ease: "power2.in" }, "-=0.2");
-        };
-
-        window.toggleAuthMode = function() {
-            const newMode = currentAuthMode === 'login' ? 'signup' : 'login';
-            switchMode(newMode, true);
-        };
-
-        function switchMode(mode, animate = true) {
-            currentAuthMode = mode;
-            if (mode === 'signup') {
-                authTitle.innerText = "Initialize Entity"; authSubtitle.innerText = "New Connection";
-                toggleText.innerText = "Already linked?"; toggleBtn.innerText = "Login";
-                if(animate) {
-                    gsap.to(formLogin, { opacity: 0, y: -20, pointerEvents: 'none', duration: 0.4, ease: "power2.inOut" });
-                    gsap.to(formSignup, { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.5, delay: 0.2, ease: "power2.out" });
-                } else {
-                    gsap.set(formLogin, { opacity: 0, y: -20, pointerEvents: 'none' }); gsap.set(formSignup, { opacity: 1, y: 0, pointerEvents: 'auto' });
-                }
-                if(mascotStatus) mascotStatus.innerText = "Ready to register";
-                gsap.to(mascotFace, { rotate: 5, duration: 0.3 });
-            } else {
-                authTitle.innerText = "Access Core"; authSubtitle.innerText = "Welcome Back";
-                toggleText.innerText = "Require an entity link?"; toggleBtn.innerText = "Sign Up";
-                if(animate) {
-                    gsap.to(formSignup, { opacity: 0, y: 20, pointerEvents: 'none', duration: 0.4, ease: "power2.inOut" });
-                    gsap.to(formLogin, { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.5, delay: 0.2, ease: "power2.out" });
-                } else {
-                    gsap.set(formSignup, { opacity: 0, y: 20, pointerEvents: 'none' }); gsap.set(formLogin, { opacity: 1, y: 0, pointerEvents: 'auto' });
-                }
-                if(mascotStatus) mascotStatus.innerText = "Awaiting Credentials";
-                gsap.to(mascotFace, { rotate: 0, duration: 0.3 });
-            }
         }
 
-        const inputs = document.querySelectorAll('.futuristic-input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', (e) => {
-                if (e.target.type === 'password') {
-                    gsap.to(mascotEyes, { height: 2, width: 12, borderRadius: "4px", duration: 0.3 });
-                    if(mascotStatus) mascotStatus.innerText = "Privacy mode enabled";
-                } else {
-                    gsap.to(mascotEyes, { height: 24, width: 20, borderRadius: "50%", duration: 0.3 });
-                    gsap.to([leftScan, rightScan], { opacity: 1, yoyo: true, repeat: -1, y: 20, duration: 1.5, ease: "linear" });
-                    if(mascotStatus) mascotStatus.innerText = "Analyzing input...";
-                }
-            });
-            input.addEventListener('blur', () => {
-                gsap.to(mascotEyes, { height: 20, width: 16, borderRadius: "50%", duration: 0.3 });
-                gsap.killTweensOf([leftScan, rightScan]); gsap.set([leftScan, rightScan], { opacity: 0, y: 0 });
-                if(mascotStatus) mascotStatus.innerText = "Awaiting input...";
-            });
-            input.addEventListener('input', (e) => {
-                if (e.target.type !== 'password') {
-                    const moveX = Math.min((e.target.value.length * 1.5), 15) - 7.5;
-                    gsap.to(mascotFace, { x: moveX, duration: 0.1 });
-                }
-            });
-        });
-
-        function authSuccess() {
-            const successOverlay = document.getElementById('auth-success-overlay');
-            gsap.to(mascotFace, { x: 0, rotate: 0, duration: 0.2 });
-            gsap.to(mascotEyes, { height: 4, width: 20, borderRadius: "50% 50% 0 0", duration: 0.2 }); 
-            if(mascotStatus) mascotStatus.innerText = "Access Granted.";
-            gsap.to(successOverlay, { opacity: 1, pointerEvents: 'auto', duration: 0.5, delay: 0.3 });
-            setTimeout(() => { window.location.href = "explore.html"; }, 2000);
+        function closeAuth() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
+    </script>
+    <script type="module">
+        import { auth } from './firebase-init.js';
+        import { initAuth } from './auth.js';
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        setInterval(() => {
-            if(Math.random() > 0.6 && mascotStatus && mascotStatus.innerText !== "Privacy mode enabled") {
-                gsap.to(mascotEyes, { height: 2, duration: 0.1, yoyo: true, repeat: 1 });
-            }
-        }, 3000);
+        // Initialize user state listener from your auth.js
+        initAuth((batches) => {
+            console.log("Enrolled Batches secure fetch:", batches);
+            document.getElementById('guestState').classList.add('hidden');
+            document.getElementById('userState').classList.remove('hidden');
+            closeAuth();
+        });
 
-        // --- REAL FIREBASE IMPLEMENTATION ---
-        
-        // 1. Email Login
-        document.getElementById('form-login').addEventListener('submit', async (e) => {
+        // Form Submit Handler
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-password').value;
-            const btn = document.getElementById('btn-login');
-            const ogText = btn.innerHTML;
-            btn.innerHTML = "Authenticating...";
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerText;
             
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
             try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                authSuccess();
-            } catch(err) {
-                alert("Login Error: " + err.message.replace("Firebase: ", ""));
-                btn.innerHTML = ogText;
+                if (authMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+                // onAuthStateChanged in auth.js will handle the rest
+            } catch (error) {
+                console.error("Auth Error:", error.message);
+                alert("Authentication failed. Please check credentials.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         });
 
-        // 2. Email Signup
-        document.getElementById('form-signup').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('signup-email').value;
-            const pass = document.getElementById('signup-password').value;
-            const confirm = document.getElementById('signup-confirm').value;
-            if(pass !== confirm) return alert("Passcodes do not match!");
-            
-            const btn = document.getElementById('btn-signup');
-            const ogText = btn.innerHTML;
-            btn.innerHTML = "Constructing...";
-            
-            try {
-                await createUserWithEmailAndPassword(auth, email, pass);
-                authSuccess();
-            } catch(err) {
-                alert("Signup Error: " + err.message.replace("Firebase: ", ""));
-                btn.innerHTML = ogText;
-            }
-        });
-
-        // 3. Google Auth
-        const handleGoogle = async () => {
+        // Google Auth Handler
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
-                authSuccess();
-            } catch(err) { alert("Google Auth Failed: " + err.message); }
-        };
-        document.getElementById('btn-google-login').addEventListener('click', handleGoogle);
-        document.getElementById('btn-google-signup').addEventListener('click', handleGoogle);
-
-        // 4. Forgot Password
-        document.getElementById('forgot-password-btn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            if(!email) return alert("Please enter your email in the Identity Sequence field first to send reset link.");
-            try {
-                await sendPasswordResetEmail(auth, email);
-                alert("Password reset code sent to your email!");
-            } catch(err) {
-                alert("Reset Error: " + err.message);
+            } catch (error) {
+                console.error("Google Auth Error:", error);
             }
         });
-
     </script>
 </body>
 </html>
