@@ -13,9 +13,9 @@
 
     <style>
         :root {
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #e5e7eb;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.2);
+            --accent: #3b82f6;
         }
 
         body {
@@ -44,6 +44,43 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.03);
         }
 
+        .auth-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 900px;
+            min-height: 550px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid white;
+            border-radius: 4rem;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 100px 100px -50px rgba(0,0,0,0.1);
+        }
+
+        .input-futuristic {
+            background: rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .input-futuristic:focus {
+            background: #fff;
+            border-color: #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            outline: none;
+        }
+
         .custom-cursor {
             width: 20px;
             height: 20px;
@@ -60,22 +97,50 @@
             transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .reveal-text {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        .shimmer-border {
+            position: relative;
+            overflow: hidden;
         }
 
-        .noise-bg {
-            position: fixed;
-            top: 0;
-            opacity: 0.04;
-            pointer-events: none;
-            z-index: 50;
+        .shimmer-border::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.8), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite;
         }
 
-        .hero-title {
-            font-size: clamp(3rem, 8vw, 12rem);
-            line-height: 0.9;
-            letter-spacing: -0.04em;
+        @keyframes shimmer {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        /* AI Mascot Styles */
+        .ai-aura {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, #fff 0%, rgba(59, 130, 246, 0.1) 100%);
+            border-radius: 50%;
+            filter: blur(10px);
+            position: relative;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .ai-eyes {
+            display: flex;
+            gap: 15px;
+        }
+
+        .eye {
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            position: relative;
         }
 
         .grain {
@@ -97,10 +162,89 @@
     <!-- Navigation -->
     <nav class="fixed top-0 w-full p-8 flex justify-between items-center z-50">
         <div class="text-xl font-bold tracking-tighter space-font">VIDYAPLUS.sys</div>
-        <div class="glass-panel px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase">
-            v 2.0.26 / Neural Interface
+        <div class="flex items-center gap-4">
+            <button onclick="toggleAuth('login')" class="magnetic-btn px-6 py-2 glass-panel rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-all">
+                Login
+            </button>
+            <button onclick="toggleAuth('signup')" class="magnetic-btn shimmer-border px-6 py-2 bg-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase shadow-xl">
+                Evolution Sign-up
+            </button>
         </div>
     </nav>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-card" id="authCard">
+            <!-- Left Side: AI Companion (Hidden on Mobile) -->
+            <div class="hidden md:flex w-1/2 bg-gray-50 flex-col items-center justify-center relative overflow-hidden p-12">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent"></div>
+                
+                <div class="ai-aura flex items-center justify-center" id="mascot">
+                    <div class="ai-eyes">
+                        <div class="eye" id="eyeL"></div>
+                        <div class="eye" id="eyeR"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 text-center z-10">
+                    <p id="ai-status" class="text-[10px] tracking-[0.4em] uppercase font-bold text-blue-600 mb-2">System Active</p>
+                    <h3 id="ai-greeting" class="space-font text-2xl font-bold">Waiting for Credentials...</h3>
+                    <p class="text-sm text-gray-400 mt-2 max-w-[200px]">I am Aura. I will guide your cognitive sync.</p>
+                </div>
+
+                <!-- Decorative elements -->
+                <div class="absolute bottom-10 flex gap-2">
+                    <div class="w-1 h-1 bg-black rounded-full animate-pulse"></div>
+                    <div class="w-1 h-1 bg-black rounded-full animate-pulse delay-75"></div>
+                    <div class="w-1 h-1 bg-black rounded-full animate-pulse delay-150"></div>
+                </div>
+            </div>
+
+            <!-- Right Side: Form -->
+            <div class="w-full md:w-1/2 p-12 md:p-16 flex flex-col justify-center relative">
+                <button onclick="toggleAuth()" class="absolute top-8 right-8 opacity-30 hover:opacity-100 transition-opacity">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+
+                <!-- Login Mode -->
+                <div id="loginForm" class="auth-form-container">
+                    <h2 class="text-3xl space-font font-bold mb-2">Welcome Back.</h2>
+                    <p class="text-gray-400 text-sm mb-8">Access your cognitive dashboard.</p>
+                    <div class="space-y-4">
+                        <input type="email" placeholder="NEURAL EMAIL" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
+                        <input type="password" placeholder="SYNTETIC PASSWORD" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
+                        <div class="flex items-center justify-between text-[10px] tracking-widest uppercase font-bold px-2">
+                            <label class="flex items-center gap-2 cursor-pointer opacity-50"><input type="checkbox"> Stay Synced</label>
+                            <a href="#" class="opacity-50 hover:opacity-100">Forgot Code?</a>
+                        </div>
+                        <button class="w-full py-5 bg-black text-white rounded-2xl font-bold tracking-[0.2em] uppercase text-xs mt-4 hover:scale-[1.02] transition-transform">
+                            Initialize Sync
+                        </button>
+                    </div>
+                    <p class="text-center text-[10px] tracking-widest uppercase mt-8 opacity-40">
+                        New entity? <button onclick="switchMode('signup')" class="text-black font-bold border-b border-black">Create Profile</button>
+                    </p>
+                </div>
+
+                <!-- Signup Mode -->
+                <div id="signupForm" class="hidden auth-form-container">
+                    <h2 class="text-3xl space-font font-bold mb-2">New Evolution.</h2>
+                    <p class="text-gray-400 text-sm mb-8">Begin your neural transformation.</p>
+                    <div class="space-y-4">
+                        <input type="text" placeholder="FULL NAME" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
+                        <input type="email" placeholder="NEURAL EMAIL" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
+                        <input type="password" placeholder="CREATE PASSWORD" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
+                        <button class="w-full py-5 bg-black text-white rounded-2xl font-bold tracking-[0.2em] uppercase text-xs mt-4 hover:scale-[1.02] transition-transform">
+                            Create Account
+                        </button>
+                    </div>
+                    <p class="text-center text-[10px] tracking-widest uppercase mt-8 opacity-40">
+                        Already evolving? <button onclick="switchMode('login')" class="text-black font-bold border-b border-black">Login</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- HERO SECTION -->
     <section class="relative min-h-screen flex flex-col items-center justify-center pt-20 px-6 text-center">
@@ -110,7 +254,7 @@
 
         <div class="z-10 max-w-7xl">
             <span class="inline-block mb-6 text-sm tracking-[0.4em] uppercase font-light opacity-50 hero-sub">The Era of Bio-Digital Intelligence</span>
-            <h1 class="hero-title space-font font-bold mb-8 reveal-text">
+            <h1 class="text-8xl md:text-[10rem] space-font font-bold mb-8 leading-[0.9] tracking-tighter">
                 HUMAN LEARNING <br> IS <span class="text-gray-400">OBSOLETE.</span>
             </h1>
             <p class="text-xl md:text-2xl font-light text-gray-500 max-w-2xl mx-auto mb-12">
@@ -118,7 +262,7 @@
             </p>
             
             <div class="flex flex-col md:flex-row gap-6 justify-center items-center">
-                <button class="magnetic-btn px-10 py-5 bg-black text-white rounded-full text-sm font-bold tracking-widest uppercase hover:scale-105 transition-all">
+                <button onclick="toggleAuth('signup')" class="magnetic-btn px-10 py-5 bg-black text-white rounded-full text-sm font-bold tracking-widest uppercase hover:scale-105 transition-all">
                     Initialize Evolution
                 </button>
                 <button class="px-10 py-5 glass-panel rounded-full text-sm font-bold tracking-widest uppercase">
@@ -126,14 +270,10 @@
                 </button>
             </div>
         </div>
-
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-30 animate-bounce">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1V19M10 19L1 10M10 19L19 10" stroke="black" stroke-width="1.5"/></svg>
-        </div>
     </section>
 
-    <!-- SECTION 1: COGNITIVE REVOLUTION -->
-    <section class="min-h-screen py-40 px-6 flex flex-col items-center justify-center bg-white relative overflow-hidden">
+    <!-- Other sections remain same... -->
+    <section class="min-h-screen py-40 px-6 flex flex-col items-center justify-center bg-white relative">
         <div class="max-w-4xl text-center z-10">
             <h2 class="text-5xl md:text-7xl space-font font-bold mb-12 tracking-tight">The old systems were designed for factories.</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
@@ -145,101 +285,25 @@
                 <div class="glass-panel p-10 rounded-[3rem]">
                     <div class="text-4xl font-bold mb-4">0.2ms</div>
                     <div class="text-gray-500 uppercase tracking-widest text-xs mb-4">Synaptic Latency</div>
-                    <p class="text-lg">Our AI engine maps your cognitive load in real-time, adjusting difficulty at the speed of thought.</p>
+                    <p class="text-lg">Our AI engine maps your cognitive load in real-time.</p>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- SECTION 2: THE TIMELINE -->
-    <section class="py-40 bg-gray-50 relative">
-        <div class="container mx-auto px-6">
-            <h3 class="text-xs tracking-[0.5em] uppercase opacity-40 mb-20 text-center">Evolutionary Roadmap</h3>
-            
-            <div class="space-y-40">
-                <div class="timeline-item flex flex-col md:flex-row items-center justify-between opacity-30">
-                    <div class="text-6xl space-font font-bold">1900s</div>
-                    <div class="h-[1px] flex-1 bg-black mx-10 hidden md:block"></div>
-                    <div class="text-2xl text-right">Industrial Classroom (Rote Memorization)</div>
-                </div>
-                <div class="timeline-item flex flex-col md:flex-row items-center justify-between opacity-30">
-                    <div class="text-6xl space-font font-bold">2010s</div>
-                    <div class="h-[1px] flex-1 bg-black mx-10 hidden md:block"></div>
-                    <div class="text-2xl text-right">Online Portals (Video Storage)</div>
-                </div>
-                <div class="timeline-item flex flex-col md:flex-row items-center justify-between scale-110">
-                    <div class="text-6xl space-font font-bold">2026+</div>
-                    <div class="h-[1px] flex-1 bg-black mx-10 hidden md:block"></div>
-                    <div class="text-2xl text-right font-bold italic">Neural Cognitive Sync (Vidyaplus)</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 3: FEATURES GRID -->
-    <section class="min-h-screen py-40 px-6 bg-white">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-5xl space-font font-bold mb-24">Synthetic Cognition Modules</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Card 1 -->
-                <div class="group relative p-12 glass-panel rounded-[4rem] hover:bg-black hover:text-white transition-all duration-700 cursor-pointer overflow-hidden h-[500px] flex flex-col justify-end">
-                    <div class="absolute top-10 right-10 text-xs tracking-widest opacity-40">MOD_01</div>
-                    <h4 class="text-3xl font-bold mb-4">Neural Weakness Heatmaps</h4>
-                    <p class="opacity-60">Visualizing the gaps in your knowledge using predictive AI tensors.</p>
-                </div>
-                <!-- Card 2 -->
-                <div class="group relative p-12 glass-panel rounded-[4rem] bg-black text-white h-[500px] flex flex-col justify-end">
-                    <div class="absolute top-10 right-10 text-xs tracking-widest opacity-40">MOD_02</div>
-                    <h4 class="text-3xl font-bold mb-4">Dopamine Regulation</h4>
-                    <p class="opacity-60">Gamified learning loops that trigger flow state on command.</p>
-                    <div class="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
-                </div>
-                <!-- Card 3 -->
-                <div class="group relative p-12 glass-panel rounded-[4rem] hover:bg-black hover:text-white transition-all duration-700 cursor-pointer overflow-hidden h-[500px] flex flex-col justify-end">
-                    <div class="absolute top-10 right-10 text-xs tracking-widest opacity-40">MOD_03</div>
-                    <h4 class="text-3xl font-bold mb-4">Cognitive Bio-Feedback</h4>
-                    <p class="opacity-60">Heart-rate and focus analysis via neural-vision processing.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER CTA -->
-    <footer class="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-white">
-        <div class="max-w-4xl">
-            <h2 class="text-6xl md:text-9xl space-font font-bold mb-12 tracking-tighter">EVOLVE <br> OR <br> FADE.</h2>
-            <p class="text-xl text-gray-400 mb-12 uppercase tracking-[0.3em]">Registration for Gen-Alpha Intelligence is open.</p>
-            <div class="inline-block p-[1px] rounded-full bg-gradient-to-r from-transparent via-gray-400 to-transparent w-full mb-12"></div>
-            <button class="magnetic-btn px-16 py-8 bg-black text-white rounded-full text-lg font-bold tracking-[0.2em] uppercase transition-transform">
-                Enter the Portal
-            </button>
-            <div class="mt-40 text-[10px] uppercase tracking-[0.5em] opacity-30">
-                © 2026 Vidyaplus System Inc. / All Rights for Humanity Reserved.
-            </div>
-        </div>
-    </footer>
 
     <script>
-        // 1. Smooth Scroll (Lenis)
+        // 1. Smooth Scroll
         const lenis = new Lenis();
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
         requestAnimationFrame(raf);
 
         // 2. Custom Cursor
         const cursor = document.getElementById('cursor');
         document.addEventListener('mousemove', (e) => {
-            gsap.to(cursor, {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.6,
-                ease: "power4.out"
-            });
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power4.out" });
         });
 
-        // 3. Three.js Background (Volumetric Particles)
+        // 3. Three.js Background
         const canvas = document.querySelector('#canvas-webgl');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -247,69 +311,92 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         const particlesGeometry = new THREE.BufferGeometry();
-        const count = 3000;
+        const count = 2500;
         const positions = new Float32Array(count * 3);
-
-        for(let i = 0; i < count * 3; i++) {
-            positions[i] = (Math.random() - 0.5) * 15;
-        }
+        for(let i = 0; i < count * 3; i++) { positions[i] = (Math.random() - 0.5) * 15; }
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particlesMaterial = new THREE.PointsMaterial({ size: 0.015, color: 0x000000, transparent: true, opacity: 0.2 });
+        const particlesMaterial = new THREE.PointsMaterial({ size: 0.015, color: 0x000000, transparent: true, opacity: 0.15 });
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
         camera.position.z = 3;
 
         function animateParticles() {
             particles.rotation.y += 0.001;
-            particles.rotation.x += 0.0005;
             renderer.render(scene, camera);
             requestAnimationFrame(animateParticles);
         }
         animateParticles();
 
-        // 4. GSAP Animations
-        gsap.registerPlugin(ScrollTrigger);
+        // 4. AUTH MODAL LOGIC
+        const authModal = document.getElementById('authModal');
+        const authCard = document.getElementById('authCard');
+        const mascot = document.getElementById('mascot');
+        const aiStatus = document.getElementById('ai-status');
+        const aiGreeting = document.getElementById('ai-greeting');
 
-        // Hero Reveal
-        const tl = gsap.timeline();
-        tl.from(".hero-title", {
-            y: 100,
-            opacity: 0,
-            duration: 1.5,
-            ease: "expo.out",
-            stagger: 0.2
-        })
-        .from(".hero-sub", { opacity: 0, y: 20 }, "-=1")
-        .from(".glass-panel", { opacity: 0, scale: 0.9, duration: 1 }, "-=0.5");
+        function toggleAuth(mode = 'login') {
+            const isOpening = authModal.style.display !== 'flex';
+            if (isOpening) {
+                switchMode(mode);
+                authModal.style.display = 'flex';
+                gsap.fromTo(authModal, { opacity: 0 }, { opacity: 1, duration: 0.5 });
+                gsap.fromTo(authCard, { scale: 0.8, y: 100, opacity: 0, rotateX: 20 }, { scale: 1, y: 0, opacity: 1, rotateX: 0, duration: 1, ease: "expo.out" });
+                
+                // AI Entrance
+                gsap.fromTo(mascot, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, delay: 0.5, duration: 1, ease: "elastic.out(1, 0.3)" });
+            } else {
+                gsap.to(authCard, { scale: 0.9, opacity: 0, y: 50, duration: 0.5, ease: "power4.in", onComplete: () => { authModal.style.display = 'none'; } });
+                gsap.to(authModal, { opacity: 0, duration: 0.5 });
+            }
+        }
 
-        // Scroll Based Scale
-        gsap.utils.toArray('.timeline-item').forEach((item) => {
-            gsap.to(item, {
-                scrollTrigger: {
-                    trigger: item,
-                    start: "top 80%",
-                    end: "top 20%",
-                    scrub: true
-                },
-                opacity: 1,
-                scale: 1,
-                filter: "blur(0px)"
+        function switchMode(mode) {
+            const login = document.getElementById('loginForm');
+            const signup = document.getElementById('signupForm');
+            
+            gsap.to(".auth-form-container", { opacity: 0, y: 10, duration: 0.3, onComplete: () => {
+                if (mode === 'login') {
+                    login.classList.remove('hidden');
+                    signup.classList.add('hidden');
+                    aiGreeting.innerText = "Welcome Back.";
+                } else {
+                    signup.classList.remove('hidden');
+                    login.classList.add('hidden');
+                    aiGreeting.innerText = "New Consciousness Detected.";
+                }
+                gsap.to(".auth-form-container", { opacity: 1, y: 0, duration: 0.5 });
+            }});
+        }
+
+        // 5. AI MASCOT INTERACTION
+        document.querySelectorAll('.auth-input').forEach(input => {
+            input.addEventListener('focus', () => {
+                gsap.to(mascot, { scale: 1.1, filter: "blur(5px)", duration: 0.5 });
+                aiStatus.innerText = "Analyzing Input...";
+                aiStatus.classList.add('text-blue-600');
+            });
+            input.addEventListener('blur', () => {
+                gsap.to(mascot, { scale: 1, filter: "blur(10px)", duration: 0.5 });
+                aiStatus.innerText = "System Active";
             });
         });
 
-        // Magnetic Button Effect
+        // Eyes Follow Cursor in Modal
+        authCard.addEventListener('mousemove', (e) => {
+            const rect = mascot.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            gsap.to(".eye", { x: x * 10, y: y * 10, duration: 0.3 });
+        });
+
+        // 6. Magnetic Effect
         const mBtns = document.querySelectorAll('.magnetic-btn');
         mBtns.forEach(btn => {
             btn.addEventListener('mousemove', (e) => {
                 const rect = btn.getBoundingClientRect();
                 const x = e.clientX - rect.left - rect.width / 2;
                 const y = e.clientY - rect.top - rect.height / 2;
-                gsap.to(btn, {
-                    x: x * 0.3,
-                    y: y * 0.3,
-                    duration: 0.4,
-                    ease: "power2.out"
-                });
+                gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: "power2.out" });
             });
             btn.addEventListener('mouseleave', () => {
                 gsap.to(btn, { x: 0, y: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" });
@@ -324,3 +411,4 @@
     </script>
 </body>
 </html>
+
