@@ -222,8 +222,8 @@
     
         <script type="module">
         import { db, auth } from './js/firebase-init.js';
-        // NAYA: getDoc import kiya hai user ka data read karne ke liye
-        import { collection, query, where, getDocs, doc, setDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // Subcollection se user ki enrollments check karne ke liye functions
+        import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const batchGrid = document.getElementById('batchGrid');
@@ -232,22 +232,23 @@
         let currentUser = null;
         let selectedBatchId = null;
         let selectedBatchPrice = "0"; 
-        let userEnrolledBatches = []; // NAYA: User ke kharide hue batches store karne ke liye
+        let userEnrolledBatches = [];
 
-        // Check if user is logged in & Fetch their enrolled batches
+        // Check if user is logged in & Fetch their enrolled batches from Subcollection
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
-                // UI update for Avatar (Optional, to match dashboard)
                 document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
 
-                // Firestore se user ka data fetch karo
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                
-                if (userSnap.exists()) {
-                    // Array me save kar lo taaki baad me match kar sakein
-                    userEnrolledBatches = userSnap.data().enrolledBatches || [];
+                try {
+                    const enrollmentsRef = collection(db, "users", user.uid, "enrollments");
+                    const enrollmentsSnap = await getDocs(enrollmentsRef);
+                    
+                    enrollmentsSnap.forEach(docSnap => {
+                        userEnrolledBatches.push(docSnap.id);
+                    });
+                } catch(e) {
+                    console.error("Error loading enrollments:", e);
                 }
             }
         });
@@ -300,28 +301,27 @@
                 </div>
             `;
 
-            // Card click event - MODIFIED FOR DYNAMIC BUTTON
+            // Card click event
             card.addEventListener('click', () => {
                 document.getElementById('sheetTitle').innerText = data.title;
                 document.getElementById('sheetSubject').innerText = data.subject || 'All Subjects';
                 document.getElementById('sheetDesc').innerText = data.description || 'No description available.';
                 document.getElementById('sheetPrice').innerText = displayPrice;
                 
-                // Set data for Enrollment Logic
                 selectedBatchId = id;
                 selectedBatchPrice = data.price || "0";
                 
                 const btnEnroll = document.getElementById('btnEnroll');
 
-                // 🔥 SMART CHECK: Kya user already enrolled hai?
+                // Check if user is already enrolled
                 if (userEnrolledBatches.includes(selectedBatchId)) {
-                    btnEnroll.innerText = "Let's Study 🚀";
-                    btnEnroll.style.background = "#10b981"; // Success green color for visual feedback
-                    btnEnroll.setAttribute('data-action', 'study'); // Custom attribute
+                    btnEnroll.innerText = "Let's Study 📖";
+                    btnEnroll.style.background = "#10b981"; 
+                    btnEnroll.setAttribute('data-action', 'study'); 
                 } else {
                     btnEnroll.innerText = "Enroll Now";
-                    btnEnroll.style.background = "var(--primary)"; // Reset to primary blue
-                    btnEnroll.setAttribute('data-action', 'enroll'); // Custom attribute
+                    btnEnroll.style.background = "var(--primary)"; 
+                    btnEnroll.setAttribute('data-action', 'enroll'); 
                 }
                 
                 document.getElementById('sheetOverlay').classList.add('active');
@@ -334,7 +334,7 @@
 
         document.addEventListener('DOMContentLoaded', fetchBatches);
 
-        // 🔥 ENROLL / STUDY BUTTON LOGIC 🔥
+        // 🚀 ENROLL / STUDY BUTTON LOGIC (Secured via Vercel Backend) 🚀
         document.getElementById('btnEnroll').addEventListener('click', async () => {
             if (!currentUser) {
                 alert("Please login to enroll or study!");
@@ -345,43 +345,50 @@
             const btn = document.getElementById('btnEnroll');
             const action = btn.getAttribute('data-action');
 
-            // Agar already kharida hua hai, to seedha Dashboard pe bhejo
             if (action === 'study') {
                 window.location.href = "dashboard.html";
                 return;
             }
             
-            // Naya Enrollment Process
+            // Secure Backend Enrollment
             if (selectedBatchPrice === "0" || selectedBatchPrice === "" || selectedBatchPrice.toLowerCase() === "free") {
                 
                 const originalText = btn.innerText;
-                btn.innerText = "Processing...";
+                btn.innerText = "Securing Enrollment...";
                 
                 try {
-                    const userRef = doc(db, "users", currentUser.uid);
-                    await setDoc(userRef, {
-                        enrolledBatches: arrayUnion(selectedBatchId),
-                        email: currentUser.email
-                    }, { merge: true });
+                    // 🚨 NAYA LOGIC: Secure Backend ko JWT bhejna
+                    const idToken = await auth.currentUser.getIdToken();
 
-                    // Local array ko bhi turant update kar do bina refresh kiye
+                    const response = await fetch("https://vidyaplus-backend.vercel.app/enrollBatch", {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${idToken}` 
+                        },
+                        body: JSON.stringify({ batchId: selectedBatchId })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) throw new Error(result.error || "Enrollment failed");
+
+                    // Local array ko update karo taaki button turant green ho jaye
                     userEnrolledBatches.push(selectedBatchId);
-
-                    alert("Successfully Enrolled! Welcome to the batch.");
+                    
+                    alert("Successfully Enrolled! Welcome to the secure batch.");
                     window.location.replace("dashboard.html"); 
 
                 } catch (error) {
                     console.error("Enrollment failed:", error);
-                    alert("Something went wrong. Please try again.");
+                    alert(error.message || "Something went wrong. Please try again.");
                     btn.innerText = originalText;
                 }
 
             } else {
-                // Check if PAID
                 alert(`Payment Gateway Integration pending for Paid Batch ID: ${selectedBatchId}`);
             }
         });
-
         </script>
 </body>
 </html>
