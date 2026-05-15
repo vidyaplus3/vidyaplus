@@ -15,12 +15,10 @@
             theme: {
                 extend: {
                     colors: {
-                        midnight: '#050B14',
-                        neonBlue: '#00F0FF',
-                        royalBlue: '#1A365D',
-                    },
-                    backgroundImage: {
-                        'glass': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+                        lightBg: '#F8FAFC', /* Soft slate-50 for body */
+                        primaryBlue: '#2563EB', /* Vibrant Blue for light theme */
+                        darkText: '#0F172A', /* Deep slate-900 for headings */
+                        softText: '#475569', /* Slate-600 for paragraphs */
                     }
                 }
             }
@@ -30,17 +28,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     
     <style>
-        body { background-color: #050B14; color: white; overflow-x: hidden; }
+        body { background-color: #F8FAFC; color: #0F172A; overflow-x: hidden; }
+        
+        /* Updated Glass Panel for Light Theme */
         .glass-panel {
-            background: rgba(10, 15, 30, 0.6);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 240, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         }
-        .neon-glow { text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .hover-lift:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,240,255,0.2); }
+        
+        .neon-glow { text-shadow: 0 0 15px rgba(37, 99, 235, 0.3); }
+        
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease; }
+        .hover-lift:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.1); 
+        }
         
         /* Modal split layout for desktop */
         @media (min-width: 768px) {
@@ -48,108 +53,123 @@
         }
     </style>
 </head>
-<body class="antialiased selection:bg-neonBlue selection:text-midnight font-sans">
+<body class="antialiased selection:bg-primaryBlue selection:text-white font-sans">
 
     <header class="fixed top-0 w-full z-40 glass-panel border-b-0 transition-all duration-300 py-4 px-6 md:px-12 flex justify-between items-center">
         <div class="flex items-center gap-4">
-            <button class="text-white hover:text-neonBlue transition lg:hidden">
+            <button class="text-darkText hover:text-primaryBlue transition lg:hidden">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <div class="text-2xl font-bold tracking-tighter cursor-pointer">
-                Vidya<span class="text-neonBlue neon-glow">Plus</span>
+            <div class="text-2xl font-bold tracking-tighter cursor-pointer text-darkText">
+                Vidya<span class="text-primaryBlue neon-glow">Plus</span>
             </div>
         </div>
         
-        <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <a href="#" class="hover:text-neonBlue transition">Explore</a>
-            <a href="#" class="hover:text-neonBlue transition">Live Classes</a>
-            <a href="#" class="hover:text-neonBlue transition">Test Series</a>
+        <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-softText">
+            <a href="#" class="hover:text-primaryBlue transition">Explore</a>
+            <a href="#" class="hover:text-primaryBlue transition">Live Classes</a>
+            <a href="#" class="hover:text-primaryBlue transition">Test Series</a>
         </nav>
 
         <div class="flex gap-4 items-center">
             <div id="userState" class="hidden flex items-center gap-3">
-                <span id="userName" class="text-sm font-medium text-gray-300"></span>
-                <div id="userIcon" class="w-8 h-8 rounded-full bg-neonBlue text-midnight flex items-center justify-center font-bold"></div>
+                <span id="userName" class="text-sm font-medium text-darkText"></span>
+                <div id="userIcon" class="w-8 h-8 rounded-full bg-primaryBlue text-white flex items-center justify-center font-bold"></div>
             </div>
             <div id="guestState" class="flex gap-3">
-                <button onclick="openAuth('login')" class="text-sm font-medium hover:text-neonBlue transition px-4 py-2">Log In</button>
-                <button onclick="openAuth('signup')" class="text-sm font-bold bg-neonBlue text-midnight px-5 py-2 rounded-full hover:bg-white transition hover:shadow-[0_0_15px_rgba(0,240,255,0.5)]">Sign Up</button>
+                <button onclick="openAuth('login')" class="text-sm font-medium text-softText hover:text-primaryBlue transition px-4 py-2">Log In</button>
+                <button onclick="openAuth('signup')" class="text-sm font-bold bg-primaryBlue text-white px-5 py-2 rounded-full hover:bg-blue-700 transition shadow-lg hover:shadow-blue-500/30">Sign Up</button>
             </div>
         </div>
     </header>
 
     <main class="pt-24">
         <section class="w-full h-[70vh] md:h-[85vh] relative px-4 md:px-12 mb-20">
-            <div class="swiper heroSwiper w-full h-full rounded-3xl overflow-hidden glass-panel">
+            <div class="swiper heroSwiper w-full h-full rounded-3xl overflow-hidden glass-panel border border-gray-100">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide relative flex items-center px-8 md:px-20 bg-gradient-to-r from-midnight to-royalBlue/40">
-                        <div class="z-10 max-w-2xl">
-                            <span class="text-neonBlue font-mono text-sm tracking-widest uppercase mb-4 block">Next-Gen Learning</span>
-                            <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6 gs-reveal">Master the Future of Code</h1>
-                            <p class="text-gray-400 text-lg md:text-xl mb-8 gs-reveal">Join premium live cohorts powered by AI doubt-solving and industry experts.</p>
-                            <button class="bg-neonBlue text-midnight px-8 py-3 rounded-full font-bold hover:scale-105 transition gs-reveal">Explore Batches</button>
+                    
+                    <div class="swiper-slide relative flex items-center px-8 md:px-20 bg-white">
+                        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop" 
+                             alt="Banner 1" 
+                             class="absolute inset-0 w-full h-full object-cover z-0 opacity-10">
+                        
+                        <div class="relative z-10 max-w-2xl">
+                            <span class="text-primaryBlue font-bold text-sm tracking-widest uppercase mb-4 block">Next-Gen Learning</span>
+                            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6 gs-reveal text-darkText">Master the Future of Code</h1>
+                            <p class="text-softText text-lg md:text-xl mb-8 gs-reveal font-medium">Join premium live cohorts powered by AI doubt-solving and industry experts.</p>
+                            <button class="bg-primaryBlue text-white px-8 py-3 rounded-full font-bold hover:scale-105 hover:bg-blue-700 transition shadow-lg hover:shadow-blue-500/40 gs-reveal">Explore Batches</button>
                         </div>
-                        <div class="absolute right-10 top-1/2 -translate-y-1/2 w-1/3 h-2/3 bg-gradient-to-tr from-neonBlue/20 to-transparent blur-3xl rounded-full"></div>
+                        
+                        <div class="absolute right-10 top-1/2 -translate-y-1/2 w-1/3 h-2/3 bg-gradient-to-tr from-blue-100 to-transparent blur-3xl rounded-full z-0"></div>
                     </div>
-                    <div class="swiper-slide relative flex items-center px-8 md:px-20 bg-gradient-to-r from-midnight to-purple-900/40">
-                        <div class="z-10 max-w-2xl">
-                            <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6">AI-Driven Test Series</h1>
-                            <p class="text-gray-400 text-lg md:text-xl mb-8">Pinpoint your weaknesses with our deep-learning analytics engine.</p>
+                    
+                    <div class="swiper-slide relative flex items-center px-8 md:px-20 bg-white">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
+                             alt="Banner 2" 
+                             class="absolute inset-0 w-full h-full object-cover z-0 opacity-10">
+
+                        <div class="relative z-10 max-w-2xl">
+                            <span class="text-primaryBlue font-bold text-sm tracking-widest uppercase mb-4 block">Deep Analytics</span>
+                            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6 text-darkText">AI-Driven Test Series</h1>
+                            <p class="text-softText text-lg md:text-xl mb-8 font-medium">Pinpoint your weaknesses with our deep-learning analytics engine.</p>
+                            <button class="bg-primaryBlue text-white px-8 py-3 rounded-full font-bold hover:scale-105 hover:bg-blue-700 transition shadow-lg hover:shadow-blue-500/40">Start Free Test</button>
                         </div>
                     </div>
+
                 </div>
                 <div class="swiper-pagination"></div>
-                <div class="swiper-button-next text-neonBlue"></div>
-                <div class="swiper-button-prev text-neonBlue"></div>
+                <div class="swiper-button-next text-primaryBlue"></div>
+                <div class="swiper-button-prev text-primaryBlue"></div>
             </div>
         </section>
+
         <section class="py-20 px-4 md:px-12 max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold mb-4">Why VidyaPlus?</h2>
-                <p class="text-gray-400 max-w-xl mx-auto">An ecosystem designed for ultimate focus and performance.</p>
+                <h2 class="text-4xl font-extrabold mb-4 text-darkText">Why VidyaPlus?</h2>
+                <p class="text-softText max-w-xl mx-auto text-lg">An ecosystem designed for ultimate focus and performance.</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature">
-                    <div class="w-12 h-12 bg-neonBlue/10 rounded-lg flex items-center justify-center mb-6 text-neonBlue">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9a1 1 0 012 0v3a1 1 0 11-2 0V9zm1-4a1 1 0 110 2 1 1 0 010-2z"></path></svg>
+                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature bg-white">
+                    <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mb-6 text-primaryBlue border border-blue-100">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9a1 1 0 012 0v3a1 1 0 11-2 0V9zm1-4a1 1 0 110 2 1 1 0 010-2z"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Live Interactive Classes</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Latency-free 4K streaming with real-time doubt polling.</p>
+                    <h3 class="text-xl font-bold mb-3 text-darkText">Live Interactive Classes</h3>
+                    <p class="text-softText text-sm leading-relaxed font-medium">Latency-free 4K streaming with real-time doubt polling.</p>
                 </div>
-                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature">
-                    <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-6 text-purple-400">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
+                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature bg-white">
+                    <div class="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center mb-6 text-purple-600 border border-purple-100">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Smart Analytics</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">AI tracks your retention rate and suggests custom revision paths.</p>
+                    <h3 class="text-xl font-bold mb-3 text-darkText">Smart Analytics</h3>
+                    <p class="text-softText text-sm leading-relaxed font-medium">AI tracks your retention rate and suggests custom revision paths.</p>
                 </div>
-                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature">
-                    <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-6 text-green-400">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+                <div class="glass-panel p-8 rounded-2xl hover-lift gs-feature bg-white">
+                    <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mb-6 text-green-600 border border-green-100">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Encrypted Notes</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Downloadable, DRM-protected study materials.</p>
+                    <h3 class="text-xl font-bold mb-3 text-darkText">Encrypted Notes</h3>
+                    <p class="text-softText text-sm leading-relaxed font-medium">Downloadable, DRM-protected study materials.</p>
                 </div>
             </div>
         </section>
 
-        <section class="py-20 px-4 md:px-12 bg-gradient-to-b from-transparent to-royalBlue/10">
-            <h2 class="text-4xl font-bold mb-12 text-center">Trending Cohorts</h2>
+        <section class="py-20 px-4 md:px-12 bg-gradient-to-b from-transparent to-blue-50">
+            <h2 class="text-4xl font-extrabold mb-12 text-center text-darkText">Trending Cohorts</h2>
             <div class="flex flex-wrap justify-center gap-8">
-                <div class="glass-panel w-full max-w-sm rounded-2xl overflow-hidden hover-lift flex flex-col">
-                    <div class="h-48 bg-gray-800 relative">
-                        <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">-20% OFF</div>
-                        <div class="w-full h-full bg-gradient-to-tr from-midnight to-blue-900"></div>
+                <div class="glass-panel w-full max-w-sm rounded-2xl overflow-hidden hover-lift flex flex-col bg-white border border-gray-100">
+                    <div class="h-48 bg-slate-200 relative">
+                        <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">-20% OFF</div>
+                        <div class="w-full h-full bg-gradient-to-tr from-slate-200 to-slate-100"></div>
                     </div>
                     <div class="p-6 flex-1 flex flex-col">
-                        <h3 class="text-2xl font-bold mb-2">Alpha Web 3.0</h3>
-                        <p class="text-gray-400 text-sm mb-4">By Sarah Jenkins • 6 Months</p>
-                        <div class="mt-auto flex justify-between items-center">
+                        <h3 class="text-2xl font-extrabold mb-2 text-darkText">Alpha Web 3.0</h3>
+                        <p class="text-softText text-sm mb-4 font-medium">By Sarah Jenkins • 6 Months</p>
+                        <div class="mt-auto flex justify-between items-center pt-4 border-t border-gray-100">
                             <div>
-                                <span class="text-2xl font-bold text-white">₹4,999</span>
-                                <span class="text-sm text-gray-500 line-through ml-2">₹6,500</span>
+                                <span class="text-2xl font-extrabold text-darkText">₹4,999</span>
+                                <span class="text-sm text-gray-400 line-through ml-2 font-medium">₹6,500</span>
                             </div>
-                            <button class="bg-white/10 hover:bg-neonBlue hover:text-midnight border border-white/20 px-4 py-2 rounded-lg transition font-medium">Enroll</button>
+                            <button class="bg-blue-50 text-primaryBlue hover:bg-primaryBlue hover:text-white px-5 py-2 rounded-lg transition font-bold text-sm">Enroll</button>
                         </div>
                     </div>
                 </div>
@@ -158,44 +178,45 @@
     </main>
 
     <dialog id="authModal" class="bg-transparent m-0 p-0 fixed inset-0 w-full h-full z-50 flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-midnight/80 backdrop-blur-sm" onclick="closeAuth()"></div>
-        <div class="auth-modal-content relative z-10 glass-panel w-[90%] max-w-4xl min-h-[500px] rounded-3xl overflow-hidden shadow-2xl scale-95 opacity-0 transition-all duration-300" id="modalContent">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeAuth()"></div>
+        
+        <div class="auth-modal-content relative z-10 glass-panel bg-white w-[90%] max-w-4xl min-h-[500px] rounded-3xl overflow-hidden shadow-2xl scale-95 opacity-0 transition-all duration-300 border border-gray-100" id="modalContent">
             
-            <div class="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-royalBlue to-midnight p-10 relative overflow-hidden">
+            <div class="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-primaryBlue to-blue-800 p-10 relative overflow-hidden">
                 <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20"></div>
-                <h2 class="text-3xl font-bold text-white z-10 mb-4 text-center text-balance">Unlock Your Potential</h2>
-                <p class="text-blue-200 z-10 text-center mb-8">Join thousands of elite learners mastering the future.</p>
-                <div class="w-48 h-48 bg-neonBlue/20 rounded-full blur-2xl absolute"></div>
-                <div class="w-32 h-32 border-4 border-neonBlue/50 rounded-lg rotate-12 z-10 animate-[spin_10s_linear_infinite]"></div>
+                <h2 class="text-3xl font-extrabold text-white z-10 mb-4 text-center text-balance">Unlock Your Potential</h2>
+                <p class="text-blue-100 z-10 text-center mb-8 font-medium">Join thousands of elite learners mastering the future.</p>
+                <div class="w-48 h-48 bg-white/10 rounded-full blur-2xl absolute"></div>
+                <div class="w-32 h-32 border-4 border-white/20 rounded-xl rotate-12 z-10 animate-[spin_10s_linear_infinite]"></div>
             </div>
 
-            <div class="p-8 md:p-12 flex flex-col justify-center bg-midnight/90">
-                <button onclick="closeAuth()" class="absolute top-6 right-6 text-gray-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <div class="p-8 md:p-12 flex flex-col justify-center bg-white">
+                <button onclick="closeAuth()" class="absolute top-6 right-6 text-gray-400 hover:text-darkText transition bg-gray-50 rounded-full p-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
                 
-                <h3 id="authTitle" class="text-2xl font-bold mb-6 text-white">Welcome Back</h3>
+                <h3 id="authTitle" class="text-3xl font-extrabold mb-6 text-darkText">Welcome Back</h3>
                 
-                <form id="authForm" class="space-y-4">
+                <form id="authForm" class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                        <input type="email" id="email" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neonBlue transition" required>
+                        <label class="block text-sm font-bold text-softText mb-1.5">Email Address</label>
+                        <input type="email" id="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-darkText focus:outline-none focus:border-primaryBlue focus:ring-2 focus:ring-blue-100 transition font-medium" required placeholder="you@example.com">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
-                        <input type="password" id="password" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neonBlue transition" required>
+                        <label class="block text-sm font-bold text-softText mb-1.5">Password</label>
+                        <input type="password" id="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-darkText focus:outline-none focus:border-primaryBlue focus:ring-2 focus:ring-blue-100 transition font-medium" required placeholder="••••••••">
                     </div>
                     
-                    <button type="submit" id="submitBtn" class="w-full bg-neonBlue text-midnight font-bold py-3 rounded-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.4)] transition mt-6">
+                    <button type="submit" id="submitBtn" class="w-full bg-primaryBlue text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 hover:shadow-[0_8px_20px_rgba(37,99,235,0.25)] transition mt-6 text-lg">
                         Log In
                     </button>
                 </form>
 
-                <div class="mt-6 text-center">
-                    <p class="text-gray-400 text-sm">Or continue with</p>
-                    <button id="googleBtn" class="mt-4 w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-3 transition">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                        Google
+                <div class="mt-8 text-center border-t border-slate-100 pt-6">
+                    <p class="text-softText text-sm font-medium mb-4">Or continue with</p>
+                    <button id="googleBtn" class="w-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-darkText font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition shadow-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Sign in with Google
                     </button>
                 </div>
             </div>
@@ -222,14 +243,14 @@
         gsap.registerPlugin(ScrollTrigger);
         gsap.from(".gs-reveal", { y: 30, opacity: 0, duration: 1, stagger: 0.2, ease: "power3.out" });
         gsap.from(".gs-feature", {
-            scrollTrigger: { trigger: ".gs-feature", start: "top 80%" },
-            y: 50, opacity: 0, duration: 0.8, stagger: 0.15, ease: "back.out(1.7)"
+            scrollTrigger: { trigger: ".gs-feature", start: "top 85%" },
+            y: 40, opacity: 0, duration: 0.8, stagger: 0.15, ease: "back.out(1.7)"
         });
 
         // Auth Modal Logic
         const modal = document.getElementById('authModal');
         const modalContent = document.getElementById('modalContent');
-        let authMode = 'login'; // 'login' or 'signup'
+        let authMode = 'login'; 
 
         function openAuth(mode) {
             authMode = mode;
@@ -237,7 +258,6 @@
             document.getElementById('submitBtn').innerText = mode === 'login' ? 'Log In' : 'Sign Up';
             
             modal.classList.remove('hidden');
-            // Trigger animation frame for CSS transition
             requestAnimationFrame(() => {
                 modalContent.classList.remove('scale-95', 'opacity-0');
                 modalContent.classList.add('scale-100', 'opacity-100');
@@ -250,14 +270,15 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
     </script>
+
     <script type="module">
         import { auth } from './firebase-init.js';
         import { initAuth } from './auth.js';
-        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Initialize user state listener from your auth.js
+        // Initialize user state listener
         initAuth((batches) => {
-            console.log("Enrolled Batches secure fetch:", batches);
+            console.log("Enrolled Batches:", batches);
             document.getElementById('guestState').classList.add('hidden');
             document.getElementById('userState').classList.remove('hidden');
             closeAuth();
@@ -280,7 +301,6 @@
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
-                // onAuthStateChanged in auth.js will handle the rest
             } catch (error) {
                 console.error("Auth Error:", error.message);
                 alert("Authentication failed. Please check credentials.");
