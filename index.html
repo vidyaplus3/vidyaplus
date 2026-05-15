@@ -1,414 +1,1193 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIDYAPLUS | Cognitive Evolution System</title>
+    <title>Vidyaplus | Cognitive Evolution System</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Lenis, GSAP, ScrollTrigger, Three.js -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.39/dist/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        cinematic: ['Syncopate', 'sans-serif'],
+                    },
+                    colors: {
+                        pure: '#ffffff',
+                        silver: '#e2e8f0',
+                        glass: 'rgba(255, 255, 255, 0.6)',
+                        dark: '#0f172a',
+                        cyan: {
+                            glow: '#00f0ff'
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(148, 163, 184, 0.1)',
+                        'glow': '0 0 40px 0 rgba(200, 210, 220, 0.4)',
+                        'blue-glow': '0 0 30px 0 rgba(0, 240, 255, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         :root {
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.2);
-            --accent: #3b82f6;
+            --cursor-size: 20px;
         }
-
+        
         body {
-            background: #ffffff;
-            color: #000;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ffffff;
+            color: #0f172a;
             overflow-x: hidden;
-            cursor: none;
+            cursor: none; /* Custom cursor */
         }
 
-        .space-font { font-family: 'Space Grotesk', sans-serif; }
+        /* Hide scrollbar for seamless cinematic feel */
+        ::-webkit-scrollbar {
+            display: none;
+        }
 
-        canvas#canvas-webgl {
+        /* Custom Magnetic Cursor */
+        #cursor-dot,
+        #cursor-outline {
             position: fixed;
             top: 0;
             left: 0;
-            z-index: -1;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
             pointer-events: none;
-            filter: grayscale(1) brightness(1.2);
         }
 
+        #cursor-dot {
+            width: 5px;
+            height: 5px;
+            background-color: #0f172a;
+        }
+
+        #cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(15, 23, 42, 0.3);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        /* Input specific cursors to bypass global none */
+        input, button, a {
+            cursor: none;
+        }
+
+        /* Glassmorphism Utilities */
         .glass-panel {
             background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(40px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.03);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
         }
 
-        .auth-modal {
-            display: none;
+        .glass-text {
+            background: linear-gradient(180deg, #0f172a 0%, #64748b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* UI Overlays */
+        #bg-canvas {
             position: fixed;
-            inset: 0;
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 900px;
-            min-height: 550px;
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid white;
-            border-radius: 4rem;
-            display: flex;
-            overflow: hidden;
-            box-shadow: 0 100px 100px -50px rgba(0,0,0,0.1);
-        }
-
-        .input-futuristic {
-            background: rgba(0,0,0,0.03);
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .input-futuristic:focus {
-            background: #fff;
-            border-color: #000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            outline: none;
-        }
-
-        .custom-cursor {
-            width: 20px;
-            height: 20px;
-            background: #000;
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            mix-blend-mode: difference;
-            transition: transform 0.1s ease;
-        }
-
-        .magnetic-btn {
-            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .shimmer-border {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .shimmer-border::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.8), transparent);
-            transform: rotate(45deg);
-            animation: shimmer 4s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { left: -150%; }
-            100% { left: 150%; }
-        }
-
-        /* AI Mascot Styles */
-        .ai-aura {
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, #fff 0%, rgba(59, 130, 246, 0.1) 100%);
-            border-radius: 50%;
-            filter: blur(10px);
-            position: relative;
-            animation: float 4s ease-in-out infinite;
-        }
-
-        .ai-eyes {
-            display: flex;
-            gap: 15px;
-        }
-
-        .eye {
-            width: 12px;
-            height: 12px;
-            background: #000;
-            border-radius: 50%;
-            position: relative;
-        }
-
-        .grain {
-            position: fixed;
+            top: 0;
+            left: 0;
             width: 100vw;
             height: 100vh;
-            background-image: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.05;
-            z-index: 100;
+            z-index: -1;
             pointer-events: none;
         }
-    </style>
+
+        /* Typography Animation Prep */
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        
+        .char {
+            transform: translateY(110%);
+            display: inline-block;
+        }
+
+        /* Grid specific */
+        .holo-grid {
+            background-image: 
+                linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .feature-card {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: rgba(15, 23, 42, 0.2);
+        }
+
+        /* AI Mascot Animations */
+        @keyframes float-bot {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+        @keyframes ring-spin {
+            0% { transform: rotateX(70deg) rotateZ(0deg); }
+            100% { transform: rotateX(70deg) rotateZ(360deg); }
+        }
+        .animate-float-bot {
+            animation: float-bot 4s ease-in-out infinite;
+        }
+        .animate-ring {
+            animation: ring-spin 8s linear infinite;
+        }
+        
+        .mascot-eye {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mascot-face {
+            transition: transform 0.2s ease-out;
+        }
+        
+        /* Auth Form Inputs */
+        .futuristic-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.3s ease;
+        }
+        .futuristic-input:focus {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #0f172a;
+            box-shadow: 0 0 20px rgba(15, 23, 42, 0.05);
+            outline: none;
+        }
+        
+        /* Interactive Shimmer Button */
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.7s ease;
+        }
+        .btn-shimmer:hover::before {
+            left: 150%;
+        }
+        </style>
 </head>
-<body class="antialiased">
-    <div class="grain"></div>
-    <div class="custom-cursor" id="cursor"></div>
-    <canvas id="canvas-webgl"></canvas>
+<body class="selection:bg-dark selection:text-white">
+
+    <!-- WebGL Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Custom Cursor -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full p-8 flex justify-between items-center z-50">
-        <div class="text-xl font-bold tracking-tighter space-font">VIDYAPLUS.sys</div>
-        <div class="flex items-center gap-4">
-            <button onclick="toggleAuth('login')" class="magnetic-btn px-6 py-2 glass-panel rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-all">
-                Login
-            </button>
-            <button onclick="toggleAuth('signup')" class="magnetic-btn shimmer-border px-6 py-2 bg-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase shadow-xl">
-                Evolution Sign-up
-            </button>
+    <nav class="fixed top-0 w-full z-40 glass-panel border-b-0 py-4 px-8 mix-blend-luminosity">
+        <div class="max-w-screen-2xl mx-auto flex justify-between items-center">
+            <div class="font-cinematic font-bold text-xl tracking-widest text-dark">
+                VIDYAPLUS <span class="text-xs font-sans tracking-normal opacity-50 ml-2">v3.1</span>
+            </div>
+            <div class="hidden md:flex gap-8 font-display text-xs tracking-[0.2em] uppercase font-semibold text-slate-500">
+                <a href="#revolution" class="hover:text-dark transition-colors" data-cursor="hover">Architecture</a>
+                <a href="#engine" class="hover:text-dark transition-colors" data-cursor="hover">Cognitive Engine</a>
+                <a href="#features" class="hover:text-dark transition-colors" data-cursor="hover">Systems</a>
+            </div>
+            
+            <!-- NEW: Premium Auth Buttons -->
+            <div class="flex items-center gap-3">
+                <button onclick="openAuthModal('login')" data-cursor="hover" class="relative group glass-panel px-6 py-2.5 rounded-full font-display text-[11px] font-bold uppercase tracking-[0.15em] text-slate-600 hover:text-dark transition-all duration-300 border border-slate-200 hover:border-slate-300 hover:shadow-glass overflow-hidden">
+                    <span class="relative z-10">Login</span>
+                    <div class="absolute inset-0 bg-white/40 transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300"></div>
+                </button>
+                <button onclick="openAuthModal('signup')" data-cursor="hover" class="btn-shimmer relative glass-panel px-6 py-2.5 rounded-full font-display text-[11px] font-bold uppercase tracking-[0.15em] bg-dark text-white hover:bg-slate-800 transition-all duration-500 shadow-lg hover:shadow-glow border border-transparent">
+                    <span class="relative z-10 flex items-center gap-2">
+                        Sign Up
+                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-glow animate-pulse"></div>
+                    </span>
+                </button>
+            </div>
         </div>
     </nav>
 
-    <!-- AUTH MODAL -->
-    <div id="authModal" class="auth-modal">
-        <div class="auth-card" id="authCard">
-            <!-- Left Side: AI Companion (Hidden on Mobile) -->
-            <div class="hidden md:flex w-1/2 bg-gray-50 flex-col items-center justify-center relative overflow-hidden p-12">
-                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent"></div>
+    <!-- AUTHENTICATION MODAL SYSTEM -->
+    <div id="auth-wrapper" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none opacity-0">
+        <!-- Blurred Background Overlay -->
+        <div id="auth-backdrop" class="absolute inset-0 bg-white/20 backdrop-blur-xl" onclick="closeAuthModal()"></div>
+        
+        <!-- Modal Container -->
+        <div id="auth-modal" class="relative w-full max-w-4xl h-[650px] max-h-[90vh] mx-4 rounded-[2rem] glass-modal flex overflow-hidden scale-95 opacity-0">
+            
+            <!-- Close Button -->
+            <button onclick="closeAuthModal()" data-cursor="hover" class="absolute top-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full glass-panel hover:bg-white transition-colors border border-slate-200 group">
+                <svg class="w-4 h-4 text-slate-500 group-hover:text-dark transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Left Side: AI Mascot (Desktop Only) -->
+            <div class="hidden md:flex w-[45%] relative bg-gradient-to-br from-slate-50/80 to-slate-200/80 items-center justify-center border-r border-white/60 overflow-hidden group">
+                <!-- Ambient Background Glows -->
+                <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-glow/10 rounded-full blur-[80px]"></div>
+                <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px]"></div>
                 
-                <div class="ai-aura flex items-center justify-center" id="mascot">
-                    <div class="ai-eyes">
-                        <div class="eye" id="eyeL"></div>
-                        <div class="eye" id="eyeR"></div>
+                <!-- Holographic Grid -->
+                <div class="absolute inset-0 holo-grid opacity-20"></div>
+
+                <!-- AI Robot Mascot -->
+                <div id="mascot-container" class="relative z-10 animate-float-bot">
+                    <!-- Holographic Rings -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-cyan-glow/20 rounded-full animate-ring pointer-events-none"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-slate-300/30 rounded-full animate-ring" style="animation-direction: reverse; animation-duration: 12s;"></div>
+                    
+                    <!-- Robot Head -->
+                    <div class="w-36 h-36 bg-white/90 backdrop-blur-md rounded-[2.5rem] shadow-2xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-blue-glow transition-shadow duration-500">
+                        <!-- Internal machinery hint -->
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwwLDAsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+                        
+                        <!-- Visor / Face -->
+                        <div id="mascot-visor" class="w-28 h-16 bg-slate-900 rounded-2xl flex items-center justify-center gap-5 relative overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] mascot-face">
+                            <!-- Reflection on glass -->
+                            <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent"></div>
+                            
+                            <!-- Eyes -->
+                            <div class="mascot-eye w-4 h-5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] flex items-center justify-center overflow-hidden">
+                                <div class="w-full h-[2px] bg-cyan-glow opacity-0 transition-opacity" id="eye-left-scan"></div>
+                            </div>
+                            <div class="mascot-eye w-4 h-5 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] flex items-center justify-center overflow-hidden">
+                                <div class="w-full h-[2px] bg-cyan-glow opacity-0 transition-opacity" id="eye-right-scan"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="mt-12 text-center z-10">
-                    <p id="ai-status" class="text-[10px] tracking-[0.4em] uppercase font-bold text-blue-600 mb-2">System Active</p>
-                    <h3 id="ai-greeting" class="space-font text-2xl font-bold">Waiting for Credentials...</h3>
-                    <p class="text-sm text-gray-400 mt-2 max-w-[200px]">I am Aura. I will guide your cognitive sync.</p>
+                    
+                    <!-- Floating Elements around mascot -->
+                    <div class="absolute -top-4 -right-4 w-3 h-3 bg-cyan-glow rounded-full blur-[2px] animate-pulse"></div>
+                    <div class="absolute -bottom-6 -left-2 w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                 </div>
 
-                <!-- Decorative elements -->
-                <div class="absolute bottom-10 flex gap-2">
-                    <div class="w-1 h-1 bg-black rounded-full animate-pulse"></div>
-                    <div class="w-1 h-1 bg-black rounded-full animate-pulse delay-75"></div>
-                    <div class="w-1 h-1 bg-black rounded-full animate-pulse delay-150"></div>
+                <!-- Status Text -->
+                <div class="absolute bottom-10 text-center w-full font-mono text-[10px] text-slate-500 tracking-[0.2em] uppercase" id="mascot-status">
+                    Awaiting Input...
                 </div>
             </div>
 
-            <!-- Right Side: Form -->
-            <div class="w-full md:w-1/2 p-12 md:p-16 flex flex-col justify-center relative">
-                <button onclick="toggleAuth()" class="absolute top-8 right-8 opacity-30 hover:opacity-100 transition-opacity">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
+            <!-- Right Side: Forms -->
+            <div class="w-full md:w-[55%] relative flex flex-col justify-center px-8 sm:px-16 py-12 bg-white/40">
+                
+                <!-- Dynamic Header -->
+                <div class="mb-10 text-center md:text-left relative z-10">
+                    <div class="font-display text-[10px] font-bold tracking-[0.3em] text-slate-400 mb-2 uppercase" id="auth-subtitle">Welcome Back</div>
+                    <h2 class="font-cinematic text-3xl md:text-4xl text-dark uppercase tracking-tighter" id="auth-title">
+                        Access Core
+                    </h2>
+                </div>
 
-                <!-- Login Mode -->
-                <div id="loginForm" class="auth-form-container">
-                    <h2 class="text-3xl space-font font-bold mb-2">Welcome Back.</h2>
-                    <p class="text-gray-400 text-sm mb-8">Access your cognitive dashboard.</p>
-                    <div class="space-y-4">
-                        <input type="email" placeholder="NEURAL EMAIL" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
-                        <input type="password" placeholder="SYNTETIC PASSWORD" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
-                        <div class="flex items-center justify-between text-[10px] tracking-widest uppercase font-bold px-2">
-                            <label class="flex items-center gap-2 cursor-pointer opacity-50"><input type="checkbox"> Stay Synced</label>
-                            <a href="#" class="opacity-50 hover:opacity-100">Forgot Code?</a>
+                <!-- Forms Container (Relative for absolute positioning of forms) -->
+                <div class="relative w-full h-[320px]">
+                    
+                    <!-- LOGIN FORM -->
+                    <form id="form-login" class="absolute top-0 left-0 w-full transition-all duration-500" onsubmit="event.preventDefault(); authSuccess();">
+                        <div class="space-y-5">
+                            <div class="relative group">
+                                <input type="email" id="login-email" required data-cursor="text" placeholder="Identity Sequence (Email)" class="futuristic-input w-full px-5 py-4 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                            </div>
+                            
+                            <div class="relative group">
+                                <input type="password" id="login-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-4 rounded-xl text-sm font-sans text-dark placeholder-slate-400 peer">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-xs font-sans">
+                                <label class="flex items-center gap-2 cursor-none" data-cursor="hover">
+                                    <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-dark focus:ring-dark cursor-none">
+                                    <span class="text-slate-500">Remember sequence</span>
+                                </label>
+                                <a href="#" data-cursor="hover" class="text-slate-500 hover:text-dark transition-colors font-medium">Lost Code?</a>
+                            </div>
+
+                            <button type="submit" data-cursor="hover" class="btn-shimmer w-full mt-4 bg-dark text-white px-8 py-4 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-slate-900 transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
+                                Initialize Link
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
                         </div>
-                        <button class="w-full py-5 bg-black text-white rounded-2xl font-bold tracking-[0.2em] uppercase text-xs mt-4 hover:scale-[1.02] transition-transform">
-                            Initialize Sync
-                        </button>
-                    </div>
-                    <p class="text-center text-[10px] tracking-widest uppercase mt-8 opacity-40">
-                        New entity? <button onclick="switchMode('signup')" class="text-black font-bold border-b border-black">Create Profile</button>
-                    </p>
+                    </form>
+
+                    <!-- SIGN UP FORM -->
+                    <form id="form-signup" class="absolute top-0 left-0 w-full opacity-0 pointer-events-none translate-y-4 transition-all duration-500" onsubmit="event.preventDefault(); authSuccess();">
+                        <div class="space-y-4">
+                            <div class="relative group">
+                                <input type="text" id="signup-name" required data-cursor="text" placeholder="Full Designation (Name)" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                            </div>
+
+                            <div class="relative group">
+                                <input type="email" id="signup-email" required data-cursor="text" placeholder="Comm Link (Email)" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="relative group">
+                                    <input type="password" id="signup-password" required data-cursor="text" placeholder="Passcode" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                </div>
+                                <div class="relative group">
+                                    <input type="password" id="signup-confirm" required data-cursor="text" placeholder="Verify" class="futuristic-input w-full px-5 py-3.5 rounded-xl text-sm font-sans text-dark placeholder-slate-400">
+                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-dark group-focus-within:w-full transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <button type="submit" data-cursor="hover" class="btn-shimmer w-full mt-4 bg-dark text-white px-8 py-4 rounded-xl font-display uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-slate-900 transition-colors shadow-lg hover:shadow-glow flex justify-center items-center gap-3">
+                                Construct Profile
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <!-- Signup Mode -->
-                <div id="signupForm" class="hidden auth-form-container">
-                    <h2 class="text-3xl space-font font-bold mb-2">New Evolution.</h2>
-                    <p class="text-gray-400 text-sm mb-8">Begin your neural transformation.</p>
-                    <div class="space-y-4">
-                        <input type="text" placeholder="FULL NAME" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
-                        <input type="email" placeholder="NEURAL EMAIL" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
-                        <input type="password" placeholder="CREATE PASSWORD" class="w-full p-5 rounded-2xl input-futuristic text-xs tracking-widest font-bold auth-input">
-                        <button class="w-full py-5 bg-black text-white rounded-2xl font-bold tracking-[0.2em] uppercase text-xs mt-4 hover:scale-[1.02] transition-transform">
-                            Create Account
-                        </button>
-                    </div>
-                    <p class="text-center text-[10px] tracking-widest uppercase mt-8 opacity-40">
-                        Already evolving? <button onclick="switchMode('login')" class="text-black font-bold border-b border-black">Login</button>
+                <!-- Toggle Mode -->
+                <div class="mt-auto text-center z-10 pt-4">
+                    <p class="font-sans text-xs text-slate-500">
+                        <span id="toggle-text">Require an entity link?</span> 
+                        <button onclick="toggleAuthMode()" data-cursor="hover" class="ml-1 font-bold text-dark hover:text-cyan-600 transition-colors uppercase tracking-wider font-display border-b border-dark/20 hover:border-cyan-600" id="toggle-btn">Sign Up</button>
                     </p>
                 </div>
+                
+                <!-- Success Overlay (Hidden by default) -->
+                <div id="auth-success-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 rounded-[2rem]">
+                    <div class="w-16 h-16 rounded-full border-2 border-dark flex items-center justify-center mb-4 relative">
+                        <div class="absolute inset-0 rounded-full border-2 border-t-cyan-glow animate-spin"></div>
+                        <svg class="w-6 h-6 text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="font-cinematic text-xl text-dark">Link Established</h3>
+                    <p class="font-mono text-[10px] text-slate-500 tracking-widest mt-2 uppercase">Redirecting to interface...</p>
+                </div>
+
             </div>
         </div>
     </div>
-
-    <!-- HERO SECTION -->
-    <section class="relative min-h-screen flex flex-col items-center justify-center pt-20 px-6 text-center">
-        <div class="absolute inset-0 z-0 opacity-20">
-            <div class="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-200 via-transparent to-transparent"></div>
-        </div>
-
-        <div class="z-10 max-w-7xl">
-            <span class="inline-block mb-6 text-sm tracking-[0.4em] uppercase font-light opacity-50 hero-sub">The Era of Bio-Digital Intelligence</span>
-            <h1 class="text-8xl md:text-[10rem] space-font font-bold mb-8 leading-[0.9] tracking-tighter">
-                HUMAN LEARNING <br> IS <span class="text-gray-400">OBSOLETE.</span>
-            </h1>
-            <p class="text-xl md:text-2xl font-light text-gray-500 max-w-2xl mx-auto mb-12">
-                Don’t prepare for exams. Upgrade your cognition. A portal into the next phase of human evolution.
-            </p>
+    <!-- Main Content Wrapper for Smooth Scroll -->
+    <main id="smooth-wrapper" class="w-full relative">
+        
+        <!-- 1. HERO SECTION -->
+        <section id="hero" class="relative h-screen w-full flex items-center justify-center overflow-hidden holo-grid pt-20">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 z-0"></div>
             
-            <div class="flex flex-col md:flex-row gap-6 justify-center items-center">
-                <button onclick="toggleAuth('signup')" class="magnetic-btn px-10 py-5 bg-black text-white rounded-full text-sm font-bold tracking-widest uppercase hover:scale-105 transition-all">
-                    Initialize Evolution
-                </button>
-                <button class="px-10 py-5 glass-panel rounded-full text-sm font-bold tracking-widest uppercase">
-                    Watch Transmission
-                </button>
-            </div>
-        </div>
-    </section>
+            <div class="relative z-10 text-center flex flex-col items-center px-4 max-w-7xl mx-auto">
+                <div class="glass-panel px-4 py-1 rounded-full mb-8 inline-block animate-pulse">
+                    <p class="font-display text-xs font-semibold tracking-widest text-slate-500 uppercase">System Active • Neural Uplink Established</p>
+                </div>
+                
+                <h1 class="font-cinematic text-6xl md:text-8xl lg:text-[9rem] leading-[0.85] tracking-tighter text-dark mb-8 reveal-text">
+                    <span class="block overflow-hidden"><span class="hero-line block">HUMAN</span></span>
+                    <span class="block overflow-hidden"><span class="hero-line block text-slate-400">LEARNING IS</span></span>
+                    <span class="block overflow-hidden"><span class="hero-line block">OBSOLETE.</span></span>
+                </h1>
+                
+                <p class="font-sans text-lg md:text-2xl text-slate-600 max-w-2xl font-light tracking-wide mb-12 opacity-0 hero-sub">
+                    Your brain deserves better software. Upgrade your cognition with advanced AI architecture designed for absolute academic superiority.
+                </p>
 
-    <!-- Other sections remain same... -->
-    <section class="min-h-screen py-40 px-6 flex flex-col items-center justify-center bg-white relative">
-        <div class="max-w-4xl text-center z-10">
-            <h2 class="text-5xl md:text-7xl space-font font-bold mb-12 tracking-tight">The old systems were designed for factories.</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
-                <div class="glass-panel p-10 rounded-[3rem]">
-                    <div class="text-4xl font-bold mb-4">98%</div>
-                    <div class="text-gray-500 uppercase tracking-widest text-xs mb-4">Attention Decay</div>
-                    <p class="text-lg">Modern education ignores your neurobiology. We don't teach. We recode.</p>
-                </div>
-                <div class="glass-panel p-10 rounded-[3rem]">
-                    <div class="text-4xl font-bold mb-4">0.2ms</div>
-                    <div class="text-gray-500 uppercase tracking-widest text-xs mb-4">Synaptic Latency</div>
-                    <p class="text-lg">Our AI engine maps your cognitive load in real-time.</p>
+                <div class="flex gap-6 opacity-0 hero-cta">
+                    <button data-cursor="hover" class="bg-dark text-white px-8 py-4 rounded-none font-display uppercase tracking-[0.2em] text-sm hover:bg-slate-800 transition-colors shadow-2xl hover:shadow-glow relative overflow-hidden group">
+                        <span class="relative z-10">Commence Evolution</span>
+                        <div class="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 opacity-10"></div>
+                    </button>
+                    <button data-cursor="hover" class="glass-panel text-dark px-8 py-4 rounded-none font-display uppercase tracking-[0.2em] text-sm hover:bg-white transition-colors">
+                        View Architecture
+                    </button>
                 </div>
             </div>
-        </div>
-    </section>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+                <span class="font-display text-[10px] uppercase tracking-widest">Scroll Sequence</span>
+                <div class="w-[1px] h-12 bg-dark/20 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-full bg-dark transform -translate-y-full animate-[scrolldown_1.5s_ease-in-out_infinite]"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. COGNITIVE REVOLUTION -->
+        <section id="revolution" class="min-h-screen w-full relative flex items-center py-32 px-8 bg-white z-10">
+            <div class="max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-20 items-center">
+                <div class="w-full md:w-1/2" data-speed="0.9">
+                    <div class="font-display text-xs font-bold tracking-[0.3em] text-slate-400 mb-6 uppercase">01 / The Paradigm Shift</div>
+                    <h2 class="font-display text-5xl md:text-7xl font-bold tracking-tight text-dark mb-8 leading-none section-title">
+                        THE <br> INDUSTRIAL <br> FAILURE.
+                    </h2>
+                    <div class="w-24 h-[1px] bg-dark/20 mb-8"></div>
+                    <p class="font-sans text-xl text-slate-600 font-light leading-relaxed mb-6">
+                        Legacy education systems are fundamentally broken. They rely on outdated memorization protocols, mass-produced coaching factories, and distraction loops that degrade attention spans.
+                    </p>
+                    <p class="font-sans text-xl text-slate-600 font-light leading-relaxed">
+                        Don’t prepare for exams. <strong class="font-medium text-dark">Upgrade cognition.</strong> Vidyaplus introduces a systematic, AI-driven methodology to rewire academic absorption.
+                    </p>
+                </div>
+                <div class="w-full md:w-1/2 relative h-[600px] flex items-center justify-center" data-speed="1.1">
+                    <!-- Abstract Glass Object -->
+                    <div class="absolute w-96 h-96 rounded-full border border-slate-200 animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute w-64 h-64 rounded-full border border-slate-300 animate-[spin_15s_linear_infinite_reverse]"></div>
+                    <div class="glass-panel w-80 h-96 relative z-10 flex flex-col justify-between p-8 backdrop-blur-3xl border-white shadow-2xl">
+                        <div class="flex justify-between items-start">
+                            <span class="font-display text-xs tracking-widest uppercase">System Status</span>
+                            <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                        </div>
+                        <div class="font-display text-4xl font-light text-dark">
+                            DOPAMINE<br>RECALIBRATION<br>ACTIVE.
+                        </div>
+                        <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-dark/20 to-transparent"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. AI INTELLIGENCE ENGINE & 6. NEXT-GEN FEATURE SYSTEM -->
+        <section id="engine" class="py-32 px-8 bg-slate-50 relative z-10 border-y border-slate-200 overflow-hidden">
+            <!-- Decorative background elements -->
+            <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white to-transparent opacity-50 pointer-events-none"></div>
+            
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-20 text-center">
+                    <div class="font-display text-xs font-bold tracking-[0.3em] text-slate-400 mb-6 uppercase">02 / Architecture</div>
+                    <h2 class="font-cinematic text-4xl md:text-6xl text-dark uppercase tracking-tighter">
+                        Intelligence Engine
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Feature 1: Academic -->
+                    <div class="glass-panel feature-card p-10 col-span-1 md:col-span-2 relative overflow-hidden bg-white/50">
+                        <div class="absolute top-0 right-0 p-6 opacity-10 font-cinematic text-6xl">PCME</div>
+                        <h3 class="font-display text-2xl font-bold mb-4">Advanced Analytics Core</h3>
+                        <p class="font-sans text-slate-600 font-light mb-8 max-w-md">Predictive scoring models mapped directly to structural frameworks of Physics, Chemistry, and Mathematics.</p>
+                        <div class="flex gap-4">
+                            <div class="h-1 flex-1 bg-slate-100 overflow-hidden rounded"><div class="h-full bg-dark w-[85%]"></div></div>
+                            <span class="font-display text-xs font-bold">85% OPTIMIZED</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="glass-panel feature-card p-10 bg-white/50 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-display text-xl font-bold mb-2">Neural Routing</h3>
+                            <p class="font-sans text-sm text-slate-600 font-light">Adaptive difficulty scaling in real-time.</p>
+                        </div>
+                        <div class="w-full h-24 border border-slate-200 mt-6 relative overflow-hidden flex items-end">
+                            <!-- Abstract bar chart -->
+                            <div class="w-1/4 h-[40%] bg-slate-200 mx-1"></div>
+                            <div class="w-1/4 h-[70%] bg-slate-300 mx-1"></div>
+                            <div class="w-1/4 h-[50%] bg-slate-400 mx-1"></div>
+                            <div class="w-1/4 h-[90%] bg-dark mx-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="glass-panel feature-card p-10 bg-white/50">
+                        <h3 class="font-display text-xl font-bold mb-4">Focus Isolation</h3>
+                        <p class="font-sans text-sm text-slate-600 font-light mb-6">Eliminates UI friction. Minimalist interfaces designed for prolonged deep work without digital fatigue.</p>
+                        <div class="w-12 h-12 rounded-full border border-dark flex items-center justify-center">
+                            <div class="w-2 h-2 bg-dark rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="glass-panel feature-card p-10 bg-dark text-white col-span-1 md:col-span-2 group">
+                        <div class="flex justify-between items-start mb-12">
+                            <h3 class="font-display text-2xl font-bold">Weakness Heatmaps</h3>
+                            <span class="font-mono text-xs opacity-50 border border-white/20 px-2 py-1">LIVE DATA</span>
+                        </div>
+                        <p class="font-sans text-slate-400 font-light max-w-md">Algorithmic identification of conceptual gaps before they manifest in examination scenarios.</p>
+                        <div class="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-tl-full transform translate-x-10 translate-y-10 group-hover:scale-110 transition-transform duration-700"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 4. IMMERSIVE DATA EXPERIENCE -->
+        <section id="data" class="py-40 bg-white relative z-10">
+            <div class="max-w-7xl mx-auto px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-12 border-t border-b border-slate-100 py-16">
+                    <div class="text-center" data-speed="1.1">
+                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">3.4</div>
+                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Million Parameters</div>
+                    </div>
+                    <div class="text-center" data-speed="0.9">
+                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">94</div>
+                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Retention Rate (%)</div>
+                    </div>
+                    <div class="text-center" data-speed="1.15">
+                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">0.2</div>
+                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Latency (ms)</div>
+                    </div>
+                    <div class="text-center" data-speed="0.85">
+                        <div class="font-display text-6xl md:text-8xl font-bold text-dark mb-2 counter">10</div>
+                        <div class="font-display text-xs tracking-[0.2em] text-slate-400 uppercase">Cognitive Multiplier (x)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. EVOLUTION TIMELINE -->
+        <section id="timeline" class="py-32 bg-slate-50 relative z-10 border-t border-slate-200">
+            <div class="max-w-4xl mx-auto px-8 relative">
+                <!-- Vertical Line -->
+                <div class="absolute left-[39px] md:left-1/2 top-0 bottom-0 w-[1px] bg-slate-300 transform md:-translate-x-1/2">
+                    <div class="timeline-progress w-full h-0 bg-dark"></div>
+                </div>
+
+                <!-- Items -->
+                <div class="relative z-10 space-y-32">
+                    
+                    <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
+                        <div class="w-full md:w-5/12 text-left md:text-right pl-20 md:pl-0 pr-0 md:pr-12">
+                            <h4 class="font-display text-xl font-bold text-dark mb-2">Industrial Education</h4>
+                            <p class="font-sans text-sm text-slate-500">Standardized output. Mass production of identical academic profiles. High inefficiency.</p>
+                        </div>
+                        <div class="absolute left-10 md:left-1/2 w-3 h-3 bg-white border-2 border-slate-400 rounded-full transform -translate-x-1/2 mt-6 md:mt-0 shadow-[0_0_0_8px_rgba(248,250,252,1)]"></div>
+                        <div class="w-full md:w-5/12 hidden md:block"></div>
+                    </div>
+
+                    <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
+                        <div class="w-full md:w-5/12 hidden md:block"></div>
+                        <div class="absolute left-10 md:left-1/2 w-3 h-3 bg-white border-2 border-slate-400 rounded-full transform -translate-x-1/2 mt-6 md:mt-0 shadow-[0_0_0_8px_rgba(248,250,252,1)]"></div>
+                        <div class="w-full md:w-5/12 text-left pl-20 md:pl-12">
+                            <h4 class="font-display text-xl font-bold text-dark mb-2">Coaching Factories</h4>
+                            <p class="font-sans text-sm text-slate-500">Brute-force memorization. Extreme psychological pressure. Diminishing returns on time invested.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item flex flex-col md:flex-row justify-between items-center w-full opacity-30 transition-opacity duration-500">
+                        <div class="w-full md:w-5/12 text-left md:text-right pl-20 md:pl-0 pr-0 md:pr-12">
+                            <div class="inline-block border border-dark text-dark text-xs px-2 py-1 mb-2 font-mono">CURRENT ERA</div>
+                            <h4 class="font-display text-2xl font-bold text-dark mb-2">AI Intelligence Era</h4>
+                            <p class="font-sans text-sm text-slate-700 font-medium">Hyper-personalized algorithms. Deep cognitive analysis. The future topper is AI-assisted.</p>
+                        </div>
+                        <div class="absolute left-10 md:left-1/2 w-5 h-5 bg-dark border-4 border-white rounded-full transform -translate-x-1/2 mt-6 md:mt-0 shadow-[0_0_20px_rgba(15,23,42,0.4)]"></div>
+                        <div class="w-full md:w-5/12 hidden md:block"></div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. FUTURE TESTIMONIALS (AI LOGS) -->
+        <section id="testimonials" class="py-40 bg-white relative z-10 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-8 relative">
+                <div class="font-display text-xs font-bold tracking-[0.3em] text-slate-400 mb-16 uppercase text-center">03 / Intercepted Transmissions</div>
+                
+                <div class="flex flex-col md:flex-row gap-8 justify-center">
+                    <!-- Log 1 -->
+                    <div class="glass-panel p-8 w-full md:w-1/3 border border-slate-200 relative group">
+                        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-dark/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
+                        <div class="flex justify-between items-center mb-6 font-mono text-[10px] text-slate-400">
+                            <span>LOG ID: 894.A2</span>
+                            <span class="text-green-600 animate-pulse">VERIFIED</span>
+                        </div>
+                        <div class="font-sans text-lg text-slate-700 mb-8 leading-relaxed">
+                            "Cognitive load reduced by 40% within three weeks. Focus retention during complex calculus derivations increased exponentially."
+                        </div>
+                        <div class="font-display text-sm font-bold uppercase tracking-wider text-dark">Subject: Alpha-9</div>
+                    </div>
+
+                    <!-- Log 2 -->
+                    <div class="glass-panel p-8 w-full md:w-1/3 border border-slate-200 relative group md:transform md:translate-y-8">
+                        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-dark/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700"></div>
+                        <div class="flex justify-between items-center mb-6 font-mono text-[10px] text-slate-400">
+                            <span>LOG ID: 912.B7</span>
+                            <span class="text-green-600 animate-pulse">VERIFIED</span>
+                        </div>
+                        <div class="font-sans text-lg text-slate-700 mb-8 leading-relaxed">
+                            "The predictive scoring module accurately mapped my structural weaknesses in Organic Chemistry. Admission probability stabilized at 99.8%."
+                        </div>
+                        <div class="font-display text-sm font-bold uppercase tracking-wider text-dark">Subject: Delta-4</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. FINAL CINEMATIC CTA -->
+        <section id="cta" class="min-h-screen relative flex items-center justify-center bg-transparent z-10 pointer-events-none">
+            <!-- The background canvas shows through here -->
+            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
+            
+            <div class="relative z-20 text-center max-w-4xl mx-auto px-4 pointer-events-auto">
+                <h2 class="font-cinematic text-4xl md:text-6xl text-dark tracking-tighter mb-8 cta-text opacity-0 transform translate-y-10">
+                    THE NEXT GENERATION <br>
+                    <span class="text-slate-400">WON'T STUDY HARDER.</span> <br>
+                    THEY'LL EVOLVE FASTER.
+                </h2>
+                
+                <div class="mt-16 cta-btn opacity-0">
+                    <button data-cursor="hover" onclick="openAuthModal('signup')" class="group relative px-12 py-6 bg-transparent overflow-hidden">
+                        <div class="absolute inset-0 border border-dark transition-all duration-300 group-hover:border-transparent"></div>
+                        <div class="absolute inset-0 bg-dark transform scale-y-0 origin-bottom transition-transform duration-500 group-hover:scale-y-100"></div>
+                        <span class="relative z-10 font-display text-sm uppercase tracking-[0.3em] font-bold text-dark group-hover:text-white transition-colors duration-300">
+                            Initialize Vidyaplus Core
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Minimal Footer -->
+        <footer class="py-8 border-t border-slate-100 bg-white relative z-10 text-center">
+            <div class="font-display text-[10px] uppercase tracking-widest text-slate-400">
+                &copy; 2026 Vidyaplus Systems. All cognitive rights reserved.
+            </div>
+        </footer>
+
+    </main>
 
     <script>
-        // 1. Smooth Scroll
-        const lenis = new Lenis();
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-        requestAnimationFrame(raf);
+        // --- 1. Custom Magnetic Cursor ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+        let mouseX = 0, mouseY = 0;
+        let outlineX = 0, outlineY = 0;
+        let cursorHoverState = false;
 
-        // 2. Custom Cursor
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', (e) => {
-            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power4.out" });
-        });
-
-        // 3. Three.js Background
-        const canvas = document.querySelector('#canvas-webgl');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-
-        const particlesGeometry = new THREE.BufferGeometry();
-        const count = 2500;
-        const positions = new Float32Array(count * 3);
-        for(let i = 0; i < count * 3; i++) { positions[i] = (Math.random() - 0.5) * 15; }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particlesMaterial = new THREE.PointsMaterial({ size: 0.015, color: 0x000000, transparent: true, opacity: 0.15 });
-        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particles);
-        camera.position.z = 3;
-
-        function animateParticles() {
-            particles.rotation.y += 0.001;
-            renderer.render(scene, camera);
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
-
-        // 4. AUTH MODAL LOGIC
-        const authModal = document.getElementById('authModal');
-        const authCard = document.getElementById('authCard');
-        const mascot = document.getElementById('mascot');
-        const aiStatus = document.getElementById('ai-status');
-        const aiGreeting = document.getElementById('ai-greeting');
-
-        function toggleAuth(mode = 'login') {
-            const isOpening = authModal.style.display !== 'flex';
-            if (isOpening) {
-                switchMode(mode);
-                authModal.style.display = 'flex';
-                gsap.fromTo(authModal, { opacity: 0 }, { opacity: 1, duration: 0.5 });
-                gsap.fromTo(authCard, { scale: 0.8, y: 100, opacity: 0, rotateX: 20 }, { scale: 1, y: 0, opacity: 1, rotateX: 0, duration: 1, ease: "expo.out" });
-                
-                // AI Entrance
-                gsap.fromTo(mascot, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, delay: 0.5, duration: 1, ease: "elastic.out(1, 0.3)" });
-            } else {
-                gsap.to(authCard, { scale: 0.9, opacity: 0, y: 50, duration: 0.5, ease: "power4.in", onComplete: () => { authModal.style.display = 'none'; } });
-                gsap.to(authModal, { opacity: 0, duration: 0.5 });
-            }
-        }
-
-        function switchMode(mode) {
-            const login = document.getElementById('loginForm');
-            const signup = document.getElementById('signupForm');
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
             
-            gsap.to(".auth-form-container", { opacity: 0, y: 10, duration: 0.3, onComplete: () => {
-                if (mode === 'login') {
-                    login.classList.remove('hidden');
-                    signup.classList.add('hidden');
-                    aiGreeting.innerText = "Welcome Back.";
-                } else {
-                    signup.classList.remove('hidden');
-                    login.classList.add('hidden');
-                    aiGreeting.innerText = "New Consciousness Detected.";
-                }
-                gsap.to(".auth-form-container", { opacity: 1, y: 0, duration: 0.5 });
-            }});
+            cursorDot.style.left = `${mouseX}px`;
+            cursorDot.style.top = `${mouseY}px`;
+        });
+
+        // Smooth outline follow
+        function animateCursor() {
+            let distX = mouseX - outlineX;
+            let distY = mouseY - outlineY;
+            
+            outlineX += distX * 0.15;
+            outlineY += distY * 0.15;
+            
+            cursorOutline.style.left = `${outlineX}px`;
+            cursorOutline.style.top = `${outlineY}px`;
+            
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hover effects for designated elements
+        document.body.addEventListener('mouseover', (e) => {
+            const interactable = e.target.closest('[data-cursor="hover"], button, a');
+            const textInput = e.target.closest('input[type="text"], input[type="email"], input[type="password"]');
+            
+            if (interactable && !textInput) {
+                cursorOutline.style.width = '60px';
+                cursorOutline.style.height = '60px';
+                cursorOutline.style.backgroundColor = 'rgba(15, 23, 42, 0.05)';
+                cursorDot.style.transform = 'scale(0.5)';
+            } else if (textInput) {
+                // Text input cursor style
+                cursorOutline.style.width = '24px';
+                cursorOutline.style.height = '40px';
+                cursorOutline.style.borderRadius = '4px';
+                cursorOutline.style.backgroundColor = 'transparent';
+                cursorOutline.style.borderColor = '#0f172a';
+                cursorDot.style.opacity = '0';
+            }
+        });
+
+        document.body.addEventListener('mouseout', (e) => {
+            const interactable = e.target.closest('[data-cursor="hover"], button, a, input');
+            if (interactable) {
+                cursorOutline.style.width = '40px';
+                cursorOutline.style.height = '40px';
+                cursorOutline.style.borderRadius = '50%';
+                cursorOutline.style.backgroundColor = 'transparent';
+                cursorOutline.style.borderColor = 'rgba(15, 23, 42, 0.3)';
+                cursorDot.style.transform = 'scale(1)';
+                cursorDot.style.opacity = '1';
+            }
+        });
+
+        // --- 2. Lenis Smooth Scrolling ---
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        })
+
+        function raf(time) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+
+        // --- 3. Three.js Background (AI Energy Waves) ---
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+        // Add subtle fog for depth
+        scene.fog = new THREE.FogExp2(0xffffff, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Create Particles
+        const particleCount = 3000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const initialPositions = new Float32Array(particleCount * 3);
+
+        for(let i = 0; i < particleCount * 3; i+=3) {
+            // Spread across a wide area
+            const x = (Math.random() - 0.5) * 50;
+            const y = (Math.random() - 0.5) * 20 - 5; // Lower down
+            const z = (Math.random() - 0.5) * 40 - 10;
+            
+            positions[i] = x;
+            positions[i+1] = y;
+            positions[i+2] = z;
+            
+            initialPositions[i] = x;
+            initialPositions[i+1] = y;
+            initialPositions[i+2] = z;
         }
 
-        // 5. AI MASCOT INTERACTION
-        document.querySelectorAll('.auth-input').forEach(input => {
-            input.addEventListener('focus', () => {
-                gsap.to(mascot, { scale: 1.1, filter: "blur(5px)", duration: 0.5 });
-                aiStatus.innerText = "Analyzing Input...";
-                aiStatus.classList.add('text-blue-600');
-            });
-            input.addEventListener('blur', () => {
-                gsap.to(mascot, { scale: 1, filter: "blur(10px)", duration: 0.5 });
-                aiStatus.innerText = "System Active";
-            });
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const material = new THREE.PointsMaterial({
+            color: 0x94a3b8, // Slate 400
+            size: 0.08,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
         });
 
-        // Eyes Follow Cursor in Modal
-        authCard.addEventListener('mousemove', (e) => {
-            const rect = mascot.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            gsap.to(".eye", { x: x * 10, y: y * 10, duration: 0.3 });
-        });
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
 
-        // 6. Magnetic Effect
-        const mBtns = document.querySelectorAll('.magnetic-btn');
-        mBtns.forEach(btn => {
-            btn.addEventListener('mousemove', (e) => {
-                const rect = btn.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: "power2.out" });
-            });
-            btn.addEventListener('mouseleave', () => {
-                gsap.to(btn, { x: 0, y: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" });
-            });
-        });
+        camera.position.z = 15;
+        camera.position.y = 2;
 
+        // Camera rig for mouse interaction
+        const cameraRig = new THREE.Group();
+        cameraRig.add(camera);
+        scene.add(cameraRig);
+
+        let targetX = 0;
+        let targetY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+            targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+        const clock = new THREE.Clock();
+
+        function animateThree() {
+            requestAnimationFrame(animateThree);
+            const time = clock.getElapsedTime();
+
+            // Wave animation
+            const posAttribute = geometry.attributes.position;
+            for(let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                const ix = initialPositions[i3];
+                const iz = initialPositions[i3+2];
+                
+                // Complex wave math based on initial positions
+                posAttribute.array[i3+1] = initialPositions[i3+1] + Math.sin(ix * 0.5 + time) * 1.5 + Math.cos(iz * 0.3 + time * 0.8) * 1.5;
+            }
+            posAttribute.needsUpdate = true;
+
+            // Parallax mouse effect
+            cameraRig.position.x += (targetX * 2 - cameraRig.position.x) * 0.02;
+            cameraRig.position.y += (-targetY * 2 - cameraRig.position.y) * 0.02;
+            
+            // Slowly rotate scene
+            particles.rotation.y = time * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animateThree();
+
+        // Handle resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // --- 4. GSAP Animations Main Site ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Synchronize ScrollTrigger with Lenis
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time)=>{
+            lenis.raf(time * 1000);
+        });
+        gsap.ticker.lagSmoothing(0);
+
+        // Hero Sequence
+        const tlHero = gsap.timeline({ defaults: { ease: "power4.out" }});
+        
+        // Split text simulation for hero
+        const heroLines = document.querySelectorAll('.hero-line');
+        heroLines.forEach(line => {
+            line.innerHTML = `<span class="char">${line.innerHTML}</span>`;
+        });
+        
+        tlHero.to('.hero-line .char', {
+            y: "0%",
+            duration: 1.5,
+            stagger: 0.1,
+            delay: 0.5
+        })
+        .to('.hero-sub', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out"
+        }, "-=1")
+        .to('.hero-cta', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out"
+        }, "-=0.8");
+
+        // Section Parallax
+        document.querySelectorAll('[data-speed]').forEach(elem => {
+            gsap.to(elem, {
+                y: (i, el) => (1 - parseFloat(el.getAttribute('data-speed'))) * (ScrollTrigger.maxScroll(window) - (this.scrollY || 0)),
+                ease: "none",
+                scrollTrigger: {
+                    trigger: elem,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 0.5
+                }
+            });
+        });
+
+        // Section Title Reveal
+        gsap.utils.toArray('.section-title').forEach(title => {
+            gsap.from(title, {
+                scrollTrigger: {
+                    trigger: title,
+                    start: "top 80%",
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+        });
+
+        // Counters
+        gsap.utils.toArray('.counter').forEach(counter => {
+            let target = parseFloat(counter.innerText);
+            let isInt = target % 1 === 0;
+            
+            ScrollTrigger.create({
+                trigger: counter,
+                start: "top 85%",
+                onEnter: () => {
+                    gsap.fromTo(counter, 
+                        { innerText: 0 }, 
+                        { 
+                            innerText: target, 
+                            duration: 2, 
+                            ease: "power2.out",
+                            snap: { innerText: isInt ? 1 : 0.1 },
+                            onUpdate: function() {
+                                counter.innerText = Number(this.targets()[0].innerText).toFixed(isInt ? 0 : 1);
+                            }
+                        }
+                    );
+                },
+                once: true
+            });
+        });
+        // Timeline Animation
+        const timelineItems = gsap.utils.toArray('.timeline-item');
+        gsap.to('.timeline-progress', {
+            height: "100%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#timeline",
+                start: "top center",
+                end: "bottom center",
+                scrub: true
+            }
+        });
+
+        timelineItems.forEach((item, i) => {
+            ScrollTrigger.create({
+                trigger: item,
+                start: "top 60%",
+                onEnter: () => {
+                    item.classList.remove('opacity-30');
+                    item.classList.add('opacity-100');
+                    
+                    const dot = item.querySelector('div[class*="rounded-full"]');
+                    if(dot) {
+                        gsap.to(dot, { scale: 1.2, duration: 0.3, yoyo: true, repeat: 1 });
+                        if(i === timelineItems.length - 1) {
+                            dot.classList.add('bg-dark');
+                            dot.classList.remove('bg-white');
+                        }
+                    }
+                },
+                onLeaveBack: () => {
+                    item.classList.add('opacity-30');
+                    item.classList.remove('opacity-100');
+                }
+            });
+        });
+
+        // Final CTA
+        const ctaTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#cta",
+                start: "top 60%",
+            }
+        });
+
+        ctaTl.to('.cta-text', {
+            opacity: 1,
+            y: 0,
+            duration: 1.5,
+            ease: "power4.out"
+        }).to('.cta-btn', {
+            opacity: 1,
+            duration: 1,
+            ease: "power2.out"
+        }, "-=0.5");
+
+
+        // --- 5. PREMIUM AUTHENTICATION MODAL SYSTEM ---
+
+        let currentAuthMode = 'login';
+        const authWrapper = document.getElementById('auth-wrapper');
+        const authModal = document.getElementById('auth-modal');
+        const formLogin = document.getElementById('form-login');
+        const formSignup = document.getElementById('form-signup');
+        const authTitle = document.getElementById('auth-title');
+        const authSubtitle = document.getElementById('auth-subtitle');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleBtn = document.getElementById('toggle-btn');
+        
+        // Mascot Elements
+        const mascotFace = document.querySelector('.mascot-face');
+        const mascotEyes = document.querySelectorAll('.mascot-eye');
+        const mascotStatus = document.getElementById('mascot-status');
+        const leftScan = document.getElementById('eye-left-scan');
+        const rightScan = document.getElementById('eye-right-scan');
+
+        function openAuthModal(mode) {
+            lenis.stop(); // Pause background scrolling
+            
+            // Set initial mode
+            if(mode !== currentAuthMode) {
+                switchMode(mode, false);
+            }
+            // Cinematic Entrance Animation
+            const tl = gsap.timeline();
+            tl.to(authWrapper, {
+                opacity: 1,
+                pointerEvents: 'auto',
+                duration: 0.3,
+                ease: "power2.out"
+            })
+            .fromTo(authModal, 
+                { scale: 0.9, y: 40, opacity: 0 },
+                { scale: 1, y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.2)" },
+                "-=0.1"
+            );
+
+            // Mascot awake animation
+            gsap.fromTo(mascotEyes, 
+                { height: 2 },
+                { height: 20, duration: 0.5, ease: "elastic.out(1, 0.5)", delay: 0.5 }
+            );
+            mascotStatus.innerText = "System Online";
+        }
+
+        function closeAuthModal() {
+            lenis.start();
+            
+            // Mascot sleep animation
+            gsap.to(mascotEyes, { height: 2, duration: 0.3 });
+            mascotStatus.innerText = "Shutting down...";
+
+            const tl = gsap.timeline();
+            tl.to(authModal, {
+                scale: 0.95,
+                y: 20,
+                opacity: 0,
+                duration: 0.4,
+                ease: "power3.in"
+            })
+            .to(authWrapper, {
+                opacity: 0,
+                pointerEvents: 'none',
+                duration: 0.3,
+                ease: "power2.in"
+            }, "-=0.2");
+        }
+
+        function toggleAuthMode() {
+            const newMode = currentAuthMode === 'login' ? 'signup' : 'login';
+            switchMode(newMode, true);
+        }
+
+        function switchMode(mode, animate = true) {
+            currentAuthMode = mode;
+            
+            if (mode === 'signup') {
+                authTitle.innerText = "Initialize Entity";
+                authSubtitle.innerText = "New Connection";
+                toggleText.innerText = "Already linked?";
+                toggleBtn.innerText = "Login";
+
+                if(animate) {
+                    gsap.to(formLogin, { opacity: 0, y: -20, pointerEvents: 'none', duration: 0.4, ease: "power2.inOut" });
+                    gsap.to(formSignup, { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.5, delay: 0.2, ease: "power2.out" });
+                } else {
+                    gsap.set(formLogin, { opacity: 0, y: -20, pointerEvents: 'none' });
+                    gsap.set(formSignup, { opacity: 1, y: 0, pointerEvents: 'auto' });
+                }
+                
+                mascotStatus.innerText = "Ready to register";
+                // Mascot curious look
+                gsap.to(mascotFace, { rotate: 5, duration: 0.3 });
+
+            } else {
+                authTitle.innerText = "Access Core";
+                authSubtitle.innerText = "Welcome Back";
+                toggleText.innerText = "Require an entity link?";
+                toggleBtn.innerText = "Sign Up";
+
+                if(animate) {
+                    gsap.to(formSignup, { opacity: 0, y: 20, pointerEvents: 'none', duration: 0.4, ease: "power2.inOut" });
+                    gsap.to(formLogin, { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.5, delay: 0.2, ease: "power2.out" });
+                } else {
+                    gsap.set(formSignup, { opacity: 0, y: 20, pointerEvents: 'none' });
+                    gsap.set(formLogin, { opacity: 1, y: 0, pointerEvents: 'auto' });
+                }
+
+                mascotStatus.innerText = "Awaiting Credentials";
+                // Mascot reset look
+                gsap.to(mascotFace, { rotate: 0, duration: 0.3 });
+            }
+        }
+
+        // --- Mascot Interactions based on Form Inputs ---
+        
+        const inputs = document.querySelectorAll('.futuristic-input');
+        
+        inputs.forEach(input => {
+            input.addEventListener('focus', (e) => {
+                const type = e.target.type;
+                const id = e.target.id;
+
+                if (type === 'password') {
+                    // Mascot hides/squints eyes for privacy
+                    gsap.to(mascotEyes, { height: 2, width: 12, borderRadius: "4px", duration: 0.3 });
+                    mascotStatus.innerText = "Privacy mode enabled";
+                } else if (type === 'email' || type === 'text') {
+                    // Mascot opens eyes wide and shows scanning line
+                    gsap.to(mascotEyes, { height: 24, width: 20, borderRadius: "50%", duration: 0.3 });
+                    gsap.to([leftScan, rightScan], { opacity: 1, yoyo: true, repeat: -1, y: 20, duration: 1.5, ease: "linear" });
+                    mascotStatus.innerText = "Analyzing input...";
+                }
+            });
+
+            input.addEventListener('blur', (e) => {
+                // Reset mascot eyes
+                gsap.to(mascotEyes, { height: 20, width: 16, borderRadius: "50%", duration: 0.3 });
+                gsap.killTweensOf([leftScan, rightScan]);
+                gsap.set([leftScan, rightScan], { opacity: 0, y: 0 });
+                mascotStatus.innerText = "Awaiting input...";
+            });
+
+            input.addEventListener('input', (e) => {
+                if (e.target.type !== 'password') {
+                    // Simulate eye tracking while typing (subtle face movement)
+                    const valLength = e.target.value.length;
+                    const maxMovement = 15;
+                    const moveX = Math.min((valLength * 1.5), maxMovement) - (maxMovement/2);
+                    gsap.to(mascotFace, { x: moveX, duration: 0.1 });
+                }
+            });
+        });
+        // Handle Form Success Animation
+        function authSuccess() {
+            // Hide forms, show success overlay
+            const successOverlay = document.getElementById('auth-success-overlay');
+            
+            // Mascot Happy Animation
+            gsap.to(mascotFace, { x: 0, rotate: 0, duration: 0.2 });
+            gsap.to(mascotEyes, { height: 4, width: 20, borderRadius: "50% 50% 0 0", duration: 0.2 }); // Happy squint
+            mascotStatus.innerText = "Access Granted.";
+
+            gsap.to(successOverlay, { opacity: 1, pointerEvents: 'auto', duration: 0.5, delay: 0.3 });
+            
+            // Close after delay
+            setTimeout(() => {
+                closeAuthModal();
+                // Reset state
+                setTimeout(() => {
+                    gsap.set(successOverlay, { opacity: 0, pointerEvents: 'none' });
+                    inputs.forEach(i => i.value = '');
+                }, 500);
+            }, 2500);
+        }
+
+        // Mascot Random Blinking
+        setInterval(() => {
+            if(Math.random() > 0.6 && mascotStatus.innerText !== "Privacy mode enabled") {
+                gsap.to(mascotEyes, { height: 2, duration: 0.1, yoyo: true, repeat: 1 });
+            }
+        }, 3000);
+
     </script>
 </body>
 </html>
-
