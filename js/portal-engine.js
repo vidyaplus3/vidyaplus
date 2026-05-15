@@ -112,7 +112,7 @@ const SecurityModule = {
     triggerViolation(reason) {
         if (!this.isActive || isSubmitting) return;
         this.warnings++;
-        Telemetry.logSystemEvent(`Violation: ${reason} (Warning ${this.warnings})`); // 👈 Tracker
+        Telemetry.logSystemEvent(`Violation: ${reason} (Warning ${this.warnings})`); 
         
         if (this.warnings >= this.maxWarnings) {
             alert(`ACADEMIC INTEGRITY VIOLATION\n\nMaximum warnings exceeded (${this.maxWarnings}/${this.maxWarnings}).\nReason: ${reason}\n\nYour assessment is being automatically submitted for administrative review.`);
@@ -125,17 +125,17 @@ const SecurityModule = {
     monitorVisibility() {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !isSubmitting) {
-                Telemetry.logSystemEvent("Tab Minimized/Hidden"); // 👈 Tracker
+                Telemetry.logSystemEvent("Tab Minimized/Hidden"); 
                 saveProgressLocally(); 
                 if(this.isActive) this.triggerViolation("Navigated away from the active assessment window");
             } else if (!document.hidden) {
-                Telemetry.logSystemEvent("Tab Restored"); // 👈 Tracker
+                Telemetry.logSystemEvent("Tab Restored"); 
             }
         });
 
         window.addEventListener('blur', () => {
             if (this.isActive && !isSubmitting) {
-                Telemetry.logSystemEvent("Window Blur (Focus Lost)"); // 👈 Tracker
+                Telemetry.logSystemEvent("Window Blur (Focus Lost)"); 
                 setTimeout(() => {
                     if (!document.hasFocus() && !document.hidden) {
                         this.triggerViolation("Assessment window lost focus");
@@ -170,9 +170,15 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     try {
+        // 🚨 NAYA CODE: Token nikalna aur headers me bhejna
+        const idToken = await user.getIdToken();
+
         const response = await fetch(BACKEND_URL + "/getSecureTest", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}` 
+            },
             body: JSON.stringify({ testId, batchId })
         });
 
@@ -199,7 +205,7 @@ function saveProgressLocally() {
         userAnswers: userAnswers,
         timeRemaining: timeRemaining,
         currentQIdx: currentQIdx,
-        systemLogs: Telemetry.systemLogs // Save logs offline too
+        systemLogs: Telemetry.systemLogs 
     };
     localStorage.setItem('vp_exam_progress_' + testData.docId, JSON.stringify(progressState));
 }
@@ -271,7 +277,7 @@ function startTimer() {
 }
 
 window.jumpToSubject = (secName) => {
-    Telemetry.recordExit(); // 👈 Tracker
+    Telemetry.recordExit(); 
     const firstQOfSec = testData.questions.findIndex(q => (q.section || "General") === secName);
     if(firstQOfSec !== -1) {
         Telemetry.logSystemEvent(`Jumped to Subject: ${secName}`);
@@ -285,7 +291,7 @@ window.renderQuestion = () => {
     const q = testData.questions[currentQIdx];
     if(!q) return;
 
-    Telemetry.recordEntry(); // 👈 Tracker Starts Clock for this Question
+    Telemetry.recordEntry(); 
 
     document.getElementById('q-meta').innerText = `Question ${currentQIdx + 1} of ${testData.questions.length}`;
     
@@ -305,7 +311,7 @@ window.renderQuestion = () => {
     const optContainer = document.getElementById('q-options');
     optContainer.innerHTML = ''; 
     
-    Telemetry.initQuestionRecord(q.id); // Ensure record exists
+    Telemetry.initQuestionRecord(q.id); 
     const saved = userAnswers[q.id];
 
     if (q.type === 'single' || q.type === 'multiple') {
@@ -346,7 +352,7 @@ window.renderQuestion = () => {
 window.selectOption = (idx, type) => {
     const qId = testData.questions[currentQIdx].id;
     Telemetry.initQuestionRecord(qId);
-    Telemetry.logAction('select_option', idx); // 👈 Tracker
+    Telemetry.logAction('select_option', idx); 
 
     if (type === 'single') {
         userAnswers[qId].answer = [idx];
@@ -354,13 +360,13 @@ window.selectOption = (idx, type) => {
         const pos = userAnswers[qId].answer.indexOf(idx);
         if (pos > -1) {
             userAnswers[qId].answer.splice(pos, 1);
-            Telemetry.logAction('deselect_option', idx); // 👈 Tracker
+            Telemetry.logAction('deselect_option', idx); 
         } else {
             userAnswers[qId].answer.push(idx);
         }
     }
     
-    userAnswers[qId].status = 'visited'; // Keep logic intact
+    userAnswers[qId].status = 'visited'; 
     
     const optContainer = document.getElementById('q-options');
     if (optContainer) {
@@ -383,7 +389,7 @@ window.saveNumerical = (val) => {
     const num = parseFloat(val);
     
     Telemetry.initQuestionRecord(qId);
-    Telemetry.logAction('numerical_input', val); // 👈 Tracker
+    Telemetry.logAction('numerical_input', val); 
     
     if(val.trim() === "" || isNaN(num)) {
         delete userAnswers[qId].answer;
@@ -395,7 +401,7 @@ window.saveNumerical = (val) => {
 };
 
 window.saveAndNext = () => {
-    Telemetry.recordExit(); // 👈 Tracker
+    Telemetry.recordExit(); 
     const qId = testData.questions[currentQIdx].id;
     Telemetry.initQuestionRecord(qId);
     
@@ -410,7 +416,7 @@ window.saveAndNext = () => {
 };
 
 window.markForReview = () => {
-    Telemetry.recordExit(); // 👈 Tracker
+    Telemetry.recordExit(); 
     const qId = testData.questions[currentQIdx].id;
     Telemetry.initQuestionRecord(qId);
     
@@ -424,7 +430,7 @@ window.markForReview = () => {
 window.clearResponse = () => {
     const qId = testData.questions[currentQIdx].id;
     Telemetry.initQuestionRecord(qId);
-    Telemetry.logAction('clear_response'); // 👈 Tracker
+    Telemetry.logAction('clear_response'); 
     
     userAnswers[qId].answer = [];
     userAnswers[qId].status = 'visited';
@@ -448,14 +454,14 @@ window.clearResponse = () => {
 window.navigateQ = (step) => {
     const newIdx = currentQIdx + step;
     if (newIdx >= 0 && newIdx < testData.questions.length) {
-        if(step !== 0) Telemetry.recordExit(); // 👈 Tracker
+        if(step !== 0) Telemetry.recordExit(); 
         currentQIdx = newIdx;
         renderQuestion();
     }
 };
 
 window.jumpToQ = (idx) => {
-    Telemetry.recordExit(); // 👈 Tracker
+    Telemetry.recordExit(); 
     currentQIdx = idx;
     renderQuestion();
     if(window.innerWidth < 900) {
@@ -488,7 +494,6 @@ function updatePaletteUI() {
         const btn = document.getElementById(`p-btn-${idx}`);
         if(!btn) return;
         
-        // Use the safely initialized record
         const state = userAnswers[q.id];
         
         btn.className = 'p-btn';
@@ -515,7 +520,7 @@ async function autoSubmit() {
     SecurityModule.isActive = false; 
     clearInterval(timerInterval);
     
-    Telemetry.recordExit(); // Capture the last question's time!
+    Telemetry.recordExit(); 
     Telemetry.logSystemEvent("Final Submit Triggered");
 
     document.body.innerHTML = `
@@ -530,16 +535,22 @@ async function autoSubmit() {
     const timeSpent = (testData.duration * 60) - timeRemaining;
 
     try {
+        // 🚨 NAYA CODE: Submit karte waqt bhi Token bhejna hai
+        const idToken = await auth.currentUser.getIdToken();
+
         const response = await fetch(BACKEND_URL + "/submitAssessment", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}` 
+            },
             body: JSON.stringify({
                 testId: testId, 
                 batchId: batchId,
-                userAnswers: safeUserAnswers, // Ab isme TimeSpent aur Actions bhi jayenge!
+                userAnswers: safeUserAnswers, 
                 timeSpent: timeSpent,
                 uid: currentUserId,
-                systemTelemetry: Telemetry.systemLogs // Extra Jasoosi Data
+                systemTelemetry: Telemetry.systemLogs 
             })
         });
 
