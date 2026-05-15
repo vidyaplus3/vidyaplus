@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vidyaplus | Next-Gen Academic Platform</title>
+    <title>VidyaPlus | Academic Excellence Platform</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,217 +11,319 @@
     <style>
         :root {
             --primary: #2563eb;
-            --primary-dark: #1e40af;
+            --primary-dark: #1d4ed8;
             --bg-light: #f8fafc;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --white: #ffffff;
-            --border: #e2e8f0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-main); overflow-x: hidden; }
-
-        /* ✨ 1. LIGHTWEIGHT BACKGROUND ANIMATION (NO-LAG) */
-        .bg-animation {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; background: linear-gradient(120deg, #f8fafc 0%, #eff6ff 100%);
-            overflow: hidden;
-        }
-        .blob {
-            position: absolute; width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
-            border-radius: 50%; animation: move 20s infinite alternate ease-in-out;
-        }
-        @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(20%, 20%); }
-        }
-
-        /* 🌐 2. RESPONSIVE HEADER */
-        .header {
-            position: fixed; top: 0; width: 100%; height: 70px;
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 5%; z-index: 1000; border-bottom: 1px solid var(--border);
-        }
-        .nav-left { display: flex; align-items: center; gap: 15px; }
-        .menu-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-main); }
-        .logo { font-size: 1.3rem; font-weight: 900; color: var(--primary); letter-spacing: -0.5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        .btn-auth-trigger {
+        /* 🌊 SMOOTH, ZERO-LAG BACKGROUND ANIMATION */
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 50%, #f1f5f9 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 🔒 GLASSMORPHISM FIXED HEADER */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 75px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 4%;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 15px; }
+        .menu-btn { background: none; border: none; font-size: 1.4rem; color: var(--text-main); cursor: pointer; }
+        .nav-brand { font-size: 1.4rem; font-weight: 900; color: var(--primary); text-decoration: none; letter-spacing: -0.5px; }
+
+        .btn-secure-login {
             background: var(--primary); color: white; padding: 10px 22px;
-            border-radius: 10px; font-weight: 700; border: none; cursor: pointer;
-            transition: 0.3s; font-size: 0.9rem;
+            border-radius: 8px; font-weight: 700; border: none; cursor: pointer;
+            transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            display: flex; align-items: center; gap: 8px;
         }
-        .btn-auth-trigger:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-secure-login:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        /* 🚀 3. HERO SECTION */
+        /* 🎯 HERO SECTION (Minimalist & Professional) */
         .hero {
-            padding: 160px 5% 100px; text-align: center;
-            max-width: 900px; margin: 0 auto;
+            padding: 160px 5% 100px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
-        .hero h1 { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1.5px; }
-        .hero p { font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; font-weight: 500; }
 
-        /* 📱 4. BOTTOM SHEET AUTH (MOBILE & DESKTOP) */
-        .sheet-overlay {
+        .security-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: white; color: #059669; font-size: 0.75rem; font-weight: 800;
+            padding: 6px 16px; border-radius: 30px; margin-bottom: 25px;
+            border: 1px solid #d1fae5; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4.2rem);
+            font-weight: 900; letter-spacing: -1.5px;
+            line-height: 1.1; margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-muted);
+            font-weight: 500; margin: 0 auto 40px; line-height: 1.6;
+        }
+
+        /* 📱 BOTTOM SHEET AUTHENTICATION (The Creative Native Feel) */
+        .auth-overlay {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none;
-            transition: 0.3s ease;
+            backdrop-filter: blur(4px); z-index: 2000;
+            opacity: 0; pointer-events: none; transition: 0.3s ease;
         }
-        .sheet-overlay.active { opacity: 1; pointer-events: auto; }
+        .auth-overlay.active { opacity: 1; pointer-events: auto; }
 
-        .bottom-sheet {
-            position: fixed; bottom: -100%; left: 0; width: 100%;
-            background: var(--white); border-radius: 30px 30px 0 0;
-            z-index: 2001; padding: 2rem; transition: 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-            max-width: 500px; margin: 0 auto; left: 50%; transform: translateX(-50%);
+        .auth-sheet {
+            position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 450px; background: white;
+            border-radius: 24px 24px 0 0; z-index: 2001; padding: 30px;
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
-        .bottom-sheet.active { bottom: 0; }
+        .auth-sheet.active { bottom: 0; }
 
-        .sheet-handle { width: 40px; height: 5px; background: var(--border); border-radius: 10px; margin: 0 auto 1.5rem; }
-        
-        .auth-form h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; }
-        .auth-form p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
-
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
-        .input-group input { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid var(--border);
-            background: #f8fafc; font-size: 1rem; outline: none; transition: 0.2s;
+        .sheet-handle {
+            width: 40px; height: 5px; background: #cbd5e1;
+            border-radius: 10px; margin: 0 auto 20px;
         }
-        .input-group input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
 
-        .btn-primary { 
-            width: 100%; padding: 14px; border-radius: 12px; background: var(--primary);
-            color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer;
-            margin-top: 10px; transition: 0.2s;
+        .auth-header { text-align: center; margin-bottom: 25px; }
+        .auth-header h2 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+        .auth-header p { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 5px; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+        .input-control {
+            width: 100%; padding: 14px; border-radius: 10px; border: 1.5px solid #e2e8f0;
+            background: #f8fafc; font-size: 0.95rem; font-weight: 500; outline: none; transition: 0.2s;
         }
-        .btn-primary:active { transform: scale(0.98); }
+        .input-control:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
 
-        .switch-mode { margin-top: 20px; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-align: center; }
-        .switch-mode span { color: var(--primary); cursor: pointer; text-decoration: underline; }
+        .btn-auth-submit {
+            width: 100%; padding: 14px; border-radius: 10px; background: var(--text-main);
+            color: white; font-size: 1rem; font-weight: 800; border: none; cursor: pointer;
+            transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-auth-submit:hover { background: #000; }
 
-        /* Desktop specific tweaks */
+        .btn-google {
+            width: 100%; padding: 12px; border-radius: 10px; background: white;
+            color: var(--text-main); font-size: 0.95rem; font-weight: 700;
+            border: 1.5px solid #e2e8f0; cursor: pointer; display: flex; justify-content: center;
+            align-items: center; gap: 10px; margin-top: 15px; transition: 0.2s;
+        }
+        .btn-google:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .auth-switch { text-align: center; margin-top: 20px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .auth-switch span { color: var(--primary); cursor: pointer; }
+
+        #auth-error { display: none; background: #fee2e2; color: #dc2626; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 15px; }
+
+        /* Mobile specific fixes */
         @media (min-width: 768px) {
-            .bottom-sheet { border-radius: 24px; bottom: -100%; margin-bottom: 20px; width: 400px; }
-            .bottom-sheet.active { bottom: 20px; }
+            .auth-sheet { border-radius: 24px; bottom: 50%; transform: translate(-50%, 50%) scale(0.95); opacity: 0; transition: all 0.3s ease; }
+            .auth-sheet.active { bottom: 50%; transform: translate(-50%, 50%) scale(1); opacity: 1; }
+            .sheet-handle { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-animation">
-        <div class="blob" style="top: 10%; left: 10%;"></div>
-        <div class="blob" style="bottom: 10%; right: 10%; animation-delay: -5s;"></div>
-    </div>
-
-    <header class="header">
+    <nav class="navbar">
         <div class="nav-left">
             <button class="menu-btn"><i class="fas fa-bars"></i></button>
-            <div class="logo">Vidyaplus</div>
+            <a href="#" class="nav-brand">VidyaPlus</a>
         </div>
-        <button class="btn-auth-trigger" onclick="toggleAuth(true)">Login / Join</button>
-    </header>
+        <button class="btn-secure-login" onclick="openAuthSheet('login')">
+            <i class="fas fa-lock"></i> Secure Login
+        </button>
+    </nav>
 
     <section class="hero">
-        <h1>Learn with India's most <span style="color: var(--primary);">Secure</span> platform</h1>
-        <p>Vidyaplus provides industry-level telemetry, X-Ray analytics, and bank-grade security to ensure your preparation is zero-distraction and 100% authentic.</p>
-        <button class="btn-auth-trigger" style="padding: 15px 40px; font-size: 1rem;" onclick="toggleAuth(true)">Get Started Free</button>
+        <div class="security-badge">
+            <i class="fas fa-shield-check"></i> Enterprise-Grade Academic Security
+        </div>
+        <h1 class="hero-title">Precision Analytics for<br><span style="color: var(--primary);">Top-Tier Preparation</span></h1>
+        <p class="hero-subtitle">Access structured curricula, high-fidelity assessment telemetry, and advanced academic resources through our secure portal.</p>
+        
+        <button class="btn-secure-login" style="margin: 0 auto; padding: 16px 32px; font-size: 1.1rem;" onclick="openAuthSheet('register')">
+            Initialize Enrollment <i class="fas fa-arrow-right"></i>
+        </button>
     </section>
 
-    <div class="sheet-overlay" id="sheet-overlay" onclick="toggleAuth(false)"></div>
-    <div class="bottom-sheet" id="auth-sheet">
-        <div class="sheet-handle"></div>
-        <div class="auth-form" id="login-form">
-            <h2 id="auth-title">Welcome Back</h2>
-            <p id="auth-desc">Enter your credentials to access your dashboard.</p>
-            
-            <div class="input-group" id="name-field" style="display: none;">
-                <label>Full Name</label>
-                <input type="text" id="reg-name" placeholder="Sudhir Anand">
-            </div>
+    <div class="auth-overlay" id="auth-overlay" onclick="if(event.target === this) closeAuthSheet()"></div>
+    
+    <div class="auth-sheet" id="auth-sheet">
+        <div class="sheet-handle" onclick="closeAuthSheet()"></div>
+        
+        <div class="auth-header">
+            <h2 id="auth-title">Authentication Portal</h2>
+            <p id="auth-subtitle">Verify your identity to proceed.</p>
+        </div>
 
+        <div id="auth-error">Error message here</div>
+
+        <form id="auth-form">
             <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="auth-email" placeholder="student@example.com">
+                <label class="input-label">Email Address</label>
+                <input type="email" id="auth-email" class="input-control" required placeholder="student@domain.com">
             </div>
-
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="auth-pass" placeholder="••••••••">
-            </div>
-
-            <button class="btn-primary" id="auth-btn">Secure Login</button>
             
-            <div class="switch-mode" id="mode-toggle">
-                New to Vidyaplus? <span onclick="switchMode('signup')">Create Account</span>
+            <div class="input-group">
+                <label class="input-label">Secure Password</label>
+                <input type="password" id="auth-password" class="input-control" required placeholder="••••••••">
             </div>
+            
+            <button type="submit" class="btn-auth-submit" id="auth-submit-btn">
+                Authenticate <i class="fas fa-chevron-right"></i>
+            </button>
+        </form>
+
+        <div style="display: flex; align-items: center; margin: 20px 0;">
+            <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+            <span style="padding: 0 10px; font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px;">OR</span>
+            <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+        </div>
+
+        <button class="btn-google" id="btn-google-auth">
+            <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" style="width: 18px;">
+            Authenticate via Google
+        </button>
+
+        <div class="auth-switch" id="auth-switch-text">
+            Unregistered? <span onclick="switchAuthMode('register')">Request Access</span>
         </div>
     </div>
 
     <script type="module">
         import { auth, db } from './js/firebase-init.js';
-        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // UI Variables
+        let currentMode = 'login';
+        const overlay = document.getElementById('auth-overlay');
         const sheet = document.getElementById('auth-sheet');
-        const overlay = document.getElementById('sheet-overlay');
-        let isLogin = true;
+        const form = document.getElementById('auth-form');
+        const errorBox = document.getElementById('auth-error');
+        const submitBtn = document.getElementById('auth-submit-btn');
 
-        window.toggleAuth = (show) => {
-            if(show) {
-                overlay.classList.add('active');
-                sheet.classList.add('active');
-            } else {
-                overlay.classList.remove('active');
-                sheet.classList.remove('active');
-            }
+        // Global functions for HTML onclick
+        window.openAuthSheet = (mode) => {
+            overlay.classList.add('active');
+            sheet.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            window.switchAuthMode(mode);
         };
 
-        window.switchMode = (mode) => {
-            isLogin = (mode === 'login');
-            document.getElementById('auth-title').innerText = isLogin ? "Welcome Back" : "Join Vidyaplus";
-            document.getElementById('auth-desc').innerText = isLogin ? "Enter your credentials to access your dashboard." : "Start your journey with professional analytics.";
-            document.getElementById('name-field').style.display = isLogin ? "none" : "block";
-            document.getElementById('auth-btn').innerText = isLogin ? "Secure Login" : "Create Account";
-            document.getElementById('mode-toggle').innerHTML = isLogin 
-                ? 'New to Vidyaplus? <span onclick="switchMode(\'signup\')">Create Account</span>' 
-                : 'Already have an account? <span onclick="switchMode(\'login\')">Log in</span>';
+        window.closeAuthSheet = () => {
+            overlay.classList.remove('active');
+            sheet.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            errorBox.style.display = 'none';
         };
 
-        // 🛡️ SECURITY: Session Check
-        onAuthStateChanged(auth, (user) => {
-            if (user) window.location.href = "dashboard.html";
-        });
-
-        // 🏦 BANK-LEVEL AUTH LOGIC
-        document.getElementById('auth-btn').onclick = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const btn = document.getElementById('auth-btn');
-
-            if(!email || !pass) return alert("Please fill all fields.");
+        window.switchAuthMode = (mode) => {
+            currentMode = mode;
+            errorBox.style.display = 'none';
+            const isReg = mode === 'register';
             
-            btn.innerText = "Verifying Identity...";
-            btn.disabled = true;
+            document.getElementById('auth-title').innerText = isReg ? "System Enrollment" : "Authentication Portal";
+            document.getElementById('auth-subtitle').innerText = isReg ? "Establish secure credentials." : "Verify your identity to proceed.";
+            submitBtn.innerHTML = isReg ? "Establish Identity <i class='fas fa-user-plus'></i>" : "Authenticate <i class='fas fa-lock-open'></i>";
+            
+            document.getElementById('auth-switch-text').innerHTML = isReg 
+                ? 'Registered Entity? <span onclick="switchAuthMode(\'login\')">Authenticate</span>' 
+                : 'Unregistered? <span onclick="switchAuthMode(\'register\')">Request Access</span>';
+        };
+
+        function showError(msg) {
+            errorBox.innerText = msg;
+            errorBox.style.display = 'block';
+            submitBtn.innerHTML = currentMode === 'register' ? "Establish Identity" : "Authenticate";
+            submitBtn.disabled = false;
+        }
+
+        // Firebase Auth Logic
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            
+            submitBtn.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> Processing...";
+            submitBtn.disabled = true;
+            errorBox.style.display = 'none';
 
             try {
-                if(isLogin) {
+                if(currentMode === 'login') {
                     await signInWithEmailAndPassword(auth, email, pass);
+                    window.location.replace("dashboard.html");
                 } else {
-                    const name = document.getElementById('reg-name').value;
-                    if(!name) throw new Error("Name is required.");
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                    // User creation logic yahan handle hogi (Profile creation)
+                    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                    // Securely create user document with student role
+                    await setDoc(doc(db, "users", userCred.user.uid), {
+                        email: email,
+                        role: "student",
+                        createdAt: new Date().toISOString()
+                    });
+                    window.location.replace("explore.html");
+                }
+            } catch(err) {
+                console.error(err);
+                if(err.code === 'auth/invalid-credential') showError("Access Denied: Invalid credentials.");
+                else if(err.code === 'auth/email-already-in-use') showError("Identity exists. Please authenticate.");
+                else showError("System Error: " + err.message);
+            }
+        });
+
+        // Google Auth Integration
+        document.getElementById('btn-google-auth').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const userRef = doc(db, "users", result.user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                // Naya user hai toh database mein entry banao
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, {
+                        email: result.user.email,
+                        name: result.user.displayName,
+                        role: "student",
+                        createdAt: new Date().toISOString()
+                    });
+                    window.location.replace("explore.html");
+                } else {
+                    window.location.replace("dashboard.html");
                 }
             } catch (err) {
-                alert(err.message);
-                btn.innerText = isLogin ? "Secure Login" : "Create Account";
-                btn.disabled = false;
+                showError("Google Authentication failed.");
             }
-        };
+        });
     </script>
 </body>
 </html>
