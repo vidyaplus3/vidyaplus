@@ -1,392 +1,774 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vidyaplus | Advanced Academic Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolve | The Future of Intelligent Learning</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        deep: '#030305',
+                        neon: {
+                            cyan: '#00f0ff',
+                            purple: '#8a2be2',
+                            pink: '#ff003c',
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
     <style>
-        /* ==========================================
-           1. ARCTIC TECH VARIABLES & RESET
-           ========================================== */
         :root {
-            --base-bg: #F8FAFC;
-            --surface-card: #FFFFFF;
-            --text-900: #0F172A;
-            --text-500: #64748B;
-            --accent-main: #4F46E5;
-            --accent-glow: rgba(79, 70, 229, 0.15);
-            --border-light: rgba(226, 232, 240, 0.8);
-            --glass-blur: blur(20px) saturate(180%);
+            --cursor-x: 50%;
+            --cursor-y: 50%;
+        }
+        
+        body {
+            background-color: #030305;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030305;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f1f2e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8a2be2;
+        }
+
+        /* Noise Overlay for Cinematic Feel */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Cursor Follower */
+        .cursor-glow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            transform: translate(calc(var(--cursor-x) - 300px), calc(var(--cursor-y) - 300px));
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.15) 0%, rgba(0, 240, 255, 0.05) 30%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+            mix-blend-mode: screen;
+            transition: transform 0.1s ease-out;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(calc(var(--cursor-x) - 4px), calc(var(--cursor-y) - 4px));
+            pointer-events: none;
+            z-index: 100;
+            mix-blend-mode: difference;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Holographic Hover Effect */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            background: linear-gradient(125deg, transparent 20%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            background-size: 200% 200%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 2;
+        }
         
-        body { 
-            background-color: var(--base-bg); color: var(--text-900); overflow-x: hidden;
+        .glass-card:hover::before {
+            opacity: 1;
+            animation: holo-shine 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes holo-shine {
+            0% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Typography Gradients */
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .text-gradient-neon {
+            background: linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Grid Background Pattern */
+        .bg-grid {
+            background-size: 40px 40px;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
-                radial-gradient(at 100% 10%, rgba(14, 165, 233, 0.08) 0px, transparent 50%);
-            background-attachment: fixed;
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
         }
 
-        /* ==========================================
-           2. FLOATING GLASS NAVBAR
-           ========================================== */
-        .glass-nav {
-            position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 1200px; padding: 14px 28px;
-            background: rgba(255, 255, 255, 0.75); backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--border-light); border-radius: 100px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.03);
-            transition: all 0.3s ease;
+        /* Magnetic Button Base */
+        .magnetic-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .magnetic-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(0,240,255,0.4) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+        .magnetic-btn:hover::after {
+            opacity: 1;
         }
 
-        .nav-brand { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; display: flex; align-items: center; gap: 8px; }
-        .nav-brand i { color: var(--accent-main); font-size: 1.8rem; }
+        /* Utility */
+        .clip-text { -webkit-background-clip: text; background-clip: text; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
         
-        .nav-links { display: flex; gap: 32px; list-style: none; }
-        .nav-links a { text-decoration: none; color: var(--text-500); font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
-        .nav-links a:hover { color: var(--text-900); }
-
-        .btn-primary {
-            background: var(--text-900); color: white; padding: 12px 28px;
-            border-radius: 50px; font-weight: 700; font-size: 0.95rem; border: none;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; align-items: center; gap: 8px;
+        /* 3D Tilt Wrapper */
+        .tilt-wrapper {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15); }
-
-        /* ==========================================
-           3. ASYMMETRIC HERO ENGINE
-           ========================================== */
-        .hero {
-            padding: 180px 5% 100px; max-width: 1300px; margin: 0 auto;
-            display: flex; align-items: center; gap: 60px; min-height: 95vh;
-        }
-
-        .hero-text { flex: 1.2; position: relative; z-index: 2; }
-        .security-badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
-            background: rgba(79, 70, 229, 0.08); border: 1px solid rgba(79, 70, 229, 0.2);
-            color: var(--accent-main); border-radius: 100px; font-size: 0.8rem;
-            font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px;
-        }
-
-        .hero-title { 
-            font-size: clamp(3.5rem, 6vw, 5.5rem); font-weight: 900; line-height: 1;
-            letter-spacing: -3px; margin-bottom: 24px; color: var(--text-900);
-        }
-
-        .hero-subtitle {
-            font-size: clamp(1.1rem, 2vw, 1.25rem); color: var(--text-500);
-            font-weight: 500; line-height: 1.6; max-width: 550px; margin-bottom: 40px;
-        }
-
-        .hero-visual {
-            flex: 0.8; height: 500px; background: var(--surface-card);
-            border-radius: 32px; border: 1px solid var(--border-light);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.04); position: relative;
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
-        }
-
-        /* The "Radar/Telemetry" Core Animation */
-        .radar-ring {
-            position: absolute; width: 300px; height: 300px; border-radius: 50%;
-            border: 1px dashed rgba(79, 70, 229, 0.2); animation: spin 20s linear infinite;
-        }
-        .radar-core {
-            width: 80px; height: 80px; background: var(--accent-main); border-radius: 50%;
-            box-shadow: 0 0 50px var(--accent-main); animation: pulse 3s ease-in-out infinite;
-        }
-        .visual-overlay-text {
-            position: absolute; bottom: 30px; left: 30px; font-size: 0.75rem;
-            font-weight: 800; color: var(--text-500); letter-spacing: 2px;
-        }
-
-        /* ==========================================
-           4. BENTO-BOX FEATURES (Apple/Stripe Style)
-           ========================================== */
-        .bento-section { padding: 100px 5%; max-width: 1300px; margin: 0 auto; }
-        .section-heading { font-size: 2.5rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 50px; }
-
-        .bento-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(2, 250px); gap: 24px;
-        }
-
-        .bento-card {
-            background: var(--surface-card); border-radius: 32px; padding: 32px;
-            border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .bento-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
-        
-        .span-2 { grid-column: span 2; }
-        .span-row-2 { grid-row: span 2; }
-
-        .bento-icon { width: 50px; height: 50px; background: #F1F5F9; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--text-900); margin-bottom: 20px; }
-        .bento-title { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
-        .bento-desc { color: var(--text-500); font-weight: 500; font-size: 0.95rem; line-height: 1.5; }
-
-        /* Custom Bento Graphics (CSS Only) */
-        .bento-graph { width: 100%; height: 100px; background: linear-gradient(90deg, #F1F5F9 0%, #E2E8F0 100%); border-radius: 12px; margin-top: auto; position: relative; overflow: hidden; }
-        .bento-graph::after { content: ''; position: absolute; bottom: 0; left: 0; width: 70%; height: 40%; background: var(--accent-main); border-top-right-radius: 12px; }
-
-        /* ==========================================
-           5. SECURE VAULT (BOTTOM SHEET LOGIN)
-           ========================================== */
-        .vault-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px); z-index: 9000;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-        }
-        .vault-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .vault-sheet {
-            position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 550px; background: var(--surface-card);
-            border-top-left-radius: 32px; border-top-right-radius: 32px;
-            padding: 40px; z-index: 9001; transition: bottom 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-            box-shadow: 0 -20px 50px rgba(0,0,0,0.1);
-        }
-        .vault-overlay.active .vault-sheet { bottom: 0; }
-
-        .sheet-pill { width: 48px; height: 6px; background: #E2E8F0; border-radius: 10px; margin: 0 auto 30px; }
-        
-        .vault-header { text-align: center; margin-bottom: 30px; }
-        .vault-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
-        
-        .vault-input {
-            width: 100%; padding: 18px 20px; border-radius: 16px; border: 1.5px solid #E2E8F0;
-            background: #F8FAFC; margin-bottom: 16px; font-size: 1rem; font-weight: 600;
-            transition: 0.3s; color: var(--text-900); outline: none;
-        }
-        .vault-input:focus { border-color: var(--accent-main); box-shadow: 0 0 0 4px var(--accent-glow); background: white; }
-
-        .btn-submit-vault {
-            width: 100%; padding: 18px; background: var(--text-900); color: white;
-            border-radius: 16px; font-size: 1.1rem; font-weight: 800; border: none;
-            cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px;
-        }
-        .btn-submit-vault:hover { background: var(--accent-main); }
-
-        .vault-footer { text-align: center; margin-top: 25px; font-size: 0.85rem; color: var(--text-500); font-weight: 600; }
-        .vault-footer span { color: var(--accent-main); cursor: pointer; }
-
-        /* ==========================================
-           ANIMATIONS & RESPONSIVE
-           ========================================== */
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 0 80px var(--accent-main); } }
-
-        .reveal { opacity: 0; transform: translateY(40px); transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-
-        @media (max-width: 900px) {
-            .hero { flex-direction: column; padding-top: 150px; text-align: center; }
-            .nav-links { display: none; }
-            .hero-visual { width: 100%; height: 350px; }
-            .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
-            .span-2, .span-row-2 { grid-column: span 1; grid-row: span 1; }
+        .tilt-element {
+            transform: translateZ(30px);
         }
     </style>
 </head>
-<body>
+<body class="antialiased font-sans selection:bg-neon-purple selection:text-white">
 
-    <nav class="glass-nav">
-        <div class="nav-brand"><i class="fas fa-fingerprint"></i> Vidyaplus</div>
-        <ul class="nav-links">
-            <li><a href="#features">Architecture</a></li>
-            <li><a href="explore.html">Batches</a></li>
-            <li><a href="#">Test Series</a></li>
-        </ul>
-        <button class="btn-primary" onclick="Vault.openMode('login')">
-            Access Portal <i class="fas fa-arrow-right"></i>
+    <!-- Global Elements -->
+    <div class="noise"></div>
+    <div class="cursor-glow"></div>
+    <div class="cursor-dot hidden md:block"></div>
+    
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container" class="fixed top-0 left-0 w-full h-full -z-10 opacity-60 mix-blend-screen"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-40 px-6 py-6 mix-blend-difference flex justify-between items-center">
+        <div class="font-display font-bold text-2xl tracking-tighter">EVOLVE<span class="text-neon-cyan">.</span>AI</div>
+        <button class="glass-card px-6 py-2 rounded-full font-mono text-sm tracking-wider hover:bg-white/10 transition-colors">
+            INITIATE_SEQUENCE
         </button>
     </nav>
 
-    <section class="hero">
-        <div class="hero-text reveal">
-            <div class="security-badge"><i class="fas fa-shield-check"></i> AES-256 Encrypted Infrastructure</div>
-            <h1 class="hero-title">Engineering the<br><span style="color: var(--accent-main);">Top 1%</span> Minds.</h1>
-            <p class="hero-subtitle">
-                Beyond traditional video lectures. We built an enterprise-grade academic engine that analyzes your test telemetry, tracks your behavioral patterns, and mathematically guarantees growth.
+    <!-- MAIN CONTENT -->
+    <main class="relative z-10">
+
+        <!-- 0. HERO SECTION -->
+        <section class="min-h-screen flex flex-col items-center justify-center relative px-4 text-center">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-deep pointer-events-none"></div>
+            
+            <div class="gsap-hero-element mb-6 inline-block">
+                <span class="glass-card px-4 py-1.5 rounded-full font-mono text-xs text-neon-cyan uppercase tracking-widest border border-neon-cyan/20">
+                    System Version 4.0 Online
+                </span>
+            </div>
+
+            <h1 class="gsap-hero-element font-display text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-[0.9] mb-6 mix-blend-lighten">
+                Don't Study Hard.<br>
+                <span class="text-gradient-neon inline-block mt-2">Evolve.</span>
+            </h1>
+
+            <p class="gsap-hero-element font-sans text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+                The era of rote learning is dead. Enter a symbiotic learning ecosystem powered by cognitive AI, real-time brain mapping, and adaptive neural-networks.
             </p>
-            <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: flex-start;">
-                <button class="btn-primary" style="padding: 16px 32px; font-size: 1.05rem;" onclick="window.location.href='explore.html'">Explore Batches</button>
-                <button class="btn-primary" style="background: white; color: var(--text-900); border: 1px solid var(--border-light);" onclick="Vault.openMode('register')">Create Free Account</button>
+
+            <div class="gsap-hero-element flex gap-4">
+                <button class="magnetic-btn bg-white text-black font-display font-bold px-8 py-4 rounded-full text-lg tracking-wide hover:scale-105 transition-transform duration-300">
+                    Start Neural Sync
+                </button>
+                <button class="glass-card font-display font-medium px-8 py-4 rounded-full text-lg tracking-wide flex items-center gap-2 hover:bg-white/5">
+                    <span class="w-2 h-2 rounded-full bg-neon-cyan animate-pulse"></span>
+                    View Architecture
+                </button>
             </div>
-        </div>
+            
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 gsap-hero-element">
+                <span class="font-mono text-xs tracking-[0.2em]">SCROLL TO UPLOAD</span>
+                <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+            </div>
+        </section>
 
-        <div class="hero-visual reveal" style="transition-delay: 0.2s;">
-            <div class="radar-ring"></div>
-            <div class="radar-ring" style="width: 200px; height: 200px; animation-direction: reverse;"></div>
-            <div class="radar-core"></div>
-            <div class="visual-overlay-text">LIVE TELEMETRY SYNC</div>
-        </div>
-    </section>
-
-    <section class="bento-section" id="features">
-        <h2 class="section-heading reveal">The Infrastructure.</h2>
-        
-        <div class="bento-grid">
-            <div class="bento-card span-2 reveal">
-                <div>
-                    <div class="bento-icon"><i class="fas fa-microscope"></i></div>
-                    <h3 class="bento-title">X-Ray Telemetry</h3>
-                    <p class="bento-desc">Our assessment engine tracks time-spent per option, mind-changes, and cursor movements to build your behavioral profile.</p>
+        <!-- 1. FUTURE VISION SECTION -->
+        <section class="py-32 relative bg-grid">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="gsap-fade-up max-w-4xl">
+                    <h2 class="font-mono text-neon-purple text-sm tracking-widest mb-4">>> PARADIGM_SHIFT</h2>
+                    <p class="font-display text-4xl md:text-6xl font-medium leading-tight text-gradient">
+                        Education was designed for factories. We redesigned it for the human cortex.
+                    </p>
+                    <p class="mt-8 text-xl text-gray-400 font-light max-w-2xl">
+                        A dynamic intelligence that learns how you learn. It anticipates your confusion, isolates your weaknesses, and rebuilds your neural pathways for absolute mastery.
+                    </p>
                 </div>
-                <div class="bento-graph"></div>
             </div>
+        </section>
 
-            <div class="bento-card span-row-2 reveal" style="background: var(--text-900); color: white;">
-                <div>
-                    <div class="bento-icon" style="background: rgba(255,255,255,0.1); color: white;"><i class="fas fa-lock"></i></div>
-                    <h3 class="bento-title" style="color: white;">Bank-Level Security</h3>
-                    <p class="bento-desc" style="color: #94A3B8;">JWT Authentication, Subcollection isolation, and real-time tab-focus monitoring. Zero cheating tolerance.</p>
+        <!-- 5. PSYCHOLOGY / WHY HUMANS FAIL (Moved up for narrative flow) -->
+        <section class="py-32 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#1a0000] to-deep opacity-50"></div>
+            <div class="max-w-7xl mx-auto px-6 relative z-10">
+                <div class="text-center mb-20 gsap-fade-up">
+                    <h2 class="font-display text-5xl md:text-7xl font-bold tracking-tighter text-red-500/90 mb-6">
+                        Why Humans Fail to Learn.
+                    </h2>
+                    <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                        Dopamine overload. Fragmented attention. Outdated curricula. The modern brain is fighting a losing battle against its own environment.
+                    </p>
                 </div>
-                <i class="fas fa-shield-alt" style="font-size: 8rem; color: rgba(255,255,255,0.05); position: absolute; bottom: -20px; right: -20px;"></i>
-            </div>
 
-            <div class="bento-card reveal">
-                <div class="bento-icon" style="color: #10B981;"><i class="fas fa-satellite-dish"></i></div>
-                <h3 class="bento-title">Zero-Lag Live</h3>
-                <p class="bento-desc">Ultra-low latency streaming optimized for Indian networks.</p>
-            </div>
-
-            <div class="bento-card reveal">
-                <div class="bento-icon" style="color: #F59E0B;"><i class="fas fa-brain"></i></div>
-                <h3 class="bento-title">AI Guru</h3>
-                <p class="bento-desc">24/7 Socratic doubt solving engine built into your portal.</p>
-            </div>
-
-            <div class="bento-card span-2 reveal">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 class="bento-title">Ready to deploy?</h3>
-                        <p class="bento-desc">Join the smartest batch of 2026.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Card 1 -->
+                    <div class="glass-card p-8 rounded-2xl border-red-500/20 tilt-wrapper gsap-fade-up relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-red-500/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                        <div class="font-mono text-red-400 mb-4 tilt-element">01 // DISTRACTION</div>
+                        <h3 class="font-display text-2xl font-bold mb-4 tilt-element text-white">Attention Fragmentation</h3>
+                        <p class="text-gray-400 text-sm tilt-element">The average focus span has collapsed to 47 seconds. Traditional studying demands 60 minutes. The math doesn't work.</p>
                     </div>
-                    <button class="btn-primary" onclick="window.location.href='explore.html'">View Catalog <i class="fas fa-arrow-right"></i></button>
+                    <!-- Card 2 -->
+                    <div class="glass-card p-8 rounded-2xl border-red-500/20 tilt-wrapper gsap-fade-up delay-100 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-red-500/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                        <div class="font-mono text-red-400 mb-4 tilt-element">02 // INEFFICIENCY</div>
+                        <h3 class="font-display text-2xl font-bold mb-4 tilt-element text-white">The Rote Trap</h3>
+                        <p class="text-gray-400 text-sm tilt-element">Reading static text builds weak synaptic links. You are storing data in short-term cache, destined for deletion.</p>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="glass-card p-8 rounded-2xl border-red-500/20 tilt-wrapper gsap-fade-up delay-200 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-red-500/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                        <div class="font-mono text-red-400 mb-4 tilt-element">03 // BLIND SPOTS</div>
+                        <h3 class="font-display text-2xl font-bold mb-4 tilt-element text-white">Illusion of Competence</h3>
+                        <p class="text-gray-400 text-sm tilt-element">You re-read what you already know. True growth requires attacking the unknown. Humans instinctively avoid this friction.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <div class="vault-overlay" id="vault-overlay">
-        <div class="vault-sheet" id="vault-sheet">
-            <div class="sheet-pill"></div>
-            
-            <div class="vault-header">
-                <h2 class="vault-title" id="vault-title">Access Portal</h2>
-                <p style="color: var(--text-500); font-weight: 500;" id="vault-subtitle">Establish secure connection to your dashboard.</p>
-                <div id="vault-error" style="color: #EF4444; font-size: 0.9rem; font-weight: 600; margin-top: 10px; display: none;"></div>
+        <!-- 2. AI LEARNING ENGINE SECTION -->
+        <section class="py-32 relative">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gsap-fade-up">
+                    <div>
+                        <h2 class="font-mono text-neon-cyan text-sm tracking-widest mb-4">>> THE_ANTIDOTE</h2>
+                        <h3 class="font-display text-4xl md:text-6xl font-bold tracking-tighter">The Cognitive Engine.</h3>
+                    </div>
+                    <p class="text-gray-400 max-w-sm text-sm mt-6 md:mt-0">Holographic neural interfaces designed to hack your learning curve.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Engine Card -->
+                    <div class="glass-card rounded-3xl p-8 tilt-wrapper h-80 flex flex-col justify-end gsap-fade-up group cursor-none">
+                        <div class="w-12 h-12 rounded-full border border-neon-cyan/50 mb-auto flex items-center justify-center tilt-element">
+                            <div class="w-2 h-2 bg-neon-cyan rounded-full group-hover:animate-ping"></div>
+                        </div>
+                        <h4 class="font-display text-2xl font-semibold mb-2 tilt-element text-white">Adaptive AI Mentor</h4>
+                        <p class="text-sm text-gray-400 tilt-element">Real-time recalibration of content difficulty based on your biometric cognitive load.</p>
+                    </div>
+                    <!-- Engine Card -->
+                    <div class="glass-card rounded-3xl p-8 tilt-wrapper h-80 flex flex-col justify-end gsap-fade-up delay-100 group cursor-none">
+                        <div class="w-12 h-12 rounded-full border border-neon-purple/50 mb-auto flex items-center justify-center tilt-element">
+                            <div class="w-4 h-4 border border-neon-purple rounded-sm transform rotate-45 group-hover:rotate-90 transition-transform"></div>
+                        </div>
+                        <h4 class="font-display text-2xl font-semibold mb-2 tilt-element text-white">Hyper-Focus Tracking</h4>
+                        <p class="text-sm text-gray-400 tilt-element">Detects micro-distractions and instantly pivots format to re-engage dopamine receptors.</p>
+                    </div>
+                    <!-- Engine Card -->
+                    <div class="glass-card rounded-3xl p-8 tilt-wrapper h-80 flex flex-col justify-end gsap-fade-up delay-200 group lg:col-span-1 md:col-span-2 cursor-none">
+                        <div class="w-full h-24 bg-gradient-to-t from-neon-cyan/20 to-transparent mb-auto rounded-lg tilt-element flex items-end p-2 gap-1">
+                            <!-- Fake bar chart -->
+                            <div class="w-full bg-neon-cyan/40 rounded-t-sm h-[20%] group-hover:h-[60%] transition-all duration-500"></div>
+                            <div class="w-full bg-neon-cyan/60 rounded-t-sm h-[40%] group-hover:h-[80%] transition-all duration-500 delay-75"></div>
+                            <div class="w-full bg-neon-cyan rounded-t-sm h-[70%] group-hover:h-[100%] transition-all duration-500 delay-150"></div>
+                        </div>
+                        <h4 class="font-display text-2xl font-semibold mb-2 tilt-element text-white">Deep Analytics</h4>
+                        <p class="text-sm text-gray-400 tilt-element">Predictive modeling forecasts your exam scores with 98.4% accuracy based on neural node completion.</p>
+                    </div>
+                </div>
             </div>
-            
-            <form id="vault-form">
-                <input type="text" id="v-name" class="vault-input" placeholder="Legal Name (For Certificates)" style="display: none;">
-                
-                <input type="email" id="v-email" class="vault-input" placeholder="Encrypted Email Address" required>
-                <input type="password" id="v-password" class="vault-input" placeholder="Master Password" required>
-                
-                <button type="submit" class="btn-submit-vault" id="v-submit-btn">Authenticate <i class="fas fa-fingerprint"></i></button>
-            </form>
-            
-            <div class="vault-footer" id="vault-switch">
-                No active clearance? <span onclick="Vault.openMode('register')">Request Access</span>
+        </section>
+
+        <!-- 3. IMMERSIVE STATS SECTION -->
+        <section class="py-24 border-y border-white/5 bg-white/[0.01] backdrop-blur-sm">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+                    <div class="gsap-stat">
+                        <div class="font-display text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-2">
+                            <span class="counter" data-target="400">0</span>+
+                        </div>
+                        <div class="font-mono text-xs text-neon-cyan tracking-widest">HOURS SAVED / YR</div>
+                    </div>
+                    <div class="gsap-stat">
+                        <div class="font-display text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-2">
+                            <span class="counter" data-target="2.5">0</span>M
+                        </div>
+                        <div class="font-mono text-xs text-neon-purple tracking-widest">AI DECISIONS / SEC</div>
+                    </div>
+                    <div class="gsap-stat">
+                        <div class="font-display text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-2">
+                            <span class="counter" data-target="312">0</span>%
+                        </div>
+                        <div class="font-mono text-xs text-neon-cyan tracking-widest">GROWTH DELTA</div>
+                    </div>
+                    <div class="gsap-stat">
+                        <div class="font-display text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-2">
+                            <span class="counter" data-target="4">0</span>x
+                        </div>
+                        <div class="font-mono text-xs text-neon-purple tracking-widest">RETENTION SPEED</div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <script type="module">
-        import { auth } from './js/firebase-init.js';
-        import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // 🛡️ ADVANCED UI STATE PROXY
-        window.UIState = new Proxy({ isOpen: false, mode: 'login' }, {
-            set(target, prop, value) {
-                target[prop] = value;
+        <!-- 4. INTERACTIVE TIMELINE -->
+        <section class="py-32 relative">
+            <div class="max-w-3xl mx-auto px-6">
+                <h2 class="font-display text-4xl font-bold text-center mb-20">The Evolution of Intelligence</h2>
                 
-                if (prop === 'isOpen') {
-                    const overlay = document.getElementById('vault-overlay');
-                    value ? overlay.classList.add('active') : overlay.classList.remove('active');
-                    document.body.style.overflow = value ? 'hidden' : 'auto';
-                }
-                
-                if (prop === 'mode') {
-                    const isReg = value === 'register';
-                    document.getElementById('vault-title').innerText = isReg ? "Initialize Account" : "Access Portal";
-                    document.getElementById('vault-subtitle').innerText = isReg ? "Create your secure academic identity." : "Establish secure connection to your dashboard.";
-                    document.getElementById('v-name').style.display = isReg ? "block" : "none";
-                    if(isReg) document.getElementById('v-name').setAttribute('required', 'true');
-                    else document.getElementById('v-name').removeAttribute('required');
+                <div class="relative border-l border-white/10 pl-8 ml-4 md:ml-0 md:pl-0 md:border-none space-y-16">
+                    <!-- Line for desktop -->
+                    <div class="hidden md:block absolute top-0 bottom-0 left-1/2 w-px bg-white/10 -translate-x-1/2"></div>
                     
-                    document.getElementById('v-submit-btn').innerHTML = isReg ? 'Generate Identity <i class="fas fa-plus-circle"></i>' : 'Authenticate <i class="fas fa-fingerprint"></i>';
-                    document.getElementById('vault-switch').innerHTML = isReg ? 'Already cleared? <span onclick="Vault.openMode(\'login\')">Authenticate Here</span>' : 'No active clearance? <span onclick="Vault.openMode(\'register\')">Request Access</span>';
-                    document.getElementById('vault-error').style.display = 'none';
-                }
-                return true;
+                    <!-- Node 1 -->
+                    <div class="relative md:w-1/2 md:pr-16 text-left gsap-timeline-node">
+                        <div class="absolute left-[-37px] md:left-auto md:right-[-4px] top-1 w-2 h-2 bg-gray-600 rounded-full shadow-[0_0_10px_gray]"></div>
+                        <h4 class="font-mono text-gray-500 text-xs mb-2">ERA 1.0</h4>
+                        <h3 class="font-display text-xl font-bold text-gray-400 mb-2">The Chalkboard Age</h3>
+                        <p class="text-sm text-gray-600">Standardized testing. One teacher to fifty minds. Survival of the compliant.</p>
+                    </div>
+
+                    <!-- Node 2 -->
+                    <div class="relative md:w-1/2 md:ml-auto md:pl-16 text-left gsap-timeline-node">
+                        <div class="absolute left-[-37px] md:left-[-4px] top-1 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_10px_blue]"></div>
+                        <h4 class="font-mono text-blue-400 text-xs mb-2">ERA 2.0</h4>
+                        <h3 class="font-display text-xl font-bold text-blue-200 mb-2">The Coaching Industrial Complex</h3>
+                        <p class="text-sm text-gray-400">Mass-produced content. Digitized whiteboards. Selling anxiety instead of intellect.</p>
+                    </div>
+
+                    <!-- Node 3 -->
+                    <div class="relative md:w-1/2 md:pr-16 text-left gsap-timeline-node">
+                        <div class="absolute left-[-37px] md:left-auto md:right-[-5px] top-1 w-3 h-3 bg-neon-purple rounded-full shadow-[0_0_20px_#8a2be2] animate-pulse"></div>
+                        <h4 class="font-mono text-neon-purple text-xs mb-2">ERA 3.0 // YOU ARE HERE</h4>
+                        <h3 class="font-display text-2xl font-bold text-white mb-2">Cognitive Symbiosis</h3>
+                        <p class="text-sm text-gray-300">Personalized algorithmic pathways. AI predicting fail-states before they happen. Deep neural immersion.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. NEXT-GEN FEATURES GRID -->
+        <section class="py-32 relative bg-grid">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-16 gsap-fade-up">
+                    <h2 class="font-display text-5xl font-bold mb-4">Architecture of Genius</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[200px]">
+                    <!-- Bento Box Items -->
+                    <div class="glass-card md:col-span-2 md:row-span-2 rounded-3xl p-8 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-neon-purple/20 rounded-full blur-[80px] group-hover:bg-neon-purple/40 transition-colors"></div>
+                        <h3 class="font-display text-2xl font-bold mb-4 relative z-10 text-white">Dynamic Heatmaps</h3>
+                        <p class="text-gray-400 relative z-10 max-w-sm">A topographic map of your brain's knowledge. Red zones indicate unstable neural links. Blue indicates mastery.</p>
+                        <!-- Abstract Visual -->
+                        <div class="absolute bottom-[-10%] right-[-10%] w-[120%] h-1/2 opacity-30">
+                            <svg viewBox="0 0 100 50" preserveAspectRatio="none" class="w-full h-full stroke-neon-cyan stroke-[0.5] fill-transparent">
+                                <path d="M0,25 Q10,5 20,25 T40,25 T60,25 T80,25 T100,25" class="animate-[pulse_4s_infinite]" />
+                                <path d="M0,30 Q15,40 30,30 T60,30 T90,30 T100,30" class="stroke-neon-purple animate-[pulse_3s_infinite_reverse]" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-6 flex flex-col justify-between group hover:bg-white/5">
+                        <div class="font-mono text-xs text-neon-cyan">SYS.1 // SMART REVISION</div>
+                        <div class="font-display text-lg font-bold text-white">Spaced Repetition Algorithm</div>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-6 flex flex-col justify-between group hover:bg-white/5">
+                        <div class="font-mono text-xs text-neon-cyan">SYS.2 // FOCUS</div>
+                        <div class="font-display text-lg font-bold text-white">Biometric Sync Mode</div>
+                    </div>
+
+                    <div class="glass-card md:col-span-2 rounded-3xl p-8 flex items-center justify-between group overflow-hidden relative">
+                        <div class="relative z-10">
+                            <div class="font-mono text-xs text-neon-purple mb-2">SYS.3 // ROADMAP</div>
+                            <div class="font-display text-2xl font-bold text-white">Auto-Generated Neural Paths</div>
+                        </div>
+                        <div class="w-24 h-24 rounded-full border border-dashed border-white/20 animate-[spin_10s_linear_infinite] relative z-10 flex items-center justify-center">
+                            <div class="w-16 h-16 border border-neon-purple/50 rounded-full animate-[spin_5s_linear_infinite_reverse]"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. TESTIMONIALS (Transmissions) -->
+        <section class="py-32 relative">
+            <div class="max-w-5xl mx-auto px-6">
+                <div class="mb-16">
+                    <h2 class="font-mono text-sm tracking-widest text-gray-500">>> INTERCEPTED_COMMUNICATIONS</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Log 1 -->
+                    <div class="glass-card p-6 rounded-xl border-l-4 border-l-neon-cyan gsap-fade-up">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></div>
+                            <span class="font-mono text-xs text-neon-cyan">LOG_ID: #8492 // MEDICAL_ASPIRANT_01</span>
+                            <span class="font-mono text-[10px] text-gray-600 ml-auto hidden md:inline">ENCRYPTED</span>
+                        </div>
+                        <p class="font-mono text-sm md:text-base text-gray-300 leading-relaxed mb-4">
+                            "Initial scans showed severe latency in Organic Chemistry nodes. The AI bypassed traditional reading, forced active-recall loops. Mastery achieved in 1/4th standard human time. System highly effective."
+                        </p>
+                    </div>
+
+                    <!-- Log 2 -->
+                    <div class="glass-card p-6 rounded-xl border-l-4 border-l-neon-purple gsap-fade-up ml-0 md:ml-12">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-2 h-2 bg-neon-purple rounded-full animate-pulse"></div>
+                            <span class="font-mono text-xs text-neon-purple">LOG_ID: #4411 // ENGINEERING_ASPIRANT_04</span>
+                        </div>
+                        <p class="font-mono text-sm md:text-base text-gray-300 leading-relaxed mb-4">
+                            "The predictive model warned me of a focus-drop 12 minutes before I felt it. Shifted UI to dark-mode syntax. Retained state of flow for 4 straight hours. Yeh India ka normal ed-tech nahi hai."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. FINAL CTA -->
+        <section class="py-40 relative flex flex-col items-center justify-center text-center px-4">
+            <!-- Background Glow -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-64 bg-neon-purple/20 blur-[100px] rounded-full pointer-events-none"></div>
+
+            <h2 class="gsap-cta font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-8 z-10 text-white">
+                The next toppers <br>
+                won't study <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">more</span>.
+            </h2>
+            <h2 class="gsap-cta font-display text-4xl md:text-6xl font-bold tracking-tighter mb-12 z-10 text-gradient-neon">
+                They'll study differently.
+            </h2>
+
+            <button class="gsap-cta magnetic-btn group relative px-12 py-5 rounded-full bg-white text-black font-display font-bold text-xl tracking-wide overflow-hidden z-10 hover:scale-105 transition-transform duration-300">
+                <span class="relative z-10 group-hover:text-white transition-colors duration-300">Join the Evolution</span>
+                <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+            </button>
+            <p class="gsap-cta mt-6 font-mono text-xs text-gray-500 tracking-widest z-10">ONLY 500 NEURAL SLOTS REMAINING IN BETA</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="border-t border-white/5 py-8 text-center relative z-10 bg-deep">
+            <div class="font-mono text-xs text-gray-600">
+                EVOLVE.AI © 2026 // SYSTEM ARCHITECTURE BY NEXT-GEN INDIA
+            </div>
+        </footer>
+
+    </main>
+    <!-- Scripts -->
+    <script>
+        // ----------------------------------------------------
+        // 1. CUSTOM CURSOR & MAGNETIC EFFECT
+        // ----------------------------------------------------
+        const cursorGlow = document.querySelector('.cursor-glow');
+        const cursorDot = document.querySelector('.cursor-dot');
+        const magneticBtns = document.querySelectorAll('.magnetic-btn');
+
+        document.addEventListener('mousemove', (e) => {
+            // Update CSS variables for raw performance
+            document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
+            document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
+        });
+
+        // ----------------------------------------------------
+        // 2. THREE.JS BACKGROUND
+        // ----------------------------------------------------
+        const canvasContainer = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        // Add subtle fog
+        scene.fog = new THREE.FogExp2(0x030305, 0.001);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        canvasContainer.appendChild(renderer.domElement);
+
+        // Particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 1500;
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorsArray = new Float32Array(particlesCount * 3);
+
+        const color1 = new THREE.Color('#00f0ff');
+        const color2 = new THREE.Color('#8a2be2');
+
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            // Spread particles over a large volume
+            posArray[i] = (Math.random() - 0.5) * 2000;
+            posArray[i+1] = (Math.random() - 0.5) * 2000;
+            posArray[i+2] = (Math.random() - 0.5) * 2000;
+
+            // Mix colors
+            const mixedColor = color1.clone().lerp(color2, Math.random());
+            colorsArray[i] = mixedColor.r;
+            colorsArray[i+1] = mixedColor.g;
+            colorsArray[i+2] = mixedColor.b;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+        // Create texture for glowing particles
+        const canvas = document.createElement('canvas');
+        canvas.width = 16; canvas.height = 16;
+        const context = canvas.getContext('2d');
+        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
+        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        context.fillStyle = gradient;
+        context.fillRect(0,0,16,16);
+        const texture = new THREE.CanvasTexture(canvas);
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 4,
+            map: texture,
+            transparent: true,
+            opacity: 0.8,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 800;
+
+        // Mouse interaction for Three.js
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX);
+            mouseY = (event.clientY - windowHalfY);
+        });
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            targetX = mouseX * 0.001;
+            targetY = mouseY * 0.001;
+
+            particlesMesh.rotation.y += 0.0005;
+            particlesMesh.rotation.x += 0.0002;
+
+            // Subtle interaction
+            particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
+            particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
+
+            // Move particles slowly towards camera
+            const positions = particlesMesh.geometry.attributes.position.array;
+            for(let i = 2; i < particlesCount * 3; i+=3) {
+                positions[i] += 0.5;
+                if(positions[i] > 1000) positions[i] = -1000;
             }
+            particlesMesh.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Expose to global scope for HTML inline calls
-        window.Vault = {
-            openMode: (mode) => { UIState.mode = mode; UIState.isOpen = true; },
-            close: () => UIState.isOpen = false
-        };
 
-        // Close on outside click
-        document.getElementById('vault-overlay').addEventListener('click', (e) => {
-            if(e.target.id === 'vault-overlay') Vault.close();
+        // ----------------------------------------------------
+        // 3. GSAP ANIMATIONS & SCROLLTRIGGERS
+        // ----------------------------------------------------
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Entrance
+        gsap.from(".gsap-hero-element", {
+            y: 50,
+            opacity: 0,
+            duration: 1.2,
+            stagger: 0.15,
+            ease: "power4.out",
+            delay: 0.2
         });
 
-        // 🌊 WORLD-CLASS SCROLL REVEAL (Intersection Observer)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target); // Reveal only once for performance
-                }
+        // Universal Fade Up for sections
+        gsap.utils.toArray(".gsap-fade-up").forEach(element => {
+            gsap.from(element, {
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 60,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out"
             });
-        }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        // 🔐 VAULT AUTHENTICATION ENGINE
-        document.getElementById('vault-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('v-submit-btn');
-            const errDiv = document.getElementById('vault-error');
-            const originalText = btn.innerHTML;
-            
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
-            errDiv.style.display = 'none';
-            
-            const email = document.getElementById('v-email').value;
-            const password = document.getElementById('v-password').value;
-            const name = document.getElementById('v-name').value;
-
-            try {
-                if (UIState.mode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    const userCreds = await createUserWithEmailAndPassword(auth, email, password);
-                    // Name update in Firebase Auth
-                    await updateProfile(userCreds.user, { displayName: name });
-                }
-                // Redirect immediately after successful auth
-                window.location.replace("explore.html");
-            } catch (error) {
-                btn.innerHTML = originalText;
-                errDiv.innerText = error.message.replace("Firebase: ", ""); // Clean error
-                errDiv.style.display = 'block';
-            }
         });
+
+        // Timeline Nodes
+        gsap.utils.toArray(".gsap-timeline-node").forEach((node, i) => {
+            gsap.from(node, {
+                scrollTrigger: {
+                    trigger: node,
+                    start: "top 80%"
+                },
+                x: i % 2 === 0 ? -50 : 50,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+        });
+
+        // Stats Counter Animation
+        gsap.utils.toArray(".gsap-stat").forEach(stat => {
+            let targetEl = stat.querySelector('.counter');
+            let endValue = parseFloat(targetEl.getAttribute('data-target'));
+            let isDecimal = endValue % 1 !== 0;
+
+            ScrollTrigger.create({
+                trigger: stat,
+                start: "top 90%",
+                onEnter: () => {
+                    gsap.to(targetEl, {
+                        innerHTML: endValue,
+                        duration: 2,
+                        ease: "power2.out",
+                        snap: { innerHTML: isDecimal ? 0.1 : 1 },
+                        onUpdate: function() {
+                            if (isDecimal) {
+                                targetEl.innerHTML = Number(this.targets()[0].innerHTML).toFixed(1);
+                            } else {
+                                targetEl.innerHTML = Math.round(this.targets()[0].innerHTML);
+                            }
+                        }
+                    });
+                },
+                once: true
+            });
+        });
+
+        // Final CTA Entrance
+        gsap.from(".gsap-cta", {
+            scrollTrigger: {
+                trigger: ".gsap-cta",
+                start: "top 80%"
+            },
+            y: 40,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power4.out"
+        });
+
+
+        // ----------------------------------------------------
+        // 4. 3D CARD TILT EFFECT (Vanilla JS)
+        // ----------------------------------------------------
+        const tiltWrappers = document.querySelectorAll('.tilt-wrapper');
+        
+        tiltWrappers.forEach(wrapper => {
+            wrapper.addEventListener('mousemove', (e) => {
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left; // x position within the element
+                const y = e.clientY - rect.top;  // y position within the element
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // Calculate rotation (max 15 degrees)
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+                
+                wrapper.style.transform = `perspective(1000px) scale3d(1.02, 1.02, 1.02) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            
+            wrapper.addEventListener('mouseleave', () => {
+                wrapper.style.transform = `perspective(1000px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg)`;
+            });
+        });
+
     </script>
 </body>
 </html>
