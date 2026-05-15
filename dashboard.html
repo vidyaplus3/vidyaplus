@@ -166,7 +166,8 @@
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // 🚨 NAYA IMPORT: collection aur getDocs add kar diya gaya hai
+        import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const myBatchGrid = document.getElementById('myBatchGrid');
 
@@ -185,26 +186,18 @@
             }
         });
 
-        // Function to fetch and display enrolled batches
+        // 🚨 UPDATED FUNCTION: Fetch from Subcollections
         async function fetchMyBatches(uid) {
             try {
-                // 1. Get user document to find which batches they bought/enrolled in
-                const userRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userRef);
+                const enrollmentsRef = collection(db, "users", uid, "enrollments");
+                const enrollmentsSnap = await getDocs(enrollmentsRef);
 
                 myBatchGrid.innerHTML = ''; // Clear loader
 
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    const enrolledBatchesArray = userData.enrolledBatches || [];
-
-                    if (enrolledBatchesArray.length === 0) {
-                        showEmptyState();
-                        return;
-                    }
-
-                    // 2. If they have batches, loop through array and fetch batch details
-                    enrolledBatchesArray.forEach(async (batchId) => {
+                if (!enrollmentsSnap.empty) {
+                    enrollmentsSnap.forEach(async (docSnap) => {
+                        const batchId = docSnap.id; // Yeh batch ka ID hai
+                        
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
                         
@@ -212,14 +205,13 @@
                             renderBatchCard(batchId, batchSnap.data());
                         }
                     });
-
                 } else {
                     showEmptyState(); // Document doesn't exist yet (never enrolled)
                 }
 
             } catch (error) {
                 console.error("Error fetching enrolled batches:", error);
-                myBatchGrid.innerHTML = '<p style="color:red; text-align:center;">Failed to load data.</p>';
+                myBatchGrid.innerHTML = '<p style="color:red; text-align:center;">Failed to load data. Access Denied.</p>';
             }
         }
 
@@ -253,11 +245,13 @@
             `;
             myBatchGrid.appendChild(card);
         }
-                // REAL function for "Start Learning" button
+        
+        // REAL function for "Start Learning" button
         window.startStudying = function(batchId) {
             // Ye code bache ko seedha Classroom me bhej dega
             window.location.href = "study.html?batch=" + batchId;
         };
+        
         // Logout Button Logic
         document.getElementById('logout-action').addEventListener('click', () => {
             signOut(auth).then(() => {
