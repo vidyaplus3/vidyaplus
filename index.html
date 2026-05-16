@@ -106,9 +106,9 @@
             </nav>
 
             <div class="flex gap-2 sm:gap-3 items-center">
-                <div id="userState" class="hidden flex items-center gap-3">
+                <div id="userState" class="hidden flex items-center gap-3 cursor-pointer" onclick="window.location.href='explore.html'" title="Go to Dashboard">
                     <span id="userName" class="text-sm font-semibold text-brand hidden sm:block"></span>
-                    <div id="userIcon" class="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-bold text-sm shadow-sm cursor-pointer hover:opacity-90 transition"></div>
+                    <div id="userIcon" class="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-bold text-sm shadow-sm hover:opacity-90 transition"></div>
                 </div>
                 <div id="guestState" class="flex gap-2">
                     <button onclick="openAuth('login')" class="text-sm font-semibold text-gray-600 hover:text-brand transition px-3 sm:px-4 py-2">Log In</button>
@@ -199,6 +199,7 @@
                 </div>
             </div>
         </section>
+        
         <section class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 md:py-16">
             <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-brand mb-8 md:mb-10 reveal-hidden">Academic Cohorts</h2>
             
@@ -252,7 +253,6 @@
             </div>
         </div>
     </footer>
-
     <div id="authModalOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="absolute inset-0 bg-brand/40 backdrop-blur-sm" onclick="closeAuth()"></div>
         
@@ -387,20 +387,33 @@
             }
         }
     </script>
+    
     <script type="module">
         import { auth } from './firebase-init.js';
-        import { initAuth } from './auth.js';
-        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        initAuth((batches) => {
-            document.getElementById('guestState').classList.add('hidden');
-            document.getElementById('userState').classList.remove('hidden');
-            // Assuming name comes from auth.js logic, else fallback
-            document.getElementById('userName').innerText = auth.currentUser?.displayName || 'User';
-            document.getElementById('userIcon').innerText = (auth.currentUser?.displayName || 'U').charAt(0).toUpperCase();
-            closeAuth();
+        // Check user session dynamically without forced redirection
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Hide Guest UI, Show User UI
+                document.getElementById('guestState').classList.add('hidden');
+                document.getElementById('userState').classList.remove('hidden');
+                
+                // Format and display user name/icon
+                const displayName = user.displayName || user.email.split('@')[0];
+                document.getElementById('userName').innerText = displayName;
+                document.getElementById('userIcon').innerText = displayName.charAt(0).toUpperCase();
+                
+                // Automatically close auth modal if it was open
+                closeAuth();
+            } else {
+                // Show Guest UI
+                document.getElementById('guestState').classList.remove('hidden');
+                document.getElementById('userState').classList.add('hidden');
+            }
         });
 
+        // Email / Password Authentication
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -417,21 +430,27 @@
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
+                // Redirect immediately to explore page on success
+                window.location.replace("explore.html");
             } catch (error) {
                 console.error("Auth System Error:", error.message);
-                alert("Authorization failed. Verify credentials.");
+                alert(error.message.replace("Firebase: ", ""));
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         });
 
+        // Google Authentication
         document.getElementById('googleBtn').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
+                // Redirect immediately to explore page on success
+                window.location.replace("explore.html");
             } catch (error) {
                 console.error("External Auth Error:", error);
+                alert("Google authentication failed. Please try again.");
             }
         });
     </script>
