@@ -388,14 +388,12 @@
         }
     </script>
     
-            <script type="module">
+                <script type="module">
         import { auth } from './js/firebase-init.js';
         import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // 1. UI Update on Auth State (BINA REDIRECT KE)
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User logged in hai, bas Navbar me uski profile dikhao, redirect mat karo!
                 document.getElementById('guestState').classList.add('hidden');
                 document.getElementById('userState').classList.remove('hidden');
                 
@@ -403,13 +401,11 @@
                 document.getElementById('userName').innerText = displayName;
                 document.getElementById('userIcon').innerText = displayName.charAt(0).toUpperCase();
             } else {
-                // Guest user hai
                 document.getElementById('guestState').classList.remove('hidden');
                 document.getElementById('userState').classList.add('hidden');
             }
         });
 
-        // 2. Success Animation & Redirect (Ye sirf Login popup complete hone par chalega)
         function triggerSuccessAndRedirect() {
             const successOverlay = document.getElementById('authModalOverlay').querySelector('#auth-success-overlay');
             if(successOverlay) {
@@ -420,7 +416,6 @@
             }, 1500);
         }
 
-        // 3. Email/Password Submit Logic
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -431,15 +426,13 @@
             btn.innerText = "Processing Request...";
             btn.disabled = true;
 
-            const isLoginMode = btn.innerText.includes("Authorize");
-
+            // 🚨 THE FIX: Direct global variable check
             try {
-                if (isLoginMode) {
+                if (currentAuthMode === 'login') {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
-                // Naya login hua hai, ab redirect maaro
                 triggerSuccessAndRedirect();
             } catch (error) {
                 console.error("Auth System Error:", error.message);
@@ -449,18 +442,16 @@
             }
         });
 
-        // 4. Google Authentication Logic
         document.getElementById('googleBtn').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
-                // Naya Google login hua hai, ab redirect maaro
                 triggerSuccessAndRedirect();
             } catch (error) {
                 console.error("External Auth Error:", error);
                 alert("Google authentication failed. Please try again.");
             }
         });
-            </script>
+                </script>
 </body>
 </html>
