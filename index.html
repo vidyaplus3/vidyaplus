@@ -388,32 +388,36 @@
         }
     </script>
     
-    <script type="module">
-        import { auth } from './firebase-init.js';
+        <script type="module">
+        // 1. Path fix kar diya: ab ye 'js' folder se auth fetch karega
+        import { auth } from './js/firebase-init.js';
         import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Check user session dynamically without forced redirection
+        // 2. Auto-Redirect Logic: Agar user pehle se login hai, toh direct explore page par bhej do
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Hide Guest UI, Show User UI
-                document.getElementById('guestState').classList.add('hidden');
-                document.getElementById('userState').classList.remove('hidden');
-                
-                // Format and display user name/icon
-                const displayName = user.displayName || user.email.split('@')[0];
-                document.getElementById('userName').innerText = displayName;
-                document.getElementById('userIcon').innerText = displayName.charAt(0).toUpperCase();
-                
-                // Automatically close auth modal if it was open
-                closeAuth();
+                window.location.replace("explore.html");
             } else {
-                // Show Guest UI
                 document.getElementById('guestState').classList.remove('hidden');
                 document.getElementById('userState').classList.add('hidden');
             }
         });
 
-        // Email / Password Authentication
+        // 3. Premium Success Animation & Redirect
+        function triggerSuccessAndRedirect() {
+            const successOverlay = document.getElementById('authModalOverlay').querySelector('#auth-success-overlay');
+            if(successOverlay) {
+                // Background form ko disable karke success screen dikhao
+                successOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            }
+            
+            // 1.5 second ka premium loading wait, phir Explore page pe jao
+            setTimeout(() => {
+                window.location.replace("explore.html");
+            }, 1500);
+        }
+
+        // 4. Email/Password Submit Logic
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -421,38 +425,42 @@
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
             
+            // UI Update: Processing dikhana
             btn.innerText = "Processing Request...";
             btn.disabled = true;
 
+            // FIX: Check if it's login or signup by reading the button text
+            const isLoginMode = btn.innerText.includes("Authorize");
+
             try {
-                if (currentAuthMode === 'login') {
+                if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
-                // Redirect immediately to explore page on success
-                window.location.replace("explore.html");
+                // Success hote hi animation trigger karo aur redirect karo
+                triggerSuccessAndRedirect();
             } catch (error) {
                 console.error("Auth System Error:", error.message);
                 alert(error.message.replace("Firebase: ", ""));
-            } finally {
+                
+                // Error aane par button wapas normal kar do
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         });
 
-        // Google Authentication
+        // 5. Google Authentication Logic
         document.getElementById('googleBtn').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
-                // Redirect immediately to explore page on success
-                window.location.replace("explore.html");
+                // Google se login hote hi animation aur redirect
+                triggerSuccessAndRedirect();
             } catch (error) {
                 console.error("External Auth Error:", error);
                 alert("Google authentication failed. Please try again.");
             }
         });
-    </script>
-</body>
-</html>
+        </script>
+        
