@@ -1,265 +1,602 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="antialiased scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Study | VidyaPlus</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Dashboard | VidyaPlus Secure Base</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#f8fafc',       /* Very light slate for background */
+                        surface: '#ffffff',    /* Pure white for cards */
+                        primary: '#1d4ed8',    /* Strong solid blue */
+                        primaryDark: '#1e3a8a',
+                        textMain: '#0f172a',   /* Near black for readability */
+                        textMuted: '#64748b',
+                        borderLight: '#e2e8f0',
+                        borderDark: '#cbd5e1',
+                        danger: '#ef4444',
+                        success: '#10b981'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        /* CORE VARIABLES */
+        /* ==========================================================================
+           1. CORE RESET & BASE STYLES
+           ========================================================================== */
         :root {
-            --primary: #2563eb;
-            --bg-color: #f1f5f9;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --white: #ffffff;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --bottom-nav-height: 65px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
+            background-color: theme('colors.base');
+            color: theme('colors.textMain');
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Hide scrollbar for clean look but keep functionality */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: theme('colors.borderDark'); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.textMuted'); }
+
+        /* ==========================================================================
+           2. SOLID UI COMPONENTS (NO GLASSMORPHISM)
+           ========================================================================== */
+        .solid-card {
+            background-color: theme('colors.surface');
+            border: 1px solid theme('colors.borderLight');
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
         
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow-x: hidden; min-height: 100vh; }
-
-        /* --- HEADER (Synced with Explore page) --- */
-        .header {
-            background: #ffffff; padding: 0.8rem 1rem; display: flex; align-items: center;
-            justify-content: space-between; position: sticky; top: 0; z-index: 1001; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-bottom: 1px solid #e2e8f0;
+        .solid-card:hover {
+            border-color: theme('colors.borderDark');
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
         }
-        .header-left { display: flex; align-items: center; }
-        .menu-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; margin-right: 15px; }
-        .logo { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+
+        .solid-btn {
+            background-color: theme('colors.primary');
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .solid-btn:hover { background-color: theme('colors.primaryDark'); }
+        .solid-btn:active { transform: scale(0.98); }
+
+        .solid-btn-outline {
+            background-color: transparent;
+            color: theme('colors.textMain');
+            border: 1px solid theme('colors.borderDark');
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .solid-btn-outline:hover {
+            background-color: theme('colors.base');
+            border-color: theme('colors.textMain');
+        }
+
+        /* ==========================================================================
+           3. LAYOUT & NAVIGATION
+           ========================================================================== */
+        /* Desktop Sidebar */
+        .desktop-sidebar {
+            position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
+            background-color: theme('colors.surface');
+            border-right: 1px solid theme('colors.borderLight');
+            z-index: 50; display: flex; flex-direction: column;
+            transform: translateX(0); transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            height: var(--header-height); display: flex; align-items: center;
+            padding: 0 24px; border-bottom: 1px solid theme('colors.borderLight');
+        }
+
+        .nav-link {
+            display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+            color: theme('colors.textMuted'); font-weight: 600; text-decoration: none;
+            border-left: 3px solid transparent; transition: all 0.2s ease;
+        }
+        .nav-link:hover { background-color: theme('colors.base'); color: theme('colors.textMain'); }
+        .nav-link.active {
+            background-color: #eff6ff; color: theme('colors.primary');
+            border-left-color: theme('colors.primary');
+        }
+
+        /* Main Header */
+        .top-header {
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+            height: var(--header-height); background-color: theme('colors.surface');
+            border-bottom: 1px solid theme('colors.borderLight'); z-index: 40;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: var(--sidebar-width); margin-top: var(--header-height);
+            padding: 32px; min-height: calc(100vh - var(--header-height));
+        }
+
+        /* Mobile Bottom App Navigation (Hides on Scroll Down) */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--bottom-nav-height);
+            background-color: theme('colors.surface'); border-top: 1px solid theme('colors.borderLight');
+            z-index: 60; display: none; justify-content: space-around; align-items: center;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .user-avatar {
-            width: 35px; height: 35px; background: var(--primary); color: white;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 1.1rem;
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: theme('colors.textMuted'); font-size: 0.7rem; font-weight: 600; width: 100%; height: 100%;
         }
-        .logout-btn-header {
-            background: #fee2e2; color: #ef4444; padding: 6px 12px; border-radius: 6px;
-            font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: 0.3s;
+        .bottom-nav-item svg { width: 20px; height: 20px; margin-bottom: 4px; transition: transform 0.2s; }
+        .bottom-nav-item.active { color: theme('colors.primary'); }
+        .bottom-nav-item.active svg { transform: translateY(-2px); stroke-width: 2.5; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .desktop-sidebar { transform: translateX(-100%); }
+            .top-header { left: 0; padding: 0 16px; }
+            .main-content { margin-left: 0; padding: 16px; padding-bottom: calc(var(--bottom-nav-height) + 20px); }
+            .bottom-nav { display: flex; }
         }
-        .logout-btn-header:hover { background: #ef4444; color: #ffffff; }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 240px; height: 100vh; background: var(--sidebar-bg); position: fixed;
-            top: 0; left: -240px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); display: flex;
-            flex-direction: column; transition: 0.3s ease; z-index: 1002; 
-        }
-        .brand-sidebar { padding: 1.2rem; font-size: 1.3rem; font-weight: 800; color: var(--primary); border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
-        .close-btn { background: none; border: none; font-size: 1.3rem; color: var(--text-main); cursor: pointer; }
-        .nav-menu { list-style: none; padding: 1.2rem 1rem; flex-grow: 1; }
-        .nav-item { margin-bottom: 0.4rem; }
-        .nav-link { display: flex; align-items: center; padding: 0.7rem 0.9rem; color: var(--text-muted); text-decoration: none; font-weight: 600; border-radius: 8px; transition: 0.2s ease; font-size: 0.95rem; }
-        .nav-link i { margin-right: 12px; font-size: 1.1rem; width: 22px; text-align: center; }
-        .nav-link:hover, .nav-link.active { background-color: #eff6ff; color: var(--primary); }
-        .sidebar.show { left: 0; }
-
-        .overlay { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 998; transition: 0.3s; }
-        .overlay.show { display: block; }
-
-        /* --- DASHBOARD CONTENT --- */
-        .dashboard-content { padding: 1.5rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-        .welcome-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; margin-bottom: 2rem; border: 1px solid #e2e8f0; }
-        .welcome-card h2 { color: var(--text-main); margin-bottom: 0.5rem; font-size: 1.4rem; }
-        .welcome-card p { color: var(--text-muted); font-size: 0.95rem; }
-        #user-email-display { color: var(--primary); font-weight: bold; }
-
-        .section-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-main); }
-
-        /* --- BATCH GRID (Copied from explore page for consistency) --- */
+        /* ==========================================================================
+           4. BATCH GRID & CARDS
+           ========================================================================== */
         .batch-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
         }
-        .batch-card {
-            background: var(--white); border-radius: 12px; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
-            display: flex; flex-direction: column;
-        }
-        .card-img-container { width: 100%; height: 150px; background: #e2e8f0; }
-        .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .card-details { padding: 1rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-subject { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 5px; }
-        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); flex-grow: 1; }
-        
-        .btn-study {
-            width: 100%; background: #eff6ff; color: var(--primary); border: 1px solid var(--primary);
-            padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
-            transition: 0.2s; text-align: center; display: inline-block; text-decoration: none;
-        }
-        .btn-study:hover { background: var(--primary); color: var(--white); }
 
-        .empty-state { text-align: center; padding: 2rem; background: white; border-radius: 12px; border: 1px dashed #cbd5e1; grid-column: 1/-1; }
-        .empty-state p { color: var(--text-muted); margin-bottom: 15px; }
-        .empty-state a { display: inline-block; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .batch-image-wrapper {
+            width: 100%; height: 160px; background-color: theme('colors.borderLight');
+            position: relative; border-bottom: 1px solid theme('colors.borderLight');
+        }
+        
+        .batch-image-wrapper img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        .batch-badge {
+            position: absolute; top: 12px; right: 12px;
+            background-color: theme('colors.textMain'); color: white;
+            font-size: 0.7rem; font-weight: 700; padding: 4px 10px;
+            border-radius: 4px; letter-spacing: 0.5px;
+        }
+
+        /* ==========================================================================
+           5. SKELETON LOADERS (High-Tech Pulse)
+           ========================================================================== */
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .skeleton {
+            background-color: theme('colors.borderLight');
+            animation: subtle-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            border-radius: 4px;
+        }
+
+        /* ==========================================================================
+           6. UTILITIES & TELEMETRY UI
+           ========================================================================== */
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background-color: theme('colors.success');
+        }
+        .status-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            100% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+
+        .telemetry-card {
+            background-color: theme('colors.textMain');
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            background-image: radial-gradient(circle at top right, #1e293b, transparent);
+        }
     </style>
 </head>
 <body>
-
-    <div class="overlay" id="overlay"></div>
-
-    <nav class="sidebar" id="sidebar">
-        <div class="brand-sidebar">
-            VidyaPlus
-            <button class="close-btn" id="close-btn"><i class="fas fa-times"></i></button>
+    <aside class="desktop-sidebar" id="desktop-sidebar">
+        <div class="sidebar-brand">
+            <svg class="w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            <span class="text-xl font-bold tracking-tight text-textMain">VidyaPlus</span>
+        </div>
+        
+        <div class="p-4">
+            <div class="text-xs font-bold text-textMuted uppercase tracking-wider mb-2 ml-4">Architecture</div>
+            <nav class="flex flex-col gap-1">
+                <a href="explore.html" class="nav-link">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    Explore Catalog
+                </a>
+                <a href="dashboard.html" class="nav-link active">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    My Infrastructure
+                </a>
+                <a href="#" class="nav-link">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Analytics
+                </a>
+            </nav>
         </div>
 
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="explore.html" class="nav-link"><i class="fas fa-compass"></i> Explore Batches</a>
-            </li>
-            <li class="nav-item">
-                <a href="dashboard.html" class="nav-link active"><i class="fas fa-book-open"></i> My Batches</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-play-circle"></i> Study</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-robot"></i> AI Guru</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-headset"></i> Support</a>
-            </li>
-        </ul>
-    </nav>
-
-    <header class="header">
-        <div class="header-left">
-            <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
-            <div class="logo">VidyaPlus</div>
+        <div class="mt-auto p-4 border-t border-borderLight">
+            <div class="flex items-center gap-3 px-2 py-2">
+                <div class="w-10 h-10 rounded bg-primary flex items-center justify-center text-white font-bold text-lg" id="sidebar-avatar">?</div>
+                <div class="overflow-hidden">
+                    <div class="text-sm font-bold text-textMain truncate" id="sidebar-name">Loading...</div>
+                    <div class="text-xs text-textMuted font-mono truncate" id="sidebar-email">identifying session</div>
+                </div>
+            </div>
+            <button id="btn-logout-sidebar" class="w-full mt-4 solid-btn-outline text-danger border-danger/30 hover:bg-red-50 hover:border-danger text-sm py-2">
+                Terminate Session
+            </button>
         </div>
-        <div class="header-right">
-            <button id="logout-action" class="logout-btn-header">Log Out</button>
-            <div class="user-avatar" id="userIcon">?</div>
+    </aside>
+
+    <header class="top-header" id="top-header">
+        <div class="flex items-center gap-4">
+            <div class="md:hidden font-bold text-lg text-primary flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                VidyaPlus
+            </div>
+            <h1 class="hidden md:block text-xl font-bold text-textMain">Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-borderLight bg-base">
+                <div class="status-dot status-pulse" id="network-indicator"></div>
+                <span class="text-xs font-mono font-bold text-textMuted" id="network-text">SYS.ONLINE</span>
+            </div>
+            
+            <button class="relative text-textMuted hover:text-textMain transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-danger border-2 border-surface rounded-full"></span>
+            </button>
+            
+            <button id="btn-logout-mobile" class="md:hidden text-xs font-bold text-danger border border-danger/30 px-3 py-1.5 rounded bg-red-50">Logout</button>
         </div>
     </header>
 
-    <main class="dashboard-content">
-        <div class="welcome-card">
-            <h2>Welcome to your Study Area! 👋</h2>
-            <p>Logged in as: <span id="user-email-display">Loading...</span></p>
-        </div>
-
-        <h3 class="section-title">My Enrolled Batches</h3>
-        
-        <div class="batch-grid" id="myBatchGrid">
-            <div style="grid-column: 1/-1; text-align:center; padding: 2rem; color: #64748b;">
-                <i class="fas fa-spinner fa-spin"></i> Fetching your classes...
+    <main class="main-content">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="solid-card p-5">
+                    <div class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1">Active Batches</div>
+                    <div class="text-3xl font-bold text-textMain font-mono" id="metric-batches">-</div>
+                </div>
+                <div class="solid-card p-5">
+                    <div class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1">Study Hours</div>
+                    <div class="text-3xl font-bold text-textMain font-mono">24.5</div>
+                </div>
+                <div class="solid-card p-5">
+                    <div class="text-xs font-bold text-textMuted uppercase tracking-wider mb-1">Avg Accuracy</div>
+                    <div class="text-3xl font-bold text-success font-mono">82%</div>
+                </div>
+                <div class="solid-card p-5 bg-textMain text-white border-none relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-10">
+                        <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Platform Rank</div>
+                        <div class="text-3xl font-bold text-white font-mono">#1,042</div>
+                    </div>
+                </div>
             </div>
+
+            <div class="flex justify-between items-end mb-6 border-b border-borderLight pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-textMain tracking-tight">Provisioned Infrastructure</h2>
+                    <p class="text-sm text-textMuted mt-1">Access your enrolled cohorts and study materials.</p>
+                </div>
+                <a href="explore.html" class="hidden md:inline-flex text-sm font-bold text-primary hover:underline items-center gap-1">
+                    Browse Catalog
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+            </div>
+
+            <div class="batch-grid" id="myBatchGrid">
+                <div class="solid-card overflow-hidden" id="skeleton-1">
+                    <div class="skeleton w-full h-[160px]"></div>
+                    <div class="p-5">
+                        <div class="skeleton h-3 w-1/4 mb-3"></div>
+                        <div class="skeleton h-5 w-3/4 mb-6"></div>
+                        <div class="skeleton h-10 w-full"></div>
+                    </div>
+                </div>
+                <div class="solid-card overflow-hidden" id="skeleton-2">
+                    <div class="skeleton w-full h-[160px]"></div>
+                    <div class="p-5">
+                        <div class="skeleton h-3 w-1/4 mb-3"></div>
+                        <div class="skeleton h-5 w-3/4 mb-6"></div>
+                        <div class="skeleton h-10 w-full"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center md:hidden pb-10">
+                <a href="explore.html" class="solid-btn-outline w-full text-sm">Browse More Batches</a>
+            </div>
+
         </div>
     </main>
 
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeBtn = document.getElementById('close-btn');
-        const overlay = document.getElementById('overlay');
-
-        function toggleMenu() { sidebar.classList.toggle('show'); overlay.classList.toggle('show'); }
-        menuToggle.addEventListener('click', toggleMenu);
-        closeBtn.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-    </script>
-
+    <nav class="bottom-nav" id="bottom-nav">
+        <a href="explore.html" class="bottom-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            Explore
+        </a>
+        <a href="dashboard.html" class="bottom-nav-item active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            Study
+        </a>
+        <a href="#" class="bottom-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            Stats
+        </a>
+        <a href="#" class="bottom-nav-item" id="nav-profile-trigger">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            Profile
+        </a>
+    </nav>
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        // 🚨 NAYA IMPORT: collection aur getDocs add kar diya gaya hai
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const myBatchGrid = document.getElementById('myBatchGrid');
-
-        // Security Guard: Check if user is logged in
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // UI Updates
-                document.getElementById('user-email-display').innerText = user.email;
-                document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase(); // Sets first letter as avatar
-                
-                // Fetch user's batches
-                fetchMyBatches(user.uid);
-            } else {
-                // Kick them out
-                window.location.replace("login.html");
+        /**
+         * CLASS: UIEngine
+         * Handles all DOM manipulations, Scroll behaviors, and State Rendering.
+         */
+        class UIEngine {
+            constructor() {
+                this.bottomNav = document.getElementById('bottom-nav');
+                this.lastScrollY = window.scrollY;
+                this.grid = document.getElementById('myBatchGrid');
+                this.initScrollListener();
             }
-        });
 
-        // 🚨 UPDATED FUNCTION: Fetch from Subcollections
-        async function fetchMyBatches(uid) {
-            try {
-                const enrollmentsRef = collection(db, "users", uid, "enrollments");
-                const enrollmentsSnap = await getDocs(enrollmentsRef);
+            initScrollListener() {
+                window.addEventListener('scroll', () => {
+                    const currentScrollY = window.scrollY;
+                    // Auto-hide bottom nav logic
+                    if (currentScrollY > this.lastScrollY && currentScrollY > 50) {
+                        this.bottomNav.style.transform = 'translateY(100%)';
+                    } else {
+                        this.bottomNav.style.transform = 'translateY(0)';
+                    }
+                    this.lastScrollY = currentScrollY;
+                }, { passive: true });
+            }
 
-                myBatchGrid.innerHTML = ''; // Clear loader
+            updateProfileUI(user) {
+                const initial = user.email.charAt(0).toUpperCase();
+                const displayName = user.displayName || user.email.split('@')[0];
+                
+                document.getElementById('sidebar-avatar').innerText = initial;
+                document.getElementById('sidebar-name').innerText = displayName;
+                document.getElementById('sidebar-email').innerText = user.email;
+            }
 
-                if (!enrollmentsSnap.empty) {
+            clearGrid() {
+                this.grid.innerHTML = '';
+            }
+
+            renderEmptyState() {
+                this.grid.innerHTML = `
+                    <div class="solid-card col-span-full p-10 text-center flex flex-col items-center justify-center">
+                        <svg class="w-16 h-16 text-borderDark mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <h3 class="text-lg font-bold text-textMain mb-2">No Infrastructure Allocated</h3>
+                        <p class="text-sm text-textMuted mb-6">You haven't enrolled in any cohorts yet.</p>
+                        <a href="explore.html" class="solid-btn">Browse Catalog</a>
+                    </div>
+                `;
+            }
+
+            renderErrorState(message) {
+                this.grid.innerHTML = `
+                    <div class="col-span-full p-4 bg-red-50 border border-danger/30 rounded-lg text-danger text-sm font-bold flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        System Error: ${message}
+                    </div>
+                `;
+            }
+
+            renderBatchCard(id, data) {
+                const imgUrl = data.imageUrl || 'https://via.placeholder.com/400x200?text=VidyaPlus+Module';
+                const subject = data.subject || 'Core Module';
+                const title = data.title || 'Untitled Assessment';
+
+                const cardHtml = `
+                    <div class="solid-card flex flex-col overflow-hidden group">
+                        <div class="batch-image-wrapper">
+                            <span class="batch-badge">SECURE</span>
+                            <img src="${imgUrl}" loading="lazy" alt="Batch Thumbnail" class="group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <div class="p-5 flex-grow flex flex-col">
+                            <div class="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">${subject}</div>
+                            <h3 class="text-lg font-bold text-textMain leading-tight mb-4 flex-grow">${title}</h3>
+                            <button onclick="DataFetcher.startStudying('${id}')" class="solid-btn w-full text-sm">
+                                Initialize Study Protocol
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                this.grid.insertAdjacentHTML('beforeend', cardHtml);
+            }
+
+            updateBatchCount(count) {
+                const metricEl = document.getElementById('metric-batches');
+                if(metricEl) metricEl.innerText = count < 10 && count > 0 ? `0${count}` : count;
+            }
+        }
+
+        /**
+         * CLASS: NetworkMonitor
+         * Simulates a high-tech ping check to update UI based on connectivity.
+         */
+        class NetworkMonitor {
+            constructor() {
+                this.indicator = document.getElementById('network-indicator');
+                this.text = document.getElementById('network-text');
+                this.init();
+            }
+
+            init() {
+                window.addEventListener('online', () => this.updateState(true));
+                window.addEventListener('offline', () => this.updateState(false));
+                this.updateState(navigator.onLine);
+            }
+
+            updateState(isOnline) {
+                if(!this.indicator || !this.text) return;
+                if (isOnline) {
+                    this.indicator.className = 'status-dot status-pulse bg-success';
+                    this.text.innerText = 'SYS.ONLINE';
+                    this.text.classList.replace('text-danger', 'text-textMuted');
+                } else {
+                    this.indicator.className = 'status-dot bg-danger';
+                    this.text.innerText = 'SYS.OFFLINE';
+                    this.text.classList.replace('text-textMuted', 'text-danger');
+                }
+            }
+        }
+
+        /**
+         * CLASS: DataFetcher
+         * Handles secure Firebase subcollection queries and mounts data to UI.
+         */
+        class DataFetcher {
+            static async fetchMyBatches(uid, uiEngine) {
+                try {
+                    // Fetching securely from Subcollection logic required by updated Firebase Rules
+                    const enrollmentsRef = collection(db, "users", uid, "enrollments");
+                    const enrollmentsSnap = await getDocs(enrollmentsRef);
+
+                    uiEngine.clearGrid();
+
+                    if (enrollmentsSnap.empty) {
+                        uiEngine.renderEmptyState();
+                        uiEngine.updateBatchCount(0);
+                        return;
+                    }
+
+                    uiEngine.updateBatchCount(enrollmentsSnap.size);
+
                     enrollmentsSnap.forEach(async (docSnap) => {
-                        const batchId = docSnap.id; // Yeh batch ka ID hai
-                        
+                        const batchId = docSnap.id;
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
-                            renderBatchCard(batchId, batchSnap.data());
+                            uiEngine.renderBatchCard(batchId, batchSnap.data());
                         }
                     });
-                } else {
-                    showEmptyState(); // Document doesn't exist yet (never enrolled)
-                }
 
-            } catch (error) {
-                console.error("Error fetching enrolled batches:", error);
-                myBatchGrid.innerHTML = '<p style="color:red; text-align:center;">Failed to load data. Access Denied.</p>';
+                } catch (error) {
+                    console.error("Fetch Error:", error);
+                    uiEngine.clearGrid();
+                    uiEngine.renderErrorState("Authorization failed while accessing encrypted sector.");
+                }
+            }
+
+            static startStudying(batchId) {
+                // Navigate to the study classroom portal
+                window.location.href = `study.html?batch=${batchId}`;
             }
         }
 
-        // HTML for empty state
-        function showEmptyState() {
-            myBatchGrid.innerHTML = `
-                <div class="empty-state">
-                    <p>You haven't enrolled in any batches yet.</p>
-                    <a href="explore.html">Explore Batches</a>
-                </div>
-            `;
+        // Make startStudying global so inline HTML onclick works
+        window.DataFetcher = DataFetcher;
+
+        /**
+         * CLASS: SecurityManager
+         * Coordinates Authentication, Session Management and Bootstrapping.
+         */
+        class SecurityManager {
+            constructor() {
+                this.uiEngine = new UIEngine();
+                this.networkMonitor = new NetworkMonitor();
+                this.attachLogoutHandlers();
+                this.verifySession();
+            }
+
+            verifySession() {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        this.uiEngine.updateProfileUI(user);
+                        await DataFetcher.fetchMyBatches(user.uid, this.uiEngine);
+                    } else {
+                        // Unauthorized Access Attempt -> Kick to gateway
+                        window.location.replace("index.html");
+                    }
+                });
+            }
+
+            attachLogoutHandlers() {
+                const handleLogout = () => {
+                    signOut(auth).then(() => {
+                        window.location.replace("index.html");
+                    }).catch(err => alert("Protocol Error: Unable to terminate session."));
+                };
+
+                const desktopLogout = document.getElementById('btn-logout-sidebar');
+                const mobileLogout = document.getElementById('btn-logout-mobile');
+                
+                if(desktopLogout) desktopLogout.addEventListener('click', handleLogout);
+                if(mobileLogout) mobileLogout.addEventListener('click', handleLogout);
+            }
         }
 
-        // Render Individual Batch Card
-        function renderBatchCard(id, data) {
-            const card = document.createElement('div');
-            card.className = 'batch-card';
-            
-            const imgUrl = data.imageUrl ? data.imageUrl : 'https://via.placeholder.com/300x150?text=VidyaPlus';
-
-            card.innerHTML = `
-                <div class="card-img-container">
-                    <img src="${imgUrl}" alt="Batch Image">
-                </div>
-                <div class="card-details">
-                    <div class="card-subject">${data.subject || 'All Subjects'}</div>
-                    <div class="card-title">${data.title}</div>
-                    
-                    <button class="btn-study" onclick="startStudying('${id}')">Start Learning <i class="fas fa-arrow-right"></i></button>
-                </div>
-            `;
-            myBatchGrid.appendChild(card);
-        }
-        
-        // REAL function for "Start Learning" button
-        window.startStudying = function(batchId) {
-            // Ye code bache ko seedha Classroom me bhej dega
-            window.location.href = "study.html?batch=" + batchId;
-        };
-        
-        // Logout Button Logic
-        document.getElementById('logout-action').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.replace("index.html");
-            }).catch((error) => {
-                alert("Error logging out. Please try again.");
-            });
+        // ==========================================
+        // SYSTEM BOOTSTRAP
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Core Systems
+            window.AppSystem = new SecurityManager();
         });
+
     </script>
 </body>
 </html>
