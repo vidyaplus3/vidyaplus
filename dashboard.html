@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard | VidyaPlus Secure Base</title>
+    <title>My Dashboard | VidyaPlus</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,32 +11,25 @@
             theme: {
                 extend: {
                     colors: {
-                        base: '#f8fafc',       /* Very light slate for background */
-                        surface: '#ffffff',    /* Pure solid white for cards & navs */
-                        primary: '#1d4ed8',    /* Strong solid blue */
-                        primaryDark: '#1e3a8a',
-                        textMain: '#0f172a',   /* Near black for readability */
+                        base: '#f8fafc',
+                        surface: '#ffffff',
+                        primary: '#1d4ed8',
+                        textMain: '#0f172a',
                         textMuted: '#64748b',
                         borderLight: '#e2e8f0',
-                        borderDark: '#cbd5e1',
-                        danger: '#ef4444',
-                        success: '#10b981'
+                        danger: '#ef4444'
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
         }
     </script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ==========================================================================
-           1. CORE RESET & BASE STYLES
-           ========================================================================== */
         :root {
             --sidebar-width: 260px;
             --header-height: 70px;
@@ -46,79 +39,37 @@
         body {
             background-color: theme('colors.base');
             color: theme('colors.textMain');
-            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: theme('colors.borderDark'); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: theme('colors.textMuted'); }
-
-        /* ==========================================================================
-           2. SOLID UI COMPONENTS (ZERO GLASSMORPHISM)
-           ========================================================================== */
-        .solid-card {
+        /* Solid Header - No Transparency */
+        .top-header {
+            position: sticky;
+            top: 0;
+            height: var(--header-height);
             background-color: theme('colors.surface');
-            border: 1px solid theme('colors.borderLight');
-            border-radius: 12px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05); /* Sleek shadow */
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .solid-card:hover {
-            border-color: theme('colors.borderDark');
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        .solid-btn {
-            background-color: theme('colors.primary');
-            color: white;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            display: inline-flex;
+            border-bottom: 1px solid theme('colors.borderLight');
+            z-index: 50;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .solid-btn:hover { background-color: theme('colors.primaryDark'); }
-        .solid-btn:active { transform: scale(0.98); }
-
-        .solid-btn-outline {
-            background-color: theme('colors.surface');
-            color: theme('colors.textMain');
-            border: 1px solid theme('colors.borderDark');
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .solid-btn-outline:hover {
-            background-color: theme('colors.base');
-            border-color: theme('colors.textMain');
+            justify-content: space-between;
+            padding: 0 24px;
         }
 
-        /* ==========================================================================
-           3. LAYOUT & NAVIGATION (SOLID & SLEEK)
-           ========================================================================== */
         /* Desktop Sidebar */
         .desktop-sidebar {
             position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
-            background-color: theme('colors.surface'); /* Solid White */
+            background-color: theme('colors.surface');
             border-right: 1px solid theme('colors.borderLight');
-            z-index: 50; display: flex; flex-direction: column;
+            z-index: 60; display: flex; flex-direction: column;
             transform: translateX(0); transition: transform 0.3s ease;
         }
 
-        .sidebar-brand {
-            height: var(--header-height); display: flex; align-items: center;
-            padding: 0 24px; border-bottom: 1px solid theme('colors.borderLight');
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 32px;
+            min-height: calc(100vh - var(--header-height));
         }
 
         .nav-link {
@@ -127,443 +78,226 @@
             border-left: 3px solid transparent; transition: all 0.2s ease;
         }
         .nav-link:hover { background-color: theme('colors.base'); color: theme('colors.textMain'); }
-        .nav-link.active {
-            background-color: #eff6ff; color: theme('colors.primary');
-            border-left-color: theme('colors.primary');
+        .nav-link.active { background-color: #eff6ff; color: theme('colors.primary'); border-left-color: theme('colors.primary'); }
+
+        /* Solid Cards */
+        .solid-card {
+            background-color: theme('colors.surface');
+            border: 1px solid theme('colors.borderLight');
+            border-radius: 12px;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .solid-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            border-color: theme('colors.borderDark');
         }
 
-        /* Main Header (Solid) */
-        .top-header {
-            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
-            height: var(--header-height); 
-            background-color: theme('colors.surface'); /* Solid White */
-            border-bottom: 1px solid theme('colors.borderLight'); 
-            z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+        .batch-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;
         }
 
-        /* Main Content Area */
-        .main-content {
-            margin-left: var(--sidebar-width); margin-top: var(--header-height);
-            padding: 32px; min-height: calc(100vh - var(--header-height));
-        }
-
-        /* Mobile Bottom App Navigation (Solid, hides on scroll) */
+        /* Mobile Bottom Nav */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: var(--bottom-nav-height);
-            background-color: theme('colors.surface'); /* Solid White */
-            border-top: 1px solid theme('colors.borderLight');
+            background-color: theme('colors.surface'); border-top: 1px solid theme('colors.borderLight');
             z-index: 60; display: none; justify-content: space-around; align-items: center;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s ease;
         }
-        
         .bottom-nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: theme('colors.textMuted'); font-size: 0.7rem; font-weight: 600; width: 100%; height: 100%;
         }
-        .bottom-nav-item svg { width: 22px; height: 22px; margin-bottom: 4px; transition: transform 0.2s; }
+        .bottom-nav-item svg { width: 22px; height: 22px; margin-bottom: 4px; }
         .bottom-nav-item.active { color: theme('colors.primary'); }
-        .bottom-nav-item.active svg { transform: translateY(-2px); stroke-width: 2.5; }
 
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .desktop-sidebar { transform: translateX(-100%); }
-            .top-header { left: 0; padding: 0 16px; }
-            .main-content { margin-left: 0; padding: 16px; padding-bottom: calc(var(--bottom-nav-height) + 20px); }
-            .bottom-nav { display: flex; }
-        }
-        /* ==========================================================================
-           4. BATCH GRID & CARDS
-           ========================================================================== */
-        .batch-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .batch-image-wrapper {
-            width: 100%; height: 160px; background-color: theme('colors.borderLight');
-            position: relative; border-bottom: 1px solid theme('colors.borderLight');
-        }
-        
-        .batch-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-        .batch-badge {
-            position: absolute; top: 12px; right: 12px;
-            background-color: theme('colors.textMain'); color: white;
-            font-size: 0.7rem; font-weight: 700; padding: 4px 10px;
-            border-radius: 4px; letter-spacing: 0.5px;
-        }
-
-        /* ==========================================================================
-           5. SKELETON LOADERS
-           ========================================================================== */
-        @keyframes subtle-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .skeleton {
-            background-color: theme('colors.borderLight');
-            animation: subtle-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            border-radius: 4px;
-        }
-
-        /* ==========================================================================
-           6. UTILITIES & DROPDOWN
-           ========================================================================== */
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: theme('colors.success'); }
-        .status-pulse { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 100% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } }
-
-        /* Profile Dropdown Logic */
+        /* Profile Dropdown */
         .profile-dropdown-content {
             opacity: 0; visibility: hidden; transform: translateY(10px);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s ease;
         }
-        .profile-dropdown-wrapper:hover .profile-dropdown-content,
-        .profile-dropdown-wrapper:focus-within .profile-dropdown-content {
+        .profile-dropdown-wrapper:hover .profile-dropdown-content {
             opacity: 1; visibility: visible; transform: translateY(0);
         }
+
+        @media (max-width: 768px) {
+            .desktop-sidebar { transform: translateX(-100%); }
+            .top-header { left: 0; padding: 0 16px; margin-left: 0; }
+            .main-content { margin-left: 0; padding: 16px; padding-bottom: 90px; }
+            .bottom-nav { display: flex; }
+        }
+
+        @keyframes pulse-bg { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .skeleton { background-color: theme('colors.borderLight'); animation: pulse-bg 1.5s infinite; border-radius: 4px; }
     </style>
 </head>
 <body>
-
-    <aside class="desktop-sidebar" id="desktop-sidebar">
-        <div class="sidebar-brand">
+    <aside class="desktop-sidebar">
+        <div class="h-[70px] flex items-center px-6 border-b border-borderLight">
             <svg class="w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
-            <span class="text-xl font-bold tracking-tight text-textMain">VidyaPlus</span>
+            <span class="text-xl font-bold text-textMain">VidyaPlus</span>
         </div>
-        
-        <div class="p-4">
-            <div class="text-xs font-bold text-textMuted uppercase tracking-wider mb-2 ml-4">Architecture</div>
-            <nav class="flex flex-col gap-1">
-                <a href="explore.html" class="nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    Explore Catalog
-                </a>
-                <a href="dashboard.html" class="nav-link active">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                    My Infrastructure
-                </a>
-            </nav>
-        </div>
+        <nav class="flex flex-col gap-1 py-6">
+            <a href="explore.html" class="nav-link"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> Explore Catalog</a>
+            <a href="dashboard.html" class="nav-link active"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg> My Infrastructure</a>
+        </nav>
     </aside>
-    <header class="top-header" id="top-header">
-        <div class="flex items-center gap-4">
-            <div class="md:hidden font-bold text-lg text-primary flex items-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                VidyaPlus
-            </div>
-            <h1 class="hidden md:block text-xl font-bold text-textMain">Dashboard</h1>
-        </div>
 
-        <div class="flex items-center gap-4 md:gap-6">
-            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-borderLight bg-base">
-                <div class="status-dot status-pulse" id="network-indicator"></div>
-                <span class="text-xs font-mono font-bold text-textMuted" id="network-text">SYS.ONLINE</span>
+    <div class="md:ml-[260px]">
+        
+        <header class="top-header">
+            <div class="flex items-center gap-2 md:gap-4">
+                <div class="md:hidden font-bold text-lg text-primary flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                    VidyaPlus
+                </div>
+                <h1 class="hidden md:block text-xl font-bold text-textMain">Dashboard</h1>
             </div>
-            
-            <div class="relative profile-dropdown-wrapper cursor-pointer">
-                <div class="flex items-center gap-2 md:gap-3 p-1.5 md:pr-4 rounded-full md:rounded-lg border border-transparent md:border-borderLight hover:bg-base transition-colors">
-                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm" id="header-avatar">?</div>
-                    <div class="hidden md:block text-left">
-                        <div class="text-sm font-bold text-textMain leading-tight" id="header-name">Loading...</div>
-                        <div class="text-xs text-textMuted font-mono leading-tight">Student</div>
+
+            <div class="relative profile-dropdown-wrapper cursor-pointer py-2">
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-bold text-textMain" id="header-name">Loading...</div>
+                        <div class="text-xs text-textMuted" id="header-email">identifying...</div>
                     </div>
-                    <svg class="hidden md:block w-4 h-4 text-textMuted ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold" id="header-avatar">?</div>
                 </div>
 
-                <div class="profile-dropdown-content absolute right-0 top-full mt-2 w-56 bg-surface border border-borderLight rounded-xl shadow-lg z-50 overflow-hidden">
-                    <div class="p-4 border-b border-borderLight bg-base">
-                        <p class="text-sm font-bold text-textMain truncate" id="dropdown-name">Loading...</p>
-                        <p class="text-xs text-textMuted truncate font-mono mt-1" id="dropdown-email">identifying session...</p>
-                    </div>
-                    <div class="p-2">
-                        <button class="w-full text-left px-3 py-2 text-sm font-medium text-textMain hover:bg-base rounded-md transition-colors flex items-center gap-2">
-                            <svg class="w-4 h-4 text-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                            My Profile
-                        </button>
-                    </div>
+                <div class="profile-dropdown-content absolute right-0 top-full mt-1 w-48 bg-surface border border-borderLight rounded-xl shadow-lg z-50 overflow-hidden">
                     <div class="p-2 border-t border-borderLight">
-                        <button id="btn-logout-header" class="w-full text-left px-3 py-2 text-sm font-bold text-danger hover:bg-red-50 rounded-md transition-colors flex items-center gap-2">
+                        <button id="btn-logout" class="w-full text-left px-3 py-2 text-sm font-bold text-danger hover:bg-red-50 rounded-md transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                             Terminate Session
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <main class="main-content">
-        <div class="max-w-6xl mx-auto">
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="solid-card p-5">
-                    <div class="text-[10px] md:text-xs font-bold text-textMuted uppercase tracking-wider mb-1">Active Batches</div>
-                    <div class="text-2xl md:text-3xl font-bold text-textMain font-mono" id="metric-batches">-</div>
-                </div>
-                <div class="solid-card p-5">
-                    <div class="text-[10px] md:text-xs font-bold text-textMuted uppercase tracking-wider mb-1">Study Hours</div>
-                    <div class="text-2xl md:text-3xl font-bold text-textMain font-mono">24.5</div>
-                </div>
-                <div class="solid-card p-5">
-                    <div class="text-[10px] md:text-xs font-bold text-textMuted uppercase tracking-wider mb-1">Avg Accuracy</div>
-                    <div class="text-2xl md:text-3xl font-bold text-success font-mono">82%</div>
-                </div>
-                <div class="solid-card p-5 bg-textMain text-white border-none relative overflow-hidden">
-                    <div class="absolute -right-4 -top-4 opacity-10">
-                        <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg>
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Platform Rank</div>
-                        <div class="text-2xl md:text-3xl font-bold text-white font-mono">#1,042</div>
-                    </div>
-                </div>
-            </div>
-
+        <main class="main-content max-w-6xl mx-auto">
             <div class="flex justify-between items-end mb-6 border-b border-borderLight pb-4">
                 <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-textMain tracking-tight">Provisioned Infrastructure</h2>
-                    <p class="text-xs md:text-sm text-textMuted mt-1">Access your enrolled cohorts and study materials.</p>
+                    <h2 class="text-2xl font-bold text-textMain tracking-tight">Provisioned Infrastructure</h2>
+                    <p class="text-sm text-textMuted mt-1">Access your enrolled cohorts and study materials.</p>
                 </div>
-                <a href="explore.html" class="hidden md:inline-flex text-sm font-bold text-primary hover:underline items-center gap-1">
-                    Browse Catalog
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </a>
+                <a href="explore.html" class="hidden md:inline-flex text-sm font-bold text-primary hover:underline items-center gap-1">Browse Catalog <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
             </div>
 
             <div class="batch-grid" id="myBatchGrid">
-                <div class="solid-card overflow-hidden">
+                <div class="solid-card">
                     <div class="skeleton w-full h-[160px]"></div>
-                    <div class="p-5">
-                        <div class="skeleton h-3 w-1/4 mb-3"></div>
-                        <div class="skeleton h-5 w-3/4 mb-6"></div>
-                        <div class="skeleton h-10 w-full"></div>
-                    </div>
+                    <div class="p-5 flex-grow"><div class="skeleton h-4 w-1/4 mb-3"></div><div class="skeleton h-6 w-3/4 mb-6"></div><div class="skeleton h-10 w-full mt-auto"></div></div>
                 </div>
-                <div class="solid-card overflow-hidden">
+                <div class="solid-card">
                     <div class="skeleton w-full h-[160px]"></div>
-                    <div class="p-5">
-                        <div class="skeleton h-3 w-1/4 mb-3"></div>
-                        <div class="skeleton h-5 w-3/4 mb-6"></div>
-                        <div class="skeleton h-10 w-full"></div>
-                    </div>
+                    <div class="p-5 flex-grow"><div class="skeleton h-4 w-1/4 mb-3"></div><div class="skeleton h-6 w-3/4 mb-6"></div><div class="skeleton h-10 w-full mt-auto"></div></div>
                 </div>
             </div>
             
             <div class="mt-6 text-center md:hidden pb-10">
-                <a href="explore.html" class="solid-btn-outline w-full text-sm">Browse More Batches</a>
+                <a href="explore.html" class="block w-full py-3 border border-borderLight rounded-lg text-sm font-bold text-textMain bg-surface">Browse More Batches</a>
             </div>
-
-        </div>
-    </main>
+        </main>
+    </div>
 
     <nav class="bottom-nav" id="bottom-nav">
-        <a href="explore.html" class="bottom-nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-            Explore
-        </a>
-        <a href="dashboard.html" class="bottom-nav-item active">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-            Study
-        </a>
-        <a href="#" class="bottom-nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-            Stats
-        </a>
-        <a href="#" class="bottom-nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            Profile
-        </a>
+        <a href="explore.html" class="bottom-nav-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> Explore</a>
+        <a href="dashboard.html" class="bottom-nav-item active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg> Study</a>
     </nav>
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 🚨 STUDY BUTTON FIX: Making start protocol globally accessible early
+        // Global Study Route
         window.startStudyProtocol = function(batchId) {
             window.location.href = `study.html?batch=${batchId}`;
         };
 
-        class UIEngine {
-            constructor() {
-                this.bottomNav = document.getElementById('bottom-nav');
-                this.lastScrollY = window.scrollY;
-                this.grid = document.getElementById('myBatchGrid');
-                this.initScrollListener();
-            }
+        const grid = document.getElementById('myBatchGrid');
+        let lastScrollY = window.scrollY;
+        const bottomNav = document.getElementById('bottom-nav');
 
-            initScrollListener() {
-                window.addEventListener('scroll', () => {
-                    const currentScrollY = window.scrollY;
-                    if (currentScrollY > this.lastScrollY && currentScrollY > 50) {
-                        this.bottomNav.style.transform = 'translateY(100%)';
-                    } else {
-                        this.bottomNav.style.transform = 'translateY(0)';
-                    }
-                    this.lastScrollY = currentScrollY;
-                }, { passive: true });
+        // Scroll hide bottom nav
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > 50) {
+                bottomNav.style.transform = 'translateY(100%)';
+            } else {
+                bottomNav.style.transform = 'translateY(0)';
             }
+            lastScrollY = window.scrollY;
+        });
 
-            updateProfileUI(user) {
+        // 🚨 MAIN LOGIC: Auth & Original Fetch
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Update UI Header
                 const initial = user.email.charAt(0).toUpperCase();
                 const displayName = user.displayName || user.email.split('@')[0];
-                
-                // Update Desktop Header
                 document.getElementById('header-avatar').innerText = initial;
                 document.getElementById('header-name').innerText = displayName;
-                
-                // Update Dropdown Details
-                document.getElementById('dropdown-name').innerText = displayName;
-                document.getElementById('dropdown-email').innerText = user.email;
+                document.getElementById('header-email').innerText = user.email;
 
-                // Update Sidebar (if visible)
-                document.getElementById('sidebar-avatar').innerText = initial;
-                document.getElementById('sidebar-name').innerText = displayName;
-                document.getElementById('sidebar-email').innerText = user.email;
-            }
-
-            clearGrid() { this.grid.innerHTML = ''; }
-
-            renderEmptyState() {
-                this.grid.innerHTML = `
-                    <div class="solid-card col-span-full p-10 text-center flex flex-col items-center justify-center">
-                        <svg class="w-16 h-16 text-borderDark mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        <h3 class="text-lg font-bold text-textMain mb-2">No Infrastructure Allocated</h3>
-                        <p class="text-sm text-textMuted mb-6">You haven't enrolled in any cohorts yet.</p>
-                        <a href="explore.html" class="solid-btn">Browse Catalog</a>
-                    </div>
-                `;
-            }
-
-            renderErrorState(message) {
-                this.grid.innerHTML = `
-                    <div class="col-span-full p-4 bg-red-50 border border-danger/30 rounded-lg text-danger text-sm font-bold flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        System Error: ${message}
-                    </div>
-                `;
-            }
-
-            renderBatchCard(id, data) {
-                const imgUrl = data.imageUrl || 'https://via.placeholder.com/400x200?text=VidyaPlus+Module';
-                const subject = data.subject || 'Core Module';
-                const title = data.title || 'Untitled Assessment';
-
-                const cardHtml = `
-                    <div class="solid-card flex flex-col overflow-hidden group">
-                        <div class="batch-image-wrapper">
-                            <span class="batch-badge">SECURE</span>
-                            <img src="${imgUrl}" loading="lazy" alt="Batch Thumbnail" class="group-hover:scale-105 transition-transform duration-500">
-                        </div>
-                        <div class="p-5 flex-grow flex flex-col">
-                            <div class="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">${subject}</div>
-                            <h3 class="text-lg font-bold text-textMain leading-tight mb-4 flex-grow">${title}</h3>
-                            <button onclick="window.startStudyProtocol('${id}')" class="solid-btn w-full text-sm">
-                                Initialize Study Protocol
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                this.grid.insertAdjacentHTML('beforeend', cardHtml);
-            }
-
-            updateBatchCount(count) {
-                const metricEl = document.getElementById('metric-batches');
-                if(metricEl) metricEl.innerText = count < 10 && count > 0 ? `0${count}` : count;
-            }
-        }
-
-        class NetworkMonitor {
-            constructor() {
-                this.indicator = document.getElementById('network-indicator');
-                this.text = document.getElementById('network-text');
-                this.init();
-            }
-            init() {
-                window.addEventListener('online', () => this.updateState(true));
-                window.addEventListener('offline', () => this.updateState(false));
-                this.updateState(navigator.onLine);
-            }
-            updateState(isOnline) {
-                if(!this.indicator || !this.text) return;
-                if (isOnline) {
-                    this.indicator.className = 'status-dot status-pulse bg-success';
-                    this.text.innerText = 'SYS.ONLINE';
-                    this.text.classList.replace('text-danger', 'text-textMuted');
-                } else {
-                    this.indicator.className = 'status-dot bg-danger';
-                    this.text.innerText = 'SYS.OFFLINE';
-                    this.text.classList.replace('text-textMuted', 'text-danger');
-                }
-            }
-        }
-
-        class SecurityManager {
-            constructor() {
-                this.uiEngine = new UIEngine();
-                this.networkMonitor = new NetworkMonitor();
-                this.attachLogoutHandlers();
-                this.verifySession();
-            }
-
-            verifySession() {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        this.uiEngine.updateProfileUI(user);
-                        this.fetchMyBatches(user.uid);
-                    } else {
-                        window.location.replace("index.html");
-                    }
-                });
-            }
-
-            async fetchMyBatches(uid) {
+                // 🚨 FIX: Fetching ORIGINAL Data from Array
                 try {
-                    const enrollmentsRef = collection(db, "users", uid, "enrollments");
-                    const enrollmentsSnap = await getDocs(enrollmentsRef);
-                    this.uiEngine.clearGrid();
+                    const userRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    grid.innerHTML = '';
 
-                    if (enrollmentsSnap.empty) {
-                        this.uiEngine.renderEmptyState();
-                        this.uiEngine.updateBatchCount(0);
-                        return;
-                    }
+                    if (userSnap.exists()) {
+                        const enrolledBatchesArray = userSnap.data().enrolledBatches || [];
 
-                    this.uiEngine.updateBatchCount(enrollmentsSnap.size);
-
-                    enrollmentsSnap.forEach(async (docSnap) => {
-                        const batchId = docSnap.id;
-                        const batchRef = doc(db, "batches", batchId);
-                        const batchSnap = await getDoc(batchRef);
-                        
-                        if (batchSnap.exists()) {
-                            this.uiEngine.renderBatchCard(batchId, batchSnap.data());
+                        if (enrolledBatchesArray.length === 0) {
+                            grid.innerHTML = `<div class="col-span-full p-10 text-center flex flex-col items-center"><svg class="w-16 h-16 text-borderDark mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg><h3 class="text-lg font-bold text-textMain mb-2">No Infrastructure Allocated</h3><p class="text-sm text-textMuted mb-6">You haven't enrolled in any cohorts yet.</p><a href="explore.html" class="bg-primary text-white px-6 py-2 rounded-lg font-bold">Browse Catalog</a></div>`;
+                            return;
                         }
-                    });
+
+                        // Render each batch
+                        enrolledBatchesArray.forEach(async (batchId) => {
+                            const batchSnap = await getDoc(doc(db, "batches", batchId));
+                            if (batchSnap.exists()) {
+                                const data = batchSnap.data();
+                                const imgUrl = data.imageUrl || 'https://via.placeholder.com/400x200?text=VidyaPlus';
+                                const cardHtml = `
+                                    <div class="solid-card">
+                                        <div class="w-full h-[160px] bg-borderLight relative border-b border-borderLight">
+                                            <span class="absolute top-3 right-3 bg-textMain text-white text-[10px] font-bold px-2 py-1 rounded">SECURE</span>
+                                            <img src="${imgUrl}" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="p-5 flex-grow flex flex-col">
+                                            <div class="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">${data.subject || 'Module'}</div>
+                                            <h3 class="text-lg font-bold text-textMain mb-4 flex-grow leading-snug">${data.title}</h3>
+                                            <button onclick="window.startStudyProtocol('${batchId}')" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
+                                                Start Learning
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                grid.insertAdjacentHTML('beforeend', cardHtml);
+                            }
+                        });
+
+                    } else {
+                        grid.innerHTML = '<div class="col-span-full p-4 text-center">No profile found.</div>';
+                    }
 
                 } catch (error) {
-                    console.error("Fetch Error:", error);
-                    this.uiEngine.clearGrid();
-                    this.uiEngine.renderErrorState("Authorization failed while accessing encrypted sector.");
+                    grid.innerHTML = `<div class="col-span-full text-danger">Error: ${error.message}</div>`;
                 }
-            }
 
-            attachLogoutHandlers() {
-                const handleLogout = () => {
-                    signOut(auth).then(() => {
-                        window.location.replace("index.html");
-                    }).catch(err => alert("Protocol Error: Unable to terminate session."));
-                };
-                
-                const headerLogout = document.getElementById('btn-logout-header');
-                if(headerLogout) headerLogout.addEventListener('click', handleLogout);
+            } else {
+                window.location.replace("index.html");
             }
-        }
+        });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            window.AppSystem = new SecurityManager();
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.replace("index.html"));
         });
     </script>
 </body>
