@@ -12,7 +12,7 @@
             --surface: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --primary: #92400e; /* Professional Amber/Brown */
+            --primary: #92400e; 
             --primary-light: #fef3c7;
             --success: #059669;
             --border-color: #e2e8f0;
@@ -58,10 +58,7 @@
         .logo i { color: var(--primary); font-size: 1.8rem; }
         .logo span { font-size: 1.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
         
-        /* Global Search (Desktop) */
-        .search-bar {
-            position: relative; width: 350px; display: none;
-        }
+        .search-bar { position: relative; width: 350px; display: none; }
         @media (min-width: 1024px) { .search-bar { display: block; } }
         .search-bar input {
             width: 100%; padding: 10px 16px 10px 40px; border-radius: 20px;
@@ -71,14 +68,36 @@
         .search-bar input:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px var(--primary-light); }
         .search-bar i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 
-        /* Header Right Actions */
+        /* Header Right Actions & Profile Dropdown */
         .header-actions { display: flex; align-items: center; gap: 20px; }
         .icon-btn { position: relative; background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
         .icon-btn:hover { color: var(--primary); }
         .badge { position: absolute; top: -4px; right: -4px; background: #dc2626; color: white; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 10px; border: 2px solid var(--surface); }
 
+        .profile-container { position: relative; }
         .user-avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
         .user-avatar:hover { border-color: var(--primary-light); }
+        
+        .profile-dropdown {
+            position: absolute; right: 0; top: calc(100% + 10px);
+            background: var(--surface); border: 1px solid var(--border-color);
+            border-radius: 10px; box-shadow: var(--shadow-md); width: 200px;
+            display: flex; flex-direction: column; opacity: 0; visibility: hidden;
+            transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1001; overflow: hidden;
+        }
+        .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item {
+            padding: 12px 16px; text-decoration: none; color: var(--text-main);
+            font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 10px;
+            background: none; border: none; text-align: left; cursor: pointer; transition: 0.2s;
+        }
+        .dropdown-item:hover { background: var(--bg-color); color: var(--primary); }
+        .dropdown-item i { width: 20px; text-align: center; color: var(--text-muted); }
+        .dropdown-item:hover i { color: var(--primary); }
+        .dropdown-item.logout { border-top: 1px solid var(--border-color); color: #dc2626; }
+        .dropdown-item.logout i { color: #dc2626; }
+        .dropdown-item.logout:hover { background: #fef2f2; color: #b91c1c; }
 
         /* --- SIDEBAR --- */
         .content-wrapper { display: flex; flex: 1; margin-top: var(--header-height); }
@@ -145,7 +164,6 @@
         
         .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); line-height: 1.4; flex-grow: 1; }
         
-        /* Progress Bar inside Card */
         .progress-wrapper { margin-bottom: 15px; }
         .progress-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
         .progress-bar { width: 100%; height: 6px; background: var(--bg-color); border-radius: 3px; overflow: hidden; }
@@ -213,8 +231,14 @@
             </div>
             
             <div class="header-actions">
-                <button class="icon-btn"><i class="fas fa-bell"></i><span class="badge">3</span></button>
-                <div class="user-avatar" id="userIcon" onclick="logoutSystem()" title="Click to Terminate Session">?</div>
+                <button class="icon-btn"><i class="fas fa-bell"></i><span class="badge">0</span></button>
+                <div class="profile-container">
+                    <div class="user-avatar" id="profileToggle">?</div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="profile.html" class="dropdown-item"><i class="fas fa-user-circle"></i> View Profile</a>
+                        <button class="dropdown-item logout" onclick="logoutSystem()"><i class="fas fa-sign-out-alt"></i> Terminate Session</button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -246,14 +270,14 @@
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-fire"></i></div>
                             <div class="stat-info">
-                                <h4>14 Days</h4>
+                                <h4><span id="user-streak">0</span> Days</h4>
                                 <span>Study Streak</span>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon" style="color: #059669; background: #d1fae5;"><i class="fas fa-clock"></i></div>
                             <div class="stat-info">
-                                <h4>42 Hrs</h4>
+                                <h4><span id="user-watch-time">0</span> Hrs</h4>
                                 <span>Watch Time</span>
                             </div>
                         </div>
@@ -262,10 +286,10 @@
 
                 <div class="hero-banner">
                     <div class="hero-content">
-                        <span class="hero-tag">Resume Session</span>
-                        <h2>Electromagnetism: Biot-Savart Law Derivation</h2>
-                        <p>Class 12 Physics • Module 4 • You left off at 14:20</p>
-                        <button class="btn-resume" onclick="window.location.href='study.html'"><i class="fas fa-play"></i> Resume Lecture</button>
+                        <span class="hero-tag" id="hero-tag">Resume Session</span>
+                        <h2 id="last-topic">No active session found</h2>
+                        <p id="last-module">Start studying to track your progress</p>
+                        <button class="btn-resume" id="resume-btn" onclick="window.location.href='explore.html'"><i class="fas fa-play"></i> Start Learning</button>
                     </div>
                     <i class="fas fa-atom hero-graphic"></i>
                 </div>
@@ -300,6 +324,22 @@
     </div>
 
     <script>
+        // Profile Dropdown Toggle Script
+        const profileToggle = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        profileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && !profileToggle.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
         // Smooth scroll hiding for mobile nav (60fps optimized)
         let lastScrollY = window.scrollY;
         let ticking = false;
@@ -321,7 +361,6 @@
             }
         }, { passive: true });
     </script>
-
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -337,7 +376,7 @@
                 // Determine user display name or fallback to email part
                 let displayName = user.displayName || user.email.split('@')[0];
                 document.getElementById('user-display-name').innerText = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-                document.getElementById('userIcon').innerText = displayName.charAt(0).toUpperCase();
+                document.getElementById('profileToggle').innerText = displayName.charAt(0).toUpperCase();
                 
                 // Reveal Application UI smoothly
                 authGuard.style.opacity = '0';
@@ -366,7 +405,10 @@
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
-                            renderBatchCard(batchId, batchSnap.data());
+                            // Fetch real progress from enrollment doc or default to 0
+                            const enrollmentData = docSnap.data();
+                            const actualProgress = enrollmentData.progressPercentage || 0;
+                            renderBatchCard(batchId, batchSnap.data(), actualProgress);
                         }
                     });
                 } else {
@@ -385,12 +427,10 @@
             }
         }
 
-        function renderBatchCard(id, data) {
+        function renderBatchCard(id, data, progress) {
             const card = document.createElement('div');
             card.className = 'batch-card';
             
-            // Generate a random progress percentage for realism (Replace with real DB data later)
-            const randomProgress = Math.floor(Math.random() * 60) + 10; 
             const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/0f172a/ffffff?text=Academic+Module';
 
             card.innerHTML = `
@@ -404,10 +444,10 @@
                     <div class="progress-wrapper">
                         <div class="progress-labels">
                             <span>Syllabus Completion</span>
-                            <span>${randomProgress}%</span>
+                            <span>${progress}%</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${randomProgress}%;"></div>
+                            <div class="progress-fill" style="width: ${progress}%;"></div>
                         </div>
                     </div>
 
