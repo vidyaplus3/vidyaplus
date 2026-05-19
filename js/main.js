@@ -5,6 +5,7 @@ import { initAuth, AppState } from './auth.js';
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
+import './video-tracker.js';
 
 // ==========================================
 // API GATEWAY
