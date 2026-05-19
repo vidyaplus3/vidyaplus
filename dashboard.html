@@ -378,6 +378,29 @@
                 document.getElementById('user-display-name').innerText = displayName.charAt(0).toUpperCase() + displayName.slice(1);
                 document.getElementById('profileToggle').innerText = displayName.charAt(0).toUpperCase();
                 
+                // 🚀 NAYA CODE: Fetch Real Academic Stats from Firestore
+                try {
+                    const userRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        
+                        // 1. Set Streak
+                        const streakCount = userData.streak || 0;
+                        const streakEl = document.getElementById('user-streak');
+                        if (streakEl) streakEl.innerText = streakCount;
+                        
+                        // 2. Set Watch Time (Convert Seconds to Hours)
+                        const totalSecs = userData.totalWatchTimeSeconds || 0;
+                        const totalHours = Math.floor(totalSecs / 3600);
+                        const watchTimeEl = document.getElementById('user-watch-time');
+                        if (watchTimeEl) watchTimeEl.innerText = totalHours;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user stats:", error);
+                }
+
                 // Reveal Application UI smoothly
                 authGuard.style.opacity = '0';
                 setTimeout(() => {
