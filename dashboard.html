@@ -72,7 +72,7 @@
         .icon-btn:hover { color: var(--primary); }
         
         .profile-container { position: relative; }
-        .user-avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .user-avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; }
         
         .profile-dropdown {
             position: absolute; right: 0; top: calc(100% + 10px);
@@ -119,23 +119,9 @@
         .dashboard-header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 2rem; }
         
         .stats-container { display: flex; gap: 1.2rem; width: 100%; justify-content: flex-end; }
-        .stat-card { background: var(--surface); padding: 1.2rem 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-light); display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); min-width: 180px; }
+        .stat-card { background: var(--surface); padding: 1.2rem 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-light); display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-icon { width: 42px; height: 42px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
         .stat-info { display: flex; flex-direction: column; }
-
-        /* Continue Learning Hero */
-        .hero-banner {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: var(--radius-lg);
-            padding: 2.5rem; color: white; display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 3rem; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
-        }
-        .hero-content { position: relative; z-index: 2; max-width: 70%; }
-        .hero-tag { display: inline-block; background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.5px; text-transform: uppercase; }
-        .hero-banner h2 { font-size: 1.7rem; margin-bottom: 8px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
-        .hero-banner p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; font-weight: 500; }
-        .btn-resume { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(146, 64, 14, 0.3); }
-        .btn-resume:hover { background: #78350f; transform: translateY(-2px); }
-        .hero-graphic { font-size: 10rem; position: absolute; right: 2%; bottom: -30px; opacity: 0.05; color: white; transform: rotate(-15deg); }
 
         .section-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
         .view-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600; transition: 0.2s; }
@@ -240,7 +226,6 @@
         /* --- RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 1024px) {
             .main-content { padding: 2rem; }
-            .hero-content { max-width: 80%; }
         }
         @media (max-width: 768px) {
             .sidebar { display: none; }
@@ -250,14 +235,11 @@
             .dashboard-header { margin-bottom: 1.5rem; justify-content: center; }
             .stats-container { justify-content: center; flex-wrap: wrap; }
             .stat-card { flex: 1; min-width: 140px; padding: 1rem; }
-            .hero-banner { padding: 1.5rem; flex-direction: column; align-items: flex-start; margin-bottom: 2rem; }
-            .hero-content { max-width: 100%; }
-            .hero-graphic { display: none; }
             .batch-grid { grid-template-columns: 1fr; gap: 1.25rem; }
         }
     </style>
 </head>
-    <body>
+<body>
     <div id="authGuard">
         <div class="loader-ring"></div>
         <p style="margin-top: 1rem; font-weight: 600; color: var(--text-main);">Securing Academic Session...</p>
@@ -331,16 +313,6 @@
                     </div>
                 </div>
 
-                <div class="hero-banner">
-                    <div class="hero-content">
-                        <span class="hero-tag" id="hero-tag">Resume Session</span>
-                        <h2 id="last-topic">No active session found</h2>
-                        <p id="last-module">Start studying to track your progress</p>
-                        <button class="btn-resume" id="resume-btn" onclick="window.location.href='explore.html'"><i class="fas fa-play"></i> Start Learning</button>
-                    </div>
-                    <i class="fas fa-atom hero-graphic"></i>
-                </div>
-
                 <div class="section-title">
                     <span>Active Enrollments</span>
                     <a href="explore.html" class="view-all">Browse Catalog <i class="fas fa-arrow-right"></i></a>
@@ -354,7 +326,8 @@
 
             </main>
         </div>
-          <nav class="bottom-nav" id="bottomNav">
+        
+        <nav class="bottom-nav" id="bottomNav">
             <a href="dashboard.html" class="bottom-nav-item active">
                 <i class="fas fa-home"></i><span>Home</span>
             </a>
@@ -407,7 +380,8 @@
             }
         }, { passive: true });
     </script>
-        <script type="module">
+    
+    <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -461,21 +435,10 @@
 
                 myBatchGrid.innerHTML = ''; 
 
-                let latestEnrollment = null;
-                let latestTime = 0;
-
                 if (!enrollmentsSnap.empty) {
                     for (const docSnap of enrollmentsSnap.docs) {
                         const batchId = docSnap.id; 
                         const enrollmentData = docSnap.data();
-                        
-                        if (enrollmentData.lastUpdated) {
-                            let ms = enrollmentData.lastUpdated.toMillis ? enrollmentData.lastUpdated.toMillis() : 0;
-                            if (ms > latestTime) {
-                                latestTime = ms;
-                                latestEnrollment = { batchId, ...enrollmentData };
-                            }
-                        }
 
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
@@ -485,24 +448,13 @@
                             renderBatchCard(batchId, batchSnap.data(), actualProgress);
                         }
                     }
-
-                    if (latestEnrollment) {
-                        document.getElementById('last-topic').innerText = "Resume Active Session";
-                        document.getElementById('last-module').innerText = "Pick up right where you left off.";
-                        const resumeBtn = document.getElementById('resume-btn');
-                        resumeBtn.innerHTML = '<i class="fas fa-play"></i> Resume Class';
-                        resumeBtn.onclick = () => {
-                            window.location.href = `study.html?batch=${latestEnrollment.batchId}`;
-                        };
-                    }
-
                 } else {
                     myBatchGrid.innerHTML = `
                         <div style="grid-column: 1/-1; text-align:center; padding: 4rem 2rem; background: var(--surface); border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
                             <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
                             <h3 style="color: var(--text-main); font-size: 1.2rem; margin-bottom: 0.5rem;">No Active Enrollments</h3>
                             <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Begin your academic journey by exploring our catalog.</p>
-                            <button onclick="window.location.href='explore.html'" class="btn-resume" style="width: auto;">Browse Catalog</button>
+                            <button onclick="window.location.href='explore.html'" class="btn-resume" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; width: auto;">Browse Catalog</button>
                         </div>
                     `;
                 }
@@ -512,7 +464,7 @@
             }
         }
 
-        // 🚀 NEW: Render card with Sleek Premium Design 🚀
+        // 🚀 Render card with Sleek Premium Design 🚀
         function renderBatchCard(id, data, progress) {
             const card = document.createElement('div');
             card.className = 'batch-card';
