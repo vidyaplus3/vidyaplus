@@ -6,7 +6,7 @@
     <title>Student Portal | VidyaPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- DESIGN SYSTEM & VARIABLES --- */
+        /* --- DESIGN SYSTEM & VARIABLES (Sleek & Minimal) --- */
         :root {
             --bg-color: #f8fafc;
             --surface: #ffffff;
@@ -17,13 +17,13 @@
             --success: #059669;
             --border-color: #e2e8f0;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             
             --header-height: 70px;
             --sidebar-width: 260px;
             --bottom-nav-height: 65px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
+            --radius-md: 14px; /* Slightly softer corners for sleek look */
+            --radius-lg: 20px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
@@ -119,62 +119,60 @@
         /* --- MAIN DASHBOARD WORKSPACE --- */
         .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 2rem 3rem; max-width: 1600px; }
 
-        /* Welcome & Stats Row */
-        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
-        .greeting h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
-        .greeting p { color: var(--text-muted); margin-top: 5px; font-size: 1rem; }
+        /* Stats Row (Sleek placement) */
+        .dashboard-header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 2rem; }
         
-        .stats-container { display: flex; gap: 1.5rem; }
-        .stat-card { background: var(--surface); padding: 1rem 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; box-shadow: var(--shadow-sm); }
-        .stat-icon { width: 45px; height: 45px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-        .stat-info h4 { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
-        .stat-info span { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-
+        .stats-container { display: flex; gap: 1.2rem; width: 100%; justify-content: flex-end; }
+        .stat-card { background: var(--surface); padding: 1.2rem 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; box-shadow: var(--shadow-sm); min-width: 180px; }
+        .stat-icon { width: 42px; height: 42px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+        .stat-info { display: flex; flex-direction: column; }
+        
         /* Continue Learning Hero */
         .hero-banner {
-            background: linear-gradient(to right, #0f172a, #1e293b); border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: var(--radius-lg);
             padding: 2.5rem; color: white; display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 2.5rem; position: relative; overflow: hidden; box-shadow: var(--shadow-md);
+            margin-bottom: 3rem; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
         }
-        .hero-content { position: relative; z-index: 2; max-width: 60%; }
-        .hero-tag { display: inline-block; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); }
-        .hero-banner h2 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 700; }
-        .hero-banner p { color: #94a3b8; font-size: 1rem; margin-bottom: 20px; line-height: 1.5; }
-        .btn-resume { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: 0.2s; }
-        .btn-resume:hover { background: #78350f; }
-        .hero-graphic { font-size: 8rem; position: absolute; right: 5%; bottom: -20px; opacity: 0.1; color: white; }
+        .hero-content { position: relative; z-index: 2; max-width: 70%; }
+        .hero-tag { display: inline-block; background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.5px; text-transform: uppercase; }
+        .hero-banner h2 { font-size: 1.7rem; margin-bottom: 8px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+        .hero-banner p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; font-weight: 500; }
+        .btn-resume { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(146, 64, 14, 0.3); }
+        .btn-resume:hover { background: #78350f; transform: translateY(-2px); }
+        .hero-graphic { font-size: 10rem; position: absolute; right: 2%; bottom: -30px; opacity: 0.05; color: white; transform: rotate(-15deg); }
 
         /* Section Titles */
-        .section-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-        .view-all { font-size: 0.9rem; color: var(--primary); text-decoration: none; font-weight: 600; }
+        .section-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+        .view-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600; transition: 0.2s; }
+        .view-all:hover { opacity: 0.8; }
 
-        /* --- BATCH GRID & CARDS --- */
-        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        /* --- BATCH GRID & CARDS (Sleek & Professional) --- */
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
         
         .batch-card {
             background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;
+            overflow: hidden; transition: all 0.2s ease; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);
         }
-        .batch-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
-        .card-img { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; border-bottom: 1px solid var(--border-color); }
+        .batch-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+        .card-img { width: 100%; height: 150px; object-fit: cover; background: #e2e8f0; border-bottom: 1px solid var(--border-color); }
         
-        .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
         .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .subject-tag { font-size: 0.75rem; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
+        .subject-tag { font-size: 0.7rem; font-weight: 800; color: var(--primary); background: var(--primary-light); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); line-height: 1.4; flex-grow: 1; }
+        .card-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; color: var(--text-main); line-height: 1.4; flex-grow: 1; letter-spacing: -0.01em; }
         
         .progress-wrapper { margin-bottom: 15px; }
-        .progress-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
-        .progress-bar { width: 100%; height: 6px; background: var(--bg-color); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--success); border-radius: 3px; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .progress-bar { width: 100%; height: 5px; background: var(--bg-color); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); border-radius: 4px; transition: width 0.5s ease; }
 
-        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-outline:hover { background: var(--bg-color); border-color: var(--text-muted); }
+        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-main); padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+        .btn-outline:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
         /* --- SKELETON LOADERS --- */
         .skeleton { background: #e2e8f0; animation: pulse 1.5s infinite; border-radius: 4px; }
-        .skel-card { height: 350px; border-radius: var(--radius-md); }
+        .skel-card { height: 320px; border-radius: var(--radius-md); }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
         /* --- MOBILE NAVIGATION --- */
@@ -193,7 +191,6 @@
         /* --- RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 1024px) {
             .main-content { padding: 2rem; }
-            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
             .hero-content { max-width: 80%; }
         }
         @media (max-width: 768px) {
@@ -201,12 +198,13 @@
             .bottom-nav { display: flex; }
             .main-content { margin-left: 0; padding: 1.5rem 1rem; padding-bottom: calc(var(--bottom-nav-height) + 2rem); }
             .header { padding: 0 1rem; }
-            .hero-banner { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
+            .dashboard-header { margin-bottom: 1.5rem; justify-content: center; }
+            .stats-container { justify-content: center; flex-wrap: wrap; }
+            .stat-card { flex: 1; min-width: 140px; padding: 1rem; }
+            .hero-banner { padding: 1.5rem; flex-direction: column; align-items: flex-start; margin-bottom: 2rem; }
             .hero-content { max-width: 100%; }
             .hero-graphic { display: none; }
-            .stats-container { width: 100%; flex-wrap: wrap; }
-            .stat-card { flex: 1; min-width: 140px; padding: 1rem; }
-            .batch-grid { grid-template-columns: 1fr; }
+            .batch-grid { grid-template-columns: 1fr; gap: 1.25rem; }
         }
     </style>
 </head>
@@ -262,23 +260,23 @@
             <main class="main-content">
                 
                 <div class="dashboard-header">
-                    <div class="greeting">
-                        <h1>Welcome back, <span id="user-display-name">Scholar</span> 👋</h1>
-                        <p>Let's continue your academic preparation.</p>
-                    </div>
                     <div class="stats-container">
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-fire"></i></div>
                             <div class="stat-info">
-                                <h4><span id="user-streak">0</span> Days</h4>
-                                <span>Study Streak</span>
+                                <h4 style="font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 1.6rem; font-weight: 900; line-height: 1;">
+                                    <span id="user-streak">0</span> <span style="font-size: 0.9rem; font-weight: 700;">Days</span>
+                                </h4>
+                                <span style="margin-top: 2px;">Study Streak</span>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon" style="color: #059669; background: #d1fae5;"><i class="fas fa-clock"></i></div>
                             <div class="stat-info">
-                                <h4><span id="user-watch-time">0</span> Hrs</h4>
-                                <span>Watch Time</span>
+                                <h4 style="font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 1.6rem; font-weight: 900; line-height: 1;">
+                                    <span id="user-watch-time">0</span> <span style="font-size: 0.9rem; font-weight: 700;">Hrs</span>
+                                </h4>
+                                <span style="margin-top: 2px;">Watch Time</span>
                             </div>
                         </div>
                     </div>
@@ -333,14 +331,13 @@
             profileDropdown.classList.toggle('active');
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!profileDropdown.contains(e.target) && !profileToggle.contains(e.target)) {
                 profileDropdown.classList.remove('active');
             }
         });
 
-        // Smooth scroll hiding for mobile nav (60fps optimized)
+        // Smooth scroll hiding for mobile nav
         let lastScrollY = window.scrollY;
         let ticking = false;
         const bottomNav = document.getElementById('bottomNav');
@@ -370,15 +367,12 @@
         const appLayout = document.getElementById('appLayout');
         const myBatchGrid = document.getElementById('myBatchGrid');
 
-        // Authentication State Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Determine user display name or fallback to email part
                 let displayName = user.displayName || user.email.split('@')[0];
-                document.getElementById('user-display-name').innerText = displayName.charAt(0).toUpperCase() + displayName.slice(1);
                 document.getElementById('profileToggle').innerText = displayName.charAt(0).toUpperCase();
                 
-                // 🚀 NAYA CODE: Fetch Real Academic Stats from Firestore
+                // 🚀 Fetch Real Academic Stats from Firestore
                 try {
                     const userRef = doc(db, "users", user.uid);
                     const userSnap = await getDoc(userRef);
@@ -386,12 +380,10 @@
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         
-                        // 1. Set Streak
                         const streakCount = userData.streak || 0;
                         const streakEl = document.getElementById('user-streak');
                         if (streakEl) streakEl.innerText = streakCount;
                         
-                        // 2. Set Watch Time (Convert Seconds to Hours)
                         const totalSecs = userData.totalWatchTimeSeconds || 0;
                         const totalHours = Math.floor(totalSecs / 3600);
                         const watchTimeEl = document.getElementById('user-watch-time');
@@ -401,7 +393,6 @@
                     console.error("Error fetching user stats:", error);
                 }
 
-                // Reveal Application UI smoothly
                 authGuard.style.opacity = '0';
                 setTimeout(() => {
                     authGuard.style.display = 'none';
@@ -419,21 +410,47 @@
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
 
-                myBatchGrid.innerHTML = ''; // Clear Skeletons
+                myBatchGrid.innerHTML = ''; 
+
+                let latestEnrollment = null;
+                let latestTime = 0;
 
                 if (!enrollmentsSnap.empty) {
-                    enrollmentsSnap.forEach(async (docSnap) => {
+                    // Loop sequentially to safely resolve promises and find latest session
+                    for (const docSnap of enrollmentsSnap.docs) {
                         const batchId = docSnap.id; 
+                        const enrollmentData = docSnap.data();
+                        
+                        // Active Session Tracker Logic
+                        if (enrollmentData.lastUpdated) {
+                            let ms = enrollmentData.lastUpdated.toMillis ? enrollmentData.lastUpdated.toMillis() : 0;
+                            if (ms > latestTime) {
+                                latestTime = ms;
+                                latestEnrollment = { batchId, ...enrollmentData };
+                            }
+                        }
+
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
-                            // Fetch real progress from enrollment doc or default to 0
-                            const enrollmentData = docSnap.data();
                             const actualProgress = enrollmentData.progressPercentage || 0;
                             renderBatchCard(batchId, batchSnap.data(), actualProgress);
                         }
-                    });
+                    }
+
+                    // 🚨 DYNAMIC HERO BANNER RENDER
+                    if (latestEnrollment) {
+                        document.getElementById('last-topic').innerText = "Resume Active Session";
+                        document.getElementById('last-module').innerText = "Pick up right where you left off.";
+                        const resumeBtn = document.getElementById('resume-btn');
+                        resumeBtn.innerHTML = '<i class="fas fa-play"></i> Resume Class';
+                        resumeBtn.onclick = () => {
+                            // Seedha classroom open karega
+                            window.location.href = `study.html?batch=${latestEnrollment.batchId}`;
+                        };
+                    }
+
                 } else {
                     myBatchGrid.innerHTML = `
                         <div style="grid-column: 1/-1; text-align:center; padding: 4rem 2rem; background: var(--surface); border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
@@ -450,6 +467,7 @@
             }
         }
 
+        // Render card with sleek and minimal styling applied in CSS
         function renderBatchCard(id, data, progress) {
             const card = document.createElement('div');
             card.className = 'batch-card';
@@ -482,7 +500,6 @@
             myBatchGrid.appendChild(card);
         }
 
-        // Global Logout Function
         window.logoutSystem = function() {
             if(confirm("Are you sure you want to terminate the current session?")) {
                 signOut(auth).then(() => {
