@@ -1,393 +1,354 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="antialiased scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Study | VidyaPlus</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>My Dashboard | VidyaPlus</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#f1f5f9',       /* Solid slate background */
+                        surface: '#ffffff',    /* Pure solid white */
+                        primary: '#1d4ed8',    /* Deep enterprise blue */
+                        primaryDark: '#1e3a8a',
+                        textMain: '#0f172a',   /* Slate 900 for text */
+                        textMuted: '#64748b',
+                        borderLight: '#e2e8f0',
+                        danger: '#ef4444'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        /* --- CORE VARIABLES --- */
+        /* =========================================================
+           1. CORE RESET
+           ========================================================= */
         :root {
-            /* Black, White, and Brown/Amber Theme */
-            --bg-color: #f9fafb; /* Very light gray/white */
-            --surface: #ffffff;
-            --text-main: #111827; /* Near black */
-            --text-muted: #6b7280;
-            --primary: #92400e; /* Sophisticated amber/brown */
-            --primary-hover: #b45309;
-            --border-color: #e5e7eb;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            
-            /* Navigation Heights */
-            --header-height: 64px;
+            --sidebar-width: 260px;
+            --header-height: 70px;
             --bottom-nav-height: 65px;
-            --sidebar-width: 250px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
+        body {
+            background-color: theme('colors.base');
+            color: theme('colors.textMain');
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- HEADER --- */
-        .header {
-            background: var(--surface);
+        /* =========================================================
+           2. SOLID UI COMPONENTS (NO TRANSPARENCY)
+           ========================================================= */
+        .top-header {
+            position: sticky;
+            top: 0;
             height: var(--header-height);
-            padding: 0 1.5rem;
+            background-color: theme('colors.surface'); /* SOLID WHITE */
+            border-bottom: 1px solid theme('colors.borderLight');
+            z-index: 50;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
         }
 
-        .logo-container { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .logo-icon { color: var(--primary); font-size: 1.5rem; }
-        .logo-text { font-size: 1.4rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
-
-        /* Profile & Dropdown */
-        .profile-container { position: relative; }
-        .profile-btn {
-            background: none; border: none; cursor: pointer;
-            display: flex; align-items: center; gap: 10px;
-            padding: 4px; border-radius: 50%; transition: 0.2s;
-        }
-        .user-avatar {
-            width: 38px; height: 38px; background: var(--primary); color: var(--surface);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 1.1rem;
-        }
-        
-        .profile-dropdown {
-            position: absolute; right: 0; top: 50px;
-            background: var(--surface); border: 1px solid var(--border-color);
-            border-radius: 8px; box-shadow: var(--shadow-md);
-            width: 180px; display: none; flex-direction: column;
-            overflow: hidden; z-index: 1001;
-        }
-        .profile-dropdown.active { display: flex; }
-        .dropdown-item {
-            padding: 12px 16px; text-decoration: none; color: var(--text-main);
-            font-size: 0.95rem; display: flex; align-items: center; gap: 10px;
-            background: none; border: none; text-align: left; width: 100%; cursor: pointer;
-        }
-        .dropdown-item:hover { background: var(--bg-color); }
-        .dropdown-item.logout { color: #dc2626; border-top: 1px solid var(--border-color); }
-
-        /* --- LAYOUT WRAPPER --- */
-        .app-body {
-            display: flex;
-            margin-top: var(--header-height);
-            flex: 1;
+        .desktop-sidebar {
+            position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
+            background-color: theme('colors.surface'); /* SOLID WHITE */
+            border-right: 1px solid theme('colors.borderLight');
+            z-index: 60; display: flex; flex-direction: column;
+            transform: translateX(0); transition: transform 0.3s ease;
         }
 
-        /* --- DESKTOP SIDEBAR --- */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--surface);
-            border-right: 1px solid var(--border-color);
-            position: fixed;
-            top: var(--header-height);
-            bottom: 0;
-            left: 0;
-            padding: 1.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            z-index: 990;
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 32px;
+            min-height: calc(100vh - var(--header-height));
         }
 
-        .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; text-decoration: none; color: var(--text-muted);
-            font-weight: 600; border-radius: 8px; transition: 0.2s;
-            font-size: 0.95rem;
+        .nav-link {
+            display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+            color: theme('colors.textMuted'); font-weight: 600; text-decoration: none;
+            border-left: 3px solid transparent; transition: all 0.2s ease;
         }
-        .nav-item:hover { background: var(--bg-color); color: var(--text-main); }
-        .nav-item.active { background: #fef3c7; color: var(--primary); }
-        .nav-item i { font-size: 1.1rem; width: 20px; text-align: center; }
+        .nav-link:hover { background-color: theme('colors.base'); color: theme('colors.textMain'); }
+        .nav-link.active { background-color: #eff6ff; color: theme('colors.primary'); border-left-color: theme('colors.primary'); }
 
-        /* --- MOBILE BOTTOM NAV --- */
+        .solid-card {
+            background-color: theme('colors.surface');
+            border: 1px solid theme('colors.borderLight');
+            border-radius: 12px;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .solid-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            border-color: theme('colors.borderLight');
+        }
+
+        .batch-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;
+        }
+
+        /* =========================================================
+           3. MOBILE BOTTOM NAVIGATION (UPDATED ORDER & SOLID)
+           ========================================================= */
         .bottom-nav {
-            display: none; /* Hidden on desktop */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            height: var(--bottom-nav-height);
-            border-top: 1px solid var(--border-color);
-            z-index: 1000;
-            justify-content: space-around;
-            align-items: center;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 60fps smooth hide */
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .bottom-nav.hidden {
-            transform: translateY(100%);
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--bottom-nav-height);
+            background-color: theme('colors.surface'); /* SOLID WHITE */
+            border-top: 1px solid theme('colors.borderLight');
+            z-index: 60; display: none; justify-content: space-around; align-items: center;
+            transition: transform 0.3s ease;
         }
         .bottom-nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            text-decoration: none; color: var(--text-muted);
-            font-size: 0.75rem; font-weight: 600; flex: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: theme('colors.textMuted'); font-size: 0.7rem; font-weight: 600; width: 100%; height: 100%;
         }
-        .bottom-nav-item i { font-size: 1.25rem; }
-        .bottom-nav-item.active { color: var(--primary); }
+        .bottom-nav-item svg { width: 22px; height: 22px; margin-bottom: 4px; transition: 0.2s; }
+        .bottom-nav-item.active { color: theme('colors.primary'); }
+        .bottom-nav-item.active svg { transform: translateY(-2px); stroke-width: 2.5; }
 
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 2rem;
-            max-width: 1200px;
-            width: 100%;
+        /* Profile Dropdown Styling */
+        .profile-dropdown-content {
+            opacity: 0; visibility: hidden; transform: translateY(10px);
+            transition: all 0.2s ease;
         }
-
-        .section-header { margin-bottom: 2rem; }
-        .section-header h1 { font-size: 1.75rem; color: var(--text-main); font-weight: 700; }
-        .section-header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
-
-        /* --- MINIMAL BATCH GRID --- */
-        .batch-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
+        .profile-dropdown-wrapper:hover .profile-dropdown-content {
+            opacity: 1; visibility: visible; transform: translateY(0);
         }
 
-        .batch-card {
-            background: var(--surface);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-        .batch-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .card-img { width: 100%; height: 160px; object-fit: cover; background: var(--bg-color); border-bottom: 1px solid var(--border-color); }
-        
-        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .card-subject { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        .card-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; line-height: 1.4; flex-grow: 1; }
-        
-        .btn-primary {
-            display: block; width: 100%; text-align: center;
-            background: var(--text-main); color: var(--surface);
-            padding: 10px; border-radius: 6px; font-weight: 600; font-size: 0.95rem;
-            text-decoration: none; border: none; cursor: pointer; transition: 0.2s;
-        }
-        .btn-primary:hover { background: var(--primary); }
-
-        .status-message { text-align: center; padding: 3rem; color: var(--text-muted); grid-column: 1/-1; border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface); }
-
-        /* --- RESPONSIVE DESIGN --- */
         @media (max-width: 768px) {
-            .sidebar { display: none; } /* Hide desktop sidebar */
-            .bottom-nav { display: flex; } /* Show mobile bottom nav */
-            .main-content { margin-left: 0; padding: 1.5rem 1rem; padding-bottom: calc(var(--bottom-nav-height) + 1.5rem); }
-            .header { padding: 0 1rem; }
+            .desktop-sidebar { transform: translateX(-100%); }
+            .top-header { left: 0; padding: 0 16px; margin-left: 0; }
+            .main-content { margin-left: 0; padding: 16px; padding-bottom: 90px; }
+            .bottom-nav { display: flex; }
         }
+
+        /* Skeleton Loaders */
+        @keyframes pulse-bg { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .skeleton { background-color: theme('colors.borderLight'); animation: pulse-bg 1.5s infinite; border-radius: 4px; }
     </style>
 </head>
-<body>
-    <header class="header">
-        <a href="dashboard.html" class="logo-container">
-            <i class="fas fa-graduation-cap logo-icon"></i>
-            <span class="logo-text">VidyaPlus</span>
-        </a>
-        
-        <div class="profile-container">
-            <button class="profile-btn" id="profileToggle">
-                <div class="user-avatar" id="userIcon">?</div>
-            </button>
-            <div class="profile-dropdown" id="profileDropdown">
-                <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Signed in as</div>
-                    <div id="user-email-display" style="font-size: 0.9rem; font-weight: 600; color: var(--text-main); word-break: break-all;">Loading...</div>
-                </div>
-                <a href="profile.html" class="dropdown-item"><i class="fas fa-user-circle"></i> View Profile</a>
-                <button id="logout-action" class="dropdown-item logout"><i class="fas fa-sign-out-alt"></i> Log Out</button>
-            </div>
+<body class="hidden" id="secure-body">
+ 
+    <aside class="desktop-sidebar">
+        <div class="h-[70px] flex items-center px-6 border-b border-borderLight">
+            <svg class="w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            <span class="text-xl font-bold text-textMain">VidyaPlus</span>
         </div>
-    </header>
-
-    <div class="app-body">
-        <nav class="sidebar">
-            <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i> Explore</a>
-            <a href="dashboard.html" class="nav-item active"><i class="fas fa-book-open"></i> My Batches</a>
-            <a href="study.html" class="nav-item"><i class="fas fa-play-circle"></i> Study</a>
+        <nav class="flex flex-col gap-1 py-6">
+            <a href="explore.html" class="nav-link">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Explore Catalog
+            </a>
+            <a href="dashboard.html" class="nav-link active">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                My Infrastructure
+            </a>
         </nav>
+    </aside>
 
-        <main class="main-content">
-            <div class="section-header">
-                <h1>My Enrolled Batches</h1>
-                <p>Select a batch to continue your academic progress.</p>
+    <div class="md:ml-[260px]">
+        
+        <header class="top-header">
+            <div class="flex items-center gap-2 md:gap-4">
+                <div class="md:hidden font-bold text-lg text-primary flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                    VidyaPlus
+                </div>
+                <h1 class="hidden md:block text-xl font-bold text-textMain">Dashboard</h1>
+            </div>
+
+            <div class="relative profile-dropdown-wrapper cursor-pointer py-2">
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-bold text-textMain" id="header-name">Loading...</div>
+                        <div class="text-xs text-textMuted" id="header-email">identifying...</div>
+                    </div>
+                    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold" id="header-avatar">?</div>
+                </div>
+
+                <div class="profile-dropdown-content absolute right-0 top-full mt-1 w-48 bg-surface border border-borderLight rounded-xl shadow-lg z-50 overflow-hidden">
+                    <div class="p-2 border-b border-borderLight text-center md:hidden">
+                        <div class="text-sm font-bold text-textMain" id="mobile-dropdown-name">Name</div>
+                    </div>
+                    <div class="p-2">
+                        <button id="btn-logout" class="w-full text-left px-3 py-2 text-sm font-bold text-danger hover:bg-red-50 rounded-md transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Terminate Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content max-w-6xl mx-auto">
+            <div class="flex justify-between items-end mb-6 border-b border-borderLight pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-textMain tracking-tight">Provisioned Infrastructure</h2>
+                    <p class="text-sm text-textMuted mt-1">Access your enrolled cohorts and study materials.</p>
+                </div>
+                <a href="explore.html" class="hidden md:inline-flex text-sm font-bold text-primary hover:underline items-center gap-1">Browse Catalog <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
             </div>
 
             <div class="batch-grid" id="myBatchGrid">
-                <div class="status-message">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 10px; color: var(--primary);"></i>
-                    <br>Retrieving enrolled data...
+                <div class="solid-card">
+                    <div class="skeleton w-full h-[160px]"></div>
+                    <div class="p-5 flex-grow"><div class="skeleton h-4 w-1/4 mb-3"></div><div class="skeleton h-6 w-3/4 mb-6"></div><div class="skeleton h-10 w-full mt-auto"></div></div>
                 </div>
+                <div class="solid-card">
+                    <div class="skeleton w-full h-[160px]"></div>
+                    <div class="p-5 flex-grow"><div class="skeleton h-4 w-1/4 mb-3"></div><div class="skeleton h-6 w-3/4 mb-6"></div><div class="skeleton h-10 w-full mt-auto"></div></div>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center md:hidden pb-10">
+                <a href="explore.html" class="block w-full py-3 border border-borderLight rounded-lg text-sm font-bold text-textMain bg-surface">Browse More Batches</a>
             </div>
         </main>
     </div>
 
-    <nav class="bottom-nav" id="bottomNav">
+    <nav class="bottom-nav" id="bottom-nav">
         <a href="explore.html" class="bottom-nav-item">
-            <i class="fas fa-compass"></i>
-            <span>Explore</span>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            Explore
         </a>
         <a href="dashboard.html" class="bottom-nav-item active">
-            <i class="fas fa-book-open"></i>
-            <span>My Batches</span>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            Study
         </a>
-        <a href="study.html" class="bottom-nav-item">
-            <i class="fas fa-play-circle"></i>
-            <span>Study</span>
+        <a href="#" class="bottom-nav-item" id="mobile-profile-trigger">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            Profile
         </a>
     </nav>
-
-    <script>
-        // Profile Dropdown Toggle
-        const profileToggle = document.getElementById('profileToggle');
-        const profileDropdown = document.getElementById('profileDropdown');
-
-        profileToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdown.classList.toggle('active');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!profileDropdown.contains(e.target) && !profileToggle.contains(e.target)) {
-                profileDropdown.classList.remove('active');
-            }
-        });
-
-        // 60fps Mobile Bottom Nav Scroll Hide/Show Logic
-        let lastScrollY = window.scrollY;
-        let ticking = false;
-        const bottomNav = document.getElementById('bottomNav');
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const currentScrollY = window.scrollY;
-                    
-                    // Hide if scrolling down and past 50px, show if scrolling up
-                    if (currentScrollY > lastScrollY && currentScrollY > 50) {
-                        bottomNav.classList.add('hidden');
-                    } else {
-                        bottomNav.classList.remove('hidden');
-                    }
-                    
-                    lastScrollY = currentScrollY;
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true }); // passive: true ensures smooth scrolling performance
-    </script>
-    <script type="module">
+        <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const myBatchGrid = document.getElementById('myBatchGrid');
+        // 🚨 STUDY BUTTON FIX: Explicit Window Binding
+        window.startStudySession = function(batchId) {
+            window.location.href = `study.html?batch=${batchId}`;
+        };
 
-        // Security Guard
+        const grid = document.getElementById('myBatchGrid');
+        const secureBody = document.getElementById('secure-body');
+        const bottomNav = document.getElementById('bottom-nav');
+        let lastScrollY = window.scrollY;
+
+        // Auto-hide bottom nav on scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > 50) {
+                bottomNav.style.transform = 'translateY(100%)';
+            } else {
+                bottomNav.style.transform = 'translateY(0)';
+            }
+            lastScrollY = window.scrollY;
+        }, { passive: true });
+
+        // Mobile Profile Click Logic
+        document.getElementById('mobile-profile-trigger').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert("Profile section is currently under development. To logout, use the desktop view header.");
+        });
+
+        // 🚨 SECURITY & FETCHING SYSTEM
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // UI Updates
-                document.getElementById('user-email-display').innerText = user.email;
-                document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
+                // Verified User -> Show UI
+                secureBody.classList.remove('hidden');
+
+                // Update Profile Details
+                const initial = user.email.charAt(0).toUpperCase();
+                const displayName = user.displayName || user.email.split('@')[0];
                 
-                // Fetch batches
-                fetchMyBatches(user.uid);
+                document.getElementById('header-avatar').innerText = initial;
+                document.getElementById('header-name').innerText = displayName;
+                document.getElementById('header-email').innerText = user.email;
+                document.getElementById('mobile-dropdown-name').innerText = displayName;
+
+                try {
+                    // Fetch from 'users' doc using array (As requested)
+                    const userRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    grid.innerHTML = '';
+
+                    if (userSnap.exists()) {
+                        const enrolledBatchesArray = userSnap.data().enrolledBatches || [];
+
+                        if (enrolledBatchesArray.length === 0) {
+                            grid.innerHTML = `
+                                <div class="col-span-full p-10 text-center flex flex-col items-center">
+                                    <svg class="w-16 h-16 text-borderDark mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    <h3 class="text-lg font-bold text-textMain mb-2">No Infrastructure Allocated</h3>
+                                    <p class="text-sm text-textMuted mb-6">You haven't enrolled in any cohorts yet.</p>
+                                    <a href="explore.html" class="bg-primary hover:bg-primaryDark text-white px-6 py-2 rounded-lg font-bold transition-colors">Browse Catalog</a>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        // Render Batches
+                        for (const batchId of enrolledBatchesArray) {
+                            const batchSnap = await getDoc(doc(db, "batches", batchId));
+                            if (batchSnap.exists()) {
+                                const data = batchSnap.data();
+                                const imgUrl = data.imageUrl || 'https://via.placeholder.com/400x200?text=VidyaPlus';
+                                
+                                const cardHtml = `
+                                    <div class="solid-card group">
+                                        <div class="w-full h-[160px] bg-borderLight relative border-b border-borderLight overflow-hidden">
+                                            <span class="absolute top-3 right-3 bg-textMain text-white text-[10px] font-bold px-2 py-1 rounded z-10">SECURE</span>
+                                            <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                        </div>
+                                        <div class="p-5 flex-grow flex flex-col">
+                                            <div class="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">${data.subject || 'Module'}</div>
+                                            <h3 class="text-lg font-bold text-textMain mb-4 flex-grow leading-snug">${data.title || 'Untitled'}</h3>
+                                            <button onclick="window.startStudySession('${batchId}')" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
+                                                Start Learning
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                grid.insertAdjacentHTML('beforeend', cardHtml);
+                            }
+                        }
+
+                    } else {
+                        grid.innerHTML = '<div class="col-span-full p-4 text-center font-bold text-textMuted">Profile not initialized.</div>';
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    grid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-danger border border-danger/20 rounded font-bold text-sm">System Error: Unable to fetch infrastructure data.</div>`;
+                }
+
             } else {
-                window.location.replace("login.html");
+                // 🚨 SECURITY ENFORCEMENT: Kick unauthenticated users immediately
+                window.location.replace("index.html");
             }
         });
 
-        async function fetchMyBatches(uid) {
-            try {
-                const enrollmentsRef = collection(db, "users", uid, "enrollments");
-                const enrollmentsSnap = await getDocs(enrollmentsRef);
-
-                myBatchGrid.innerHTML = ''; 
-
-                if (!enrollmentsSnap.empty) {
-                    enrollmentsSnap.forEach(async (docSnap) => {
-                        const batchId = docSnap.id; 
-                        const batchRef = doc(db, "batches", batchId);
-                        const batchSnap = await getDoc(batchRef);
-                        
-                        if (batchSnap.exists()) {
-                            renderBatchCard(batchId, batchSnap.data());
-                        }
-                    });
-                } else {
-                    showEmptyState();
-                }
-
-            } catch (error) {
-                console.error("Error fetching enrolled batches:", error);
-                myBatchGrid.innerHTML = '<div class="status-message" style="color:#dc2626;">Error retrieving data. Please verify your connection.</div>';
-            }
-        }
-
-        function showEmptyState() {
-            myBatchGrid.innerHTML = `
-                <div class="status-message">
-                    <p style="margin-bottom: 15px; color: var(--text-main); font-weight: 600;">No enrollments found.</p>
-                    <a href="explore.html" class="btn-primary" style="display: inline-block; width: auto; padding: 10px 24px;">Explore Available Batches</a>
-                </div>
-            `;
-        }
-
-        function renderBatchCard(id, data) {
-            const card = document.createElement('div');
-            card.className = 'batch-card';
-            
-            const imgUrl = data.imageUrl ? data.imageUrl : 'https://via.placeholder.com/400x200?text=VidyaPlus+Academic';
-
-            card.innerHTML = `
-                <img src="${imgUrl}" alt="Batch Image" class="card-img">
-                <div class="card-body">
-                    <div class="card-subject">${data.subject || 'Comprehensive Study'}</div>
-                    <div class="card-title">${data.title}</div>
-                    <button class="btn-primary" onclick="startStudying('${id}')">Access Materials</button>
-                </div>
-            `;
-            myBatchGrid.appendChild(card);
-        }
-        
-        window.startStudying = function(batchId) {
-            window.location.href = "study.html?batch=" + batchId;
-        };
-        
-        document.getElementById('logout-action').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.replace("index.html");
-            }).catch((error) => {
-                alert("Sign-out process encountered an error.");
-            });
+        // Logout Event
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.replace("index.html"));
         });
     </script>
 </body>
