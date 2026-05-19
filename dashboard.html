@@ -3,1589 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="description" content="VidyaPlus - Premier Student Learning Portal">
-    <meta name="theme-color" content="#92400e">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-{NONCE}' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self' https://www.gstatic.com https://firebaseapp.com; frame-src 'none'; object-src 'none';">
-    
-    <title>Dashboard | VidyaPlus - Student Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVJkEZSMUkrQ6usKnu8CQjx7dFLcKHb8FQJCZT9xmBLd0aPFcUCzoiJ5FHZOC5vQRmlrP40TR8w==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <title>Student Portal | VidyaPlus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* ============================================
-           🎨 PREMIUM DESIGN SYSTEM & VARIABLES
-           ============================================ */
+        /* --- PREMIUM DESIGN SYSTEM & VARIABLES --- */
         :root {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #f1f5f9;
+            --bg-color: #f4f7f9;
             --surface: #ffffff;
-            --surface-hover: #f8fafc;
-            
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            
-            --brand-primary: #92400e;
-            --brand-light: #fef3c7;
-            --brand-lighter: #fef9e7;
-            --brand-dark: #78350f;
-            
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --primary: #2563eb; 
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
             --success: #10b981;
-            --success-light: #d1fae5;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            
-            --border-color: #e2e8f0;
-            --border-light: #f1f5f9;
-            --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.03), 0 1px 1px 0 rgba(15, 23, 42, 0.06);
-            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
             
             --header-height: 72px;
-            --sidebar-width: 280px;
-            --bottom-nav-height: 68px;
-            --radius-sm: 8px;
-            --radius-md: 12px;
+            --sidebar-width: 260px;
+            --bottom-nav-height: 65px;
+            --radius-md: 10px;
             --radius-lg: 16px;
-            --radius-xl: 20px;
-            
-            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-        html {
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.6;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        /* ============================================
-           🔐 AUTH GUARD - Secure Session Loading
-           ============================================ */
+        /* --- AUTH GUARD --- */
         #authGuard {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--surface);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity var(--transition-slow) ease;
-            backdrop-filter: blur(8px);
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--surface); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.4s ease;
         }
-
-        .loader-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2rem;
-        }
-
         .loader-ring {
-            width: 56px;
-            height: 56px;
-            border: 3px solid var(--border-light);
-            border-top-color: var(--brand-primary);
-            border-radius: 50%;
-            animation: spin-smooth 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            width: 40px; height: 40px; border: 3px solid var(--border-color);
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .loader-text {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            letter-spacing: 0.3px;
-        }
+        /* --- LAYOUT ARCHITECTURE --- */
+        #appLayout { display: none; flex-direction: column; min-height: 100vh; }
 
-        .loader-subtext {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        @keyframes spin-smooth {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ============================================
-           📐 LAYOUT ARCHITECTURE
-           ============================================ */
-        #appLayout {
-            display: none;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* ============================================
-           🎯 HEADER - Premium Navigation
-           ============================================ */
+        /* --- HEADER (Fixed & Mobile Responsive) --- */
         .header {
-            height: var(--header-height);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 0 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
+            height: var(--header-height); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px);
+            padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             border-bottom: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 3rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            transition: var(--transition-fast);
-        }
-
-        .logo:hover {
-            transform: translateY(-2px);
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-dark) 100%);
-            border-radius: var(--radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
-
-        .logo-text {
-            font-size: 1.35rem;
-            font-weight: 900;
-            color: var(--text-primary);
-            letter-spacing: -0.8px;
-        }
-
-        .search-bar {
-            position: relative;
-            width: 360px;
-            display: none;
-        }
-
-        @media (min-width: 1024px) {
-            .search-bar {
-                display: block;
-            }
-        }
-
+        .header-left { display: flex; align-items: center; gap: 3rem; flex: 1; }
+        .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .logo i { color: var(--primary); font-size: 1.6rem; }
+        .logo span { font-size: 1.4rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
+        
+        .search-bar { position: relative; max-width: 400px; width: 100%; display: flex; align-items: center; }
         .search-bar input {
-            width: 100%;
-            padding: 10px 16px 10px 40px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
-            font-size: 0.9rem;
-            font-family: inherit;
-            color: var(--text-primary);
-            transition: var(--transition-fast);
+            width: 100%; padding: 10px 16px 10px 42px; border-radius: 8px;
+            border: 1px solid var(--border-color); background: var(--bg-color);
+            font-size: 0.9rem; transition: all 0.2s ease; color: var(--text-main);
         }
+        .search-bar input:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px var(--primary-light); }
+        .search-bar i { position: absolute; left: 14px; color: var(--text-muted); font-size: 0.9rem; }
 
-        .search-bar input::placeholder {
-            color: var(--text-muted);
-        }
+        /* Header Right Actions */
+        .header-actions { display: flex; align-items: center; gap: 24px; }
+        .icon-btn { position: relative; background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .icon-btn:hover { color: var(--text-main); }
+        .badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 600; padding: 2px 6px; border-radius: 12px; border: 2px solid var(--surface); }
 
-        .search-bar input:focus {
-            outline: none;
-            border-color: var(--brand-primary);
-            background: var(--surface);
-            box-shadow: 0 0 0 3px var(--brand-lighter);
-        }
-
-        .search-bar i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .icon-btn {
-            position: relative;
-            background: none;
-            border: none;
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: var(--transition-fast);
-            padding: 8px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-btn:hover {
-            color: var(--brand-primary);
-            background: var(--bg-secondary);
-        }
-
-        .badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 18px;
-            height: 18px;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            font-size: 0.65rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .profile-container {
-            position: relative;
-        }
-
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-dark) 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition-fast);
-            border: 2px solid transparent;
-        }
-
-        .user-avatar:hover {
-            transform: scale(1.05);
-            border-color: var(--brand-light);
-        }
-
+        .profile-container { position: relative; }
+        .user-avatar { width: 38px; height: 38px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); transition: all 0.2s; }
+        .user-avatar:hover { background: var(--primary); color: white; }
+        
         .profile-dropdown {
-            position: absolute;
-            right: 0;
-            top: calc(100% + 12px);
-            background: var(--surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-xl);
-            width: 220px;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-8px);
-            transition: all var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1001;
-            overflow: hidden;
-            pointer-events: none;
+            position: absolute; right: 0; top: calc(100% + 12px);
+            background: var(--surface); border: 1px solid var(--border-color);
+            border-radius: 8px; box-shadow: var(--shadow-lg); width: 220px;
+            display: flex; flex-direction: column; opacity: 0; visibility: hidden;
+            transform: translateY(-8px); transition: all 0.2s ease;
+            z-index: 1001; overflow: hidden;
         }
-
-        .profile-dropdown.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
+        .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
         .dropdown-item {
-            padding: 12px 16px;
-            text-decoration: none;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: none;
-            border: none;
-            text-align: left;
-            cursor: pointer;
-            transition: var(--transition-fast);
+            padding: 12px 16px; text-decoration: none; color: var(--text-muted);
+            font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 12px;
+            background: none; border: none; text-align: left; cursor: pointer; transition: 0.2s;
         }
+        .dropdown-item:hover { background: var(--bg-color); color: var(--text-main); }
+        .dropdown-item i { width: 16px; text-align: center; font-size: 1rem; }
+        .dropdown-item.logout { border-top: 1px solid var(--border-color); color: #ef4444; }
+        .dropdown-item.logout i { color: #ef4444; }
+        .dropdown-item.logout:hover { background: #fef2f2; }
 
-        .dropdown-item:hover {
-            background: var(--bg-secondary);
-            color: var(--brand-primary);
-        }
-
-        .dropdown-item i {
-            width: 18px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        .dropdown-item:hover i {
-            color: var(--brand-primary);
-        }
-
-        .dropdown-item.logout {
-            border-top: 1px solid var(--border-color);
-            color: var(--danger);
-        }
-
-        .dropdown-item.logout i {
-            color: var(--danger);
-        }
-
-        .dropdown-item.logout:hover {
-            background: rgba(239, 68, 68, 0.08);
-            color: #dc2626;
-        }
-
-        /* ============================================
-           🗂️ SIDEBAR - Premium Navigation
-           ============================================ */
-        .content-wrapper {
-            display: flex;
-            flex: 1;
-            margin-top: var(--header-height);
-        }
-
+        /* --- SIDEBAR --- */
+        .content-wrapper { display: flex; flex: 1; margin-top: var(--header-height); }
         .sidebar {
-            width: var(--sidebar-width);
-            background: var(--surface);
-            border-right: 1px solid var(--border-color);
-            position: fixed;
-            top: var(--header-height);
-            bottom: 0;
-            left: 0;
-            padding: 2rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 990;
-            overflow-y: auto;
-            overflow-x: hidden;
+            width: var(--sidebar-width); background: var(--surface); border-right: 1px solid var(--border-color);
+            position: fixed; top: var(--header-height); bottom: 0; left: 0;
+            padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 4px; z-index: 990; overflow-y: auto;
         }
-
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .sidebar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        .nav-label {
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            padding: 12px 16px;
-            margin-top: 16px;
-        }
-
+        .nav-label { font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; padding: 12px; margin-top: 8px; }
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 11px 14px;
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: var(--radius-md);
-            transition: var(--transition-fast);
-            position: relative;
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+            text-decoration: none; color: var(--text-muted); font-weight: 500;
+            border-radius: 6px; transition: all 0.2s; font-size: 0.95rem;
         }
+        .nav-item:hover { background: var(--bg-color); color: var(--text-main); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
 
-        .nav-item:hover {
-            background: var(--bg-secondary);
-            color: var(--brand-primary);
-            transform: translateX(4px);
+        /* --- MAIN DASHBOARD WORKSPACE --- */
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem 3rem; max-width: 1400px; }
+
+        /* Welcome & Stats Row */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        .greeting h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-main); }
+        .greeting p { color: var(--text-muted); margin-top: 6px; font-size: 0.95rem; }
+        
+        .stats-container { display: flex; gap: 1rem; }
+        .stat-card { background: var(--surface); padding: 0.8rem 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); min-width: 150px; }
+        .stat-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .stat-info h4 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+        .stat-info span { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+        /* Simple Daily Objectives Section (Replaces Hero) */
+        .daily-directives {
+            background: var(--surface); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 1.5rem 2rem;
+            margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: var(--shadow-sm); border-left: 4px solid var(--primary);
         }
+        .directive-content h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+        .directive-content p { font-size: 0.9rem; color: var(--text-muted); }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: 0.2s; text-decoration: none; }
+        .btn-primary:hover { background: var(--primary-hover); }
 
-        .nav-item.active {
-            background: var(--brand-light);
-            color: var(--brand-primary);
-            font-weight: 700;
-        }
+        /* Section Titles */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+        .section-title { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+        .view-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 500; transition: 0.2s; }
+        .view-all:hover { color: var(--primary-hover); }
 
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: var(--brand-primary);
-            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-        }
-
-        .nav-item i {
-            width: 20px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        /* ============================================
-           📊 MAIN DASHBOARD WORKSPACE
-           ============================================ */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 2.5rem 3.5rem;
-            max-width: 1800px;
-            width: 100%;
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-            gap: 2rem;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            width: 100%;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition-base);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .stat-card:hover {
-            border-color: var(--brand-primary);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: var(--radius-lg);
-            background: var(--brand-light);
-            color: var(--brand-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.35rem;
-            flex-shrink: 0;
-        }
-
-        .stat-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 900;
-            color: var(--text-primary);
-            line-height: 1;
-            letter-spacing: -0.5px;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 900;
-            margin-bottom: 1.8rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--text-primary);
-            letter-spacing: -0.5px;
-        }
-
-        .view-all {
-            font-size: 0.85rem;
-            color: var(--brand-primary);
-            text-decoration: none;
-            font-weight: 700;
-            transition: var(--transition-fast);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .view-all:hover {
-            gap: 10px;
-        }
-
-        /* ============================================
-           🎴 PREMIUM BATCH CARDS
-           ============================================ */
-        .batch-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
+        /* --- SLEEK BATCH GRID & CARDS --- */
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        
         .batch-card {
-            background: var(--surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            transition: all var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
+            background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column;
             box-shadow: var(--shadow-sm);
-            position: relative;
-            group: batch-card;
         }
+        .batch-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: #d1d5db; }
+        .card-img-wrapper { position: relative; height: 140px; width: 100%; background: #f3f4f6; border-bottom: 1px solid var(--border-color); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .subject-tag { display: inline-block; font-size: 0.7rem; font-weight: 600; color: var(--primary); background: var(--primary-light); padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; align-self: flex-start; }
+        
+        .card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-main); line-height: 1.4; flex-grow: 1; }
+        
+        .progress-wrapper { margin-bottom: 1.25rem; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
+        .progress-bar { width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.5s ease; }
 
-        .batch-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--brand-primary);
-        }
+        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); padding: 10px; border-radius: 6px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
+        .btn-outline:hover { background: var(--bg-color); border-color: #d1d5db; color: var(--primary); }
 
-        .card-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 180px;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-        }
+        /* --- SKELETON LOADERS --- */
+        .skeleton { background: #e5e7eb; animation: pulse 1.5s infinite; border-radius: 4px; }
+        .skel-card { height: 320px; border-radius: var(--radius-md); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform var(--transition-base);
-        }
-
-        .batch-card:hover .card-img {
-            transform: scale(1.08);
-        }
-
-        .card-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.2) 100%);
-            opacity: 0;
-            transition: opacity var(--transition-base);
-        }
-
-        .batch-card:hover .card-overlay {
-            opacity: 1;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            gap: 1rem;
-        }
-
-        .subject-tag {
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: var(--brand-primary);
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--brand-light);
-            padding: 4px 10px;
-            border-radius: var(--radius-md);
-            white-space: nowrap;
-        }
-
-        .card-title {
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 1.2rem;
-            color: var(--text-primary);
-            line-height: 1.35;
-            flex-grow: 1;
-            letter-spacing: -0.3px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .progress-wrapper {
-            margin-bottom: 1.5rem;
-        }
-
-        .progress-labels {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 5px;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--brand-primary) 0%, #d97706 100%);
-            border-radius: 10px;
-            transition: width var(--transition-slow);
-            position: relative;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
-            border-radius: 10px;
-        }
-
-        .card-action-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            background: transparent;
-            color: var(--text-primary);
-            padding-top: 1.2rem;
-            border: none;
-            border-top: 1px solid var(--border-color);
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: var(--transition-fast);
-            font-family: inherit;
-        }
-
-        .card-action-btn:hover {
-            color: var(--brand-primary);
-        }
-
-        .card-action-btn i {
-            transition: transform var(--transition-fast);
-            color: var(--text-muted);
-        }
-
-        .card-action-btn:hover i {
-            transform: translateX(4px);
-            color: var(--brand-primary);
-        }
-
-        /* ============================================
-           ⚡ SKELETON LOADERS
-           ============================================ */
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-light) 50%, var(--bg-secondary) 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-            border-radius: var(--radius-lg);
-        }
-
-        .skel-card {
-            height: 360px;
-        }
-
-        @keyframes skeleton-loading {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        /* ============================================
-           📱 MOBILE NAVIGATION
-           ============================================ */
+        /* --- MOBILE NAVIGATION --- */
         .bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            height: var(--bottom-nav-height);
-            border-top: 1px solid var(--border-color);
-            box-shadow: 0 -1px 3px rgba(15, 23, 42, 0.08);
-            z-index: 1000;
-            justify-content: space-around;
-            align-items: center;
-            padding-bottom: env(safe-area-inset-bottom);
-            transition: transform var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
+            display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px); height: var(--bottom-nav-height); border-top: 1px solid var(--border-color);
+            z-index: 1000; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.05);
         }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: var(--text-muted); font-size: 0.7rem; font-weight: 500; flex: 1; }
+        .bottom-nav-item.active { color: var(--primary); }
+        .bottom-nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
 
-        .bottom-nav.hidden {
-            transform: translateY(100%);
-        }
-
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            font-weight: 700;
-            flex: 1;
-            transition: var(--transition-fast);
-            border-radius: var(--radius-md);
-            padding: 8px;
-        }
-
-        .bottom-nav-item:active {
-            background: var(--bg-secondary);
-        }
-
-        .bottom-nav-item.active {
-            color: var(--brand-primary);
-        }
-
-        .bottom-nav-item.active i {
-            transform: scale(1.2);
-        }
-
-        .bottom-nav-item i {
-            font-size: 1.35rem;
-            transition: var(--transition-fast);
-        }
-
-        /* ============================================
-           📱 RESPONSIVE DESIGN
-           ============================================ */
+        /* --- RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 1024px) {
-            .main-content {
-                padding: 2rem;
-                margin-left: 0;
-            }
-
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform var(--transition-base);
-                z-index: 995;
-                box-shadow: 4px 0 20px rgba(15, 23, 42, 0.1);
-            }
-
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
+            .main-content { padding: 2rem; }
+            .search-bar { max-width: 300px; }
         }
-
         @media (max-width: 768px) {
-            :root {
-                --header-height: 64px;
-                --sidebar-width: 100%;
-            }
-
-            .header {
-                padding: 0 1rem;
-                height: var(--header-height);
-            }
-
-            .header-left {
-                gap: 1rem;
-            }
-
-            .search-bar {
-                display: none;
-            }
-
-            .sidebar {
-                display: none;
-                width: 100%;
-                top: var(--header-height);
-                height: calc(100vh - var(--header-height));
-                border-right: none;
-                border-bottom: none;
-                z-index: 995;
-            }
-
-            .sidebar.mobile-open {
-                display: flex;
-                transform: translateX(0);
-            }
-
-            .bottom-nav {
-                display: flex;
-            }
-
-            .main-content {
-                padding: 1.5rem 1rem;
-                padding-bottom: calc(var(--bottom-nav-height) + 1.5rem);
-                margin-left: 0;
-                max-width: 100%;
-            }
-
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-                margin-bottom: 2rem;
-            }
-
-            .stats-container {
-                grid-template-columns: 1fr;
-                width: 100%;
-                gap: 1rem;
-            }
-
-            .stat-card {
-                padding: 1.2rem;
-            }
-
-            .batch-grid {
-                grid-template-columns: 1fr;
-                gap: 1.2rem;
-                margin-bottom: 2rem;
-            }
-
-            .section-title {
-                font-size: 1.2rem;
-                margin-bottom: 1.2rem;
-            }
-
-            .card-body {
-                padding: 1.2rem;
-            }
-
-            .logo-text {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-left {
-                gap: 0.5rem;
-            }
-
-            .logo-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 1.3rem;
-            }
-
-            .logo-text {
-                font-size: 1rem;
-            }
-
-            .header-actions {
-                gap: 1rem;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
-            }
-
-            .section-title {
-                font-size: 1.1rem;
-            }
-        }
-
-        /* ============================================
-           🎭 ACCESSIBILITY & UTILITIES
-           ============================================ */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-
-        :focus-visible {
-            outline: 2px solid var(--brand-primary);
-            outline-offset: 2px;
-        }
-
-        button:disabled,
-        a:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 4rem 2rem;
-            background: var(--surface);
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-lg);
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-        }
-
-        .empty-state-title {
-            color: var(--text-primary);
-            font-size: 1.2rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-state-text {
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-primary {
-            background: var(--brand-primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: var(--radius-lg);
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: var(--transition-fast);
-            font-family: inherit;
-        }
-
-        .btn-primary:hover {
-            background: var(--brand-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
+            .sidebar { display: none; }
+            .bottom-nav { display: flex; }
+            .main-content { margin-left: 0; padding: 1.5rem 1rem; padding-bottom: calc(var(--bottom-nav-height) + 2rem); }
+            .header { padding: 0 1rem; }
+            .header-left { gap: 1rem; }
+            .logo span { display: none; } /* Hide logo text on mobile to save space for search */
+            .search-bar { max-width: none; flex: 1; margin-right: 10px; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+            .stats-container { width: 100%; justify-content: space-between; }
+            .stat-card { flex: 1; min-width: auto; padding: 0.8rem; }
+            .daily-directives { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
+            .btn-primary { width: 100%; text-align: center; }
+            .batch-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-<body>
-    <!-- 🔐 AUTH GUARD - Secure Session Loading -->
+    <body>
     <div id="authGuard">
-        <div class="loader-container">
-            <div class="loader-ring"></div>
-            <div class="loader-text">Securing Academic Session</div>
-            <div class="loader-subtext">Validating credentials...</div>
-        </div>
+        <div class="loader-ring"></div>
+        <p style="margin-top: 1rem; font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">Authenticating Session...</p>
     </div>
 
-    <!-- 📱 MAIN APPLICATION LAYOUT -->
     <div id="appLayout">
-        <!-- 🎯 HEADER -->
-        <header class="header" role="banner">
+        
+        <header class="header">
             <div class="header-left">
-                <a href="dashboard.html" class="logo" title="VidyaPlus Dashboard">
-                    <div class="logo-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <span class="logo-text">VidyaPlus</span>
+                <a href="dashboard.html" class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>VidyaPlus</span>
                 </a>
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search courses, concepts, or resources..." aria-label="Search">
+                    <input type="text" placeholder="Search curriculum, modules, or notes...">
                 </div>
             </div>
-
+            
             <div class="header-actions">
-                <button class="icon-btn" title="Notifications" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge" aria-live="polite">0</span>
-                </button>
+                <button class="icon-btn"><i class="fas fa-bell"></i><span class="badge">0</span></button>
                 <div class="profile-container">
-                    <div class="user-avatar" id="profileToggle" role="button" tabindex="0" aria-label="Profile menu" aria-expanded="false" aria-haspopup="menu">?</div>
-                    <div class="profile-dropdown" id="profileDropdown" role="menu">
-                        <a href="profile.html" class="dropdown-item" role="menuitem">
-                            <i class="fas fa-user-circle"></i>
-                            <span>View Profile</span>
-                        </a>
-                        <button class="dropdown-item logout" onclick="logoutSystem()" role="menuitem">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Terminate Session</span>
-                        </button>
+                    <div class="user-avatar" id="profileToggle">?</div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="profile.html" class="dropdown-item"><i class="fas fa-user"></i> Account Overview</a>
+                        <button class="dropdown-item logout" onclick="logoutSystem()"><i class="fas fa-sign-out-alt"></i> Terminate Session</button>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- 📊 MAIN CONTENT WRAPPER -->
         <div class="content-wrapper">
-            <!-- 🗂️ SIDEBAR NAVIGATION -->
-            <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+            <nav class="sidebar">
                 <div class="nav-label">Academic Hub</div>
-                <a href="dashboard.html" class="nav-item active">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="explore.html" class="nav-item">
-                    <i class="fas fa-compass"></i>
-                    <span>Course Catalog</span>
-                </a>
-                <a href="study.html" class="nav-item">
-                    <i class="fas fa-book-reader"></i>
-                    <span>My Library</span>
-                </a>
+                <a href="dashboard.html" class="nav-item active"><i class="fas fa-layer-group"></i> Dashboard</a>
+                <a href="explore.html" class="nav-item"><i class="fas fa-book"></i> Course Catalog</a>
+                <a href="study.html" class="nav-item"><i class="fas fa-folder-open"></i> My Library</a>
+                
+                <div class="nav-label">Assessments</div>
+                <a href="#" class="nav-item"><i class="fas fa-file-signature"></i> Mock Tests</a>
+                <a href="#" class="nav-item"><i class="fas fa-chart-bar"></i> Performance Analytics</a>
 
-                <div class="nav-label">Assessments & AI</div>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Mock Tests</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-robot"></i>
-                    <span>AI Guru (Doubt)</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Performance</span>
-                </a>
-
-                <div class="nav-label">Settings</div>
-                <a href="profile.html" class="nav-item">
-                    <i class="fas fa-user-cog"></i>
-                    <span>Profile Settings</span>
-                </a>
-                <a href="#" class="nav-item" onclick="logoutSystem()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Terminate Session</span>
-                </a>
+                <div class="nav-label">System</div>
+                <a href="profile.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" class="nav-item" onclick="logoutSystem()" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Terminate Session</a>
             </nav>
 
-            <!-- 📈 MAIN DASHBOARD CONTENT -->
-            <main class="main-content" role="main">
-                <!-- Stats Section -->
+            <main class="main-content">
+                
                 <div class="dashboard-header">
+                    <div class="greeting">
+                        <h1>Academic Dashboard</h1>
+                        <p>Welcome back, <span id="user-display-name">Scholar</span>.</p>
+                    </div>
                     <div class="stats-container">
                         <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-fire"></i>
-                            </div>
+                            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
                             <div class="stat-info">
-                                <div class="stat-value">
-                                    <span id="user-streak">0</span><span style="font-size: 0.65em;">d</span>
-                                </div>
-                                <div class="stat-label">Study Streak</div>
+                                <h4><span id="user-streak">0</span></h4>
+                                <span>Day Streak</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon" style="background: var(--success-light); color: var(--success);">
-                                <i class="fas fa-clock"></i>
-                            </div>
+                            <div class="stat-icon" style="color: var(--success); background: #ecfdf5;"><i class="fas fa-stopwatch"></i></div>
                             <div class="stat-info">
-                                <div class="stat-value">
-                                    <span id="user-watch-time">0</span><span style="font-size: 0.65em;">h</span>
-                                </div>
-                                <div class="stat-label">Watch Time</div>
+                                <h4><span id="user-watch-time">0</span>h</h4>
+                                <span>Study Hours</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Batch Cards Section -->
-                <div style="margin-top: 2rem;">
-                    <h2 class="section-title">
-                        <span>Active Enrollments</span>
-                        <a href="explore.html" class="view-all">
-                            Browse Catalog
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </h2>
-
-                    <div class="batch-grid" id="myBatchGrid">
-                        <div class="skeleton skel-card"></div>
-                        <div class="skeleton skel-card"></div>
-                        <div class="skeleton skel-card"></div>
+                <div class="daily-directives">
+                    <div class="directive-content">
+                        <h3>Pending Academic Modules</h3>
+                        <p>You have uncompleted lectures in your current curriculum. Resume your studies to maintain progress.</p>
                     </div>
+                    <a href="explore.html" class="btn-primary">Access Curriculum</a>
                 </div>
+
+                <div class="section-header">
+                    <span class="section-title">Active Enrollments</span>
+                    <a href="explore.html" class="view-all">View All Modules <i class="fas fa-chevron-right" style="font-size: 0.75rem; margin-left: 4px;"></i></a>
+                </div>
+
+                <div class="batch-grid" id="myBatchGrid">
+                    <div class="skeleton skel-card"></div>
+                    <div class="skeleton skel-card"></div>
+                    <div class="skeleton skel-card"></div>
+                </div>
+
             </main>
         </div>
-
-        <!-- 📱 BOTTOM NAVIGATION (Mobile) -->
-        <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="Mobile navigation">
-            <a href="dashboard.html" class="bottom-nav-item active" title="Home">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
+        
+        <nav class="bottom-nav" id="bottomNav">
+            <a href="dashboard.html" class="bottom-nav-item active">
+                <i class="fas fa-layer-group"></i><span>Home</span>
             </a>
-            <a href="explore.html" class="bottom-nav-item" title="Explore Courses">
-                <i class="fas fa-compass"></i>
-                <span>Explore</span>
+            <a href="explore.html" class="bottom-nav-item">
+                <i class="fas fa-book"></i><span>Catalog</span>
             </a>
-            <a href="study.html" class="bottom-nav-item" title="My Library">
-                <i class="fas fa-book-reader"></i>
-                <span>Library</span>
+            <a href="study.html" class="bottom-nav-item">
+                <i class="fas fa-folder-open"></i><span>Library</span>
             </a>
-            <a href="#" class="bottom-nav-item" title="AI Guru">
-                <i class="fas fa-robot"></i>
-                <span>AI Guru</span>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="fas fa-user"></i><span>Profile</span>
             </a>
         </nav>
     </div>
 
-    <!-- 🔧 UTILITY SCRIPTS -->
     <script>
-        // ============================================
-        // 🔐 SECURITY: CSP & XSS Protection
-        // ============================================
-        (function() {
-            'use strict';
+        // Profile Dropdown Logic
+        const profileToggle = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
 
-            // Prevent clickjacking
-            if (window.self !== window.top) {
-                window.top.location = window.self.location;
+        profileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && !profileToggle.contains(e.target)) {
+                profileDropdown.classList.remove('active');
             }
-
-            // Sanitize output
-            window.sanitizeHTML = function(text) {
-                const map = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                };
-                return text.replace(/[&<>"']/g, m => map[m]);
-            };
-
-            // Rate limiting
-            window.rateLimiter = {};
-            window.checkRateLimit = function(key, maxAttempts = 10, windowMs = 60000) {
-                const now = Date.now();
-                if (!window.rateLimiter[key]) {
-                    window.rateLimiter[key] = [];
-                }
-                window.rateLimiter[key] = window.rateLimiter[key].filter(t => now - t < windowMs);
-                if (window.rateLimiter[key].length >= maxAttempts) {
-                    return false;
-                }
-                window.rateLimiter[key].push(now);
-                return true;
-            };
-        })();
-
-        // ============================================
-        // 🎯 PROFILE DROPDOWN MANAGEMENT
-        // ============================================
-        (function() {
-            const profileToggle = document.getElementById('profileToggle');
-            const profileDropdown = document.getElementById('profileDropdown');
-
-            if (profileToggle && profileDropdown) {
-                profileToggle.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isActive = profileDropdown.classList.toggle('active');
-                    profileToggle.setAttribute('aria-expanded', isActive);
-                });
-
-                // Close on outside click
-                document.addEventListener('click', (e) => {
-                    if (!profileDropdown.contains(e.target) && !profileToggle.contains(e.target)) {
-                        profileDropdown.classList.remove('active');
-                        profileToggle.setAttribute('aria-expanded', 'false');
-                    }
-                });
-
-                // Close on Escape
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && profileDropdown.classList.contains('active')) {
-                        profileDropdown.classList.remove('active');
-                        profileToggle.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            }
-        })();
-
-        // ============================================
-        // 📱 SMOOTH SCROLL HIDING FOR MOBILE NAV
-        // ============================================
-        (function() {
-            let lastScrollY = window.scrollY;
-            let ticking = false;
-            const bottomNav = document.getElementById('bottomNav');
-
-            window.addEventListener('scroll', () => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        const currentScrollY = window.scrollY;
-                        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                            bottomNav.classList.add('hidden');
-                        } else {
-                            bottomNav.classList.remove('hidden');
-                        }
-                        lastScrollY = currentScrollY;
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            }, { passive: true });
-        })();
-
-        // ============================================
-        // 🌐 LOGOUT SYSTEM
-        // ============================================
-        window.logoutSystem = function() {
-            if (!window.checkRateLimit('logout', 3, 30000)) {
-                console.error('Too many logout attempts');
-                return;
-            }
-            
-            if (confirm('Are you sure you want to terminate the current session?')) {
-                // Clear sensitive data
-                sessionStorage.clear();
-                localStorage.removeItem('authToken');
-                
-                try {
-                    signOut(auth).then(() => {
-                        window.location.replace('index.html');
-                    }).catch((error) => {
-                        console.error('Logout error:', error);
-                        window.location.replace('index.html');
-                    });
-                } catch (error) {
-                    console.error('Logout exception:', error);
-                    window.location.replace('index.html');
-                }
-            }
-        };
+        });
     </script>
-
-    <!-- 🔥 FIREBASE & MAIN APPLICATION LOGIC -->
-    <script type="module">
+        <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const authGuard = document.getElementById('authGuard');
         const appLayout = document.getElementById('appLayout');
         const myBatchGrid = document.getElementById('myBatchGrid');
 
-        // ============================================
-        // 🔐 AUTH STATE CHANGE LISTENER
-        // ============================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User authenticated
-                await initializeDashboard(user);
-            } else {
-                // User not authenticated
-                sessionStorage.clear();
-                authGuard.style.opacity = '0';
-                setTimeout(() => {
-                    window.location.replace('login.html');
-                }, 400);
-            }
-        });
-
-        // ============================================
-        // 📊 INITIALIZE DASHBOARD
-        // ============================================
-        async function initializeDashboard(user) {
-            try {
-                // Set user avatar
                 let displayName = user.displayName || user.email.split('@')[0];
-                const avatarLetter = displayName.charAt(0).toUpperCase();
-                document.getElementById('profileToggle').innerText = avatarLetter;
-                document.getElementById('profileToggle').title = displayName;
+                document.getElementById('user-display-name').innerText = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+                document.getElementById('profileToggle').innerText = displayName.charAt(0).toUpperCase();
+                
+                try {
+                    const userRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        
+                        const streakCount = userData.streak || 0;
+                        const streakEl = document.getElementById('user-streak');
+                        if (streakEl) streakEl.innerText = streakCount;
+                        
+                        const totalSecs = userData.totalWatchTimeSeconds || 0;
+                        const totalHours = Math.floor(totalSecs / 3600);
+                        const watchTimeEl = document.getElementById('user-watch-time');
+                        if (watchTimeEl) watchTimeEl.innerText = totalHours;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user stats:", error);
+                }
 
-                // Fetch user stats with enhanced security
-                await fetchUserStats(user.uid);
-
-                // Fade out auth guard
                 authGuard.style.opacity = '0';
                 setTimeout(() => {
                     authGuard.style.display = 'none';
                     appLayout.style.display = 'flex';
-                }, 300);
+                }, 400);
 
-                // Load batch enrollments
-                await fetchMyBatches(user.uid);
-
-            } catch (error) {
-                console.error('Dashboard initialization error:', error);
-                showErrorState('Failed to load dashboard. Please refresh.');
+                fetchMyBatches(user.uid);
+            } else {
+                window.location.replace("login.html");
             }
-        }
+        });
 
-        // ============================================
-        // 📈 FETCH USER STATISTICS
-        // ============================================
-        async function fetchUserStats(uid) {
-            try {
-                const userRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userRef);
-
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-
-                    // Update streak
-                    const streakCount = Math.max(0, userData.streak || 0);
-                    const streakEl = document.getElementById('user-streak');
-                    if (streakEl) {
-                        animateCounter(streakEl, streakCount);
-                    }
-
-                    // Update watch time
-                    const totalSecs = Math.max(0, userData.totalWatchTimeSeconds || 0);
-                    const totalHours = Math.floor(totalSecs / 3600);
-                    const watchTimeEl = document.getElementById('user-watch-time');
-                    if (watchTimeEl) {
-                        animateCounter(watchTimeEl, totalHours);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching user stats:', error);
-            }
-        }
-
-        // ============================================
-        // 🎨 ANIMATE COUNTER
-        // ============================================
-        function animateCounter(element, target) {
-            const current = parseInt(element.innerText) || 0;
-            const increment = Math.ceil((target - current) / 20);
-            let count = current;
-
-            const timer = setInterval(() => {
-                count += increment;
-                if (count >= target) {
-                    count = target;
-                    clearInterval(timer);
-                }
-                element.innerText = count;
-            }, 30);
-        }
-
-        // ============================================
-        // 📚 FETCH USER ENROLLMENTS
-        // ============================================
         async function fetchMyBatches(uid) {
             try {
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
 
-                myBatchGrid.innerHTML = '';
+                myBatchGrid.innerHTML = ''; 
 
                 if (!enrollmentsSnap.empty) {
-                    const batchPromises = enrollmentsSnap.docs.map(async (docSnap) => {
-                        const batchId = docSnap.id;
-                        const enrollmentData = docSnap.data();
-
-                        try {
-                            const batchRef = doc(db, "batches", batchId);
-                            const batchSnap = await getDoc(batchRef);
-
-                            if (batchSnap.exists()) {
-                                const actualProgress = Math.min(100, Math.max(0, enrollmentData.progressPercentage || 0));
-                                return { id: batchId, data: batchSnap.data(), progress: actualProgress };
-                            }
-                        } catch (error) {
-                            console.error(`Error fetching batch ${batchId}:`, error);
+                    enrollmentsSnap.forEach(async (docSnap) => {
+                        const batchId = docSnap.id; 
+                        const batchRef = doc(db, "batches", batchId);
+                        const batchSnap = await getDoc(batchRef);
+                        
+                        if (batchSnap.exists()) {
+                            const enrollmentData = docSnap.data();
+                            const actualProgress = enrollmentData.progressPercentage || 0;
+                            renderBatchCard(batchId, batchSnap.data(), actualProgress);
                         }
-                        return null;
-                    });
-
-                    const batches = (await Promise.all(batchPromises)).filter(b => b !== null);
-
-                    batches.forEach(batch => {
-                        renderBatchCard(batch.id, batch.data, batch.progress);
                     });
                 } else {
-                    showEmptyState();
+                    myBatchGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align:center; padding: 3rem 2rem; background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <i class="fas fa-inbox" style="font-size: 2.5rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+                            <h3 style="color: var(--text-main); font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 500;">No Active Curriculum Found</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Navigate to the course catalog to begin enrollment.</p>
+                            <button onclick="window.location.href='explore.html'" class="btn-outline" style="width: auto; padding: 8px 16px;">Browse Modules</button>
+                        </div>
+                    `;
                 }
             } catch (error) {
-                console.error('Database Query Error:', error);
-                showErrorState('Unable to retrieve academic data. Please try again.');
+                console.error("Database Query Error:", error);
+                myBatchGrid.innerHTML = '<p style="color: #ef4444; grid-column: 1/-1; font-size: 0.9rem;">System Error: Unable to sync academic data at this time.</p>';
             }
         }
 
-        // ============================================
-        // 🎴 RENDER BATCH CARD
-        // ============================================
         function renderBatchCard(id, data, progress) {
             const card = document.createElement('div');
             card.className = 'batch-card';
-
-            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/92400e/ffffff?text=' + encodeURIComponent(data.subject || 'Course');
-            const subject = window.sanitizeHTML(data.subject || 'Core Curriculum');
-            const title = window.sanitizeHTML(data.title || 'Untitled Course');
+            
+            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/f3f4f6/9ca3af?text=Academic+Module';
 
             card.innerHTML = `
-                <div class="card-image-wrapper">
-                    <img src="${imgUrl}" alt="${title}" class="card-img" loading="lazy" decoding="async">
-                    <div class="card-overlay"></div>
+                <div class="card-img-wrapper">
+                    <img src="${imgUrl}" alt="Module Content" class="card-img" loading="lazy">
                 </div>
                 <div class="card-body">
-                    <div class="card-meta">
-                        <span class="subject-tag">
-                            <i class="fas fa-tag"></i>
-                            ${subject}
-                        </span>
-                    </div>
-                    <h3 class="card-title" title="${title}">${title}</h3>
-
+                    <span class="subject-tag">${data.subject || 'Core Subject'}</span>
+                    <div class="card-title">${data.title}</div>
+                    
                     <div class="progress-wrapper">
                         <div class="progress-labels">
-                            <span>Overall Progress</span>
-                            <span style="color: var(--text-primary); font-weight: 800;">${progress}%</span>
+                            <span>Syllabus Covered</span>
+                            <span>${progress}%</span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${progress}%;"></div>
                         </div>
                     </div>
 
-                    <button class="card-action-btn" onclick="window.location.href='study.html?batch=${id}'">
-                        Continue Learning
-                        <i class="fas fa-arrow-right"></i>
+                    <button class="btn-outline" onclick="window.location.href='study.html?batch=${id}'">
+                        Access Module
                     </button>
                 </div>
             `;
-
             myBatchGrid.appendChild(card);
         }
 
-        // ============================================
-        // 📭 EMPTY STATE UI
-        // ============================================
-        function showEmptyState() {
-            myBatchGrid.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <h3 class="empty-state-title">No Active Enrollments</h3>
-                    <p class="empty-state-text">Begin your academic journey by exploring our comprehensive course catalog.</p>
-                    <button onclick="window.location.href='explore.html'" class="btn-primary">
-                        Explore Courses
-                    </button>
-                </div>
-            `;
-        }
-
-        // ============================================
-        // ⚠️ ERROR STATE UI
-        // ============================================
-        function showErrorState(message) {
-            myBatchGrid.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon" style="color: var(--danger);">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <h3 class="empty-state-title" style="color: var(--danger);">Error Loading Data</h3>
-                    <p class="empty-state-text">${window.sanitizeHTML(message)}</p>
-                    <button onclick="location.reload()" class="btn-primary">
-                        Try Again
-                    </button>
-                </div>
-            `;
-        }
-
-        // ============================================
-        // 🌐 MAKE FUNCTIONS GLOBALLY AVAILABLE
-        // ============================================
-        window.sanitizeHTML = window.sanitizeHTML;
+        window.logoutSystem = function() {
+            if(confirm("Confirm session termination?")) {
+                signOut(auth).then(() => {
+                    window.location.replace("index.html");
+                }).catch((error) => console.error(error));
+            }
+        };
     </script>
 </body>
 </html>
