@@ -6,29 +6,32 @@
     <title>Student Portal | VidyaPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- DESIGN SYSTEM & VARIABLES --- */
+        /* --- PREMIUM DESIGN SYSTEM & VARIABLES --- */
         :root {
-            --bg-color: #F9FAFB;
+            --bg-color: #F8FAFC; /* Softer, premium light background */
             --surface: #FFFFFF;
-            --text-main: #111827;
-            --text-muted: #6B7280;
-            --primary: #2563EB; 
-            --primary-hover: #1D4ED8;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --primary: #3B82F6; 
+            --primary-hover: #2563EB;
             --primary-light: #EFF6FF;
             --success: #10B981;
-            --border-color: #E5E7EB;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --border-color: #E2E8F0;
+            --header-bg: #0F172A; /* Dark theme from Study section */
+            
+            /* Sleek Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
             
             --header-height: 64px;
             --sidebar-width: 240px;
             --bottom-nav-height: 60px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
         
         body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
@@ -40,7 +43,7 @@
             transition: opacity 0.3s ease;
         }
         .loader-ring {
-            width: 40px; height: 40px; border: 3px solid var(--border-color);
+            width: 36px; height: 36px; border: 3px solid var(--border-color);
             border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -48,28 +51,29 @@
         /* --- LAYOUT ARCHITECTURE --- */
         #appLayout { display: none; flex-direction: column; min-height: 100vh; }
 
-        /* --- HEADER --- */
+        /* --- DARK PREMIUM HEADER (From Study Section) --- */
         .header {
-            height: var(--header-height); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(8px);
+            height: var(--header-height); 
+            background: var(--header-bg); 
             padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between;
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
         }
         
         .header-left { display: flex; align-items: center; gap: 2rem; flex: 1; }
         .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
         .logo i { color: var(--primary); font-size: 1.4rem; }
-        .logo span { font-size: 1.25rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.3px; }
+        .logo span { font-size: 1.25rem; font-weight: 700; color: #FFFFFF; letter-spacing: -0.3px; }
 
-        /* Header Right Actions & Profile Dropdown */
+        /* Header Right Actions */
         .header-actions { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
-        .icon-btn { position: relative; background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; padding: 4px; }
-        .icon-btn:hover { color: var(--text-main); }
-        .badge { position: absolute; top: 0; right: 0; background: var(--primary); color: white; font-size: 0.6rem; font-weight: 600; padding: 2px 4px; border-radius: 4px; border: 2px solid var(--surface); line-height: 1; }
+        .icon-btn { position: relative; background: none; border: none; font-size: 1.1rem; color: #94A3B8; cursor: pointer; transition: color 0.2s; padding: 4px; }
+        .icon-btn:hover { color: #FFFFFF; }
+        .badge { position: absolute; top: 0; right: 0; background: var(--primary); color: white; font-size: 0.6rem; font-weight: 600; padding: 2px 4px; border-radius: 4px; border: 2px solid var(--header-bg); line-height: 1; }
 
         .profile-container { position: relative; margin-left: 0.5rem; }
-        .user-avatar { width: 32px; height: 32px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; cursor: pointer; border: 1px solid var(--border-color); transition: all 0.2s; }
-        .user-avatar:hover { border-color: var(--primary); background: var(--surface); }
+        .user-avatar { width: 32px; height: 32px; background: #1E293B; color: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; cursor: pointer; border: 1px solid #334155; transition: all 0.2s; }
+        .user-avatar:hover { border-color: var(--primary); }
         
         .profile-dropdown {
             position: absolute; right: 0; top: calc(100% + 8px);
@@ -83,12 +87,12 @@
         .dropdown-item {
             padding: 8px 12px; text-decoration: none; color: var(--text-main);
             font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 8px;
-            background: none; border: none; text-align: left; cursor: pointer; border-radius: 4px; transition: background 0.2s;
+            background: none; border: none; text-align: left; cursor: pointer; border-radius: 6px; transition: background 0.2s;
         }
         .dropdown-item:hover { background: var(--bg-color); }
         .dropdown-item i { width: 16px; text-align: center; color: var(--text-muted); font-size: 0.875rem; }
-        .dropdown-item.logout { margin-top: 4px; border-top: 1px solid var(--border-color); color: #DC2626; border-radius: 0 0 4px 4px; }
-        .dropdown-item.logout i { color: #DC2626; }
+        .dropdown-item.logout { margin-top: 4px; border-top: 1px solid var(--border-color); color: #EF4444; border-radius: 0 0 6px 6px; }
+        .dropdown-item.logout i { color: #EF4444; }
         .dropdown-item.logout:hover { background: #FEF2F2; }
 
         /* --- SIDEBAR --- */
@@ -102,7 +106,7 @@
         .nav-item {
             display: flex; align-items: center; gap: 12px; padding: 8px 12px;
             text-decoration: none; color: var(--text-muted); font-weight: 500;
-            border-radius: 6px; transition: all 0.2s ease; font-size: 0.875rem;
+            border-radius: 8px; transition: all 0.2s ease; font-size: 0.875rem;
         }
         .nav-item:hover { background: var(--bg-color); color: var(--text-main); }
         .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
@@ -111,13 +115,11 @@
         /* --- MAIN DASHBOARD WORKSPACE --- */
         .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 2rem; max-width: 1400px; }
 
-        /* Welcome & Stats Row */
-        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+        /* Clean Header & Sleek Stats */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         
-        /* Upgraded Greeting Design */
-        .greeting { display: flex; flex-direction: column; gap: 6px; }
         .greeting h1 { 
-            font-size: 1.6rem; 
+            font-size: 1.5rem; 
             font-weight: 700; 
             color: var(--text-main); 
             letter-spacing: -0.02em; 
@@ -125,103 +127,84 @@
             align-items: center; 
             gap: 12px;
         }
-        /* The Blue Accent Pill */
         .greeting h1::before {
             content: '';
             display: block;
-            width: 6px;
-            height: 26px;
+            width: 4px;
+            height: 22px;
             background: var(--primary);
             border-radius: 4px;
         }
-        .greeting p { color: var(--text-muted); font-size: 0.875rem; padding-left: 18px; }
         
         .stats-container { display: flex; gap: 1rem; }
         .stat-card { 
             background: var(--surface); 
-            padding: 1rem 1.25rem; 
+            padding: 0.75rem 1rem; 
             border-radius: var(--radius-md); 
             border: 1px solid var(--border-color); 
-            display: flex; align-items: center; gap: 1rem; 
-            box-shadow: var(--shadow-sm);
-            min-width: 160px;
+            display: flex; align-items: center; gap: 12px; 
+            box-shadow: var(--shadow-md);
+            min-width: 140px;
         }
-        .stat-icon { width: 36px; height: 36px; border-radius: 6px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .stat-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
         .stat-info { display: flex; flex-direction: column; }
-        .stat-value { font-size: 1.05rem; font-weight: 600; color: var(--text-main); line-height: 1.2; margin-bottom: 2px; }
-        .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
-
-        /* Professional Notice Panel */
-        .notice-panel {
-            background: var(--surface);
-            border: 1px solid var(--border-color);
-            border-left: 3px solid var(--primary);
-            border-radius: var(--radius-md);
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-sm);
-        }
-        .notice-icon { font-size: 1.2rem; color: var(--primary); margin-top: 2px; }
-        .notice-text h3 { font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
-        .notice-text p { color: var(--text-muted); font-size: 0.875rem; line-height: 1.5; margin: 0; }
+        .stat-value { font-size: 1rem; font-weight: 700; color: var(--text-main); line-height: 1.1; margin-bottom: 2px; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
 
         /* Section Titles */
-        .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
-        .view-all { font-size: 0.875rem; color: var(--primary); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
+        .section-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+        .view-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
         .view-all:hover { color: var(--primary-hover); }
 
-        /* --- BATCH GRID & PREMIUM CARDS --- */
-        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        /* --- PREMIUM COMPACT BATCH CARDS --- */
+        /* Changed grid to make cards smaller and neater */
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
         
         @keyframes premiumFadeUp {
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         .batch-card {
             background: var(--surface); 
             border: 1px solid var(--border-color); 
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             overflow: hidden; 
             display: flex; flex-direction: column;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-md);
             opacity: 0; 
-            animation: premiumFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
+            animation: premiumFadeUp 0.5s ease forwards;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
         
         .batch-card:hover { 
-            transform: translateY(-6px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-hover); 
-            border-color: #D1D5DB; 
+            border-color: #CBD5E1; 
         }
         
-        .card-img-wrapper { width: 100%; height: 140px; overflow: hidden; border-bottom: 1px solid var(--border-color); background: var(--bg-color); }
-        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* Sleeker image wrapper */
+        .card-img-wrapper { width: 100%; height: 110px; overflow: hidden; background: var(--bg-color); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
         .batch-card:hover .card-img { transform: scale(1.05); }
         
-        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .subject-tag { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-body { padding: 1rem; display: flex; flex-direction: column; flex-grow: 1; }
         
-        .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text-main); line-height: 1.4; flex-grow: 1; }
+        .card-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-main); line-height: 1.3; flex-grow: 1; }
         
-        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); padding: 8px 12px; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; }
-        .btn-outline:hover { background: var(--bg-color); border-color: #D1D5DB; }
+        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); padding: 8px; border-radius: 8px; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; }
+        .btn-outline:hover { background: var(--bg-color); border-color: #CBD5E1; }
 
         /* Button styles for fallbacks */
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: background 0.2s; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
         .btn-primary:hover { background: var(--primary-hover); }
 
         /* --- SKELETON LOADERS --- */
-        .skeleton { background: #E5E7EB; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: var(--radius-md); }
-        .skel-card { height: 280px; }
+        .skeleton { background: #E2E8F0; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: var(--radius-lg); }
+        .skel-card { height: 210px; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* --- MOBILE NAVIGATION & RESPONSIVENESS --- */
+        /* --- MOBILE NAVIGATION --- */
         .bottom-nav {
             display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(8px); height: var(--bottom-nav-height); border-top: 1px solid var(--border-color);
@@ -233,7 +216,6 @@
 
         @media (max-width: 1024px) {
             .main-content { padding: 1.5rem; }
-            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
         }
         @media (max-width: 768px) {
             .sidebar { display: none; }
@@ -243,17 +225,16 @@
             .header { padding: 0 1rem; gap: 1rem; }
             .header-left { gap: 1rem; }
             
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
             .stats-container { width: 100%; flex-wrap: wrap; }
-            .stat-card { flex: 1; min-width: calc(50% - 0.5rem); padding: 0.875rem; }
-            .notice-panel { flex-direction: column; padding: 1rem; gap: 0.75rem; }
-            .batch-grid { grid-template-columns: 1fr; }
+            .stat-card { flex: 1; min-width: calc(50% - 0.5rem); }
+            .batch-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
         }
     </style>
 </head>
 <body>
     <div id="authGuard">
         <div class="loader-ring"></div>
-        <p style="margin-top: 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted);">Authenticating Session...</p>
     </div>
 
     <div id="appLayout">
@@ -292,7 +273,7 @@
 
                 <div class="nav-label">Account</div>
                 <a href="profile.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
-                <a href="#" class="nav-item" onclick="logoutSystem()" style="color: #DC2626;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                <a href="#" class="nav-item" onclick="logoutSystem()" style="color: #EF4444;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
             </nav>
 
             <main class="main-content">
@@ -300,7 +281,7 @@
                 <div class="dashboard-header">
                     <div class="greeting">
                         <h1>Dashboard Overview</h1>
-                        <p>Welcome, <span id="user-display-name" style="text-transform: capitalize;">Student</span>. Monitor your academic progress below.</p>
+                        <span id="user-display-name" style="display: none;"></span> 
                     </div>
                     <div class="stats-container">
                         <div class="stat-card">
@@ -317,14 +298,6 @@
                                 <div class="stat-label">Study Time</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="notice-panel">
-                    <div class="notice-icon"><i class="fas fa-info-circle"></i></div>
-                    <div class="notice-text">
-                        <h3>Academic Module Status</h3>
-                        <p>Ensure consistent progression through your enrolled curriculum. Review active syllabus materials and pending assessments.</p>
                     </div>
                 </div>
 
@@ -457,37 +430,34 @@
                     });
                 } else {
                     myBatchGrid.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align:center; padding: 3rem 1.5rem; background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                        <div style="grid-column: 1/-1; text-align:center; padding: 2rem 1.5rem; background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
                             <i class="fas fa-folder-open" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                            <h3 style="color: var(--text-main); font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">No Active Enrollments</h3>
-                            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">Access the course catalog to begin a module.</p>
+                            <h3 style="color: var(--text-main); font-size: 0.95rem; margin-bottom: 0.5rem; font-weight: 600;">No Active Enrollments</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Access the course catalog to begin a module.</p>
                             <button onclick="window.location.href='explore.html'" class="btn-primary" style="width: auto;">Browse Catalog</button>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error("Database Query Error:", error);
-                myBatchGrid.innerHTML = '<p style="color: #DC2626; grid-column: 1/-1; font-size: 0.875rem;">System Error: Unable to retrieve academic data.</p>';
+                myBatchGrid.innerHTML = '<p style="color: #EF4444; grid-column: 1/-1; font-size: 0.85rem;">System Error: Unable to retrieve academic data.</p>';
             }
         }
 
+        // Updated Render function for compact cards without extra tags
         function renderBatchCard(id, data, delayIndex) {
             const card = document.createElement('div');
             card.className = 'batch-card';
             card.style.animationDelay = `${delayIndex * 0.1}s`; 
             
-            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/E5E7EB/6B7280?text=Module+Data';
+            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/E2E8F0/64748B?text=Module+Data';
 
             card.innerHTML = `
                 <div class="card-img-wrapper">
                     <img src="${imgUrl}" alt="Module Image" class="card-img" loading="lazy">
                 </div>
                 <div class="card-body">
-                    <div class="card-meta">
-                        <span class="subject-tag">${data.subject || 'Core Curriculum'}</span>
-                    </div>
                     <div class="card-title">${data.title}</div>
-                    
                     <button class="btn-outline" onclick="window.location.href='study.html?batch=${id}'">
                         Access Material
                     </button>
