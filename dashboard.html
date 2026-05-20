@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VidyaPlus | Advanced Learning Platform</title>
+    <title>VidyaPlus | Dashboard</title>
     
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com;">
 
@@ -21,86 +21,84 @@
                         surface: '#f8fafc',
                         dark: '#0f172a'
                     },
-                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.04)' }
                 }
             }
         }
     </script>
 
     <style>
-        body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; overflow-y: scroll; }
+        body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; overflow-y: hidden; }
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Hide scrollbar for horizontal scrolling containers but keep functionality */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- SKELETON SHIMMER ANIMATION --- */
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .skeleton {
-            background: #e2e8f0;
-            background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite linear;
-        }
+        /* Skeletons */
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        .skeleton { background: #e2e8f0; background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px); background-size: 1000px 100%; animation: shimmer 2s infinite linear; }
 
-        /* --- LAYOUT ARCHITECTURE --- */
-        #app-container { display: flex; min-height: 100vh; opacity: 0; transition: opacity 0.4s ease; }
+        /* Layout Architecture */
+        #app-container { display: flex; height: 100vh; opacity: 0; transition: opacity 0.4s ease; overflow: hidden; }
         
-        .sidebar { width: 260px; flex-shrink: 0; border-right: 1px solid #e2e8f0; background: white; position: fixed; height: 100vh; z-index: 50; transition: transform 0.3s ease; }
-        .main-content { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; min-width: 0; }
+        /* Sidebar Desktop */
+        .sidebar { width: 260px; flex-shrink: 0; border-right: 1px solid #e2e8f0; background: white; display: flex; flex-direction: column; z-index: 50; transition: transform 0.3s ease; }
         
-        .top-navbar { height: 72px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; display: flex; items-center; justify-content: space-between; padding: 0 1.5rem; }
+        /* Main Content Area */
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; position: relative; }
+        .top-navbar { height: 72px; flex-shrink: 0; background: white/80; backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 40; }
+        .scrollable-content { flex-grow: 1; overflow-y: auto; padding: 1.5rem; }
+        
+        /* Desktop Center Constraints */
+        .content-max-width { max-width: 1200px; margin: 0 auto; width: 100%; }
 
-        /* --- COMPONENT STYLES --- */
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 12px; border-radius: 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; cursor: pointer; }
+        /* Sidebar Nav Items */
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin: 4px 16px; border-radius: 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; cursor: pointer; }
         .nav-item:hover { background: #f1f5f9; color: #0f172a; }
         .nav-item.active { background: #eff6ff; color: #2563eb; }
 
-        .search-bar { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
+        /* Search */
+        .search-bar { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; width: 100%; max-width: 400px; }
         .search-bar:focus-within { border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         .search-bar input { background: transparent; border: none; outline: none; width: 100%; font-size: 0.95rem; color: #0f172a; }
 
-        .target-selector { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        
-        .segmented-control { display: flex; background: #f1f5f9; padding: 4px; border-radius: 12px; gap: 4px; }
-        .segment-btn { flex: 1; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-align: center; cursor: pointer; color: #64748b; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .segment-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        /* Premium Cards */
+        .vp-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: var(--box-shadow-soft); transition: all 0.2s ease; display: flex; flex-direction: column; }
+        .vp-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08); border-color: #cbd5e1; }
 
-        .pw-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: var(--box-shadow-soft); transition: transform 0.2s; display: flex; flex-direction: column; }
-        .pw-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        /* Notification Panel */
+        #notification-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 380px; background: white; box-shadow: -4px 0 24px rgba(0,0,0,0.1); z-index: 100; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+        #notification-panel.open { transform: translateX(0); }
         
-        /* Initial Loading Overlay */
+        /* Profile Dropdown */
+        #profile-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 200px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 50; }
+        #profile-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        /* Initial Loader */
         #global-loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Responsive Breakpoints */
+        /* Mobile Adjustments */
         .mobile-bottom-nav { display: none; }
         .mobile-header-menu { display: none; }
 
         @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
+            .sidebar { position: fixed; height: 100vh; transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; }
             .mobile-header-menu { display: block; }
         }
 
         @media (max-width: 768px) {
-            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; z-index: 45; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; }
-            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; font-size: 0.7rem; font-weight: 600; }
+            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white/90; backdrop-filter: blur(10px); border-top: 1px solid #e2e8f0; z-index: 45; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; }
+            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; font-size: 0.7rem; font-weight: 600; text-decoration: none; }
             .bottom-nav-item.active { color: #3b82f6; }
-            .main-content { padding-bottom: 70px; }
+            .scrollable-content { padding: 1rem; padding-bottom: 80px; }
             .top-navbar { padding: 0 1rem; }
-            .search-bar { width: 100%; }
         }
     </style>
 </head>
@@ -108,7 +106,7 @@
 
     <div id="global-loader">
         <div class="spinner mb-4"></div>
-        <h2 class="text-lg font-bold text-slate-800">Establishing Secure Session</h2>
+        <h2 class="text-lg font-bold text-slate-800">Loading VidyaPlus...</h2>
     </div>
 
     <div id="app-container">
@@ -121,178 +119,195 @@
                 </div>
                 <button class="lg:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div class="py-4 overflow-y-auto hide-scroll" style="height: calc(100vh - 80px);">
+            
+            <div class="py-4 flex-1 overflow-y-auto hide-scroll">
                 <div class="px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">My Workspace</div>
-                <div class="nav-item active"><i class="fas fa-layer-group w-6"></i> Batches</div>
-                <div class="nav-item"><i class="fas fa-book-open w-6"></i> Study Material</div>
-                <div class="nav-item"><i class="fas fa-clipboard-list w-6"></i> Test Series</div>
-                <div class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Explore</div>
-                <div class="nav-item"><i class="fas fa-store w-6"></i> PW Store</div>
-                <div class="nav-item"><i class="fas fa-robot w-6"></i> Pi Assistant</div>
+                <a href="dashboard.html" class="nav-item active"><i class="fas fa-border-all w-6"></i> Dashboard</a>
+                <a href="study.html" class="nav-item"><i class="fas fa-book-open w-6"></i> Study Material</a>
+                <a href="test.html" class="nav-item"><i class="fas fa-clipboard-list w-6"></i> Test Series</a>
+                
+                <div class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Discover</div>
+                <a href="explore.html" class="nav-item"><i class="fas fa-compass w-6"></i> Explore</a>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 mt-auto">
+                <button onclick="logoutSystem()" class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-red-50 text-red-600 font-semibold text-sm hover:bg-red-100 transition">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </aside>
 
-        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-        <main class="main-content">
+        <main class="main-wrapper">
             
-            <header class="top-navbar flex items-center">
+            <header class="top-navbar">
                 <div class="flex items-center gap-4 flex-1">
                     <button class="mobile-header-menu text-slate-600 focus:outline-none" onclick="toggleSidebar()">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     
-                    <div class="search-bar flex-1 max-w-xl hidden sm:flex">
+                    <div class="search-bar hidden sm:flex">
                         <i class="fas fa-search text-slate-400"></i>
-                        <input type="text" id="searchInput" placeholder="Search for batches, teachers, subjects...">
+                        <input type="text" id="searchInput" placeholder="Search batches, subjects...">
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 sm:gap-6 ml-4">
-                    <button class="text-slate-600 hover:text-blue-600 relative">
-                        <i class="fas fa-gift text-xl"></i>
-                    </button>
-                    <button class="text-slate-600 hover:text-blue-600 relative">
+                <div class="flex items-center gap-3 sm:gap-5">
+                    <button onclick="toggleNotifications()" class="text-slate-500 hover:text-blue-600 relative p-2 rounded-full hover:bg-slate-100 transition">
                         <i class="fas fa-bell text-xl"></i>
-                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                        <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
                     
-                    <div class="flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer" onclick="logoutSystem()">
-                        <div id="profile-skeleton" class="w-9 h-9 rounded-full skeleton"></div>
-                        <div id="profile-data" class="hidden flex items-center gap-2">
-                            <div class="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm" id="user-avatar">S</div>
+                    <div class="relative">
+                        <div class="flex items-center gap-3 pl-3 border-l border-slate-200 cursor-pointer" onclick="toggleProfileDropdown()" id="profile-btn">
+                            <div id="profile-skeleton" class="w-9 h-9 rounded-full skeleton"></div>
+                            <div id="profile-data" class="hidden flex items-center gap-2">
+                                <div class="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-md" id="user-avatar">S</div>
+                                <i class="fas fa-chevron-down text-xs text-slate-400 hidden sm:block"></i>
+                            </div>
+                        </div>
+
+                        <div id="profile-dropdown">
+                            <div class="p-3 border-b border-slate-100">
+                                <p class="text-xs text-slate-500">Signed in as</p>
+                                <p class="text-sm font-bold text-slate-900 truncate" id="dropdown-name">Student</p>
+                            </div>
+                            <div class="p-1">
+                                <a href="profile.html" class="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-md transition"><i class="fas fa-user w-4 text-slate-400"></i> View Profile</a>
+                                <button onclick="logoutSystem()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition text-left"><i class="fas fa-sign-out-alt w-4"></i> Logout</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto">
-                
-                <div class="target-selector max-w-sm mb-6 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center"><i class="fas fa-crown text-xs"></i></div>
-                        <div>
-                            <p class="text-xs text-slate-500 font-semibold">Your Target</p>
-                            <p class="text-sm font-bold text-slate-900">Class 12th + JEE</p>
-                        </div>
-                    </div>
-                    <button class="text-blue-600 text-sm font-bold hover:underline">Change</button>
-                </div>
-
-                <div class="segmented-control max-w-md mb-8">
-                    <div class="segment-btn active"><i class="fas fa-laptop"></i> Online</div>
-                    <div class="segment-btn"><i class="fas fa-building"></i> Vidyapeeth</div>
-                    <div class="segment-btn"><i class="fas fa-bolt text-yellow-500"></i> Power Batch</div>
-                </div>
-
-                <div class="mb-10">
-                    <h2 class="text-xl font-bold text-slate-900 mb-4">My Enrolled Courses</h2>
+            <div class="scrollable-content">
+                <div class="content-max-width">
                     
-                    <div id="batch-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        
-                        <div class="pw-card skeleton-card">
-                            <div class="h-44 skeleton"></div>
-                            <div class="p-4 flex flex-col gap-3">
-                                <div class="flex justify-between"><div class="h-4 w-24 skeleton rounded"></div><div class="h-4 w-12 skeleton rounded"></div></div>
-                                <div class="h-6 w-3/4 skeleton rounded"></div>
-                                <div class="h-4 w-1/2 skeleton rounded"></div>
-                                <div class="flex items-center gap-2 mt-2"><div class="h-8 w-16 skeleton rounded"></div><div class="h-8 flex-1 skeleton rounded"></div></div>
-                            </div>
-                        </div>
-                        <div class="pw-card skeleton-card hidden md:flex">
-                            <div class="h-44 skeleton"></div>
-                            <div class="p-4 flex flex-col gap-3">
-                                <div class="flex justify-between"><div class="h-4 w-24 skeleton rounded"></div><div class="h-4 w-12 skeleton rounded"></div></div>
-                                <div class="h-6 w-3/4 skeleton rounded"></div>
-                                <div class="h-4 w-1/2 skeleton rounded"></div>
-                                <div class="flex items-center gap-2 mt-2"><div class="h-8 w-16 skeleton rounded"></div><div class="h-8 flex-1 skeleton rounded"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-10">
-                    <h2 class="text-xl font-bold text-slate-900 mb-4">Upcoming Events (Live)</h2>
-                    <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
-                        
-                        <div class="p-3 flex items-center gap-4 skeleton-row">
-                            <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
-                            <div class="flex-1 space-y-2">
-                                <div class="h-3 w-20 skeleton rounded"></div>
-                                <div class="h-4 w-1/2 skeleton rounded"></div>
-                                <div class="h-3 w-3/4 skeleton rounded"></div>
-                            </div>
-                        </div>
-                        <div class="p-3 flex items-center gap-4 skeleton-row">
-                            <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
-                            <div class="flex-1 space-y-2">
-                                <div class="h-3 w-20 skeleton rounded"></div>
-                                <div class="h-4 w-1/2 skeleton rounded"></div>
-                                <div class="h-3 w-3/4 skeleton rounded"></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="mb-10">
-                    <h2 class="text-xl font-bold text-slate-900 mb-4">Explore Platform</h2>
-                    <div class="flex gap-4 overflow-x-auto hide-scroll pb-4">
-                        
-                        <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-yellow-50/50 border-yellow-100">
-                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-                                <i class="fas fa-clipboard-check text-yellow-600 text-xl"></i>
-                            </div>
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between mb-8 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-bullseye"></i></div>
                             <div>
-                                <h3 class="font-bold text-slate-900">Real Test Pass</h3>
-                                <p class="text-xs text-slate-500 mt-1">NTA like Real Tests & Rank Booster Practice.</p>
-                                <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
+                                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Your Target</p>
+                                <p class="text-base font-bold text-slate-900">Class 12th + UP Board</p>
                             </div>
                         </div>
-
-                        <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-blue-50/50 border-blue-100">
-                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                <i class="fas fa-book text-blue-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-slate-900">Modules & Books</h3>
-                                <p class="text-xs text-slate-500 mt-1">Hardcopy material for UP Board & JEE.</p>
-                                <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
-                            </div>
-                        </div>
-
+                        <button class="text-blue-600 text-sm font-bold hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">Change</button>
                     </div>
-                </div>
 
+                    <div class="mb-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-slate-900">My Enrolled Courses</h2>
+                        </div>
+                        
+                        <div id="batch-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="vp-card skeleton-card">
+                                <div class="h-40 skeleton"></div>
+                                <div class="p-4 flex flex-col gap-3">
+                                    <div class="h-5 w-3/4 skeleton rounded"></div>
+                                    <div class="h-4 w-1/2 skeleton rounded"></div>
+                                    <div class="mt-4 h-10 w-full skeleton rounded-lg"></div>
+                                </div>
+                            </div>
+                            <div class="vp-card skeleton-card hidden md:flex">
+                                <div class="h-40 skeleton"></div>
+                                <div class="p-4 flex flex-col gap-3">
+                                    <div class="h-5 w-3/4 skeleton rounded"></div>
+                                    <div class="h-4 w-1/2 skeleton rounded"></div>
+                                    <div class="mt-4 h-10 w-full skeleton rounded-lg"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-10">
+                        <h2 class="text-xl font-bold text-slate-900 mb-4">Upcoming Events</h2>
+                        <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+                            <div class="p-3 flex items-center gap-4 skeleton-row">
+                                <div class="w-12 h-12 rounded-lg skeleton shrink-0"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="h-3 w-24 skeleton rounded"></div>
+                                    <div class="h-4 w-1/2 skeleton rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-slate-900 mb-4">Explore More</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div onclick="window.location.href='explore.html'" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-xl cursor-pointer hover:shadow-md transition group flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 group-hover:text-blue-600 transition">Course Catalog</h3>
+                                    <p class="text-sm text-slate-500 mt-1">Discover new subjects and batches.</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-500 group-hover:scale-110 transition">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                            </div>
+                            <div onclick="window.location.href='test.html'" class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 p-5 rounded-xl cursor-pointer hover:shadow-md transition group flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 group-hover:text-emerald-600 transition">Mock Test Series</h3>
+                                    <p class="text-sm text-slate-500 mt-1">Practice and improve your scores.</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-emerald-500 group-hover:scale-110 transition">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </main>
 
-        <nav class="mobile-bottom-nav">
-            <div class="bottom-nav-item active"><i class="fas fa-layer-group text-xl mb-1"></i> Batches</div>
-            <div class="bottom-nav-item"><i class="fas fa-book-open text-xl mb-1"></i> Study</div>
-            <div class="bottom-nav-item"><i class="fas fa-clipboard-list text-xl mb-1"></i> Test</div>
-            <div class="bottom-nav-item relative">
-                <span class="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-[8px] font-bold px-1 rounded">NEW</span>
-                <i class="fas fa-robot text-xl mb-1"></i> Pi
+        <div id="notification-overlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 hidden" onclick="toggleNotifications()"></div>
+        <div id="notification-panel">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-white">
+                <h3 class="font-bold text-lg text-slate-900">Notifications</h3>
+                <button onclick="toggleNotifications()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
             </div>
-            <div class="bottom-nav-item"><i class="fas fa-store text-xl mb-1"></i> Store</div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <p class="text-xs font-bold text-slate-500">Just Now</p>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-900">Welcome to VidyaPlus!</p>
+                    <p class="text-xs text-slate-500 mt-1">Explore your dashboard and start learning.</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm opacity-70">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                        <p class="text-xs font-bold text-slate-500">Yesterday</p>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-900">Account setup complete.</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="mobile-bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item active"><i class="fas fa-border-all text-xl mb-1"></i> Dashboard</a>
+            <a href="study.html" class="bottom-nav-item"><i class="fas fa-book-open text-xl mb-1"></i> Study</a>
+            <a href="test.html" class="bottom-nav-item"><i class="fas fa-clipboard-list text-xl mb-1"></i> Test</a>
+            <a href="explore.html" class="bottom-nav-item"><i class="fas fa-compass text-xl mb-1"></i> Explore</a>
         </nav>
 
     </div>
     <script type="module">
-        // Import Firebase Configuration (Assuming standard module path)
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- DOM Elements ---
+        // DOM Elements
         const appContainer = document.getElementById('app-container');
         const globalLoader = document.getElementById('global-loader');
         const batchGrid = document.getElementById('batch-grid');
         const scheduleContainer = document.getElementById('schedule-container');
+        const profileDropdown = document.getElementById('profile-dropdown');
 
-        // --- SECURITY UTILITY: DOM SANITIZER ---
-        // This prevents XSS attacks by escaping malicious HTML tags from DB data before rendering.
+        // --- SECURITY: Sanitization ---
         function sanitizeHTML(str) {
             if (!str) return '';
             const temp = document.createElement('div');
@@ -300,50 +315,60 @@
             return temp.innerHTML;
         }
 
-        // --- UI UTILS ---
+        // --- UI TOGGLES ---
         window.toggleSidebar = function() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('mobile-overlay').classList.toggle('hidden');
         }
 
-        // --- AUTH & DATA INITIALIZATION ---
+        window.toggleNotifications = function() {
+            const panel = document.getElementById('notification-panel');
+            const overlay = document.getElementById('notification-overlay');
+            panel.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        }
+
+        window.toggleProfileDropdown = function() {
+            profileDropdown.classList.toggle('open');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileBtn = document.getElementById('profile-btn');
+            if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('open');
+            }
+        });
+
+        // --- AUTH & DATA LOGIC ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Securely render user profile
                 const displayName = sanitizeHTML(user.displayName || user.email.split('@')[0]);
                 const initial = displayName.charAt(0).toUpperCase();
                 
-                // Hide Skeletons, Show Data
                 document.getElementById('profile-skeleton').classList.add('hidden');
                 document.getElementById('profile-data').classList.remove('hidden');
                 document.getElementById('user-avatar').innerText = initial;
+                document.getElementById('dropdown-name').innerText = displayName;
 
-                // Reveal App Shell
                 globalLoader.style.opacity = '0';
                 setTimeout(() => {
                     globalLoader.style.display = 'none';
                     appContainer.style.opacity = '1';
                 }, 400);
 
-                // Fetch Core Data
                 await fetchBatches(user.uid);
-                renderDummySchedule(); // In production, fetch from DB
-
+                renderDummySchedule();
             } else {
-                // Clear session and redirect securely
                 window.location.replace("login.html");
             }
         });
 
-        // --- FETCH & RENDER BATCHES ---
         async function fetchBatches(uid) {
             try {
-                // NOTE: Bank-Level Security requires Firestore Rules like:
-                // match /users/{userId}/enrollments/{document=**} { allow read: if request.auth != null && request.auth.uid == userId; }
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
 
-                // Remove Skeletons
                 const skeletons = document.querySelectorAll('.skeleton-card');
                 skeletons.forEach(el => el.remove());
 
@@ -361,43 +386,28 @@
                     renderEmptyState();
                 }
             } catch (error) {
-                console.error("Secure DB Fetch Error:", error);
-                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">Error retrieving data securely. Check connection.</div>`;
+                console.error("Fetch Error:", error);
+                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg text-sm font-semibold">Error retrieving data.</div>`;
             }
         }
 
         function renderBatchCard(id, data) {
-            // Sanitize all incoming data
-            const title = sanitizeHTML(data.title || "Untitled Batch");
-            const imgUrl = sanitizeHTML(data.imageUrl || "https://via.placeholder.com/600x340/e2e8f0/64748b?text=Batch+Cover");
-            const target = sanitizeHTML(data.subject || "Class 12th + JEE");
-            const price = data.price ? `₹${data.price}` : 'Enrolled';
+            const title = sanitizeHTML(data.title || "Untitled Course");
+            const imgUrl = sanitizeHTML(data.imageUrl || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=300&fit=crop");
+            const target = sanitizeHTML(data.subject || "General");
 
             const cardHTML = `
-                <div class="pw-card">
-                    <div class="relative h-44 bg-slate-100 overflow-hidden">
-                        <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-slate-800 shadow-sm border border-slate-200 z-10 flex items-center gap-1">
-                            <i class="fas fa-star text-yellow-500"></i> Multiple Plans
-                        </div>
+                <div class="vp-card">
+                    <div class="h-36 bg-slate-100 overflow-hidden relative">
                         <img src="${imgUrl}" alt="Cover" class="w-full h-full object-cover">
                     </div>
-                    <div class="p-4 flex flex-col flex-1">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold text-orange-600">${target}</span>
-                            <span class="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">Hindi/Eng</span>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2 line-clamp-2">${title}</h3>
+                    <div class="p-5 flex flex-col flex-1">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">${target}</span>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug mb-4 line-clamp-2">${title}</h3>
                         
-                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-4">
-                            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ongoing</div>
-                            <span class="text-slate-300">|</span>
-                            <span>Syllabus: Physics, Chem, Math</span>
-                        </div>
-                        
-                        <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-                            <div class="text-lg font-black text-slate-900">${price}</div>
-                            <button class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-6 rounded-lg text-sm transition" onclick="window.location.href='study.html?batch=${id}'">
-                                Access Material <i class="fas fa-chevron-right text-xs ml-1"></i>
+                        <div class="mt-auto">
+                            <button class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg text-sm transition shadow-md" onclick="window.location.href='study.html?batch=${id}'">
+                                Access Material
                             </button>
                         </div>
                     </div>
@@ -408,49 +418,45 @@
 
         function renderEmptyState() {
             batchGrid.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-xl">
-                    <i class="fas fa-box-open text-4xl text-slate-300 mb-4"></i>
-                    <h3 class="text-lg font-bold text-slate-900">No Batches Yet</h3>
-                    <p class="text-sm text-slate-500 mt-1">Explore our store to find your target batch.</p>
-                    <button class="mt-4 border border-blue-600 text-blue-600 font-bold px-6 py-2 rounded-lg hover:bg-blue-50 transition">View All Batches</button>
+                <div class="col-span-full flex flex-col items-center justify-center p-10 bg-slate-50 border border-slate-200 border-dashed rounded-2xl">
+                    <i class="fas fa-compass text-3xl text-slate-400 mb-3"></i>
+                    <h3 class="text-lg font-bold text-slate-900">No Courses Yet</h3>
+                    <p class="text-sm text-slate-500 mb-4 text-center">Start your journey by exploring our catalog.</p>
+                    <button onclick="window.location.href='explore.html'" class="bg-blue-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-blue-700 transition">Explore Courses</button>
                 </div>
             `;
         }
 
-        // --- MOCK UPCOMING EVENTS (To demonstrate the List UI) ---
         function renderDummySchedule() {
             const skeletens = document.querySelectorAll('.skeleton-row');
             skeletens.forEach(el => el.remove());
 
             const scheduleData = [
-                { time: "08:15 AM", type: "Lecture • Physics", title: "Electrostatics 04: Electric Field & Flux", teacher: "S", bg: "bg-green-100" },
-                { time: "11:00 AM", type: "Lecture • Chemistry", title: "Organic Chemistry: SN1 & SN2 Reactions", teacher: "P", bg: "bg-blue-100" }
+                { time: "Today, 5:00 PM", title: "Physics: Live Doubt Session", icon: "fa-video", bg: "bg-red-50 text-red-500" },
+                { time: "Tomorrow, 10:00 AM", title: "Chemistry Mock Test Upload", icon: "fa-file-alt", bg: "bg-blue-50 text-blue-500" }
             ];
 
             let html = '';
             scheduleData.forEach(item => {
                 html += `
-                    <div class="p-3 flex items-start gap-4 hover:bg-slate-50 rounded-lg cursor-pointer transition border border-transparent hover:border-slate-100">
-                        <div class="w-14 h-14 rounded-lg ${item.bg} flex items-center justify-center text-xl font-bold text-slate-700 shrink-0 border border-slate-200/50">
-                            ${item.teacher}
+                    <div class="p-3 flex items-center gap-4 hover:bg-slate-50 rounded-lg cursor-pointer transition border border-transparent hover:border-slate-100">
+                        <div class="w-10 h-10 rounded-lg ${item.bg} flex items-center justify-center shrink-0">
+                            <i class="fas ${item.icon}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-slate-500 mb-0.5">${sanitizeHTML(item.time)}</p>
-                            <h4 class="text-sm font-bold text-slate-900 truncate">${sanitizeHTML(item.type)}</h4>
-                            <p class="text-xs text-slate-500 truncate mt-0.5">${sanitizeHTML(item.title)}</p>
+                            <p class="text-xs font-bold text-slate-400">${item.time}</p>
+                            <h4 class="text-sm font-semibold text-slate-900 truncate">${item.title}</h4>
                         </div>
-                        <i class="fas fa-chevron-right text-slate-300 mt-2"></i>
+                        <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
                     </div>
                 `;
             });
-            
-            html += `<button class="w-full text-center text-sm font-bold text-blue-600 border border-blue-200 rounded-lg py-2.5 mt-2 hover:bg-blue-50 transition">View Weekly Schedule</button>`;
             scheduleContainer.insertAdjacentHTML('beforeend', html);
         }
 
-        // Secure Logout Protocol
+        // Secure Logout
         window.logoutSystem = function() {
-            if(confirm("Securely log out of the platform?")) {
+            if(confirm("Log out of VidyaPlus?")) {
                 signOut(auth).then(() => {
                     window.location.replace("index.html");
                 }).catch((error) => console.error("Sign Out Error:", error));
