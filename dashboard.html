@@ -19,7 +19,7 @@
             --border-color: #E5E7EB;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
             
             --header-height: 64px;
             --sidebar-width: 240px;
@@ -127,8 +127,11 @@
             min-width: 160px;
         }
         .stat-icon { width: 36px; height: 36px; border-radius: 6px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-        .stat-info h4 { font-size: 1.25rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
-        .stat-info span { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        
+        /* Updated Typography for Stats */
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-value { font-size: 1.05rem; font-weight: 600; color: var(--text-main); line-height: 1.2; margin-bottom: 2px; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
         /* Professional Notice Panel */
         .notice-panel {
@@ -152,25 +155,36 @@
         .view-all { font-size: 0.875rem; color: var(--primary); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
         .view-all:hover { color: var(--primary-hover); }
 
-        /* --- BATCH GRID & CARDS (Clean & Minimal) --- */
+        /* --- BATCH GRID & PREMIUM CARDS --- */
         .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         
+        /* Premium Animation Keyframes */
+        @keyframes premiumFadeUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
         .batch-card {
             background: var(--surface); 
             border: 1px solid var(--border-color); 
             border-radius: var(--radius-md);
             overflow: hidden; 
-            transition: all 0.2s ease; 
             display: flex; flex-direction: column;
             box-shadow: var(--shadow-sm);
+            opacity: 0; /* Starts hidden for animation */
+            animation: premiumFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
         }
+        
         .batch-card:hover { 
+            transform: translateY(-6px);
             box-shadow: var(--shadow-hover); 
             border-color: #D1D5DB; 
         }
         
         .card-img-wrapper { width: 100%; height: 140px; overflow: hidden; border-bottom: 1px solid var(--border-color); background: var(--bg-color); }
-        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .batch-card:hover .card-img { transform: scale(1.05); }
         
         .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
         .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -275,15 +289,15 @@
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
                             <div class="stat-info">
-                                <h4><span id="user-streak">0</span> Days</h4>
-                                <span>Active Streak</span>
+                                <div class="stat-value"><span id="user-streak">0</span> Days</div>
+                                <div class="stat-label">Active Streak</div>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon" style="color: var(--success); background: #ECFDF5;"><i class="fas fa-clock"></i></div>
                             <div class="stat-info">
-                                <h4><span id="user-watch-time">0</span> Hrs</h4>
-                                <span>Study Time</span>
+                                <div class="stat-value"><span id="user-watch-time">0</span> Hrs</div>
+                                <div class="stat-label">Study Time</div>
                             </div>
                         </div>
                     </div>
@@ -358,6 +372,7 @@
             lastScrollY = currentScrollY;
         }, { passive: true });
     </script>
+
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -414,13 +429,14 @@
                 myBatchGrid.innerHTML = '';
 
                 if (!enrollmentsSnap.empty) {
+                    let delayIndex = 0;
                     enrollmentsSnap.forEach(async (docSnap) => {
                         const batchId = docSnap.id; 
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
-                            renderBatchCard(batchId, batchSnap.data());
+                            renderBatchCard(batchId, batchSnap.data(), delayIndex++);
                         }
                     });
                 } else {
@@ -439,9 +455,11 @@
             }
         }
 
-        function renderBatchCard(id, data) {
+        function renderBatchCard(id, data, delayIndex) {
             const card = document.createElement('div');
             card.className = 'batch-card';
+            // Apply staggered animation delay based on index
+            card.style.animationDelay = `${delayIndex * 0.1}s`; 
             
             const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/E5E7EB/6B7280?text=Module+Data';
 
