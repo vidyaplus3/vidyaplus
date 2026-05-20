@@ -6,31 +6,29 @@
     <title>Student Portal | VidyaPlus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- PREMIUM DESIGN SYSTEM & VARIABLES --- */
+        /* --- DESIGN SYSTEM & VARIABLES --- */
         :root {
-            --bg-color: #f4f7f9;
+            --bg-color: #f8fafc;
             --surface: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --primary: #2563eb; 
-            --primary-hover: #1d4ed8;
-            --primary-light: #eff6ff;
-            --success: #10b981;
-            --border-color: #e5e7eb;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #92400e; 
+            --primary-light: #fef3c7;
+            --success: #059669;
+            --border-color: #e2e8f0;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             
-            --header-height: 72px;
+            --header-height: 70px;
             --sidebar-width: 260px;
             --bottom-nav-height: 65px;
-            --radius-md: 10px;
+            --radius-md: 12px;
             --radius-lg: 16px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
         
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
         /* --- AUTH GUARD --- */
         #authGuard {
@@ -40,7 +38,7 @@
             transition: opacity 0.4s ease;
         }
         .loader-ring {
-            width: 40px; height: 40px; border: 3px solid var(--border-color);
+            width: 48px; height: 48px; border: 4px solid var(--border-color);
             border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -48,174 +46,199 @@
         /* --- LAYOUT ARCHITECTURE --- */
         #appLayout { display: none; flex-direction: column; min-height: 100vh; }
 
-        /* --- HEADER (Fixed & Mobile Responsive) --- */
+        /* --- HEADER --- */
         .header {
-            height: var(--header-height); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px);
+            height: var(--header-height); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
             padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
         }
-        .header-left { display: flex; align-items: center; gap: 3rem; flex: 1; }
-        .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .logo i { color: var(--primary); font-size: 1.6rem; }
-        .logo span { font-size: 1.4rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo i { color: var(--primary); font-size: 1.8rem; }
+        .logo span { font-size: 1.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
         
-        .search-bar { position: relative; max-width: 400px; width: 100%; display: flex; align-items: center; }
+        .search-bar { position: relative; width: 350px; display: none; }
+        @media (min-width: 1024px) { .search-bar { display: block; } }
         .search-bar input {
-            width: 100%; padding: 10px 16px 10px 42px; border-radius: 8px;
+            width: 100%; padding: 10px 16px 10px 40px; border-radius: 20px;
             border: 1px solid var(--border-color); background: var(--bg-color);
-            font-size: 0.9rem; transition: all 0.2s ease; color: var(--text-main);
+            font-size: 0.9rem; transition: 0.2s;
         }
         .search-bar input:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px var(--primary-light); }
-        .search-bar i { position: absolute; left: 14px; color: var(--text-muted); font-size: 0.9rem; }
+        .search-bar i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 
-        /* Header Right Actions */
-        .header-actions { display: flex; align-items: center; gap: 24px; }
+        /* Header Right Actions & Profile Dropdown */
+        .header-actions { display: flex; align-items: center; gap: 20px; }
         .icon-btn { position: relative; background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
-        .icon-btn:hover { color: var(--text-main); }
-        .badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 600; padding: 2px 6px; border-radius: 12px; border: 2px solid var(--surface); }
+        .icon-btn:hover { color: var(--primary); }
+        .badge { position: absolute; top: -4px; right: -4px; background: #dc2626; color: white; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 10px; border: 2px solid var(--surface); }
 
         .profile-container { position: relative; }
-        .user-avatar { width: 38px; height: 38px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); transition: all 0.2s; }
-        .user-avatar:hover { background: var(--primary); color: white; }
+        .user-avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .user-avatar:hover { border-color: var(--primary-light); }
         
         .profile-dropdown {
-            position: absolute; right: 0; top: calc(100% + 12px);
+            position: absolute; right: 0; top: calc(100% + 10px);
             background: var(--surface); border: 1px solid var(--border-color);
-            border-radius: 8px; box-shadow: var(--shadow-lg); width: 220px;
+            border-radius: 10px; box-shadow: var(--shadow-md); width: 200px;
             display: flex; flex-direction: column; opacity: 0; visibility: hidden;
-            transform: translateY(-8px); transition: all 0.2s ease;
+            transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1001; overflow: hidden;
         }
         .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
         .dropdown-item {
-            padding: 12px 16px; text-decoration: none; color: var(--text-muted);
-            font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; text-decoration: none; color: var(--text-main);
+            font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 10px;
             background: none; border: none; text-align: left; cursor: pointer; transition: 0.2s;
         }
-        .dropdown-item:hover { background: var(--bg-color); color: var(--text-main); }
-        .dropdown-item i { width: 16px; text-align: center; font-size: 1rem; }
-        .dropdown-item.logout { border-top: 1px solid var(--border-color); color: #ef4444; }
-        .dropdown-item.logout i { color: #ef4444; }
-        .dropdown-item.logout:hover { background: #fef2f2; }
+        .dropdown-item:hover { background: var(--bg-color); color: var(--primary); }
+        .dropdown-item i { width: 20px; text-align: center; color: var(--text-muted); }
+        .dropdown-item:hover i { color: var(--primary); }
+        .dropdown-item.logout { border-top: 1px solid var(--border-color); color: #dc2626; }
+        .dropdown-item.logout i { color: #dc2626; }
+        .dropdown-item.logout:hover { background: #fef2f2; color: #b91c1c; }
 
         /* --- SIDEBAR --- */
         .content-wrapper { display: flex; flex: 1; margin-top: var(--header-height); }
         .sidebar {
             width: var(--sidebar-width); background: var(--surface); border-right: 1px solid var(--border-color);
             position: fixed; top: var(--header-height); bottom: 0; left: 0;
-            padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 4px; z-index: 990; overflow-y: auto;
+            padding: 2rem 1rem; display: flex; flex-direction: column; gap: 8px; z-index: 990; overflow-y: auto;
         }
-        .nav-label { font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; padding: 12px; margin-top: 8px; }
+        .nav-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; padding: 10px 16px; margin-top: 10px; }
         .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-            text-decoration: none; color: var(--text-muted); font-weight: 500;
-            border-radius: 6px; transition: all 0.2s; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+            text-decoration: none; color: var(--text-muted); font-weight: 600;
+            border-radius: 8px; transition: 0.2s; font-size: 0.95rem;
         }
         .nav-item:hover { background: var(--bg-color); color: var(--text-main); }
-        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
-        .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .nav-item i { width: 24px; text-align: center; font-size: 1.2rem; }
 
         /* --- MAIN DASHBOARD WORKSPACE --- */
-        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem 3rem; max-width: 1400px; }
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 2rem 3rem; max-width: 1600px; }
 
         /* Welcome & Stats Row */
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
-        .greeting h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-main); }
-        .greeting p { color: var(--text-muted); margin-top: 6px; font-size: 0.95rem; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+        .greeting h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+        .greeting p { color: var(--text-muted); margin-top: 5px; font-size: 1rem; }
         
-        .stats-container { display: flex; gap: 1rem; }
-        .stat-card { background: var(--surface); padding: 0.8rem 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); min-width: 150px; }
-        .stat-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-        .stat-info h4 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
-        .stat-info span { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-
-        /* Simple Daily Objectives Section (Replaces Hero) */
-        .daily-directives {
-            background: var(--surface); border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); padding: 1.5rem 2rem;
-            margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: var(--shadow-sm); border-left: 4px solid var(--primary);
+        .stats-container { display: flex; gap: 1.5rem; }
+        .stat-card { 
+            background: var(--surface); 
+            padding: 1rem 1.5rem; 
+            border-radius: var(--radius-md); 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            display: flex; align-items: center; gap: 15px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
         }
-        .directive-content h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
-        .directive-content p { font-size: 0.9rem; color: var(--text-muted); }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: 0.2s; text-decoration: none; }
-        .btn-primary:hover { background: var(--primary-hover); }
+        .stat-card:hover { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04); transform: translateY(-2px); border-color: var(--border-color); }
+        .stat-icon { width: 45px; height: 45px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+        .stat-info h4 { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+        .stat-info span { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+        /* Button styles (kept for JS fallback usage) */
+        .btn-resume { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .btn-resume:hover { background: #78350f; }
+
+        /* Simple Notice Panel (Replaced Hero) */
+        .notice-panel {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+        .notice-icon { font-size: 1.5rem; color: var(--primary); background: var(--primary-light); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
+        .notice-text h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .notice-text p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin: 0; }
 
         /* Section Titles */
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
-        .section-title { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
-        .view-all { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 500; transition: 0.2s; }
-        .view-all:hover { color: var(--primary-hover); }
+        .section-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .view-all { font-size: 0.9rem; color: var(--primary); text-decoration: none; font-weight: 600; }
 
-        /* --- SLEEK BATCH GRID & CARDS --- */
-        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        /* --- BATCH GRID & CARDS (Sleek & Minimal) --- */
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
         
         .batch-card {
-            background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column;
-            box-shadow: var(--shadow-sm);
+            background: var(--surface); 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            border-radius: var(--radius-md);
+            overflow: hidden; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: flex; flex-direction: column;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         }
-        .batch-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: #d1d5db; }
-        .card-img-wrapper { position: relative; height: 140px; width: 100%; background: #f3f4f6; border-bottom: 1px solid var(--border-color); }
-        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        .batch-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06); 
+            border-color: var(--border-color); 
+        }
         
-        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .subject-tag { display: inline-block; font-size: 0.7rem; font-weight: 600; color: var(--primary); background: var(--primary-light); padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; align-self: flex-start; }
+        .card-img-wrapper { width: 100%; height: 160px; overflow: hidden; border-bottom: 1px solid var(--border-color); background: var(--bg-color); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .batch-card:hover .card-img { transform: scale(1.03); }
         
-        .card-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-main); line-height: 1.4; flex-grow: 1; }
+        .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .subject-tag { font-size: 0.75rem; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .progress-wrapper { margin-bottom: 1.25rem; }
-        .progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
-        .progress-bar { width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.5s ease; }
+        .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); line-height: 1.4; flex-grow: 1; }
+        
+        .progress-wrapper { margin-bottom: 15px; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .progress-bar { width: 100%; height: 6px; background: var(--bg-color); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); border-radius: 3px; }
 
-        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); padding: 10px; border-radius: 6px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
-        .btn-outline:hover { background: var(--bg-color); border-color: #d1d5db; color: var(--primary); }
+        .btn-outline { width: 100%; text-align: center; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-outline:hover { background: var(--bg-color); border-color: var(--text-muted); }
 
         /* --- SKELETON LOADERS --- */
-        .skeleton { background: #e5e7eb; animation: pulse 1.5s infinite; border-radius: 4px; }
-        .skel-card { height: 320px; border-radius: var(--radius-md); }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .skeleton { background: #e2e8f0; animation: pulse 1.5s infinite; border-radius: 4px; }
+        .skel-card { height: 350px; border-radius: var(--radius-md); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
         /* --- MOBILE NAVIGATION --- */
         .bottom-nav {
-            display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(12px); height: var(--bottom-nav-height); border-top: 1px solid var(--border-color);
+            display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); height: var(--bottom-nav-height); border-top: 1px solid var(--border-color);
             z-index: 1000; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: var(--text-muted); font-size: 0.7rem; font-weight: 500; flex: 1; }
+        .bottom-nav.hidden { transform: translateY(100%); }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; flex: 1; }
         .bottom-nav-item.active { color: var(--primary); }
-        .bottom-nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
+        .bottom-nav-item.active i { transform: scale(1.15); }
+        .bottom-nav-item i { font-size: 1.3rem; transition: 0.2s; }
 
         /* --- RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 1024px) {
             .main-content { padding: 2rem; }
-            .search-bar { max-width: 300px; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
         }
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .bottom-nav { display: flex; }
             .main-content { margin-left: 0; padding: 1.5rem 1rem; padding-bottom: calc(var(--bottom-nav-height) + 2rem); }
             .header { padding: 0 1rem; }
-            .header-left { gap: 1rem; }
-            .logo span { display: none; } /* Hide logo text on mobile to save space for search */
-            .search-bar { max-width: none; flex: 1; margin-right: 10px; }
-            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
-            .stats-container { width: 100%; justify-content: space-between; }
-            .stat-card { flex: 1; min-width: auto; padding: 0.8rem; }
-            .daily-directives { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
-            .btn-primary { width: 100%; text-align: center; }
+            .notice-panel { padding: 1.25rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .stats-container { width: 100%; flex-wrap: wrap; }
+            .stat-card { flex: 1; min-width: 140px; padding: 1rem; }
             .batch-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-    <body>
+<body>
     <div id="authGuard">
         <div class="loader-ring"></div>
-        <p style="margin-top: 1rem; font-size: 0.9rem; font-weight: 500; color: var(--text-muted);">Authenticating Session...</p>
+        <p style="margin-top: 1rem; font-weight: 600; color: var(--text-main);">Securing Academic Session...</p>
     </div>
 
     <div id="appLayout">
@@ -228,7 +251,7 @@
                 </a>
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search curriculum, modules, or notes...">
+                    <input type="text" placeholder="Search for concepts, classes, or notes...">
                 </div>
             </div>
             
@@ -237,7 +260,7 @@
                 <div class="profile-container">
                     <div class="user-avatar" id="profileToggle">?</div>
                     <div class="profile-dropdown" id="profileDropdown">
-                        <a href="profile.html" class="dropdown-item"><i class="fas fa-user"></i> Account Overview</a>
+                        <a href="profile.html" class="dropdown-item"><i class="fas fa-user-circle"></i> View Profile</a>
                         <button class="dropdown-item logout" onclick="logoutSystem()"><i class="fas fa-sign-out-alt"></i> Terminate Session</button>
                     </div>
                 </div>
@@ -247,55 +270,56 @@
         <div class="content-wrapper">
             <nav class="sidebar">
                 <div class="nav-label">Academic Hub</div>
-                <a href="dashboard.html" class="nav-item active"><i class="fas fa-layer-group"></i> Dashboard</a>
-                <a href="explore.html" class="nav-item"><i class="fas fa-book"></i> Course Catalog</a>
-                <a href="study.html" class="nav-item"><i class="fas fa-folder-open"></i> My Library</a>
+                <a href="dashboard.html" class="nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="explore.html" class="nav-item"><i class="fas fa-compass"></i> Course Catalog</a>
+                <a href="study.html" class="nav-item"><i class="fas fa-book-reader"></i> My Library</a>
                 
-                <div class="nav-label">Assessments</div>
-                <a href="#" class="nav-item"><i class="fas fa-file-signature"></i> Mock Tests</a>
-                <a href="#" class="nav-item"><i class="fas fa-chart-bar"></i> Performance Analytics</a>
+                <div class="nav-label">Assessments & AI</div>
+                <a href="#" class="nav-item"><i class="fas fa-file-alt"></i> Mock Tests</a>
+                <a href="#" class="nav-item"><i class="fas fa-robot"></i> AI Guru (Doubt)</a>
+                <a href="#" class="nav-item"><i class="fas fa-chart-line"></i> Performance Analytics</a>
 
-                <div class="nav-label">System</div>
-                <a href="profile.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
-                <a href="#" class="nav-item" onclick="logoutSystem()" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Terminate Session</a>
+                <div class="nav-label">Settings</div>
+                <a href="profile.html" class="nav-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                <a href="#" class="nav-item" onclick="logoutSystem()" style="color: #dc2626;"><i class="fas fa-sign-out-alt"></i> Terminate Session</a>
             </nav>
 
             <main class="main-content">
                 
                 <div class="dashboard-header">
                     <div class="greeting">
-                        <h1>Academic Dashboard</h1>
-                        <p>Welcome back, <span id="user-display-name">Scholar</span>.</p>
+                        <h1>Welcome back, <span id="user-display-name">Scholar</span> 👋</h1>
+                        <p>Let's continue your academic preparation.</p>
                     </div>
                     <div class="stats-container">
                         <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                            <div class="stat-icon"><i class="fas fa-fire"></i></div>
                             <div class="stat-info">
-                                <h4><span id="user-streak">0</span></h4>
-                                <span>Day Streak</span>
+                                <h4><span id="user-streak">0</span> Days</h4>
+                                <span>Study Streak</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon" style="color: var(--success); background: #ecfdf5;"><i class="fas fa-stopwatch"></i></div>
+                            <div class="stat-icon" style="color: #059669; background: #d1fae5;"><i class="fas fa-clock"></i></div>
                             <div class="stat-info">
-                                <h4><span id="user-watch-time">0</span>h</h4>
-                                <span>Study Hours</span>
+                                <h4><span id="user-watch-time">0</span> Hrs</h4>
+                                <span>Watch Time</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="daily-directives">
-                    <div class="directive-content">
-                        <h3>Pending Academic Modules</h3>
-                        <p>You have uncompleted lectures in your current curriculum. Resume your studies to maintain progress.</p>
+                <div class="notice-panel">
+                    <div class="notice-icon"><i class="fas fa-bullhorn"></i></div>
+                    <div class="notice-text">
+                        <h3>Academic Overview</h3>
+                        <p>Review your active modules and ensure consistent progression through the core curriculum materials below.</p>
                     </div>
-                    <a href="explore.html" class="btn-primary">Access Curriculum</a>
                 </div>
 
-                <div class="section-header">
-                    <span class="section-title">Active Enrollments</span>
-                    <a href="explore.html" class="view-all">View All Modules <i class="fas fa-chevron-right" style="font-size: 0.75rem; margin-left: 4px;"></i></a>
+                <div class="section-title">
+                    <span>Active Enrollments</span>
+                    <a href="explore.html" class="view-all">Browse Catalog <i class="fas fa-arrow-right"></i></a>
                 </div>
 
                 <div class="batch-grid" id="myBatchGrid">
@@ -306,25 +330,24 @@
 
             </main>
         </div>
-        
-        <nav class="bottom-nav" id="bottomNav">
+          <nav class="bottom-nav" id="bottomNav">
             <a href="dashboard.html" class="bottom-nav-item active">
-                <i class="fas fa-layer-group"></i><span>Home</span>
+                <i class="fas fa-home"></i><span>Home</span>
             </a>
             <a href="explore.html" class="bottom-nav-item">
-                <i class="fas fa-book"></i><span>Catalog</span>
+                <i class="fas fa-compass"></i><span>Explore</span>
             </a>
             <a href="study.html" class="bottom-nav-item">
-                <i class="fas fa-folder-open"></i><span>Library</span>
+                <i class="fas fa-book-reader"></i><span>Library</span>
             </a>
-            <a href="profile.html" class="bottom-nav-item">
-                <i class="fas fa-user"></i><span>Profile</span>
+            <a href="#" class="bottom-nav-item">
+                <i class="fas fa-robot"></i><span>AI Guru</span>
             </a>
         </nav>
     </div>
 
     <script>
-        // Profile Dropdown Logic
+        // Profile Dropdown Toggle Script
         const profileToggle = document.getElementById('profileToggle');
         const profileDropdown = document.getElementById('profileDropdown');
 
@@ -333,13 +356,35 @@
             profileDropdown.classList.toggle('active');
         });
 
+        // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!profileDropdown.contains(e.target) && !profileToggle.contains(e.target)) {
                 profileDropdown.classList.remove('active');
             }
         });
+
+        // Smooth scroll hiding for mobile nav (60fps optimized)
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        const bottomNav = document.getElementById('bottomNav');
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                        bottomNav.classList.add('hidden');
+                    } else {
+                        bottomNav.classList.remove('hidden');
+                    }
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
     </script>
-        <script type="module">
+    <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -348,12 +393,15 @@
         const appLayout = document.getElementById('appLayout');
         const myBatchGrid = document.getElementById('myBatchGrid');
 
+        // Authentication State Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Determine user display name or fallback to email part
                 let displayName = user.displayName || user.email.split('@')[0];
                 document.getElementById('user-display-name').innerText = displayName.charAt(0).toUpperCase() + displayName.slice(1);
                 document.getElementById('profileToggle').innerText = displayName.charAt(0).toUpperCase();
                 
+                // Fetch Real Academic Stats from Firestore
                 try {
                     const userRef = doc(db, "users", user.uid);
                     const userSnap = await getDoc(userRef);
@@ -361,10 +409,12 @@
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         
+                        // 1. Set Streak
                         const streakCount = userData.streak || 0;
                         const streakEl = document.getElementById('user-streak');
                         if (streakEl) streakEl.innerText = streakCount;
                         
+                        // 2. Set Watch Time (Convert Seconds to Hours)
                         const totalSecs = userData.totalWatchTimeSeconds || 0;
                         const totalHours = Math.floor(totalSecs / 3600);
                         const watchTimeEl = document.getElementById('user-watch-time');
@@ -374,6 +424,7 @@
                     console.error("Error fetching user stats:", error);
                 }
 
+                // Reveal Application UI smoothly
                 authGuard.style.opacity = '0';
                 setTimeout(() => {
                     authGuard.style.display = 'none';
@@ -391,7 +442,7 @@
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
 
-                myBatchGrid.innerHTML = ''; 
+                myBatchGrid.innerHTML = ''; // Clear Skeletons
 
                 if (!enrollmentsSnap.empty) {
                     enrollmentsSnap.forEach(async (docSnap) => {
@@ -400,6 +451,7 @@
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
+                            // Fetch real progress from enrollment doc or default to 0
                             const enrollmentData = docSnap.data();
                             const actualProgress = enrollmentData.progressPercentage || 0;
                             renderBatchCard(batchId, batchSnap.data(), actualProgress);
@@ -407,17 +459,17 @@
                     });
                 } else {
                     myBatchGrid.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align:center; padding: 3rem 2rem; background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-                            <i class="fas fa-inbox" style="font-size: 2.5rem; color: #d1d5db; margin-bottom: 1rem;"></i>
-                            <h3 style="color: var(--text-main); font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 500;">No Active Curriculum Found</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Navigate to the course catalog to begin enrollment.</p>
-                            <button onclick="window.location.href='explore.html'" class="btn-outline" style="width: auto; padding: 8px 16px;">Browse Modules</button>
+                        <div style="grid-column: 1/-1; text-align:center; padding: 4rem 2rem; background: var(--surface); border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
+                            <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                            <h3 style="color: var(--text-main); font-size: 1.2rem; margin-bottom: 0.5rem;">No Active Enrollments</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Begin your academic journey by exploring our catalog.</p>
+                            <button onclick="window.location.href='explore.html'" class="btn-resume" style="width: auto;">Browse Catalog</button>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error("Database Query Error:", error);
-                myBatchGrid.innerHTML = '<p style="color: #ef4444; grid-column: 1/-1; font-size: 0.9rem;">System Error: Unable to sync academic data at this time.</p>';
+                myBatchGrid.innerHTML = '<p style="color: #dc2626; grid-column: 1/-1;">Critical Error: Unable to retrieve academic data.</p>';
             }
         }
 
@@ -425,19 +477,22 @@
             const card = document.createElement('div');
             card.className = 'batch-card';
             
-            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/f3f4f6/9ca3af?text=Academic+Module';
+            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/0f172a/ffffff?text=Academic+Module';
 
+            // JS update: Added .card-img-wrapper to ensure hover scale effect remains inside rounded corners
             card.innerHTML = `
                 <div class="card-img-wrapper">
-                    <img src="${imgUrl}" alt="Module Content" class="card-img" loading="lazy">
+                    <img src="${imgUrl}" alt="Module Image" class="card-img" loading="lazy">
                 </div>
                 <div class="card-body">
-                    <span class="subject-tag">${data.subject || 'Core Subject'}</span>
+                    <div class="card-meta">
+                        <span class="subject-tag">${data.subject || 'Core Curriculum'}</span>
+                    </div>
                     <div class="card-title">${data.title}</div>
                     
                     <div class="progress-wrapper">
                         <div class="progress-labels">
-                            <span>Syllabus Covered</span>
+                            <span>Syllabus Completion</span>
                             <span>${progress}%</span>
                         </div>
                         <div class="progress-bar">
@@ -446,15 +501,16 @@
                     </div>
 
                     <button class="btn-outline" onclick="window.location.href='study.html?batch=${id}'">
-                        Access Module
+                        Access Module Material
                     </button>
                 </div>
             `;
             myBatchGrid.appendChild(card);
         }
 
+        // Global Logout Function
         window.logoutSystem = function() {
-            if(confirm("Confirm session termination?")) {
+            if(confirm("Are you sure you want to terminate the current session?")) {
                 signOut(auth).then(() => {
                     window.location.replace("index.html");
                 }).catch((error) => console.error(error));
