@@ -114,6 +114,7 @@
         /* Welcome & Stats Row */
         .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
         
+        /* Upgraded Greeting Design */
         .greeting { display: flex; flex-direction: column; gap: 6px; }
         .greeting h1 { 
             font-size: 1.6rem; 
@@ -124,6 +125,7 @@
             align-items: center; 
             gap: 12px;
         }
+        /* The Blue Accent Pill */
         .greeting h1::before {
             content: '';
             display: block;
@@ -171,7 +173,7 @@
         .view-all { font-size: 0.875rem; color: var(--primary); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
         .view-all:hover { color: var(--primary-hover); }
 
-        /* --- BATCH GRID & PREMIUM UPGRADED CARDS --- */
+        /* --- BATCH GRID & PREMIUM CARDS --- */
         .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         
         @keyframes premiumFadeUp {
@@ -197,45 +199,9 @@
             border-color: #D1D5DB; 
         }
         
-        /* CARD HEADER / ART UPGRADE */
-        .card-img-wrapper { 
-            width: 100%; height: 140px; overflow: hidden; border-bottom: 1px solid var(--border-color); 
-            position: relative; /* important for absolute scaling */
-            background-color: var(--bg-color); 
-        }
-        
-        /* Fallback Art Styling (Vibrant & Abstract) */
-        .card-art-fallback {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 0; left: 0;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            /* Background art pattern applied dynamically via JS */
-        }
-        
-        .card-art-icon {
-            font-size: 3rem;
-            opacity: 0.3; /* Subtle icon texture */
-            transform: rotate(-15deg);
-        }
-
-        /* Actual Image Styling (if exists) */
-        .card-img { 
-            width: 100%; height: 100%; object-fit: cover; 
-            position: absolute;
-            top: 0; left: 0;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
-        }
-        
-        /* Hover Effect for Image Area (scales up slightly) */
-        .batch-card:hover .card-img,
-        .batch-card:hover .card-art-fallback { 
-            transform: scale(1.05); 
-        }
+        .card-img-wrapper { width: 100%; height: 140px; overflow: hidden; border-bottom: 1px solid var(--border-color); background: var(--bg-color); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .batch-card:hover .card-img { transform: scale(1.05); }
         
         .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
         .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -432,26 +398,6 @@
         const appLayout = document.getElementById('appLayout');
         const myBatchGrid = document.getElementById('myBatchGrid');
 
-        /* NEW: Art Generator Data (Colorful Abstract Patterns) */
-        const artPalettes = [
-            { bg: 'linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%)', text: '#FEF2F2', icon: 'fa-brain' }, // Coral
-            { bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', text: '#EFF6FF', icon: 'fa-microscope' }, // Sky
-            { bg: 'linear-gradient(135deg, #B3FFAB 0%, #12FFF7 100%)', text: '#F0FDF4', icon: 'fa-flask' }, // Teal
-            { bg: 'linear-gradient(135deg, #F093FB 0%, #f5576c 100%)', text: '#FEF2F2', icon: 'fa-dna' }, // Pink
-            { bg: 'linear-gradient(135deg, #b721ff 0%, #21d4fd 100%)', text: '#F5F3FF', icon: 'fa-code' }, // Purple
-            { bg: 'linear-gradient(135deg, #FFD93D 0%, #4facfe 100%)', text: '#FDFCEB', icon: 'fa-calculator' } // Yellow
-        ];
-
-        function getDeterministicArtPalette(id) {
-            let hash = 0;
-            if (id.length === 0) return artPalettes[0];
-            for (let i = 0; i < id.length; i++) {
-                hash = id.charCodeAt(i) + ((hash << 5) - hash);
-                hash = hash & hash; // Convert to 32bit integer
-            }
-            return artPalettes[Math.abs(hash) % artPalettes.length];
-        }
-
         // Authentication State Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -525,33 +471,16 @@
             }
         }
 
-        /* UPGRADED: Card Rendering with Dynamic Art Fallback */
         function renderBatchCard(id, data, delayIndex) {
             const card = document.createElement('div');
             card.className = 'batch-card';
             card.style.animationDelay = `${delayIndex * 0.1}s`; 
             
-            let cardHeaderHtml = '';
-            const placeholderUrl = 'https://via.placeholder.com/600x340/E5E7EB/6B7280?text=Module+Data';
-
-            // Check if actual image exists and is not the placeholder
-            if (data.imageUrl && data.imageUrl !== placeholderUrl) {
-                cardHeaderHtml = `<img src="${data.imageUrl}" alt="Module Image" class="card-img" loading="lazy">`;
-            } else {
-                // APPLY ART UPGRADE: Deterministic colorful art pattern
-                const palette = getDeterministicArtPalette(id);
-                const subjectIcon = data.subjectIcon || palette.icon || 'fa-cubes';
-                
-                cardHeaderHtml = `
-                    <div class="card-art-fallback" style="background: ${palette.bg};">
-                        <i class="fas ${subjectIcon} card-art-icon" style="color: ${palette.text}; opacity: 0.25;"></i>
-                    </div>
-                `;
-            }
+            const imgUrl = data.imageUrl || 'https://via.placeholder.com/600x340/E5E7EB/6B7280?text=Module+Data';
 
             card.innerHTML = `
                 <div class="card-img-wrapper">
-                    ${cardHeaderHtml}
+                    <img src="${imgUrl}" alt="Module Image" class="card-img" loading="lazy">
                 </div>
                 <div class="card-body">
                     <div class="card-meta">
