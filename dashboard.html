@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VidyaPlus | Dashboard</title>
+    <title>VidyaPlus | Advanced Learning Platform</title>
     
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com;">
 
@@ -17,6 +17,7 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
                         surface: '#f8fafc',
                         dark: '#0f172a'
                     },
@@ -55,7 +56,7 @@
         
         .top-navbar { height: 72px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
 
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 12px; border-radius: 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 12px; border-radius: 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; cursor: pointer; }
         .nav-item:hover { background: #f1f5f9; color: #0f172a; }
         .nav-item.active { background: #eff6ff; color: #2563eb; }
 
@@ -64,7 +65,7 @@
         .search-bar input { background: transparent; border: none; outline: none; width: 100%; font-size: 0.95rem; color: #0f172a; }
 
         .target-selector { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        
+
         .pw-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: var(--box-shadow-soft); transition: transform 0.2s; display: flex; flex-direction: column; }
         .pw-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         
@@ -72,31 +73,20 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Notification Drawer */
-        .notif-drawer {
-            position: fixed; top: 0; right: -400px; width: 100%; max-width: 350px; height: 100vh;
-            background: white; z-index: 100; box-shadow: -4px 0 25px rgba(0,0,0,0.1);
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
-        }
-        .notif-drawer.open { right: 0; }
-        
-        .drawer-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 90;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+        /* Added Styles for Notifications & Profile Dropdown */
+        .notification-drawer { position: fixed; top: 0; right: -350px; width: 320px; max-width: 100vw; height: 100vh; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.05); z-index: 100; transition: right 0.3s ease; display: flex; flex-direction: column; }
+        .notification-drawer.open { right: 0; }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 90; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
 
-        /* Profile Dropdown */
-        .profile-dropdown {
-            position: absolute; top: calc(100% + 10px); right: 1.5rem; width: 220px;
-            background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s; z-index: 60;
-        }
-        .profile-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
-        .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #475569; font-size: 0.9rem; font-weight: 500; transition: background 0.2s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 180px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 50; }
+        .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item { padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: #475569; cursor: pointer; transition: background 0.2s; }
         .dropdown-item:hover { background: #f8fafc; color: #0f172a; }
-        .dropdown-item.danger:hover { color: #ef4444; background: #fef2f2; }
+        .dropdown-item.danger { color: #dc2626; border-top: 1px solid #e2e8f0; }
+        .dropdown-item.danger:hover { background: #fef2f2; }
 
+        /* Responsive Breakpoints */
         .mobile-bottom-nav { display: none; }
         .mobile-header-menu { display: none; }
 
@@ -109,7 +99,7 @@
 
         @media (max-width: 768px) {
             .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; z-index: 45; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; }
-            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; font-size: 0.7rem; font-weight: 600; text-decoration: none; }
+            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
             .bottom-nav-item.active { color: #3b82f6; }
             .main-content { padding-bottom: 70px; }
             .top-navbar { padding: 0 1rem; }
@@ -124,10 +114,22 @@
         <h2 class="text-lg font-bold text-slate-800">Establishing Secure Session</h2>
     </div>
 
+    <div class="drawer-overlay" id="notif-overlay" onclick="toggleNotifications()"></div>
+    <div class="notification-drawer" id="notif-drawer">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900">Notifications</h3>
+            <button onclick="toggleNotifications()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
+            <i class="fas fa-bell-slash text-4xl text-slate-200 mb-2"></i>
+            <p class="text-slate-500 text-sm font-medium">No new notifications</p>
+        </div>
+    </div>
+
     <div id="app-container">
         
         <aside class="sidebar" id="sidebar">
-            <div class="p-6 flex items-center justify-between border-b border-slate-100 shrink-0">
+            <div class="p-6 flex items-center justify-between border-b border-slate-100">
                 <div class="flex items-center gap-2 text-blue-600">
                     <i class="fas fa-graduation-cap text-2xl"></i>
                     <span class="text-2xl font-extrabold text-slate-900 tracking-tight">VidyaPlus</span>
@@ -135,26 +137,25 @@
                 <button class="lg:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
             </div>
             
-            <div class="py-4 overflow-y-auto hide-scroll flex-1">
+            <div class="flex-1 overflow-y-auto hide-scroll py-4">
                 <div class="px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">My Workspace</div>
-                <a href="dashboard.html" class="nav-item active"><i class="fas fa-border-all w-6"></i> Dashboard</a>
-                <a href="study.html" class="nav-item"><i class="fas fa-book-open w-6"></i> Study Material</a>
-                <a href="#" class="nav-item"><i class="fas fa-clipboard-list w-6"></i> Test Series</a>
-                
-                <div class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Discover</div>
-                <a href="explore.html" class="nav-item"><i class="fas fa-compass w-6"></i> Explore</a>
+                <div class="nav-item active"><i class="fas fa-layer-group w-6"></i> Dashboard</div>
+                <div class="nav-item" onclick="window.location.href='study.html'"><i class="fas fa-book-open w-6"></i> Study Material</div>
+                <div class="nav-item"><i class="fas fa-clipboard-list w-6"></i> Test Series</div>
+                <div class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Explore</div>
+                <div class="nav-item" onclick="window.location.href='explore.html'"><i class="fas fa-compass w-6"></i> Explore</div>
             </div>
 
-            <div class="p-4 border-t border-slate-100 shrink-0">
-                <button onclick="logoutSystem()" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-sm font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-colors">
-                    <i class="fas fa-sign-out-alt"></i> Log Out
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="logoutSystem()" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 text-sm font-bold rounded-lg border border-slate-200 hover:border-red-200 transition">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
         </aside>
 
-        <div id="mobile-overlay" class="drawer-overlay hidden lg:hidden" onclick="toggleSidebar()"></div>
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-        <main class="main-content relative">
+        <main class="main-content">
             
             <header class="top-navbar">
                 <div class="flex items-center gap-4 flex-1">
@@ -164,47 +165,39 @@
                     
                     <div class="search-bar flex-1 max-w-xl hidden sm:flex">
                         <i class="fas fa-search text-slate-400"></i>
-                        <input type="text" id="searchInput" placeholder="Search for courses, teachers, subjects...">
+                        <input type="text" id="searchInput" placeholder="Search for batches, teachers, subjects...">
                     </div>
                 </div>
 
                 <div class="flex items-center gap-4 sm:gap-6 ml-4">
-                    <button class="text-slate-600 hover:text-blue-600 relative focus:outline-none" onclick="toggleNotifDrawer()">
+                    <button class="text-slate-600 hover:text-blue-600 relative" onclick="toggleNotifications()">
                         <i class="fas fa-bell text-xl"></i>
                         <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
                     
-                    <div class="relative">
+                    <div class="relative" id="profile-container">
                         <div class="flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer" onclick="toggleProfileDropdown(event)">
                             <div id="profile-skeleton" class="w-9 h-9 rounded-full skeleton"></div>
                             <div id="profile-data" class="hidden flex items-center gap-2">
                                 <div class="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm" id="user-avatar">S</div>
                             </div>
                         </div>
-
-                        <div id="profileDropdown" class="profile-dropdown">
-                            <div class="px-4 py-3 border-b border-slate-100">
-                                <p class="text-sm font-bold text-slate-900 truncate" id="dropdown-name">Student Name</p>
-                                <p class="text-xs text-slate-500 truncate" id="dropdown-email">student@vidyaplus.com</p>
-                            </div>
-                            <div class="py-1">
-                                <a href="profile.html" class="dropdown-item"><i class="fas fa-user-circle"></i> View Profile</a>
-                            </div>
-                            <div class="py-1 border-t border-slate-100">
-                                <div class="dropdown-item danger" onclick="logoutSystem()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
-                            </div>
+                        
+                        <div class="profile-dropdown" id="profile-dropdown">
+                            <div class="dropdown-item" onclick="window.location.href='profile.html'"><i class="fas fa-user w-5"></i> View Profile</div>
+                            <div class="dropdown-item danger" onclick="logoutSystem()"><i class="fas fa-sign-out-alt w-5"></i> Logout</div>
                         </div>
                     </div>
                 </div>
             </header>
 
             <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto">
-                <div class="max-w-7xl mx-auto w-full"> <div class="target-selector max-w-sm mb-8 shadow-sm">
+                <div class="max-w-7xl mx-auto"> <div class="target-selector max-w-sm mb-8 shadow-sm">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center"><i class="fas fa-crown text-xs"></i></div>
                             <div>
                                 <p class="text-xs text-slate-500 font-semibold">Your Target</p>
-                                <p class="text-sm font-bold text-slate-900">Class 12th + Board</p>
+                                <p class="text-sm font-bold text-slate-900">Class 12th + JEE</p>
                             </div>
                         </div>
                         <button class="text-blue-600 text-sm font-bold hover:underline">Change</button>
@@ -213,7 +206,7 @@
                     <div class="mb-10">
                         <h2 class="text-xl font-bold text-slate-900 mb-4">My Enrolled Courses</h2>
                         
-                        <div id="batch-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div id="batch-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             
                             <div class="pw-card skeleton-card">
                                 <div class="h-44 skeleton"></div>
@@ -238,8 +231,16 @@
 
                     <div class="mb-10">
                         <h2 class="text-xl font-bold text-slate-900 mb-4">Upcoming Events (Live)</h2>
-                        <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm max-w-4xl">
+                        <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
                             
+                            <div class="p-3 flex items-center gap-4 skeleton-row">
+                                <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="h-3 w-20 skeleton rounded"></div>
+                                    <div class="h-4 w-1/2 skeleton rounded"></div>
+                                    <div class="h-3 w-3/4 skeleton rounded"></div>
+                                </div>
+                            </div>
                             <div class="p-3 flex items-center gap-4 skeleton-row">
                                 <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
                                 <div class="flex-1 space-y-2">
@@ -256,24 +257,24 @@
                         <h2 class="text-xl font-bold text-slate-900 mb-4">Explore Platform</h2>
                         <div class="flex gap-4 overflow-x-auto hide-scroll pb-4">
                             
-                            <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-blue-50/50 border-blue-100" onclick="window.location.href='explore.html'">
-                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                    <i class="fas fa-compass text-blue-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-slate-900">Explore Catalog</h3>
-                                    <p class="text-xs text-slate-500 mt-1">Find new subjects, batches, and study material.</p>
-                                    <div class="mt-3 text-sm font-bold text-blue-600">Browse <i class="fas fa-arrow-right text-xs"></i></div>
-                                </div>
-                            </div>
-
                             <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-yellow-50/50 border-yellow-100">
                                 <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
                                     <i class="fas fa-clipboard-check text-yellow-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900">Mock Tests</h3>
-                                    <p class="text-xs text-slate-500 mt-1">Assess your preparation with full-length exams.</p>
+                                    <h3 class="font-bold text-slate-900">Real Test Pass</h3>
+                                    <p class="text-xs text-slate-500 mt-1">NTA like Real Tests & Rank Booster Practice.</p>
+                                    <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
+                                </div>
+                            </div>
+
+                            <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-blue-50/50 border-blue-100">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-book text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900">Modules & Books</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Hardcopy material for UP Board & JEE.</p>
                                     <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
                                 </div>
                             </div>
@@ -285,29 +286,15 @@
             </div>
         </main>
 
-        <div id="notif-overlay" class="drawer-overlay" onclick="toggleNotifDrawer()"></div>
-        <div id="notif-drawer" class="notif-drawer">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="text-lg font-bold text-slate-900">Notifications</h3>
-                <button class="text-slate-400 hover:text-slate-700 focus:outline-none" onclick="toggleNotifDrawer()"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <div class="p-4 flex-1 overflow-y-auto">
-                <div class="text-center py-10">
-                    <i class="fas fa-bell-slash text-4xl text-slate-200 mb-3"></i>
-                    <p class="text-sm font-medium text-slate-500">No new notifications</p>
-                </div>
-            </div>
-        </div>
-
         <nav class="mobile-bottom-nav">
-            <a href="dashboard.html" class="bottom-nav-item active"><i class="fas fa-border-all text-xl mb-1"></i> Dashboard</a>
-            <a href="study.html" class="bottom-nav-item"><i class="fas fa-book-open text-xl mb-1"></i> Study</a>
-            <a href="#" class="bottom-nav-item"><i class="fas fa-clipboard-list text-xl mb-1"></i> Test</a>
-            <a href="#" class="bottom-nav-item relative">
+            <div class="bottom-nav-item active"><i class="fas fa-layer-group text-xl mb-1"></i> Dashboard</div>
+            <div class="bottom-nav-item" onclick="window.location.href='study.html'"><i class="fas fa-book-open text-xl mb-1"></i> Study</div>
+            <div class="bottom-nav-item"><i class="fas fa-clipboard-list text-xl mb-1"></i> Test</div>
+            <div class="bottom-nav-item relative">
                 <span class="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-[8px] font-bold px-1 rounded">NEW</span>
                 <i class="fas fa-robot text-xl mb-1"></i> Pi
-            </a>
-            <a href="explore.html" class="bottom-nav-item"><i class="fas fa-compass text-xl mb-1"></i> Explore</a>
+            </div>
+            <div class="bottom-nav-item" onclick="window.location.href='explore.html'"><i class="fas fa-compass text-xl mb-1"></i> Explore</div>
         </nav>
 
     </div>
@@ -321,7 +308,6 @@
         const batchGrid = document.getElementById('batch-grid');
         const scheduleContainer = document.getElementById('schedule-container');
 
-        // Security Utility
         function sanitizeHTML(str) {
             if (!str) return '';
             const temp = document.createElement('div');
@@ -329,47 +315,41 @@
             return temp.innerHTML;
         }
 
-        // --- UI Toggles ---
+        // Sidebar logic
         window.toggleSidebar = function() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('mobile-overlay').classList.toggle('hidden');
         }
 
-        window.toggleNotifDrawer = function() {
+        // Notifications logic
+        window.toggleNotifications = function() {
             document.getElementById('notif-drawer').classList.toggle('open');
-            document.getElementById('notif-overlay').classList.toggle('open');
+            document.getElementById('notif-overlay').classList.toggle('active');
         }
 
+        // Profile Dropdown logic
         window.toggleProfileDropdown = function(e) {
             e.stopPropagation();
-            document.getElementById('profileDropdown').classList.toggle('open');
+            document.getElementById('profile-dropdown').classList.toggle('active');
         }
-
+        
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('profileDropdown');
-            const profileTrigger = document.querySelector('.pl-4.border-l');
-            if(dropdown && profileTrigger && !dropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
-                dropdown.classList.remove('open');
+            const dropdown = document.getElementById('profile-dropdown');
+            const profileBtn = document.getElementById('profile-container');
+            if (!profileBtn.contains(e.target)) {
+                dropdown.classList.remove('active');
             }
         });
 
-        // --- Auth & Data Load ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const displayName = sanitizeHTML(user.displayName || user.email.split('@')[0]);
-                const email = sanitizeHTML(user.email);
                 const initial = displayName.charAt(0).toUpperCase();
                 
                 document.getElementById('profile-skeleton').classList.add('hidden');
                 document.getElementById('profile-data').classList.remove('hidden');
                 document.getElementById('user-avatar').innerText = initial;
-                
-                // Update dropdown details
-                const dName = document.getElementById('dropdown-name');
-                const dEmail = document.getElementById('dropdown-email');
-                if(dName) dName.innerText = displayName;
-                if(dEmail) dEmail.innerText = email;
 
                 globalLoader.style.opacity = '0';
                 setTimeout(() => {
@@ -378,8 +358,7 @@
                 }, 400);
 
                 await fetchBatches(user.uid);
-                renderDummySchedule();
-
+                renderDummySchedule(); 
             } else {
                 window.location.replace("login.html");
             }
@@ -408,36 +387,41 @@
                 }
             } catch (error) {
                 console.error("Secure DB Fetch Error:", error);
-                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">System Error retrieving data securely.</div>`;
+                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">Error retrieving data securely. Check connection.</div>`;
             }
         }
 
         function renderBatchCard(id, data) {
-            const title = sanitizeHTML(data.title || "Untitled Course");
-            const imgUrl = sanitizeHTML(data.imageUrl || "https://via.placeholder.com/600x340/e2e8f0/64748b?text=Course+Cover");
-            const target = sanitizeHTML(data.subject || "Academic Core");
-            const price = data.price ? `₹${data.price}` : 'Access Granted';
+            const title = sanitizeHTML(data.title || "Untitled Batch");
+            const imgUrl = sanitizeHTML(data.imageUrl || "https://via.placeholder.com/600x340/e2e8f0/64748b?text=Batch+Cover");
+            const target = sanitizeHTML(data.subject || "Class 12th + JEE");
+            const price = data.price ? `₹${data.price}` : 'Enrolled';
 
             const cardHTML = `
                 <div class="pw-card">
                     <div class="relative h-44 bg-slate-100 overflow-hidden">
+                        <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-slate-800 shadow-sm border border-slate-200 z-10 flex items-center gap-1">
+                            <i class="fas fa-star text-yellow-500"></i> Multiple Plans
+                        </div>
                         <img src="${imgUrl}" alt="Cover" class="w-full h-full object-cover">
                     </div>
                     <div class="p-4 flex flex-col flex-1">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-xs font-bold text-orange-600">${target}</span>
-                            <span class="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">Standard</span>
+                            <span class="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">Hindi/Eng</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2 line-clamp-2">${title}</h3>
                         
                         <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-4">
-                            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Active</div>
+                            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ongoing</div>
+                            <span class="text-slate-300">|</span>
+                            <span>Syllabus: Physics, Chem, Math</span>
                         </div>
                         
                         <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-                            <div class="text-base font-black text-slate-900">${price}</div>
+                            <div class="text-lg font-black text-slate-900">${price}</div>
                             <button class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-6 rounded-lg text-sm transition" onclick="window.location.href='study.html?batch=${id}'">
-                                View Content <i class="fas fa-chevron-right text-xs ml-1"></i>
+                                Access Material <i class="fas fa-chevron-right text-xs ml-1"></i>
                             </button>
                         </div>
                     </div>
@@ -450,9 +434,9 @@
             batchGrid.innerHTML = `
                 <div class="col-span-full flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-xl">
                     <i class="fas fa-box-open text-4xl text-slate-300 mb-4"></i>
-                    <h3 class="text-lg font-bold text-slate-900">No Courses Yet</h3>
-                    <p class="text-sm text-slate-500 mt-1">Explore our catalog to find your target content.</p>
-                    <button class="mt-4 border border-blue-600 text-blue-600 font-bold px-6 py-2 rounded-lg hover:bg-blue-50 transition" onclick="window.location.href='explore.html'">Explore Catalog</button>
+                    <h3 class="text-lg font-bold text-slate-900">No Batches Yet</h3>
+                    <p class="text-sm text-slate-500 mt-1">Explore our store to find your target batch.</p>
+                    <button class="mt-4 border border-blue-600 text-blue-600 font-bold px-6 py-2 rounded-lg hover:bg-blue-50 transition" onclick="window.location.href='explore.html'">View All Batches</button>
                 </div>
             `;
         }
@@ -483,7 +467,7 @@
                 `;
             });
             
-            html += `<button class="w-full text-center text-sm font-bold text-blue-600 border border-blue-200 rounded-lg py-2.5 mt-2 hover:bg-blue-50 transition">View Full Schedule</button>`;
+            html += `<button class="w-full text-center text-sm font-bold text-blue-600 border border-blue-200 rounded-lg py-2.5 mt-2 hover:bg-blue-50 transition">View Weekly Schedule</button>`;
             scheduleContainer.insertAdjacentHTML('beforeend', html);
         }
 
