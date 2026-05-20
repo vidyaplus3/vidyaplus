@@ -51,14 +51,16 @@
 
         #app-container { display: flex; min-height: 100vh; opacity: 0; transition: opacity 0.4s ease; }
         
-        .sidebar { width: 260px; flex-shrink: 0; border-right: 1px solid #e2e8f0; background: white; position: fixed; height: 100vh; z-index: 50; transition: transform 0.3s ease; display: flex; flex-direction: column; }
-        .main-content { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; min-width: 0; }
+        /* SLEEK SIDEBAR CSS CHANGES ONLY */
+        .sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid #f1f5f9; background: white; position: fixed; height: 100vh; z-index: 50; transition: transform 0.3s ease; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; margin-left: 240px; display: flex; flex-direction: column; min-width: 0; }
         
         .top-navbar { height: 72px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
 
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 12px; border-radius: 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; cursor: pointer; }
-        .nav-item:hover { background: #f1f5f9; color: #0f172a; }
-        .nav-item.active { background: #eff6ff; color: #2563eb; }
+        /* Minimal Nav Items */
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin: 2px 12px; border-radius: 6px; color: #64748b; font-weight: 500; font-size: 0.85rem; transition: all 0.2s ease; cursor: pointer; }
+        .nav-item:hover { background: #f8fafc; color: #0f172a; }
+        .nav-item.active { background: #f0f6ff; color: #2563eb; font-weight: 600; }
 
         .search-bar { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
         .search-bar:focus-within { border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
@@ -73,7 +75,6 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Added Styles for Notifications & Profile Dropdown */
         .notification-drawer { position: fixed; top: 0; right: -350px; width: 320px; max-width: 100vw; height: 100vh; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.05); z-index: 100; transition: right 0.3s ease; display: flex; flex-direction: column; }
         .notification-drawer.open { right: 0; }
         .drawer-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 90; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
@@ -86,7 +87,6 @@
         .dropdown-item.danger { color: #dc2626; border-top: 1px solid #e2e8f0; }
         .dropdown-item.danger:hover { background: #fef2f2; }
 
-        /* Responsive Breakpoints */
         .mobile-bottom-nav { display: none; }
         .mobile-header-menu { display: none; }
 
@@ -129,25 +129,25 @@
     <div id="app-container">
         
         <aside class="sidebar" id="sidebar">
-            <div class="p-6 flex items-center justify-between border-b border-slate-100">
+            <div class="p-5 flex items-center justify-between border-b border-slate-50">
                 <div class="flex items-center gap-2 text-blue-600">
-                    <i class="fas fa-graduation-cap text-2xl"></i>
-                    <span class="text-2xl font-extrabold text-slate-900 tracking-tight">VidyaPlus</span>
+                    <i class="fas fa-graduation-cap text-xl"></i>
+                    <span class="text-lg font-extrabold text-slate-900 tracking-tight">VidyaPlus</span>
                 </div>
-                <button class="lg:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
+                <button class="lg:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-sm"></i></button>
             </div>
             
             <div class="flex-1 overflow-y-auto hide-scroll py-4">
-                <div class="px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">My Workspace</div>
-                <div class="nav-item active"><i class="fas fa-layer-group w-6"></i> Dashboard</div>
-                <div class="nav-item" onclick="window.location.href='study.html'"><i class="fas fa-book-open w-6"></i> Study Material</div>
-                <div class="nav-item"><i class="fas fa-clipboard-list w-6"></i> Test Series</div>
-                <div class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Explore</div>
-                <div class="nav-item" onclick="window.location.href='explore.html'"><i class="fas fa-compass w-6"></i> Explore</div>
+                <div class="px-5 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">My Workspace</div>
+                <div class="nav-item active"><i class="fas fa-layer-group text-center w-5"></i> Dashboard</div>
+                <div class="nav-item" onclick="window.location.href='study.html'"><i class="fas fa-book-open text-center w-5"></i> Study Material</div>
+                <div class="nav-item"><i class="fas fa-clipboard-list text-center w-5"></i> Test Series</div>
+                <div class="px-5 mt-6 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Explore</div>
+                <div class="nav-item" onclick="window.location.href='explore.html'"><i class="fas fa-compass text-center w-5"></i> Explore</div>
             </div>
 
-            <div class="p-4 border-t border-slate-100">
-                <button onclick="logoutSystem()" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 text-sm font-bold rounded-lg border border-slate-200 hover:border-red-200 transition">
+            <div class="p-4 border-t border-slate-50">
+                <button onclick="logoutSystem()" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-transparent hover:bg-slate-50 text-slate-500 hover:text-slate-800 text-xs font-semibold rounded-md transition">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
@@ -192,7 +192,9 @@
             </header>
 
             <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto">
-                <div class="max-w-7xl mx-auto"> <div class="target-selector max-w-sm mb-8 shadow-sm">
+                <div class="max-w-7xl mx-auto"> 
+                    
+                    <div class="target-selector max-w-sm mb-8 shadow-sm">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center"><i class="fas fa-crown text-xs"></i></div>
                             <div>
@@ -315,25 +317,21 @@
             return temp.innerHTML;
         }
 
-        // Sidebar logic
         window.toggleSidebar = function() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('mobile-overlay').classList.toggle('hidden');
         }
 
-        // Notifications logic
         window.toggleNotifications = function() {
             document.getElementById('notif-drawer').classList.toggle('open');
             document.getElementById('notif-overlay').classList.toggle('active');
         }
 
-        // Profile Dropdown logic
         window.toggleProfileDropdown = function(e) {
             e.stopPropagation();
             document.getElementById('profile-dropdown').classList.toggle('active');
         }
         
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             const dropdown = document.getElementById('profile-dropdown');
             const profileBtn = document.getElementById('profile-container');
