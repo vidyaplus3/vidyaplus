@@ -3,833 +3,457 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Student Portal | VidyaPlus Premium</title>
+    <title>VidyaPlus | Advanced Learning Platform</title>
     
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com;">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
+                        surface: '#f8fafc',
+                        dark: '#0f172a'
+                    },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
     <style>
-        /* ==========================================================================
-           PREMIUM CUSTOM CSS (OVERRIDING & EXTENDING TAILWIND)
-           ========================================================================== */
+        body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; overflow-y: scroll; }
         
-        :root {
-            --primary-gradient: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-            --sidebar-width: 280px;
-            --header-height: 76px;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8FAFC;
-            color: #0F172A;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Custom Scrollbar for sleek look */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* ==========================================================================
-           GLASSMORPHISM & PREMIUM UTILITIES
-           ========================================================================== */
-        
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-        }
+        /* Hide scrollbar for horizontal scrolling containers but keep functionality */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .premium-card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 0 3px rgba(0,0,0,0.02);
-            border: 1px solid #F1F5F9;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .premium-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-            border-color: #E2E8F0;
-        }
-
-        .gradient-text {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .gradient-bg {
-            background: var(--primary-gradient);
-        }
-
-        /* ==========================================================================
-           ANIMATIONS & KEYFRAMES
-           ========================================================================== */
-        
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-
-        @keyframes fade-in-up {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
+        /* --- SKELETON SHIMMER ANIMATION --- */
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
             100% { background-position: 1000px 0; }
         }
-
-        .animate-fade-up { animation: fade-in-up 0.6s ease-out forwards; opacity: 0; }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-
-        /* ==========================================================================
-           SKELETON LOADERS
-           ========================================================================== */
-        
-        .skeleton-box {
-            background: #E2E8F0;
-            background-image: linear-gradient(90deg, #E2E8F0 0px, #F1F5F9 40px, #E2E8F0 80px);
+        .skeleton {
+            background: #e2e8f0;
+            background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px);
             background-size: 1000px 100%;
             animation: shimmer 2s infinite linear;
-            border-radius: 8px;
         }
 
-        /* ==========================================================================
-           AUTH GUARD SPINNER
-           ========================================================================== */
+        /* --- LAYOUT ARCHITECTURE --- */
+        #app-container { display: flex; min-height: 100vh; opacity: 0; transition: opacity 0.4s ease; }
         
-        #authGuard {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #FFFFFF; z-index: 99999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
+        .sidebar { width: 260px; flex-shrink: 0; border-right: 1px solid #e2e8f0; background: white; position: fixed; height: 100vh; z-index: 50; transition: transform 0.3s ease; }
+        .main-content { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; min-width: 0; }
         
-        .premium-loader {
-            width: 60px; height: 60px;
-            border: 4px solid #F1F5F9;
-            border-top: 4px solid #3B82F6;
-            border-right: 4px solid #8B5CF6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
+        .top-navbar { height: 72px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; display: flex; items-center; justify-content: space-between; padding: 0 1.5rem; }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* --- COMPONENT STYLES --- */
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 12px; border-radius: 8px; color: #64748b; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; cursor: pointer; }
+        .nav-item:hover { background: #f1f5f9; color: #0f172a; }
+        .nav-item.active { background: #eff6ff; color: #2563eb; }
 
-        /* ==========================================================================
-           LAYOUT STRUCTURE
-           ========================================================================== */
+        .search-bar { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
+        .search-bar:focus-within { border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .search-bar input { background: transparent; border: none; outline: none; width: 100%; font-size: 0.95rem; color: #0f172a; }
+
+        .target-selector { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
         
-        #appLayout {
-            display: none; /* Shown after auth */
-            min-height: 100vh;
-        }
+        .segmented-control { display: flex; background: #f1f5f9; padding: 4px; border-radius: 12px; gap: 4px; }
+        .segment-btn { flex: 1; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-align: center; cursor: pointer; color: #64748b; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .segment-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
 
-        .sidebar {
-            width: var(--sidebar-width);
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            background: #FFFFFF;
-            border-right: 1px solid #E2E8F0;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-        }
-
-        .main-wrapper {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: margin-left 0.3s ease;
-        }
-
-        .top-header {
-            height: var(--header-height);
-            position: sticky;
-            top: 0;
-            z-index: 40;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .top-header.scrolled {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-            border-bottom: 1px solid #F1F5F9;
-        }
-
-        /* ==========================================================================
-           SIDEBAR NAVIGATION UI
-           ========================================================================== */
+        .pw-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: var(--box-shadow-soft); transition: transform 0.2s; display: flex; flex-direction: column; }
+        .pw-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         
-        .nav-item {
-            display: flex; align-items: center; gap: 14px;
-            padding: 12px 20px; margin: 4px 16px;
-            border-radius: 12px;
-            color: #64748B; font-weight: 600; font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+        /* Initial Loading Overlay */
+        #global-loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .nav-item::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--primary-gradient); opacity: 0; z-index: 0; transition: opacity 0.3s ease;
-        }
-
-        .nav-item:hover { color: #0F172A; background: #F8FAFC; transform: translateX(4px); }
-        .nav-item:hover i { color: #3B82F6; }
-        
-        .nav-item.active { color: #FFFFFF; background: transparent; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25); }
-        .nav-item.active::before { opacity: 1; }
-        .nav-item i, .nav-item span { position: relative; z-index: 1; }
-        .nav-item.active i { color: #FFFFFF; }
-
-        .nav-section-title {
-            padding: 24px 20px 8px 32px;
-            font-size: 0.75rem; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1.2px;
-            color: #94A3B8;
-        }
-
-        /* ==========================================================================
-           DROPDOWNS & TOOLTIPS
-           ========================================================================== */
-        
-        .dropdown-menu {
-            position: absolute; right: 0; top: calc(100% + 10px);
-            background: #FFFFFF; border: 1px solid #E2E8F0;
-            border-radius: 16px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
-            width: 240px; padding: 8px;
-            opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            transform-origin: top right;
-            z-index: 100;
-        }
-
-        .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-
-        .dropdown-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 16px; border-radius: 10px;
-            color: #475569; font-weight: 500; font-size: 0.9rem;
-            text-decoration: none; transition: all 0.2s;
-            cursor: pointer; border: none; background: transparent; width: 100%; text-align: left;
-        }
-
-        .dropdown-item:hover { background: #F1F5F9; color: #0F172A; }
-        .dropdown-item.danger:hover { background: #FEF2F2; color: #DC2626; }
-        .dropdown-item.danger:hover i { color: #DC2626; }
-
-        /* ==========================================================================
-           BATCH CARDS (COURSE CARDS)
-           ========================================================================== */
-        
-        .course-card-image {
-            height: 160px; width: 100%;
-            object-fit: cover;
-            border-radius: 20px 20px 0 0;
-            transition: transform 0.7s ease;
-        }
-        
-        .premium-card:hover .course-card-image {
-            transform: scale(1.08);
-        }
-
-        .course-badge {
-            position: absolute; top: 16px; right: 16px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(4px);
-            padding: 6px 12px; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 700; color: #0F172A;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-
-        .btn-access {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 100%; padding: 12px;
-            background: #F8FAFC; border: 1px solid #E2E8F0;
-            color: #0F172A; font-weight: 600; font-size: 0.9rem;
-            border-radius: 12px; transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-access:hover {
-            background: #0F172A; color: #FFFFFF; border-color: #0F172A;
-            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
-        }
-        
-        .btn-access i { transition: transform 0.3s; margin-left: 8px; }
-        .btn-access:hover i { transform: translateX(4px); }
-
-        /* ==========================================================================
-           MOBILE RESPONSIVENESS
-           ========================================================================== */
-        
-        .mobile-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
-            z-index: 40; opacity: 0; visibility: hidden; transition: all 0.3s ease;
-        }
-        .mobile-overlay.active { opacity: 1; visibility: visible; }
+        /* Responsive Breakpoints */
+        .mobile-bottom-nav { display: none; }
+        .mobile-header-menu { display: none; }
 
         @media (max-width: 1024px) {
             .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .main-wrapper { margin-left: 0; }
-            .top-header { padding: 0 1rem; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-header-menu { display: block; }
         }
 
         @media (max-width: 768px) {
-            .metrics-grid { grid-template-columns: 1fr 1fr; }
-            .charts-grid { grid-template-columns: 1fr; }
-            .mobile-bottom-nav { display: flex; }
-            .main-wrapper { padding-bottom: 80px; }
+            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; z-index: 45; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; }
+            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; font-size: 0.7rem; font-weight: 600; }
+            .bottom-nav-item.active { color: #3b82f6; }
+            .main-content { padding-bottom: 70px; }
+            .top-navbar { padding: 0 1rem; }
+            .search-bar { width: 100%; }
         }
-        
-        @media (min-width: 769px) {
-            .mobile-bottom-nav { display: none; }
-        }
-
-        /* Mobile Bottom Nav */
-        .mobile-bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 70px; background: #FFFFFF;
-            border-top: 1px solid #E2E8F0; z-index: 45;
-            display: none; justify-content: space-around; align-items: center;
-            padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
-        }
-        
-        .mobile-nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 6px;
-            color: #94A3B8; font-size: 0.7rem; font-weight: 600; text-decoration: none;
-            transition: color 0.2s;
-        }
-        .mobile-nav-item.active { color: #3B82F6; }
-        .mobile-nav-item i { font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <div id="authGuard">
-        <div class="premium-loader"></div>
-        <h2 class="text-xl font-bold text-slate-800 tracking-tight">Authenticating...</h2>
-        <p class="text-sm text-slate-500 mt-2">Securing your session securely</p>
+    <div id="global-loader">
+        <div class="spinner mb-4"></div>
+        <h2 class="text-lg font-bold text-slate-800">Establishing Secure Session</h2>
     </div>
 
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-
-    <div id="appLayout">
+    <div id="app-container">
         
         <aside class="sidebar" id="sidebar">
-            <div class="flex items-center gap-3 px-8 py-6 border-b border-slate-100">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <i class="fas fa-graduation-cap text-white text-xl"></i>
+            <div class="p-6 flex items-center justify-between border-b border-slate-100">
+                <div class="flex items-center gap-2 text-blue-600">
+                    <i class="fas fa-graduation-cap text-2xl"></i>
+                    <span class="text-2xl font-extrabold text-slate-900 tracking-tight">VidyaPlus</span>
                 </div>
-                <span class="text-2xl font-extrabold text-slate-900 tracking-tight">VidyaPlus</span>
+                <button class="lg:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
             </div>
-
-            <div class="flex-1 overflow-y-auto py-6 custom-scrollbar">
-                <div class="nav-section-title">Main Dashboard</div>
-                <a href="dashboard.html" class="nav-item active">
-                    <i class="fas fa-border-all w-6 text-center"></i>
-                    <span>Overview</span>
-                </a>
-                <a href="explore.html" class="nav-item">
-                    <i class="fas fa-compass w-6 text-center"></i>
-                    <span>Course Catalog</span>
-                </a>
-                <a href="study.html" class="nav-item">
-                    <i class="fas fa-book-open w-6 text-center"></i>
-                    <span>My Library</span>
-                </a>
-
-                <div class="nav-section-title">Performance Analytics</div>
-                <a href="analytics.html" class="nav-item">
-                    <i class="fas fa-chart-pie w-6 text-center"></i>
-                    <span>Test X-Ray</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-bullseye w-6 text-center"></i>
-                    <span>Goal Tracking</span>
-                </a>
-
-                <div class="nav-section-title">Support & Settings</div>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-robot w-6 text-center"></i>
-                    <span>AI Assistant</span>
-                </a>
-                <a href="profile.html" class="nav-item">
-                    <i class="fas fa-cog w-6 text-center"></i>
-                    <span>Account Settings</span>
-                </a>
-            </div>
-
-            <div class="p-6 border-t border-slate-100">
-                <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-200 cursor-pointer hover:bg-slate-100 transition">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold" id="sidebarAvatar">S</div>
-                    <div class="overflow-hidden">
-                        <p class="text-sm font-bold text-slate-900 truncate" id="sidebarName">Student</p>
-                        <p class="text-xs font-medium text-emerald-500"><i class="fas fa-circle text-[8px] mr-1"></i>Online</p>
-                    </div>
-                </div>
+            <div class="py-4 overflow-y-auto hide-scroll" style="height: calc(100vh - 80px);">
+                <div class="px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">My Workspace</div>
+                <div class="nav-item active"><i class="fas fa-layer-group w-6"></i> Batches</div>
+                <div class="nav-item"><i class="fas fa-book-open w-6"></i> Study Material</div>
+                <div class="nav-item"><i class="fas fa-clipboard-list w-6"></i> Test Series</div>
+                <div class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Explore</div>
+                <div class="nav-item"><i class="fas fa-store w-6"></i> PW Store</div>
+                <div class="nav-item"><i class="fas fa-robot w-6"></i> Pi Assistant</div>
             </div>
         </aside>
 
-        <main class="main-wrapper" id="mainWrapper">
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+        <main class="main-content">
             
-            <header class="top-header" id="topHeader">
-                <div class="flex items-center gap-4">
-                    <button class="lg:hidden text-slate-500 hover:text-slate-900 text-xl focus:outline-none" id="mobileMenuBtn">
-                        <i class="fas fa-bars"></i>
+            <header class="top-navbar flex items-center">
+                <div class="flex items-center gap-4 flex-1">
+                    <button class="mobile-header-menu text-slate-600 focus:outline-none" onclick="toggleSidebar()">
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <div class="hidden md:flex items-center bg-slate-100 rounded-full px-4 py-2 border border-slate-200 w-80 focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
+                    
+                    <div class="search-bar flex-1 max-w-xl hidden sm:flex">
                         <i class="fas fa-search text-slate-400"></i>
-                        <input type="text" placeholder="Search courses, notes, tests..." class="bg-transparent border-none outline-none ml-3 text-sm font-medium w-full text-slate-700 placeholder-slate-400">
+                        <input type="text" id="searchInput" placeholder="Search for batches, teachers, subjects...">
                     </div>
                 </div>
 
-                <div class="flex items-center gap-5">
-                    <div class="relative">
-                        <button class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors relative">
-                            <i class="fas fa-bell"></i>
-                            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
-                        </button>
-                    </div>
-
-                    <div class="relative">
-                        <button class="flex items-center gap-2 focus:outline-none" id="profileDropdownBtn">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-slate-800 to-slate-900 flex items-center justify-center text-white font-bold shadow-md shadow-slate-900/20 border-2 border-white" id="headerAvatar">S</div>
-                            <i class="fas fa-chevron-down text-xs text-slate-400 ml-1"></i>
-                        </button>
-
-                        <div class="dropdown-menu" id="profileDropdownMenu">
-                            <div class="p-4 border-b border-slate-100 mb-2">
-                                <p class="text-sm text-slate-500 font-medium">Signed in as</p>
-                                <p class="text-base font-bold text-slate-900 truncate" id="dropdownEmail">student@vidyaplus.com</p>
-                            </div>
-                            <a href="profile.html" class="dropdown-item"><i class="fas fa-user w-5"></i> My Profile</a>
-                            <a href="#" class="dropdown-item"><i class="fas fa-shield-alt w-5"></i> Security</a>
-                            <a href="#" class="dropdown-item"><i class="fas fa-credit-card w-5"></i> Billing</a>
-                            <div class="h-px bg-slate-100 my-2"></div>
-                            <button class="dropdown-item danger" onclick="window.logoutSystem()">
-                                <i class="fas fa-sign-out-alt w-5"></i> Sign Out
-                            </button>
+                <div class="flex items-center gap-4 sm:gap-6 ml-4">
+                    <button class="text-slate-600 hover:text-blue-600 relative">
+                        <i class="fas fa-gift text-xl"></i>
+                    </button>
+                    <button class="text-slate-600 hover:text-blue-600 relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    
+                    <div class="flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer" onclick="logoutSystem()">
+                        <div id="profile-skeleton" class="w-9 h-9 rounded-full skeleton"></div>
+                        <div id="profile-data" class="hidden flex items-center gap-2">
+                            <div class="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm" id="user-avatar">S</div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div class="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto w-full">
+            <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto">
                 
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 animate-fade-up">
-                    <div>
-                        <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase mb-1">Overview</h2>
-                        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-                            Welcome back, <span class="gradient-text capitalize" id="welcomeName">Student</span>
-                        </h1>
-                        <p class="text-slate-500 mt-2 font-medium">Here's what's happening with your learning journey today.</p>
+                <div class="target-selector max-w-sm mb-6 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center"><i class="fas fa-crown text-xs"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-semibold">Your Target</p>
+                            <p class="text-sm font-bold text-slate-900">Class 12th + JEE</p>
+                        </div>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="window.location.href='explore.html'" class="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition shadow-sm">
-                            <i class="fas fa-search mr-2 text-slate-400"></i> Find Courses
-                        </button>
-                        <button onclick="window.location.href='study.html'" class="px-6 py-2.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">
-                            Resume Study <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>
+                    <button class="text-blue-600 text-sm font-bold hover:underline">Change</button>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10 metrics-grid animate-fade-up delay-100">
-                    <div class="premium-card p-6 flex flex-col justify-between">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-500 flex items-center justify-center text-xl">
-                                <i class="fas fa-fire"></i>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">+1 Today</span>
-                        </div>
-                        <div>
-                            <h3 class="text-3xl font-black text-slate-900" id="metric-streak">0</h3>
-                            <p class="text-sm font-semibold text-slate-500 mt-1">Day Active Streak</p>
-                        </div>
-                    </div>
-
-                    <div class="premium-card p-6 flex flex-col justify-between">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">Total</span>
-                        </div>
-                        <div>
-                            <h3 class="text-3xl font-black text-slate-900"><span id="metric-hours">0</span><span class="text-xl text-slate-400 ml-1">hrs</span></h3>
-                            <p class="text-sm font-semibold text-slate-500 mt-1">Total Study Time</p>
-                        </div>
-                    </div>
-
-                    <div class="premium-card p-6 flex flex-col justify-between">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-3xl font-black text-slate-900">12</h3>
-                            <p class="text-sm font-semibold text-slate-500 mt-1">Mock Tests Solved</p>
-                        </div>
-                    </div>
-
-                    <div class="premium-card p-6 flex flex-col justify-between">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
-                                <i class="fas fa-bullseye"></i>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg"><i class="fas fa-arrow-up mr-1"></i>2.4%</span>
-                        </div>
-                        <div>
-                            <h3 class="text-3xl font-black text-slate-900">84<span class="text-xl text-slate-400">%</span></h3>
-                            <p class="text-sm font-semibold text-slate-500 mt-1">Avg. Accuracy</p>
-                        </div>
-                    </div>
+                <div class="segmented-control max-w-md mb-8">
+                    <div class="segment-btn active"><i class="fas fa-laptop"></i> Online</div>
+                    <div class="segment-btn"><i class="fas fa-building"></i> Vidyapeeth</div>
+                    <div class="segment-btn"><i class="fas fa-bolt text-yellow-500"></i> Power Batch</div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10 charts-grid animate-fade-up delay-200">
+                <div class="mb-10">
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">My Enrolled Courses</h2>
                     
-                    <div class="premium-card lg:col-span-2 p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900">Study Activity Pulse</h3>
-                                <p class="text-sm text-slate-500">Hours spent per day over the last week.</p>
-                            </div>
-                            <button class="text-slate-400 hover:text-blue-600"><i class="fas fa-ellipsis-h"></i></button>
-                        </div>
-                        <div id="activityChart" class="w-full h-64"></div>
-                    </div>
-
-                    <div class="premium-card p-0 flex flex-col">
-                        <div class="p-6 border-b border-slate-100">
-                            <h3 class="text-lg font-bold text-slate-900">Upcoming Schedule</h3>
-                            <p class="text-sm text-slate-500">Don't miss your live sessions.</p>
-                        </div>
-                        <div class="p-4 flex-1 flex flex-col gap-3">
-                            <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition cursor-pointer border border-transparent hover:border-slate-100">
-                                <div class="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-red-50 text-red-600 shrink-0">
-                                    <span class="text-xs font-bold uppercase">Today</span>
-                                    <span class="text-lg font-black leading-none">18</span>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-slate-900">Physics: Ray Optics Live</h4>
-                                    <p class="text-xs font-medium text-slate-500 mt-1"><i class="fas fa-clock mr-1"></i> 5:00 PM - 6:30 PM</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition cursor-pointer border border-transparent hover:border-slate-100">
-                                <div class="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-slate-100 text-slate-600 shrink-0">
-                                    <span class="text-xs font-bold uppercase">Tmrw</span>
-                                    <span class="text-lg font-black leading-none">19</span>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-slate-900">Organic Chem Doubt Session</h4>
-                                    <p class="text-xs font-medium text-slate-500 mt-1"><i class="fas fa-clock mr-1"></i> 4:00 PM - 5:00 PM</p>
-                                </div>
+                    <div id="batch-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        
+                        <div class="pw-card skeleton-card">
+                            <div class="h-44 skeleton"></div>
+                            <div class="p-4 flex flex-col gap-3">
+                                <div class="flex justify-between"><div class="h-4 w-24 skeleton rounded"></div><div class="h-4 w-12 skeleton rounded"></div></div>
+                                <div class="h-6 w-3/4 skeleton rounded"></div>
+                                <div class="h-4 w-1/2 skeleton rounded"></div>
+                                <div class="flex items-center gap-2 mt-2"><div class="h-8 w-16 skeleton rounded"></div><div class="h-8 flex-1 skeleton rounded"></div></div>
                             </div>
                         </div>
-                        <div class="p-4 border-t border-slate-100 mt-auto">
-                            <button class="w-full text-center text-sm font-bold text-blue-600 hover:text-blue-800 transition">View Full Calendar</button>
+                        <div class="pw-card skeleton-card hidden md:flex">
+                            <div class="h-44 skeleton"></div>
+                            <div class="p-4 flex flex-col gap-3">
+                                <div class="flex justify-between"><div class="h-4 w-24 skeleton rounded"></div><div class="h-4 w-12 skeleton rounded"></div></div>
+                                <div class="h-6 w-3/4 skeleton rounded"></div>
+                                <div class="h-4 w-1/2 skeleton rounded"></div>
+                                <div class="flex items-center gap-2 mt-2"><div class="h-8 w-16 skeleton rounded"></div><div class="h-8 flex-1 skeleton rounded"></div></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="animate-fade-up delay-300">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-extrabold text-slate-900"><i class="fas fa-layer-group text-blue-500 mr-2"></i> Active Enrollments</h3>
-                        <a href="explore.html" class="text-sm font-bold text-blue-600 hover:text-blue-800 transition flex items-center gap-1">
-                            Browse All <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
+                <div class="mb-10">
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Upcoming Events (Live)</h2>
+                    <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+                        
+                        <div class="p-3 flex items-center gap-4 skeleton-row">
+                            <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="h-3 w-20 skeleton rounded"></div>
+                                <div class="h-4 w-1/2 skeleton rounded"></div>
+                                <div class="h-3 w-3/4 skeleton rounded"></div>
+                            </div>
+                        </div>
+                        <div class="p-3 flex items-center gap-4 skeleton-row">
+                            <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="h-3 w-20 skeleton rounded"></div>
+                                <div class="h-4 w-1/2 skeleton rounded"></div>
+                                <div class="h-3 w-3/4 skeleton rounded"></div>
+                            </div>
+                        </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="myBatchGrid">
-                        <div class="premium-card h-[320px] flex flex-col p-0">
-                            <div class="h-[160px] w-full skeleton-box rounded-none"></div>
-                            <div class="p-5 flex-1 flex flex-col gap-3">
-                                <div class="h-4 w-1/3 skeleton-box"></div>
-                                <div class="h-6 w-3/4 skeleton-box mb-2"></div>
-                                <div class="mt-auto h-12 w-full skeleton-box rounded-xl"></div>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Explore Platform</h2>
+                    <div class="flex gap-4 overflow-x-auto hide-scroll pb-4">
+                        
+                        <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-yellow-50/50 border-yellow-100">
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
+                                <i class="fas fa-clipboard-check text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Real Test Pass</h3>
+                                <p class="text-xs text-slate-500 mt-1">NTA like Real Tests & Rank Booster Practice.</p>
+                                <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
                             </div>
                         </div>
-                        <div class="premium-card h-[320px] flex flex-col p-0">
-                            <div class="h-[160px] w-full skeleton-box rounded-none"></div>
-                            <div class="p-5 flex-1 flex flex-col gap-3">
-                                <div class="h-4 w-1/3 skeleton-box"></div>
-                                <div class="h-6 w-3/4 skeleton-box mb-2"></div>
-                                <div class="mt-auto h-12 w-full skeleton-box rounded-xl"></div>
+
+                        <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-blue-50/50 border-blue-100">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                                <i class="fas fa-book text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Modules & Books</h3>
+                                <p class="text-xs text-slate-500 mt-1">Hardcopy material for UP Board & JEE.</p>
+                                <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
                             </div>
                         </div>
-                        <div class="premium-card h-[320px] flex flex-col p-0 hidden md:flex">
-                            <div class="h-[160px] w-full skeleton-box rounded-none"></div>
-                            <div class="p-5 flex-1 flex flex-col gap-3">
-                                <div class="h-4 w-1/3 skeleton-box"></div>
-                                <div class="h-6 w-3/4 skeleton-box mb-2"></div>
-                                <div class="mt-auto h-12 w-full skeleton-box rounded-xl"></div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
             </div>
         </main>
-        
+
         <nav class="mobile-bottom-nav">
-            <a href="dashboard.html" class="mobile-nav-item active">
-                <i class="fas fa-border-all"></i><span>Home</span>
-            </a>
-            <a href="explore.html" class="mobile-nav-item">
-                <i class="fas fa-compass"></i><span>Explore</span>
-            </a>
-            <a href="study.html" class="mobile-nav-item">
-                <i class="fas fa-book-open"></i><span>Study</span>
-            </a>
-            <a href="analytics.html" class="mobile-nav-item">
-                <i class="fas fa-chart-pie"></i><span>Stats</span>
-            </a>
+            <div class="bottom-nav-item active"><i class="fas fa-layer-group text-xl mb-1"></i> Batches</div>
+            <div class="bottom-nav-item"><i class="fas fa-book-open text-xl mb-1"></i> Study</div>
+            <div class="bottom-nav-item"><i class="fas fa-clipboard-list text-xl mb-1"></i> Test</div>
+            <div class="bottom-nav-item relative">
+                <span class="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-[8px] font-bold px-1 rounded">NEW</span>
+                <i class="fas fa-robot text-xl mb-1"></i> Pi
+            </div>
+            <div class="bottom-nav-item"><i class="fas fa-store text-xl mb-1"></i> Store</div>
         </nav>
+
     </div>
     <script type="module">
+        // Import Firebase Configuration (Assuming standard module path)
         import { db, auth } from './js/firebase-init.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // DOM Elements
-        const authGuard = document.getElementById('authGuard');
-        const appLayout = document.getElementById('appLayout');
-        const myBatchGrid = document.getElementById('myBatchGrid');
-        
-        // UI Controls
-        const profileDropdownBtn = document.getElementById('profileDropdownBtn');
-        const profileDropdownMenu = document.getElementById('profileDropdownMenu');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const sidebar = document.getElementById('sidebar');
-        const mobileOverlay = document.getElementById('mobileOverlay');
-        const topHeader = document.getElementById('topHeader');
+        // --- DOM Elements ---
+        const appContainer = document.getElementById('app-container');
+        const globalLoader = document.getElementById('global-loader');
+        const batchGrid = document.getElementById('batch-grid');
+        const scheduleContainer = document.getElementById('schedule-container');
 
-        // --- UI Interactions ---
-
-        // Header Scroll Effect
-        window.addEventListener('scroll', () => {
-            if(window.scrollY > 10) topHeader.classList.add('scrolled');
-            else topHeader.classList.remove('scrolled');
-        });
-
-        // Profile Dropdown Toggle
-        profileDropdownBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdownMenu.classList.toggle('active');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!profileDropdownMenu.contains(e.target) && !profileDropdownBtn.contains(e.target)) {
-                profileDropdownMenu.classList.remove('active');
-            }
-        });
-
-        // Mobile Sidebar Toggle
-        mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.add('active');
-            mobileOverlay.classList.add('active');
-        });
-
-        mobileOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-        });
-
-        // Initialize ApexChart (Dummy data to match analytics feel)
-        function renderActivityChart() {
-            var options = {
-                series: [{ name: 'Study Hours', data: [1.5, 2.0, 3.2, 1.8, 4.0, 2.5, 3.8] }],
-                chart: { type: 'area', height: 260, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                colors: ['#3B82F6'],
-                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
-                dataLabels: { enabled: false },
-                stroke: { curve: 'smooth', width: 3 },
-                xaxis: {
-                    categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    axisBorder: { show: false }, axisTicks: { show: false },
-                    labels: { style: { colors: '#94A3B8', fontWeight: 500 } }
-                },
-                yaxis: { labels: { style: { colors: '#94A3B8', fontWeight: 500 } } },
-                grid: { borderColor: '#F1F5F9', strokeDashArray: 4, yaxis: { lines: { show: true } } },
-                tooltip: { theme: 'light', y: { formatter: function (val) { return val + " Hrs" } } }
-            };
-            var chart = new ApexCharts(document.querySelector("#activityChart"), options);
-            chart.render();
+        // --- SECURITY UTILITY: DOM SANITIZER ---
+        // This prevents XSS attacks by escaping malicious HTML tags from DB data before rendering.
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
         }
 
-        // --- Firebase Auth & Data Fetching ---
+        // --- UI UTILS ---
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mobile-overlay').classList.toggle('hidden');
+        }
 
+        // --- AUTH & DATA INITIALIZATION ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Set UI Details
-                let displayName = user.displayName || user.email.split('@')[0];
-                let initial = displayName.charAt(0).toUpperCase();
+                // Securely render user profile
+                const displayName = sanitizeHTML(user.displayName || user.email.split('@')[0]);
+                const initial = displayName.charAt(0).toUpperCase();
                 
-                document.getElementById('welcomeName').innerText = displayName;
-                document.getElementById('headerAvatar').innerText = initial;
-                document.getElementById('sidebarAvatar').innerText = initial;
-                document.getElementById('sidebarName').innerText = displayName;
-                document.getElementById('dropdownEmail').innerText = user.email;
-                
-                try {
-                    // Fetch Metrics (Streak, Time)
-                    const userRef = doc(db, "users", user.uid);
-                    const userSnap = await getDoc(userRef);
-                    
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        
-                        document.getElementById('metric-streak').innerText = userData.streak || 0;
-                        
-                        const totalSecs = userData.totalWatchTimeSeconds || 0;
-                        const totalHours = Math.floor(totalSecs / 3600);
-                        document.getElementById('metric-hours').innerText = totalHours;
-                    }
-                } catch (error) {
-                    console.error("Error retrieving user metrics:", error);
-                }
+                // Hide Skeletons, Show Data
+                document.getElementById('profile-skeleton').classList.add('hidden');
+                document.getElementById('profile-data').classList.remove('hidden');
+                document.getElementById('user-avatar').innerText = initial;
 
-                // Render UI Chart
-                renderActivityChart();
-
-                // Hide Loader, Show App
-                authGuard.style.opacity = '0';
+                // Reveal App Shell
+                globalLoader.style.opacity = '0';
                 setTimeout(() => {
-                    authGuard.style.visibility = 'hidden';
-                    appLayout.style.display = 'block';
-                }, 500);
+                    globalLoader.style.display = 'none';
+                    appContainer.style.opacity = '1';
+                }, 400);
 
-                // Fetch Batches
-                fetchMyBatches(user.uid);
+                // Fetch Core Data
+                await fetchBatches(user.uid);
+                renderDummySchedule(); // In production, fetch from DB
+
             } else {
+                // Clear session and redirect securely
                 window.location.replace("login.html");
             }
         });
 
-        async function fetchMyBatches(uid) {
+        // --- FETCH & RENDER BATCHES ---
+        async function fetchBatches(uid) {
             try {
+                // NOTE: Bank-Level Security requires Firestore Rules like:
+                // match /users/{userId}/enrollments/{document=**} { allow read: if request.auth != null && request.auth.uid == userId; }
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
 
-                myBatchGrid.innerHTML = ''; // Clear skeletons
+                // Remove Skeletons
+                const skeletons = document.querySelectorAll('.skeleton-card');
+                skeletons.forEach(el => el.remove());
 
                 if (!enrollmentsSnap.empty) {
-                    let delayIndex = 0;
                     enrollmentsSnap.forEach(async (docSnap) => {
                         const batchId = docSnap.id; 
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
-                            renderBatchCard(batchId, batchSnap.data(), delayIndex++);
+                            renderBatchCard(batchId, batchSnap.data());
                         }
                     });
                 } else {
-                    // Empty State Premium UI
-                    myBatchGrid.innerHTML = `
-                        <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
-                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-                                <i class="fas fa-folder-open text-4xl"></i>
-                            </div>
-                            <h3 class="text-xl font-extrabold text-slate-900 mb-2">No Active Enrollments Found</h3>
-                            <p class="text-slate-500 font-medium max-w-md mx-auto mb-8">It looks like you haven't enrolled in any courses yet. Explore our catalog to start your learning journey.</p>
-                            <button onclick="window.location.href='explore.html'" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-lg shadow-blue-600/30">
-                                Browse Catalog Now
-                            </button>
-                        </div>
-                    `;
+                    renderEmptyState();
                 }
             } catch (error) {
-                console.error("Database Query Error:", error);
-                myBatchGrid.innerHTML = `
-                    <div class="col-span-full bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
-                        <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-2"></i>
-                        <p class="text-red-600 font-bold">System Error: Unable to retrieve academic data. Please refresh the page.</p>
-                    </div>
-                `;
+                console.error("Secure DB Fetch Error:", error);
+                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">Error retrieving data securely. Check connection.</div>`;
             }
         }
 
-        // Render Premium Compact Cards
-        function renderBatchCard(id, data, delayIndex) {
-            const card = document.createElement('div');
-            card.className = 'premium-card animate-fade-up';
-            // Slight delay based on index for staggered entry effect
-            card.style.animationDelay = `${(delayIndex * 0.1) + 0.3}s`; 
-            
-            const imgUrl = data.imageUrl || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=600&h=340';
-            const subject = data.subject || 'General Studies';
+        function renderBatchCard(id, data) {
+            // Sanitize all incoming data
+            const title = sanitizeHTML(data.title || "Untitled Batch");
+            const imgUrl = sanitizeHTML(data.imageUrl || "https://via.placeholder.com/600x340/e2e8f0/64748b?text=Batch+Cover");
+            const target = sanitizeHTML(data.subject || "Class 12th + JEE");
+            const price = data.price ? `₹${data.price}` : 'Enrolled';
 
-            card.innerHTML = `
-                <div class="relative overflow-hidden">
-                    <div class="course-badge">${subject}</div>
-                    <img src="${imgUrl}" alt="Module Image" class="course-card-image" loading="lazy">
-                </div>
-                <div class="p-5 flex flex-col flex-grow bg-white relative z-10">
-                    <h4 class="text-lg font-bold text-slate-900 leading-tight mb-2 line-clamp-2">${data.title}</h4>
-                    <p class="text-sm text-slate-500 font-medium mb-5 line-clamp-1">Resume where you left off</p>
-                    
-                    <div class="mt-auto">
-                        <button class="btn-access" onclick="window.location.href='study.html?batch=${id}'">
-                            Access Material <i class="fas fa-arrow-right"></i>
-                        </button>
+            const cardHTML = `
+                <div class="pw-card">
+                    <div class="relative h-44 bg-slate-100 overflow-hidden">
+                        <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-slate-800 shadow-sm border border-slate-200 z-10 flex items-center gap-1">
+                            <i class="fas fa-star text-yellow-500"></i> Multiple Plans
+                        </div>
+                        <img src="${imgUrl}" alt="Cover" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-orange-600">${target}</span>
+                            <span class="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">Hindi/Eng</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2 line-clamp-2">${title}</h3>
+                        
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-4">
+                            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ongoing</div>
+                            <span class="text-slate-300">|</span>
+                            <span>Syllabus: Physics, Chem, Math</span>
+                        </div>
+                        
+                        <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
+                            <div class="text-lg font-black text-slate-900">${price}</div>
+                            <button class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-6 rounded-lg text-sm transition" onclick="window.location.href='study.html?batch=${id}'">
+                                Access Material <i class="fas fa-chevron-right text-xs ml-1"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
-            myBatchGrid.appendChild(card);
+            batchGrid.insertAdjacentHTML('beforeend', cardHTML);
         }
 
-        // Global Logout Function
+        function renderEmptyState() {
+            batchGrid.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-xl">
+                    <i class="fas fa-box-open text-4xl text-slate-300 mb-4"></i>
+                    <h3 class="text-lg font-bold text-slate-900">No Batches Yet</h3>
+                    <p class="text-sm text-slate-500 mt-1">Explore our store to find your target batch.</p>
+                    <button class="mt-4 border border-blue-600 text-blue-600 font-bold px-6 py-2 rounded-lg hover:bg-blue-50 transition">View All Batches</button>
+                </div>
+            `;
+        }
+
+        // --- MOCK UPCOMING EVENTS (To demonstrate the List UI) ---
+        function renderDummySchedule() {
+            const skeletens = document.querySelectorAll('.skeleton-row');
+            skeletens.forEach(el => el.remove());
+
+            const scheduleData = [
+                { time: "08:15 AM", type: "Lecture • Physics", title: "Electrostatics 04: Electric Field & Flux", teacher: "S", bg: "bg-green-100" },
+                { time: "11:00 AM", type: "Lecture • Chemistry", title: "Organic Chemistry: SN1 & SN2 Reactions", teacher: "P", bg: "bg-blue-100" }
+            ];
+
+            let html = '';
+            scheduleData.forEach(item => {
+                html += `
+                    <div class="p-3 flex items-start gap-4 hover:bg-slate-50 rounded-lg cursor-pointer transition border border-transparent hover:border-slate-100">
+                        <div class="w-14 h-14 rounded-lg ${item.bg} flex items-center justify-center text-xl font-bold text-slate-700 shrink-0 border border-slate-200/50">
+                            ${item.teacher}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-500 mb-0.5">${sanitizeHTML(item.time)}</p>
+                            <h4 class="text-sm font-bold text-slate-900 truncate">${sanitizeHTML(item.type)}</h4>
+                            <p class="text-xs text-slate-500 truncate mt-0.5">${sanitizeHTML(item.title)}</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 mt-2"></i>
+                    </div>
+                `;
+            });
+            
+            html += `<button class="w-full text-center text-sm font-bold text-blue-600 border border-blue-200 rounded-lg py-2.5 mt-2 hover:bg-blue-50 transition">View Weekly Schedule</button>`;
+            scheduleContainer.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Secure Logout Protocol
         window.logoutSystem = function() {
-            if(confirm("Are you sure you want to log out of your session?")) {
+            if(confirm("Securely log out of the platform?")) {
                 signOut(auth).then(() => {
                     window.location.replace("index.html");
-                }).catch((error) => console.error("Logout Error:", error));
+                }).catch((error) => console.error("Sign Out Error:", error));
             }
         };
     </script>
