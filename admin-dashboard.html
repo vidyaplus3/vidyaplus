@@ -119,8 +119,11 @@
         
         .input-group { margin-bottom: 1.5rem; }
         .input-group label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 1rem 1.2rem; border: 1px solid #e2e8f0; border-radius: 16px; font-size: 0.95rem; transition: 0.3s; background: #f8fafc; }
-        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); outline: none; background: white; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
+        
+        /* UPDATED CSS TO INCLUDE SELECT TAGS WITHOUT CHANGING DESIGN */
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 1rem 1.2rem; border: 1px solid #e2e8f0; border-radius: 16px; font-size: 0.95rem; transition: 0.3s; background: #f8fafc; }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--primary); outline: none; background: white; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
+        
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 5px; }
         .check-label { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 10px 12px; border-radius: 12px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
         .check-label:hover { border-color: var(--primary); background: rgba(99,102,241,0.02); }
@@ -277,11 +280,24 @@
                 <div style="display: flex; gap: 15px;">
                     <div class="input-group" style="flex: 1;">
                         <label>Language</label>
-                        <input type="text" id="batch-language" placeholder="e.g. Hinglish" required>
+                        <select id="batch-language" required>
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="English">English</option>
+                            <option value="Hinglish">Hinglish</option>
+                        </select>
                     </div>
                     <div class="input-group" style="flex: 1;">
                         <label>Class</label>
-                        <input type="text" id="batch-class" placeholder="e.g. Class 12" required>
+                        <select id="batch-class" required>
+                            <option value="" disabled selected>Select...</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                            <option value="Dropper">Dropper</option>
+                            <option value="Government Exam">Government Exam</option>
+                        </select>
                     </div>
                     <div class="input-group" style="flex: 1;">
                         <label>Stream</label>
@@ -341,11 +357,24 @@
                 <div style="display: flex; gap: 15px;">
                     <div class="input-group" style="flex: 1;">
                         <label>Language</label>
-                        <input type="text" id="edit-batch-language" placeholder="e.g. Hinglish" required>
+                        <select id="edit-batch-language" required>
+                            <option value="" disabled>Select...</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="English">English</option>
+                            <option value="Hinglish">Hinglish</option>
+                        </select>
                     </div>
                     <div class="input-group" style="flex: 1;">
                         <label>Class</label>
-                        <input type="text" id="edit-batch-class" placeholder="e.g. Class 12" required>
+                        <select id="edit-batch-class" required>
+                            <option value="" disabled>Select...</option>
+                            <option value="9th">9th</option>
+                            <option value="10th">10th</option>
+                            <option value="11th">11th</option>
+                            <option value="12th">12th</option>
+                            <option value="Dropper">Dropper</option>
+                            <option value="Government Exam">Government Exam</option>
+                        </select>
                     </div>
                     <div class="input-group" style="flex: 1;">
                         <label>Stream</label>
@@ -417,7 +446,7 @@
         // =======================
         // UI & TAB LOGIC
         // =======================
-        window.showToast = (message, type = "success") => {
+        window.showToast = (message, type = "success", duration = 3000) => {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>';
@@ -427,7 +456,7 @@
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(100%)';
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, duration);
         };
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
@@ -461,6 +490,7 @@
             submitBtn.innerText = "Processing...";
             submitBtn.disabled = true;
             try {
+                // Number conversion added to price to prevent potential type errors in database rules
                 await addDoc(collection(db, "batches"), {
                     title: document.getElementById('batch-name').value,
                     subject: selectedSubjects,
@@ -469,7 +499,7 @@
                     language: document.getElementById('batch-language').value,
                     classLevel: document.getElementById('batch-class').value,
                     stream: document.getElementById('batch-stream').value,
-                    price: document.getElementById('batch-price').value,
+                    price: Number(document.getElementById('batch-price').value),
                     description: quillAdd.root.innerHTML, 
                     imageUrl: document.getElementById('batch-image').value,
                     status: "Active",
@@ -480,7 +510,11 @@
                 closeModal('add-modal');
                 showToast("Batch Launched Successfully!", "success");
                 loadBatches();
-            } catch (err) { showToast("Error saving batch!", "error"); }
+            } catch (err) { 
+                console.error("Firebase Add Error:", err);
+                // Print specific error to toast to help debugging if it persists
+                showToast("Error saving batch! " + err.message, "error", 5000); 
+            }
             finally { submitBtn.innerText = "Launch Batch 🚀"; submitBtn.disabled = false; }
         });
 
@@ -518,14 +552,17 @@
                     language: document.getElementById('edit-batch-language').value,
                     classLevel: document.getElementById('edit-batch-class').value,
                     stream: document.getElementById('edit-batch-stream').value,
-                    price: document.getElementById('edit-batch-price').value,
+                    price: Number(document.getElementById('edit-batch-price').value),
                     description: quillEdit.root.innerHTML,
                     imageUrl: document.getElementById('edit-batch-image').value,
                 });
                 closeModal('edit-modal');
                 showToast("Batch Updated Successfully!", "success");
                 loadBatches();
-            } catch (error) { showToast("Failed to update.", "error"); } 
+            } catch (err) { 
+                console.error("Firebase Update Error:", err);
+                showToast("Failed to update. " + err.message, "error", 5000); 
+            } 
             finally { btn.innerText = "Save Changes ✅"; batchToEditId = null; }
         });
 
@@ -544,7 +581,10 @@
                 closeModal('delete-modal');
                 showToast("Batch deleted.", "success");
                 loadBatches();
-            } catch (error) { showToast("Failed to delete.", "error"); } 
+            } catch (err) { 
+                console.error("Firebase Delete Error:", err);
+                showToast("Failed to delete. " + err.message, "error", 5000); 
+            } 
             finally { btn.innerText = "Yes, Delete it"; batchToDeleteId = null; }
         });
 
