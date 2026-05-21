@@ -51,20 +51,14 @@
 
         #app-container { display: flex; min-height: 100vh; opacity: 0; transition: opacity 0.4s ease; }
         
-        /* SLEEK SIDEBAR CSS CHANGES ONLY */
         .sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid #f1f5f9; background: white; position: fixed; height: 100vh; z-index: 50; transition: transform 0.3s ease; display: flex; flex-direction: column; }
         .main-content { flex-grow: 1; margin-left: 240px; display: flex; flex-direction: column; min-width: 0; }
         
         .top-navbar { height: 72px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
 
-        /* Minimal Nav Items */
         .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin: 2px 12px; border-radius: 6px; color: #64748b; font-weight: 500; font-size: 0.85rem; transition: all 0.2s ease; cursor: pointer; }
         .nav-item:hover { background: #f8fafc; color: #0f172a; }
         .nav-item.active { background: #f0f6ff; color: #2563eb; font-weight: 600; }
-
-        .search-bar { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
-        .search-bar:focus-within { border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .search-bar input { background: transparent; border: none; outline: none; width: 100%; font-size: 0.95rem; color: #0f172a; }
 
         .target-selector { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
 
@@ -103,7 +97,6 @@
             .bottom-nav-item.active { color: #3b82f6; }
             .main-content { padding-bottom: 70px; }
             .top-navbar { padding: 0 1rem; }
-            .search-bar { width: 100%; }
         }
     </style>
 </head>
@@ -162,11 +155,6 @@
                     <button class="mobile-header-menu text-slate-600 focus:outline-none" onclick="toggleSidebar()">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    
-                    <div class="search-bar flex-1 max-w-xl hidden sm:flex">
-                        <i class="fas fa-search text-slate-400"></i>
-                        <input type="text" id="searchInput" placeholder="Search for batches, teachers, subjects...">
-                    </div>
                 </div>
 
                 <div class="flex items-center gap-4 sm:gap-6 ml-4">
