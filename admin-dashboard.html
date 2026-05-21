@@ -266,6 +266,30 @@
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <div class="input-group" style="flex: 1;">
+                        <label>Start Date</label>
+                        <input type="date" id="batch-start-date" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>End Date</label>
+                        <input type="date" id="batch-end-date" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Language</label>
+                        <input type="text" id="batch-language" placeholder="e.g. Hinglish" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Class</label>
+                        <input type="text" id="batch-class" placeholder="e.g. Class 12" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Stream</label>
+                        <input type="text" id="batch-stream" placeholder="e.g. JEE" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
                         <label>Price (₹)</label>
                         <input type="number" id="batch-price" required>
                     </div>
@@ -306,6 +330,30 @@
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <div class="input-group" style="flex: 1;">
+                        <label>Start Date</label>
+                        <input type="date" id="edit-batch-start-date" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>End Date</label>
+                        <input type="date" id="edit-batch-end-date" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Language</label>
+                        <input type="text" id="edit-batch-language" placeholder="e.g. Hinglish" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Class</label>
+                        <input type="text" id="edit-batch-class" placeholder="e.g. Class 12" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Stream</label>
+                        <input type="text" id="edit-batch-stream" placeholder="e.g. JEE" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
                         <label>Price (₹)</label>
                         <input type="number" id="edit-batch-price" required>
                     </div>
@@ -335,7 +383,7 @@
             </div>
         </div>
     </div>
-        <script type="module">
+    <script type="module">
         import { db } from './js/firebase-init.js';
         import { collection, getDocs, addDoc, query, where, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -416,6 +464,11 @@
                 await addDoc(collection(db, "batches"), {
                     title: document.getElementById('batch-name').value,
                     subject: selectedSubjects,
+                    startDate: document.getElementById('batch-start-date').value,
+                    endDate: document.getElementById('batch-end-date').value,
+                    language: document.getElementById('batch-language').value,
+                    classLevel: document.getElementById('batch-class').value,
+                    stream: document.getElementById('batch-stream').value,
                     price: document.getElementById('batch-price').value,
                     description: quillAdd.root.innerHTML, 
                     imageUrl: document.getElementById('batch-image').value,
@@ -437,6 +490,11 @@
             const batchData = window.loadedBatches[batchId];
             if(!batchData) return;
             document.getElementById('edit-batch-name').value = batchData.title || '';
+            document.getElementById('edit-batch-start-date').value = batchData.startDate || '';
+            document.getElementById('edit-batch-end-date').value = batchData.endDate || '';
+            document.getElementById('edit-batch-language').value = batchData.language || '';
+            document.getElementById('edit-batch-class').value = batchData.classLevel || '';
+            document.getElementById('edit-batch-stream').value = batchData.stream || '';
             document.getElementById('edit-batch-price').value = batchData.price || '';
             document.getElementById('edit-batch-image').value = batchData.imageUrl || '';
             quillEdit.root.innerHTML = batchData.description || '';
@@ -455,6 +513,11 @@
                 await updateDoc(doc(db, "batches", batchToEditId), {
                     title: document.getElementById('edit-batch-name').value,
                     subject: selectedSubjects,
+                    startDate: document.getElementById('edit-batch-start-date').value,
+                    endDate: document.getElementById('edit-batch-end-date').value,
+                    language: document.getElementById('edit-batch-language').value,
+                    classLevel: document.getElementById('edit-batch-class').value,
+                    stream: document.getElementById('edit-batch-stream').value,
                     price: document.getElementById('edit-batch-price').value,
                     description: quillEdit.root.innerHTML,
                     imageUrl: document.getElementById('edit-batch-image').value,
