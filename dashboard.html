@@ -120,7 +120,6 @@
         .input-group { margin-bottom: 1.5rem; }
         .input-group label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
         
-        /* UPDATED CSS TO INCLUDE SELECT TAGS WITHOUT CHANGING DESIGN */
         .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 1rem 1.2rem; border: 1px solid #e2e8f0; border-radius: 16px; font-size: 0.95rem; transition: 0.3s; background: #f8fafc; }
         .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--primary); outline: none; background: white; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
         
@@ -141,13 +140,6 @@
         .toast.success { color: #10b981; border-left: 6px solid #10b981; }
         .toast.error { color: #ef4444; border-left: 6px solid #ef4444; }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        /* ADMIN LOGIN OVERLAY CSS (NEW) */
-        #admin-login-overlay {
-            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
-            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);
-        }
-        
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; width: 100%; padding: 1rem; }
@@ -162,33 +154,6 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 </head>
 <body>
-
-    <div id="admin-login-overlay">
-        <div class="modal-content" style="max-width: 450px; text-align: center; padding: 3rem 2.5rem;">
-            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">
-                <span class="brand-vidya" style="font-weight: 800;">Vidya</span><span class="brand-plus" style="font-weight: 800; color: var(--secondary);">Plus</span>
-            </div>
-            <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 2rem; color: var(--text-light);">Admin Portal Access</h2>
-            
-            <form id="admin-login-form">
-                <div class="input-group" style="text-align: left;">
-                    <label>Admin Email Address</label>
-                    <input type="email" id="admin-login-email" required placeholder="admin@vidyaplus.com">
-                </div>
-                <div class="input-group" style="text-align: left;">
-                    <label>Master Password</label>
-                    <input type="password" id="admin-login-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-submit" id="admin-login-btn" style="margin-top: 10px;">Secure Login <i class="fas fa-lock ml-2"></i></button>
-            </form>
-            <div id="admin-login-error" style="color: #ef4444; font-size: 0.9rem; font-weight: 600; margin-top: 1.5rem; display: none; background: #fee2e2; padding: 10px; border-radius: 8px;"></div>
-        </div>
-    </div>
-    <div id="global-loader" style="position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
-        <div class="spinner mb-4" style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <h2 class="text-lg font-bold text-slate-800">Establishing Secure Session</h2>
-    </div>
-
     <div class="toast-container" id="toast-container"></div>
 
     <aside class="sidebar">
@@ -212,6 +177,7 @@
                         <input type="text" id="search-input" placeholder="Search batches by name...">
                     </div>
                     <button class="btn-add" id="open-add-modal"><i class="fas fa-plus"></i> Create New Batch</button>
+                    <button onclick="adminLogout()" style="background: #fee2e2; color: #ef4444; padding: 0.9rem; border-radius: 50%; border: none; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(239,68,68,0.2); transition: 0.3s;" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </header>
             <div class="batch-grid" id="batches-container">
@@ -230,6 +196,7 @@
                         <i class="fas fa-search"></i>
                         <input type="text" id="student-search" placeholder="Search student by name or email...">
                     </div>
+                    <button onclick="adminLogout()" style="background: #fee2e2; color: #ef4444; padding: 0.9rem; border-radius: 50%; border: none; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(239,68,68,0.2); transition: 0.3s;" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </header>
 
@@ -448,8 +415,17 @@
     </div>
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
-        import { collection, getDocs, addDoc, query, where, doc, deleteDoc, updateDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, getDocs, addDoc, query, where, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // --- NEW LOGOUT FUNCTION ADDED HERE ---
+        window.adminLogout = function() {
+            if(confirm("Are you sure you want to log out of Admin Dashboard?")) {
+                signOut(auth).then(() => {
+                    window.location.replace("index.html");
+                }).catch((error) => console.error("Logout Error:", error));
+            }
+        };
 
         const container = document.getElementById('batches-container');
         const searchInput = document.getElementById('search-input');
@@ -459,83 +435,6 @@
         let batchToEditId = null;
         window.loadedBatches = {};
         window.loadedStudents = [];
-
-        // =======================
-        // ADMIN LOGIN SYSTEM (FIXED)
-        // =======================
-        const adminOverlay = document.getElementById('admin-login-overlay');
-        const adminLoginForm = document.getElementById('admin-login-form');
-        const adminLoginError = document.getElementById('admin-login-error');
-        const adminLoginBtn = document.getElementById('admin-login-btn');
-        const globalLoader = document.getElementById('global-loader');
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                if (sessionStorage.getItem('admin_verified') !== 'true') {
-                    globalLoader.style.display = 'none';
-                    adminOverlay.style.display = 'flex';
-                    return; 
-                }
-
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    const isFirestoreAdmin = userDoc.exists() && userDoc.data().role === 'admin';
-
-                    if (isFirestoreAdmin) {
-                        adminOverlay.style.display = 'none';
-                        globalLoader.style.display = 'none';
-                        loadBatches();
-                    } else {
-                        adminLoginError.innerText = "Access Denied: You do not have Admin privileges.";
-                        adminLoginError.style.display = 'block';
-                        await signOut(auth);
-                        window.location.replace("index.html");
-                    }
-                } catch (error) {
-                    console.error("Verification Error:", error);
-                    adminLoginError.innerText = "Error verifying admin status.";
-                    adminLoginError.style.display = 'block';
-                    await signOut(auth);
-                }
-            } else {
-                globalLoader.style.display = 'none';
-                adminOverlay.style.display = 'flex';
-                container.innerHTML = '';
-            }
-        });
-
-        adminLoginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            adminLoginBtn.innerText = "Authenticating...";
-            adminLoginError.style.display = 'none';
-            
-            const email = document.getElementById('admin-login-email').value;
-            const password = document.getElementById('admin-login-password').value;
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                const isFirestoreAdmin = userDoc.exists() && userDoc.data().role === 'admin';
-
-                if (isFirestoreAdmin) {
-                    sessionStorage.setItem('admin_verified', 'true'); 
-                    adminOverlay.style.display = 'none';
-                    globalLoader.style.display = 'none';
-                    loadBatches();
-                } else {
-                    adminLoginError.innerText = "Access Denied: This account is not an Admin.";
-                    adminLoginError.style.display = 'block';
-                    await signOut(auth); 
-                }
-            } catch (error) {
-                adminLoginError.innerText = "Invalid Credentials. Please try again.";
-                adminLoginError.style.display = 'block';
-            } finally {
-                adminLoginBtn.innerHTML = 'Secure Login <i class="fas fa-lock ml-2"></i>';
-            }
-        });
 
         // =======================
         // QUILL EDITOR SETUP
@@ -816,7 +715,7 @@
             });
         }
 
-        // Removed default loadBatches(); -> It now only runs inside onAuthStateChanged if Admin is verified.
+        loadBatches();
     </script>
 </body>
 </html>
