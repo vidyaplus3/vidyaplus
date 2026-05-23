@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin Setup</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; background: #f8fafc; margin: 0; }
+        .box { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 400px; border: 1px solid #e2e8f0; }
+        h2 { color: #0f172a; margin-top: 0; }
+        p { color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        button { background: #ef4444; color: white; border: none; padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.3s; }
+        button:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>🛡️ Master Admin Setup</h2>
+        <p>Ensure you are already logged in to Vidyaplus on this browser before clicking the button below.</p>
+        <button onclick="makeMeAdmin()">MAKE ME ADMIN</button>
+    </div>
+
+    <script type="module">
+        // 🚨 DHYAN DEIN 1: Agar firebase-init.js kisi 'js' folder me hai, toh path sahi rakhein ('./js/firebase-init.js')
+        import { auth } from './js/firebase-init.js'; 
+        
+        window.makeMeAdmin = async () => {
+            const user = auth.currentUser;
+            
+            if (!user) {
+                alert("⚠️ Pehle apni Vidyaplus website par jaakar login karo, fir ye page refresh karna!");
+                return;
+            }
+            
+            try {
+                const token = await user.getIdToken();
+                
+                // 🚨 DHYAN DEIN 2: Yahan apne Vercel ka URL daalna mat bhoolna
+                const response = await fetch("https://vidyaplus-backend.vercel.app/claim-admin-rights", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if(data.success) {
+                    // Naya token load karna jisme admin rights hain
+                    await user.getIdToken(true);
+                    alert("✅ Mubarak ho! Aap Admin ban gaye hain. Ab is page ko GitHub se delete kar dijiye.");
+                } else {
+                    alert("❌ Backend ne mana kar diya: " + JSON.stringify(data));
+                }
+            } catch(e) {
+                alert("❌ Error: " + e.message);
+            }
+        };
+    </script>
+</body>
+</html>
+
