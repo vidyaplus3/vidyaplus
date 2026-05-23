@@ -387,71 +387,89 @@
             }
         }
     </script>
-    
-                <script type="module">
-        import { auth } from './js/firebase-init.js';
-        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    <script type="module">
+    // 🚨 NAYA: 'db' aur Firestore ke functions import kiye gaye hain
+    import { auth, db } from './js/firebase-init.js';
+    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('guestState').classList.add('hidden');
-                document.getElementById('userState').classList.remove('hidden');
-                
-                const displayName = user.displayName || user.email.split('@')[0];
-                document.getElementById('userName').innerText = displayName;
-                document.getElementById('userIcon').innerText = displayName.charAt(0).toUpperCase();
-            } else {
-                document.getElementById('guestState').classList.remove('hidden');
-                document.getElementById('userState').classList.add('hidden');
-            }
-        });
-
-        function triggerSuccessAndRedirect() {
-            const successOverlay = document.getElementById('authModalOverlay').querySelector('#auth-success-overlay');
-            if(successOverlay) {
-                successOverlay.classList.remove('opacity-0', 'pointer-events-none');
-            }
-            setTimeout(() => {
-                window.location.replace("explore.html");
-            }, 1500);
-        }
-
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerText;
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('guestState').classList.add('hidden');
+            document.getElementById('userState').classList.remove('hidden');
             
-            btn.innerText = "Processing Request...";
-            btn.disabled = true;
+            const displayName = user.displayName || user.email.split('@')[0];
+            document.getElementById('userName').innerText = displayName;
+            document.getElementById('userIcon').innerText = displayName.charAt(0).toUpperCase();
+        } else {
+            document.getElementById('guestState').classList.remove('hidden');
+            document.getElementById('userState').classList.add('hidden');
+        }
+    });
 
-            // 🚨 THE FIX: Direct global variable check
-            try {
-                if (currentAuthMode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                }
-                triggerSuccessAndRedirect();
-            } catch (error) {
-                console.error("Auth System Error:", error.message);
-                alert(error.message.replace("Firebase: ", ""));
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
+    function triggerSuccessAndRedirect() {
+        const successOverlay = document.getElementById('authModalOverlay').querySelector('#auth-success-overlay');
+        if(successOverlay) {
+            successOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        }
+        setTimeout(() => {
+            window.location.replace("explore.html");
+        }, 1500);
+    }
 
-        document.getElementById('googleBtn').addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            try {
-                await signInWithPopup(auth, provider);
-                triggerSuccessAndRedirect();
-            } catch (error) {
-                console.error("External Auth Error:", error);
-                alert("Google authentication failed. Please try again.");
+    // 🛡️ NAYA FUNCTION: Ye function secure rules ke hisaab se sirf Name aur Email save karega
+    async function saveUserToDatabase(user, nameStr) {
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        
+        // Agar database me user pehle se nahi hai, tabhi save karo
+        if (!snap.exists()) {
+            await setDoc(userRef, {
+                name: nameStr || "Student",
+                email: user.email
+            });
+        }
+    }
+
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerText;
+        
+        btn.innerText = "Processing Request...";
+        btn.disabled = true;
+
+        try {
+            if (currentAuthMode === 'login') {
+                await signInWithEmailAndPassword(auth, email, password);
+            } else {
+                // Email se Signup karne par database me save hoga
+                const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                await saveUserToDatabase(userCred.user, email.split('@')[0]);
             }
-        });
+            triggerSuccessAndRedirect();
+        } catch (error) {
+            console.error("Auth System Error:", error.message);
+            alert(error.message.replace("Firebase: ", ""));
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    document.getElementById('googleBtn').addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            // Google se Signup/Login karne par database me save hoga
+            const userCred = await signInWithPopup(auth, provider);
+            await saveUserToDatabase(userCred.user, userCred.user.displayName);
+            triggerSuccessAndRedirect();
+        } catch (error) {
+            console.error("External Auth Error:", error);
+            alert("Google authentication failed. Please try again.");
+        }
+    });
                 </script>
 </body>
 </html>
