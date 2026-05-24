@@ -468,38 +468,50 @@ window.startTestPlayer = () => {
 };
 
 // ==========================================
-// INITIALIZATION
+// INITIALIZATION (ULTIMATE URL FIX)
 // ==========================================
 const setupDropdown = async (batchIds) => {
     const dropdown = document.getElementById('batch-dropdown');
     if(!dropdown) return;
     dropdown.innerHTML = '';
     
-    let firstBatchLoaded = false;
+    // 1. Dashboard URL se batch ID nikalna (Yeh logic pehle missing tha)
+    const urlParams = new URLSearchParams(window.location.search);
+    let targetBatchId = urlParams.get('batch');
 
-    // Har batch ID ke liye sequentially data fetch karo
+    // 2. Agar URL me nahi hai (direct khola hai), toh Local Storage se lena
+    if (!targetBatchId) {
+        targetBatchId = AppState.currentBatchId;
+    }
+
+    // 3. Agar Local Storage bhi khali hai (jaise history clear karne pe), toh list ka pehla batch uthana
+    if (!targetBatchId && batchIds.length > 0) {
+        targetBatchId = batchIds[0];
+    }
+
+    // Dropdown me batches load karna
     for (const bId of batchIds) {
         try {
             const bSnap = await getDoc(doc(db, "batches", bId));
             if (bSnap.exists()) { 
                 const title = bSnap.data().title;
-                // Dropdown me option add karo
                 dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
-                
-                // 🚨 MASTER FIX: Agar memory (localStorage) khali hai, toh pehla batch khud select kardo
-                if (!AppState.currentBatchId && !firstBatchLoaded) {
-                    window.switchBatch(bId);
-                    firstBatchLoaded = true;
-                }
             }
         } catch (error) {
             console.error("Error fetching batch detail:", error);
         }
     }
     
-    // Agar memory me pehle se batch hai (history clear nahi ki hai), toh usko load karo
-    if (AppState.currentBatchId && !firstBatchLoaded) {
-        window.switchBatch(AppState.currentBatchId);
+    // 4. Finally, batch ko automatically screen par load karna
+    if (targetBatchId) {
+        if (typeof window.switchBatch === 'function') {
+            window.switchBatch(targetBatchId);
+        } else {
+            // Agar browser slow hai aur function turant ready nahi hua, toh 0.5 sec wait karke try karega
+            setTimeout(() => {
+                if (typeof window.switchBatch === 'function') window.switchBatch(targetBatchId);
+            }, 500);
+        }
     }
 };
 
