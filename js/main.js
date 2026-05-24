@@ -474,33 +474,36 @@ window.startTestPlayer = () => {
 
 
 // ==========================================
-// 6. INITIALIZATION 
+// 6. INITIALIZATION (Decoupled Architecture)
 // ==========================================
 const setupDropdown = async (batchIds) => {
-    const dropdown = document.getElementById('batch-dropdown');
-    if(!dropdown) return;
-    dropdown.innerHTML = '';
-    
     const urlParams = new URLSearchParams(window.location.search);
     let targetBatchId = urlParams.get('batch');
 
+    // 1. Identify Target Batch
     if (!targetBatchId) targetBatchId = AppState.currentBatchId;
     if (!targetBatchId && batchIds.length > 0) targetBatchId = batchIds[0];
 
-    for (const bId of batchIds) {
-        try {
-            const bSnap = await getDoc(doc(db, "batches", bId));
-            if (bSnap.exists()) { 
-                const title = bSnap.data().title;
-                dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
-            }
-        } catch (error) {
-            console.error("Error fetching batch detail:", error);
-        }
-    }
-    
+    // 2. CORE EXECUTION: Data loading should never depend on a UI element
     if (targetBatchId) {
         window.switchBatch(targetBatchId);
+    }
+
+    // 3. UI EXECUTION: Only update dropdown if the element exists on this specific page
+    const dropdown = document.getElementById('batch-dropdown');
+    if (dropdown) {
+        dropdown.innerHTML = '';
+        for (const bId of batchIds) {
+            try {
+                const bSnap = await getDoc(doc(db, "batches", bId));
+                if (bSnap.exists()) { 
+                    const title = bSnap.data().title;
+                    dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
+                }
+            } catch (error) {
+                console.error("Error fetching batch detail:", error);
+            }
+        }
     }
 };
 
