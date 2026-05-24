@@ -470,21 +470,39 @@ window.startTestPlayer = () => {
 // ==========================================
 // INITIALIZATION
 // ==========================================
-const setupDropdown = (batchIds) => {
+const setupDropdown = async (batchIds) => {
     const dropdown = document.getElementById('batch-dropdown');
     if(!dropdown) return;
     dropdown.innerHTML = '';
-    batchIds.forEach(async (bId) => {
-        const bSnap = await getDoc(doc(db, "batches", bId));
-        if (bSnap.exists()) { 
-            dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${bSnap.data().title}</div>`; 
+    
+    let firstBatchLoaded = false;
+
+    // Har batch ID ke liye loop chalega aur data layega
+    for (const bId of batchIds) {
+        try {
+            const bSnap = await getDoc(doc(db, "batches", bId));
+            if (bSnap.exists()) { 
+                const title = bSnap.data().title;
+                dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
+                
+                // 🚨 THE FIX: Agar user ne koi batch select nahi kiya hai, toh pehle wale ko apne aap load kardo
+                if (!AppState.currentBatchId && !firstBatchLoaded) {
+                    window.switchBatch(bId);
+                    firstBatchLoaded = true;
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching batch detail:", error);
         }
-    });
+    }
+    
+    // Agar user ka pehle se koi currentBatch selected hai, toh direct usko load karo
+    if (AppState.currentBatchId) {
+        window.switchBatch(AppState.currentBatchId);
+    }
 };
 
 VideoPlayer.initAPI();
 initAuth((batches) => {
     setupDropdown(batches);
-    let bToLoad = AppState.currentBatchId || batches[batches.length - 1];
-    window.switchBatch(bToLoad); 
 });
