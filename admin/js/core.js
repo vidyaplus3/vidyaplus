@@ -3,13 +3,15 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
-// 1. ROUTE PROTECTION & PIN
+// 1. ROUTE PROTECTION & PIN (UPDATED WITH CUSTOM CLAIMS)
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         try {
-            const docSnap = await getDoc(doc(db, "users", user.uid));
-            if (docSnap.exists() && docSnap.data().role === 'admin') {
+            // Naya token load karke claims check karenge, database reading ki zarurat nahi hai
+            const idTokenResult = await user.getIdTokenResult();
+            
+            if (idTokenResult.claims.admin === true) {
                 document.getElementById('auth-verifier').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('auth-verifier').style.display = 'none';
@@ -21,11 +23,16 @@ onAuthStateChanged(auth, async (user) => {
                 else setTimeout(() => { if(window.fetchBatches) window.fetchBatches(); }, 500);
 
             } else {
+                // Agar admin claim nahi hai, toh student portal ya login par bhagao
                 await signOut(auth);
                 window.location.href = 'login.html';
             }
-        } catch (error) { window.location.href = 'login.html'; }
-    } else { window.location.href = 'login.html'; }
+        } catch (error) { 
+            window.location.href = 'login.html'; 
+        }
+    } else { 
+        window.location.href = 'login.html'; 
+    }
 });
 
 window.adminLogout = async () => { await signOut(auth); window.location.href = 'login.html'; };
