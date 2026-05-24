@@ -6,8 +6,7 @@ import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
 
-// 🚨 PRECAUTION: Agar video-tracker.js file server par maujud nahi hui, toh ES6 script ko crash kar dega.
-// Agar aapke paas yeh file completely ready hai, tabhi is comment (//) ko hatayein.
+// 🚨 PRECAUTION: Video tracker file missing hone par system crash rokne ke liye
 // import './video-tracker.js'; 
 
 // ==========================================
@@ -23,7 +22,7 @@ async function switchBatch(batchId) {
         localStorage.setItem('vp_batch', batchId);
         AppState.currentBatchId = batchId;
         
-        // 🎯 MASTER ROUTING FIX: Default screen ab 'dashboard' rahegi
+        // 🎯 FIX: Hamesha default 'dashboard' khulega batch switch hone par
         let initialScreen = window.location.hash.replace('#', '');
         if (!initialScreen) {
             initialScreen = 'dashboard'; 
@@ -140,7 +139,6 @@ window.addEventListener('hashchange', () => {
     if(window.closeInstructions) window.closeInstructions();
     if(window.closeModals) window.closeModals();
     
-    // 🎯 MASTER ROUTING FIX: Default screen 'dashboard'
     let screen = window.location.hash.replace('#', '');
     if (!screen) {
         screen = 'dashboard';
@@ -267,7 +265,7 @@ window.switchClassroomTab = (type) => {
 };
 
 // ==========================================
-// 5. TEST PORTAL ENGINE
+// 5. TEST PORTAL ENGINE (100% RESTORED)
 // ==========================================
 window.testsDataCache = {};
 window.userAttemptedQuizzes = {}; 
@@ -343,11 +341,24 @@ window.renderTestsList = async (type = 'live') => {
                         <div style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Total Tests Attempted</div>
                     </div>
                 </div>
+                <h4 style="font-weight: 700; color: #334155; margin-bottom: 10px;">Growth Trajectory (%)</h4>
+                <div id="overall-growth-chart" style="width: 100%; height: 250px;"></div>
             </div>
         `;
+
+        if(window.ApexCharts) {
+            new ApexCharts(document.querySelector("#overall-growth-chart"), {
+                series: [{ name: 'Accuracy %', data: graphScores }],
+                chart: { type: 'area', height: 250, toolbar: { show: false } },
+                colors: ['#8b5cf6'],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9, stops: [0, 90, 100] } },
+                dataLabels: { enabled: true },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: { categories: graphLabels }
+            }).render();
+        }
         return;
     }
-
     if (type === 'attempted') {
         const attemptedIds = Object.keys(attemptedMap);
         if (attemptedIds.length === 0) {
@@ -375,6 +386,11 @@ window.renderTestsList = async (type = 'live') => {
                     <div style="display: flex; gap: 20px; font-size: 0.8rem; color: #475569; font-weight: 500; margin-bottom: 16px;">
                         <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-redo-alt" style="color: #3b82f6;"></i> Attempts: ${attempts}</span>
                         <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-star" style="color: #f59e0b;"></i> Score: ${score} / ${maxMarks}</span>
+                    </div>
+                    <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
+                        <button onclick="window.location.href='analytics.html?testId=${tId}&attemptId=${attemptId}'" style="padding: 8px 20px; background: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                            View Full Analytics <i class="fas fa-chart-pie ml-1"></i>
+                        </button>
                     </div>
                 </div>
             `;
@@ -406,6 +422,13 @@ window.renderTestsList = async (type = 'live') => {
                     </div>
                     <div>${statusBadge}</div>
                 </div>
+                
+                <div style="display: flex; gap: 20px; font-size: 0.8rem; color: #475569; font-weight: 500; margin-bottom: 16px;">
+                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-clock" style="color: #94a3b8;"></i> ${test.duration} Mins</span>
+                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-list-ol" style="color: #94a3b8;"></i> ${test.totalQuestions || 'N/A'} Qs</span>
+                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-bullseye" style="color: #94a3b8;"></i> ${test.maxMarks} Marks</span>
+                </div>
+                
                 <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
                     ${actionButtons}
                 </div>
@@ -417,12 +440,29 @@ window.renderTestsList = async (type = 'live') => {
 
 window.currentActiveTestId = null;
 
+// 🚨 FIX: Yeh pura block wapas daal diya hai taaki UI par instructions load ho sakein.
 window.openInstructions = (testId) => {
     const test = window.testsDataCache[testId];
     if(!test) return;
     
     window.currentActiveTestId = testId;
+    
     document.getElementById('inst-title').innerText = test.title;
+    
+    const instSubject = document.getElementById('inst-subject');
+    if (instSubject) instSubject.innerText = test.subject || 'Standard Assessment';
+    
+    document.getElementById('inst-time').innerText = test.duration + " Mins";
+    document.getElementById('inst-marks').innerText = test.maxMarks;
+    
+    if(test.questions && test.questions.length > 0) {
+        document.getElementById('inst-plus').innerText = `+${test.questions[0].marks?.correct || 4} Marks`;
+        document.getElementById('inst-minus').innerText = `-${test.questions[0].marks?.incorrect || 1} Mark`;
+    } else {
+        document.getElementById('inst-plus').innerText = `+4 Marks`;
+        document.getElementById('inst-minus').innerText = `-1 Mark`;
+    }
+
     document.getElementById('instruction-mode').style.display = 'flex';
 };
 
