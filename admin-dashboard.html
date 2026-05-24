@@ -414,6 +414,21 @@
         </div>
     </div>
     <script type="module">
+        import { auth } from './js/firebase-init.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const idTokenResult = await user.getIdTokenResult();
+        // Agar token me admin claim nahi hai, toh student portal par redirect karein
+        if (!idTokenResult.claims.admin) {
+            window.location.replace("dashboard.html");
+        }
+    } else {
+        window.location.replace("index.html");
+    }
+});
+        
         import { db, auth } from './js/firebase-init.js';
         import { collection, getDocs, addDoc, query, where, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
