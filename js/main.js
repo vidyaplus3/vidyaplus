@@ -14,14 +14,19 @@ import './video-tracker.js';
 async function switchBatch(batchId) {
     if (!batchId) return;
 
-    // Step A: Local State & UI Update
     const batchNameEl = document.getElementById('current-batch-name');
     if (batchNameEl) batchNameEl.innerText = "Authenticating & Loading...";
     
     localStorage.setItem('vp_batch', batchId);
     AppState.currentBatchId = batchId;
     
-    const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
+    // 🚨 ULTIMATE FIX: Smart Routing Detection
+    let initialScreen = window.location.hash.replace('#', '');
+    if (!initialScreen) {
+        // Agar page study.html hai toh default 'subjects' khulega, warna 'dashboard'
+        initialScreen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
+    }
+    
     window.handleScreenRender(initialScreen); 
 
     const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
@@ -35,17 +40,12 @@ async function switchBatch(batchId) {
     if(initialScreen === 'classroom' && lecList) lecList.innerHTML = skeletonHTML;
 
     try {
-        // Step B: Secure Data Fetching
         const batchSnap = await getDoc(doc(db, "batches", batchId));
         if (batchSnap.exists() && batchNameEl) batchNameEl.innerText = batchSnap.data().title;
 
         const matRef = collection(db, "batches", batchId, "materials");
         const q = query(matRef, where("status", "==", "Active"));
         const matSnap = await getDocs(q);
-
-        if (matSnap.empty) {
-            console.warn("System Notice: No materials found or access restricted.");
-        }
 
         AppState.materialsTree = {};
         AppState.globalResources = [];
@@ -76,7 +76,6 @@ async function switchBatch(batchId) {
 
     } catch (error) { 
         console.error("Batch Authorization Error:", error); 
-        // 🚨 SECURITY FALLBACK: Block Unauthorized Access
         if (error.code === 'permission-denied') {
             alert("Security System: Unauthorized access detected. You are not enrolled in this batch.");
             window.location.replace("explore.html");
@@ -86,7 +85,7 @@ async function switchBatch(batchId) {
 // ==========================================
 // 2. API GATEWAY (Centralized Global Exports)
 // ==========================================
-window.switchBatch = switchBatch; // 🚨 FIX: Explicit global mapping done here
+window.switchBatch = switchBatch; 
 window.openMenu = UI.openMenu;
 window.openNotif = UI.openNotif;
 window.closeModals = UI.closeModals;
@@ -130,7 +129,13 @@ window.handleScreenRender = (screenId) => {
 window.addEventListener('hashchange', () => { 
     if(window.closeInstructions) window.closeInstructions();
     if(window.closeModals) window.closeModals();
-    window.handleScreenRender(window.location.hash.replace('#', '') || 'dashboard'); 
+    
+    // 🚨 FIX: Hash listener also needs Smart Detection
+    let screen = window.location.hash.replace('#', '');
+    if (!screen) {
+        screen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
+    }
+    window.handleScreenRender(screen); 
 });
 
 window.addEventListener('popstate', (e) => {
@@ -176,7 +181,9 @@ window.renderSubjects = () => {
     const coreSubjects = Object.keys(AppState.materialsTree || {});
     const extraSubjects = Object.keys(AppState.subjectMaterials || {});
     const subjects = [...new Set([...coreSubjects, ...extraSubjects])];
+    
     if (subjects.length === 0) { container.innerHTML = `<div class="empty-box"><i class="fas fa-book"></i><h4>No subjects assigned.</h4></div>`; return; }
+    
     subjects.forEach(subject => { container.innerHTML += `<div class="list-card" onclick="navigate('chapters', {subject: '${subject}'})"><div class="card-icon">${subject.substring(0, 2).toUpperCase()}</div><div class="card-info"><div class="card-title">${subject}</div><div class="card-sub">Access materials & lectures</div></div><i class="fas fa-chevron-right" style="color: var(--text-light);"></i></div>`; });
 };
 
@@ -288,6 +295,7 @@ window.renderTestsList = async (type = 'live') => {
     currentBatchTestIds.forEach(tId => {
         if (allAttemptsMap[tId]) attemptedMap[tId] = allAttemptsMap[tId];
     });
+
     container.innerHTML = '';
 
     if (type === 'dashboard') {
@@ -491,8 +499,6 @@ const setupDropdown = async (batchIds) => {
         }
     }
     
-    // 🚨 FIX: Kyunki ab window.switchBatch globally 100% available hai, 
-    // Isliye complex setTimeout ki zaroorat nahi hai. Direct execute hoga.
     if (targetBatchId) {
         window.switchBatch(targetBatchId);
     }
