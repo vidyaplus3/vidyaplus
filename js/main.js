@@ -1,47 +1,60 @@
 // js/main.js
+
+// 🚨 GOD MODE MOBILE DEBUGGER: Koi bhi error ab chhipega nahi! 🚨
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    alert("System Crash: " + msg + "\nLine: " + lineNo);
+    return false;
+};
+window.onunhandledrejection = function(event) {
+    alert("Database/Network Error: " + (event.reason ? event.reason.message : "Unknown Error"));
+};
+
 import { db, auth } from './firebase-init.js'; 
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initAuth, AppState } from './auth.js'; 
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
-import './video-tracker.js';
+// 🚨 FIX: Ise band kiya gaya hai kyunki agar yeh file missing hogi toh poora app crash ho jayega.
+// import './video-tracker.js'; 
 
 // ==========================================
 // 1. CORE BUSINESS LOGIC (Secure Functions)
 // ==========================================
-
 async function switchBatch(batchId) {
-    if (!batchId) return;
-
-    const batchNameEl = document.getElementById('current-batch-name');
-    if (batchNameEl) batchNameEl.innerText = "Authenticating & Loading...";
-    
-    localStorage.setItem('vp_batch', batchId);
-    AppState.currentBatchId = batchId;
-    
-    // 🚨 ULTIMATE FIX: Smart Routing Detection
-    let initialScreen = window.location.hash.replace('#', '');
-    if (!initialScreen) {
-        // Agar page study.html hai toh default 'subjects' khulega, warna 'dashboard'
-        initialScreen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
+    if (!batchId) {
+        alert("System Notice: Target Batch ID missing.");
+        return;
     }
-    
-    window.handleScreenRender(initialScreen); 
-
-    const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
-    
-    const subList = document.getElementById('subject-list');
-    const chapList = document.getElementById('chapter-list');
-    const lecList = document.getElementById('lecture-list');
-
-    if(initialScreen === 'subjects' && subList) subList.innerHTML = skeletonHTML;
-    if(initialScreen === 'chapters' && chapList) chapList.innerHTML = skeletonHTML;
-    if(initialScreen === 'classroom' && lecList) lecList.innerHTML = skeletonHTML;
 
     try {
+        const batchNameEl = document.getElementById('current-batch-name');
+        if (batchNameEl) batchNameEl.innerText = "Authenticating & Loading...";
+        
+        localStorage.setItem('vp_batch', batchId);
+        AppState.currentBatchId = batchId;
+        
+        let initialScreen = window.location.hash.replace('#', '');
+        if (!initialScreen) {
+            initialScreen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
+        }
+        
+        window.handleScreenRender(initialScreen); 
+
+        const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
+        
+        const subList = document.getElementById('subject-list');
+        const chapList = document.getElementById('chapter-list');
+        const lecList = document.getElementById('lecture-list');
+
+        if(initialScreen === 'subjects' && subList) subList.innerHTML = skeletonHTML;
+        if(initialScreen === 'chapters' && chapList) chapList.innerHTML = skeletonHTML;
+        if(initialScreen === 'classroom' && lecList) lecList.innerHTML = skeletonHTML;
+
         const batchSnap = await getDoc(doc(db, "batches", batchId));
-        if (batchSnap.exists() && batchNameEl) batchNameEl.innerText = batchSnap.data().title;
+        if (batchSnap.exists() && batchNameEl) {
+            batchNameEl.innerText = batchSnap.data().title;
+        }
 
         const matRef = collection(db, "batches", batchId, "materials");
         const q = query(matRef, where("status", "==", "Active"));
@@ -51,6 +64,11 @@ async function switchBatch(batchId) {
         AppState.globalResources = [];
         AppState.subjectMaterials = {};
         AppState.quizzes = [];
+
+        if (matSnap.empty) {
+            window.handleScreenRender(initialScreen); 
+            return;
+        }
 
         matSnap.forEach(docSnap => {
             const data = { id: docSnap.id, ...docSnap.data() };
@@ -75,15 +93,16 @@ async function switchBatch(batchId) {
         window.handleScreenRender(initialScreen); 
 
     } catch (error) { 
+        // 🚨 YEH SEEDHA PHONE PAR ERROR DIKHAYEGA
+        alert("Security/Network System Error: " + error.message);
         console.error("Batch Authorization Error:", error); 
         if (error.code === 'permission-denied') {
-            alert("Security System: Unauthorized access detected. You are not enrolled in this batch.");
             window.location.replace("explore.html");
         }
     }
 }
 // ==========================================
-// 2. API GATEWAY (Centralized Global Exports)
+// 2. API GATEWAY 
 // ==========================================
 window.switchBatch = switchBatch; 
 window.openMenu = UI.openMenu;
@@ -113,35 +132,33 @@ window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
 window.togglePDFFull = PDFViewer.togglePDFFull;
 
-
 // ==========================================
 // 3. ROUTING & UI RENDER ENGINE
 // ==========================================
 window.handleScreenRender = (screenId) => {
-    UI.showScreen(screenId); 
-    
-    if (screenId === 'subjects') window.renderSubjects();
-    if (screenId === 'chapters' && AppState.currentSubject) window.renderChapters(AppState.currentSubject);
-    if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
-    if (screenId === 'tests') window.renderTestsList('live'); 
+    try {
+        UI.showScreen(screenId); 
+        if (screenId === 'subjects') window.renderSubjects();
+        if (screenId === 'chapters' && AppState.currentSubject) window.renderChapters(AppState.currentSubject);
+        if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
+        if (screenId === 'tests') window.renderTestsList('live'); 
+    } catch(e) {
+        alert("Render Error: " + e.message);
+    }
 };
 
 window.addEventListener('hashchange', () => { 
     if(window.closeInstructions) window.closeInstructions();
     if(window.closeModals) window.closeModals();
     
-    // 🚨 FIX: Hash listener also needs Smart Detection
     let screen = window.location.hash.replace('#', '');
-    if (!screen) {
-        screen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
-    }
+    if (!screen) screen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
     window.handleScreenRender(screen); 
 });
 
 window.addEventListener('popstate', (e) => {
     const pdfOverlay = document.getElementById('pdf-mode');
     const classOverlay = document.getElementById('classroom-mode');
-    
     if (pdfOverlay && pdfOverlay.classList.contains('active')) {
         pdfOverlay.classList.remove('active');
         let iframe = document.getElementById('pdf-iframe');
@@ -161,7 +178,6 @@ window.navigate = (screenId, payload = {}) => {
     if (payload.chapter) { AppState.currentChapter = payload.chapter; localStorage.setItem('vp_chapter', payload.chapter); }
     window.location.hash = screenId;
 };
-
 
 // ==========================================
 // 4. DATA PRESENTATION LOGIC
@@ -335,22 +351,8 @@ window.renderTestsList = async (type = 'live') => {
                         <div style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Total Tests Attempted</div>
                     </div>
                 </div>
-                <h4 style="font-weight: 700; color: #334155; margin-bottom: 10px;">Growth Trajectory (%)</h4>
-                <div id="overall-growth-chart" style="width: 100%; height: 250px;"></div>
             </div>
         `;
-
-        if(window.ApexCharts) {
-            new ApexCharts(document.querySelector("#overall-growth-chart"), {
-                series: [{ name: 'Accuracy %', data: graphScores }],
-                chart: { type: 'area', height: 250, toolbar: { show: false } },
-                colors: ['#8b5cf6'],
-                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9, stops: [0, 90, 100] } },
-                dataLabels: { enabled: true },
-                stroke: { curve: 'smooth', width: 3 },
-                xaxis: { categories: graphLabels }
-            }).render();
-        }
         return;
     }
 
@@ -382,11 +384,6 @@ window.renderTestsList = async (type = 'live') => {
                         <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-redo-alt" style="color: #3b82f6;"></i> Attempts: ${attempts}</span>
                         <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-star" style="color: #f59e0b;"></i> Score: ${score} / ${maxMarks}</span>
                     </div>
-                    <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
-                        <button onclick="window.location.href='analytics.html?testId=${tId}&attemptId=${attemptId}'" style="padding: 8px 20px; background: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
-                            View Full Analytics <i class="fas fa-chart-pie ml-1"></i>
-                        </button>
-                    </div>
                 </div>
             `;
         });
@@ -417,13 +414,6 @@ window.renderTestsList = async (type = 'live') => {
                     </div>
                     <div>${statusBadge}</div>
                 </div>
-                
-                <div style="display: flex; gap: 20px; font-size: 0.8rem; color: #475569; font-weight: 500; margin-bottom: 16px;">
-                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-clock" style="color: #94a3b8;"></i> ${test.duration} Mins</span>
-                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-list-ol" style="color: #94a3b8;"></i> ${test.totalQuestions || 'N/A'} Qs</span>
-                    <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-bullseye" style="color: #94a3b8;"></i> ${test.maxMarks} Marks</span>
-                </div>
-                
                 <div style="border-top: 1px solid #f1f5f9; padding-top: 12px; display: flex; justify-content: flex-end;">
                     ${actionButtons}
                 </div>
@@ -439,23 +429,7 @@ window.openInstructions = (testId) => {
     if(!test) return;
     
     window.currentActiveTestId = testId;
-    
     document.getElementById('inst-title').innerText = test.title;
-    
-    const instSubject = document.getElementById('inst-subject');
-    if (instSubject) instSubject.innerText = test.subject || 'Standard Assessment';
-    
-    document.getElementById('inst-time').innerText = test.duration + " Mins";
-    document.getElementById('inst-marks').innerText = test.maxMarks;
-    
-    if(test.questions && test.questions.length > 0) {
-        document.getElementById('inst-plus').innerText = `+${test.questions[0].marks?.correct || 4} Marks`;
-        document.getElementById('inst-minus').innerText = `-${test.questions[0].marks?.incorrect || 1} Mark`;
-    } else {
-        document.getElementById('inst-plus').innerText = `+4 Marks`;
-        document.getElementById('inst-minus').innerText = `-1 Mark`;
-    }
-
     document.getElementById('instruction-mode').style.display = 'flex';
 };
 
@@ -472,9 +446,8 @@ window.startTestPlayer = () => {
     window.open(`portal.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`, '_blank');
 };
 
-
 // ==========================================
-// 6. INITIALIZATION (Mobile Debug Mode)
+// 6. INITIALIZATION 
 // ==========================================
 const setupDropdown = async (batchIds) => {
     try {
@@ -484,32 +457,31 @@ const setupDropdown = async (batchIds) => {
         if (!targetBatchId) targetBatchId = AppState.currentBatchId;
         if (!targetBatchId && batchIds.length > 0) targetBatchId = batchIds[0];
 
-        // 🚨 EXECUTION CORE: Ab yeh UI/Dropdown par nirbhar nahi karega
         if (targetBatchId) {
             window.switchBatch(targetBatchId);
         }
 
-        // Dropdown Rendering (Sirf tab chalega jab dropdown element hoga)
         const dropdown = document.getElementById('batch-dropdown');
         if (dropdown) {
             dropdown.innerHTML = '';
-            const batchPromises = batchIds.map(async (bId) => {
+            for (const bId of batchIds) {
                 const bSnap = await getDoc(doc(db, "batches", bId));
-                if (bSnap.exists()) {
-                    return `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${bSnap.data().title}</div>`;
+                if (bSnap.exists()) { 
+                    const title = bSnap.data().title;
+                    dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
                 }
-                return "";
-            });
-            const dropdownItems = await Promise.all(batchPromises);
-            dropdown.innerHTML = dropdownItems.join('');
+            }
         }
-    } catch (error) {
-        // PHONE CONSOLE HACK: Error seedha aapki screen par dikhega
-        alert("System Setup Error: " + error.message);
+    } catch(err) {
+        alert("Initialization Error: " + err.message);
     }
 };
 
-VideoPlayer.initAPI();
-initAuth((batches) => {
-    setupDropdown(batches);
-});
+try {
+    if(VideoPlayer && VideoPlayer.initAPI) VideoPlayer.initAPI();
+    initAuth((batches) => {
+        setupDropdown(batches);
+    });
+} catch(err) {
+    alert("Auth/Video Init Error: " + err.message);
+}
