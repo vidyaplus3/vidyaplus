@@ -1,5 +1,5 @@
 // js/main.js
-import { db, auth } from './firebase-init.js'; // 👈 FIX: Added auth to fetch user data
+import { db, auth } from './firebase-init.js'; 
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initAuth, AppState } from './auth.js'; 
 import { UI } from './ui.js';
@@ -8,8 +8,85 @@ import { PDFViewer } from './pdf.js';
 import './video-tracker.js';
 
 // ==========================================
-// API GATEWAY
+// 1. CORE BUSINESS LOGIC (Secure Functions)
 // ==========================================
+
+async function switchBatch(batchId) {
+    if (!batchId) return;
+
+    // Step A: Local State & UI Update
+    const batchNameEl = document.getElementById('current-batch-name');
+    if (batchNameEl) batchNameEl.innerText = "Authenticating & Loading...";
+    
+    localStorage.setItem('vp_batch', batchId);
+    AppState.currentBatchId = batchId;
+    
+    const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
+    window.handleScreenRender(initialScreen); 
+
+    const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
+    
+    const subList = document.getElementById('subject-list');
+    const chapList = document.getElementById('chapter-list');
+    const lecList = document.getElementById('lecture-list');
+
+    if(initialScreen === 'subjects' && subList) subList.innerHTML = skeletonHTML;
+    if(initialScreen === 'chapters' && chapList) chapList.innerHTML = skeletonHTML;
+    if(initialScreen === 'classroom' && lecList) lecList.innerHTML = skeletonHTML;
+
+    try {
+        // Step B: Secure Data Fetching
+        const batchSnap = await getDoc(doc(db, "batches", batchId));
+        if (batchSnap.exists() && batchNameEl) batchNameEl.innerText = batchSnap.data().title;
+
+        const matRef = collection(db, "batches", batchId, "materials");
+        const q = query(matRef, where("status", "==", "Active"));
+        const matSnap = await getDocs(q);
+
+        if (matSnap.empty) {
+            console.warn("System Notice: No materials found or access restricted.");
+        }
+
+        AppState.materialsTree = {};
+        AppState.globalResources = [];
+        AppState.subjectMaterials = {};
+        AppState.quizzes = [];
+
+        matSnap.forEach(docSnap => {
+            const data = { id: docSnap.id, ...docSnap.data() };
+            const targetLayer = data.targetLayer || "";
+            const subject = data.subject || "General";
+            const chapter = data.chapter || "Uncategorized";
+
+            if (data.type === 'quiz') {
+                AppState.quizzes.push(data);
+            } else if (targetLayer === 'global_resource' || subject === 'Batch Resources') {
+                AppState.globalResources.push(data);
+            } else if (targetLayer === 'subject_material' || chapter === 'Subject Materials') {
+                if (!AppState.subjectMaterials[subject]) AppState.subjectMaterials[subject] = [];
+                AppState.subjectMaterials[subject].push(data);
+            } else {
+                if (!AppState.materialsTree[subject]) AppState.materialsTree[subject] = {};
+                if (!AppState.materialsTree[subject][chapter]) AppState.materialsTree[subject][chapter] = [];
+                AppState.materialsTree[subject][chapter].push(data);
+            }
+        });
+        
+        window.handleScreenRender(initialScreen); 
+
+    } catch (error) { 
+        console.error("Batch Authorization Error:", error); 
+        // 🚨 SECURITY FALLBACK: Block Unauthorized Access
+        if (error.code === 'permission-denied') {
+            alert("Security System: Unauthorized access detected. You are not enrolled in this batch.");
+            window.location.replace("explore.html");
+        }
+    }
+}
+// ==========================================
+// 2. API GATEWAY (Centralized Global Exports)
+// ==========================================
+window.switchBatch = switchBatch; // 🚨 FIX: Explicit global mapping done here
 window.openMenu = UI.openMenu;
 window.openNotif = UI.openNotif;
 window.closeModals = UI.closeModals;
@@ -37,8 +114,9 @@ window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
 window.togglePDFFull = PDFViewer.togglePDFFull;
 
+
 // ==========================================
-// ROUTING ENGINE
+// 3. ROUTING & UI RENDER ENGINE
 // ==========================================
 window.handleScreenRender = (screenId) => {
     UI.showScreen(screenId); 
@@ -79,65 +157,10 @@ window.navigate = (screenId, payload = {}) => {
     window.location.hash = screenId;
 };
 
+
 // ==========================================
-// BUSINESS LOGIC & DATA SYNC
+// 4. DATA PRESENTATION LOGIC
 // ==========================================
-window.switchBatch = async (batchId) => {
-    const batchNameEl = document.getElementById('current-batch-name');
-    if (batchNameEl) batchNameEl.innerText = "Loading...";
-    
-    localStorage.setItem('vp_batch', batchId);
-    AppState.currentBatchId = batchId;
-    
-    const initialScreen = window.location.hash.replace('#', '') || 'dashboard';
-    window.handleScreenRender(initialScreen); 
-
-    const skeletonHTML = `<div class="list-card" style="border:none; box-shadow:none; padding:15px 0;"><div class="skeleton" style="width:45px; height:45px; border-radius:10px; flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:16px; width:70%; margin-bottom:8px; border-radius:4px;"></div><div class="skeleton" style="height:12px; width:40%; border-radius:4px;"></div></div></div>`.repeat(5);
-    
-    const subList = document.getElementById('subject-list');
-    const chapList = document.getElementById('chapter-list');
-    const lecList = document.getElementById('lecture-list');
-
-    if(initialScreen === 'subjects' && subList) subList.innerHTML = skeletonHTML;
-    if(initialScreen === 'chapters' && chapList) chapList.innerHTML = skeletonHTML;
-    if(initialScreen === 'classroom' && lecList) lecList.innerHTML = skeletonHTML;
-
-    try {
-        const batchSnap = await getDoc(doc(db, "batches", batchId));
-        if (batchSnap.exists() && batchNameEl) batchNameEl.innerText = batchSnap.data().title;
-
-        const matRef = collection(db, "batches", batchId, "materials");
-        const q = query(matRef, where("status", "==", "Active"));
-        const matSnap = await getDocs(q);
-
-        AppState.materialsTree = {};
-        AppState.globalResources = [];
-        AppState.subjectMaterials = {};
-        AppState.quizzes = [];
-
-        matSnap.forEach(docSnap => {
-            const data = { id: docSnap.id, ...docSnap.data() };
-            const targetLayer = data.targetLayer || "";
-            const subject = data.subject || "General";
-            const chapter = data.chapter || "Uncategorized";
-
-            if (data.type === 'quiz') {
-                AppState.quizzes.push(data);
-            } else if (targetLayer === 'global_resource' || subject === 'Batch Resources') {
-                AppState.globalResources.push(data);
-            } else if (targetLayer === 'subject_material' || chapter === 'Subject Materials') {
-                if (!AppState.subjectMaterials[subject]) AppState.subjectMaterials[subject] = [];
-                AppState.subjectMaterials[subject].push(data);
-            } else {
-                if (!AppState.materialsTree[subject]) AppState.materialsTree[subject] = {};
-                if (!AppState.materialsTree[subject][chapter]) AppState.materialsTree[subject][chapter] = [];
-                AppState.materialsTree[subject][chapter].push(data);
-            }
-        });
-        window.handleScreenRender(initialScreen); 
-    } catch (error) { console.error("Batch Load Error:", error); }
-};
-
 window.switchTab = (btnElement, listId) => {
     UI.switchTabUI(btnElement);
     if (listId === 'resource-list') window.renderExtraMaterials('subject-list', AppState.globalResources, "No global resources available."); 
@@ -171,7 +194,6 @@ window.renderChapters = (subjectName) => {
         index++;
     }
 };
-
 window.filterClassroom = (filterType, btnElement = null) => {
     const container = document.getElementById('lecture-list');
     if(!container) return;
@@ -230,7 +252,7 @@ window.switchClassroomTab = (type) => {
 };
 
 // ==========================================
-// 🚨 GOD-LEVEL TEST PORTAL ENGINE (With Database Sync)
+// 5. TEST PORTAL ENGINE
 // ==========================================
 window.testsDataCache = {};
 window.userAttemptedQuizzes = {}; 
@@ -244,10 +266,8 @@ window.renderTestsList = async (type = 'live') => {
     const container = document.getElementById('test-list-container');
     if(!container) return;
 
-    // Show Loading state before fetching
     container.innerHTML = '<div style="text-align:center; padding: 40px;"><i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: #2563eb;"></i><p style="margin-top:10px; font-weight:600; color:#64748b;">Syncing Assessment Data...</p></div>';
 
-    // 📡 FETCH ALL USER ATTEMPTS FROM FIRESTORE
     let allAttemptsMap = {};
     if (auth && auth.currentUser) {
         try {
@@ -261,22 +281,15 @@ window.renderTestsList = async (type = 'live') => {
         }
     }
 
-    // 🚨 THE FIX: Filter attempts so ONLY THIS BATCH's tests show up!
     const currentBatchQuizzes = AppState.quizzes || [];
     const currentBatchTestIds = currentBatchQuizzes.map(q => q.id);
     
     let attemptedMap = {};
     currentBatchTestIds.forEach(tId => {
-        if (allAttemptsMap[tId]) {
-            attemptedMap[tId] = allAttemptsMap[tId];
-        }
+        if (allAttemptsMap[tId]) attemptedMap[tId] = allAttemptsMap[tId];
     });
-
     container.innerHTML = '';
 
-    // =========================================
-    // 📈 RENDER: OVERALL ANALYTICS TAB (Batch Specific)
-    // =========================================
     if (type === 'dashboard') {
         const attemptedIds = Object.keys(attemptedMap);
         if (attemptedIds.length === 0) {
@@ -284,19 +297,15 @@ window.renderTestsList = async (type = 'live') => {
             return;
         }
 
-        // Calculate Overall Stats for Current Batch
         let totalTests = attemptedIds.length;
-        let totalScore = 0;
-        let totalMax = 0;
-        let graphScores = [];
-        let graphLabels = [];
+        let totalScore = 0; let totalMax = 0;
+        let graphScores = []; let graphLabels = [];
 
         attemptedIds.forEach((tId, index) => {
             const d = attemptedMap[tId];
             const sc = d.latestScore || d.score || 0;
             const mx = d.maxMarks || 100;
-            totalScore += sc;
-            totalMax += mx;
+            totalScore += sc; totalMax += mx;
             
             let percent = mx > 0 ? ((sc / mx) * 100).toFixed(1) : 0;
             graphScores.push(percent);
@@ -337,9 +346,6 @@ window.renderTestsList = async (type = 'live') => {
         return;
     }
 
-    // =========================================
-    // RENDER: ATTEMPTED TESTS TAB (Batch Specific)
-    // =========================================
     if (type === 'attempted') {
         const attemptedIds = Object.keys(attemptedMap);
         if (attemptedIds.length === 0) {
@@ -379,9 +385,6 @@ window.renderTestsList = async (type = 'live') => {
         return;
     }
 
-    // =========================================
-    // RENDER: LIVE TESTS TAB (Batch Specific)
-    // =========================================
     if(currentBatchQuizzes.length === 0) {
         container.innerHTML = `<div class="empty-box" style="margin-top: 50px;"><i class="fas fa-clipboard-list" style="opacity:0.2;"></i><h4 style="margin-top:10px; font-weight:500;">No live assessments available.</h4></div>`;
         return;
@@ -421,8 +424,6 @@ window.renderTestsList = async (type = 'live') => {
         container.insertAdjacentHTML('beforeend', cardHtml);
     });
 };
-
-
 window.currentActiveTestId = null;
 
 window.openInstructions = (testId) => {
@@ -455,41 +456,29 @@ window.closeInstructions = () => {
     window.currentActiveTestId = null;
 };
 
-// 🚨 REDIRECT TO ISOLATED PORTAL (NEW TAB)
 window.startTestPlayer = () => {
     if(!window.currentActiveTestId || !AppState.currentBatchId) {
         alert("Session error. Please reload the page."); return;
     }
-    
     document.getElementById('instruction-mode').style.display = 'none';
-    
-    // Naye tab me portal.html khulega (No Back Button Glitch)
     window.open(`portal.html?testId=${window.currentActiveTestId}&batchId=${AppState.currentBatchId}`, '_blank');
 };
 
+
 // ==========================================
-// INITIALIZATION (ULTIMATE URL FIX)
+// 6. INITIALIZATION 
 // ==========================================
 const setupDropdown = async (batchIds) => {
     const dropdown = document.getElementById('batch-dropdown');
     if(!dropdown) return;
     dropdown.innerHTML = '';
     
-    // 1. Dashboard URL se batch ID nikalna (Yeh logic pehle missing tha)
     const urlParams = new URLSearchParams(window.location.search);
     let targetBatchId = urlParams.get('batch');
 
-    // 2. Agar URL me nahi hai (direct khola hai), toh Local Storage se lena
-    if (!targetBatchId) {
-        targetBatchId = AppState.currentBatchId;
-    }
+    if (!targetBatchId) targetBatchId = AppState.currentBatchId;
+    if (!targetBatchId && batchIds.length > 0) targetBatchId = batchIds[0];
 
-    // 3. Agar Local Storage bhi khali hai (jaise history clear karne pe), toh list ka pehla batch uthana
-    if (!targetBatchId && batchIds.length > 0) {
-        targetBatchId = batchIds[0];
-    }
-
-    // Dropdown me batches load karna
     for (const bId of batchIds) {
         try {
             const bSnap = await getDoc(doc(db, "batches", bId));
@@ -502,16 +491,10 @@ const setupDropdown = async (batchIds) => {
         }
     }
     
-    // 4. Finally, batch ko automatically screen par load karna
+    // 🚨 FIX: Kyunki ab window.switchBatch globally 100% available hai, 
+    // Isliye complex setTimeout ki zaroorat nahi hai. Direct execute hoga.
     if (targetBatchId) {
-        if (typeof window.switchBatch === 'function') {
-            window.switchBatch(targetBatchId);
-        } else {
-            // Agar browser slow hai aur function turant ready nahi hua, toh 0.5 sec wait karke try karega
-            setTimeout(() => {
-                if (typeof window.switchBatch === 'function') window.switchBatch(targetBatchId);
-            }, 500);
-        }
+        window.switchBatch(targetBatchId);
     }
 };
 
