@@ -1,31 +1,20 @@
 // js/main.js
-
-// 🚨 GOD MODE MOBILE DEBUGGER: Koi bhi error ab chhipega nahi! 🚨
-window.onerror = function(msg, url, lineNo, columnNo, error) {
-    alert("System Crash: " + msg + "\nLine: " + lineNo);
-    return false;
-};
-window.onunhandledrejection = function(event) {
-    alert("Database/Network Error: " + (event.reason ? event.reason.message : "Unknown Error"));
-};
-
 import { db, auth } from './firebase-init.js'; 
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initAuth, AppState } from './auth.js'; 
 import { UI } from './ui.js';
 import { VideoPlayer } from './player.js';
 import { PDFViewer } from './pdf.js';
-// 🚨 FIX: Ise band kiya gaya hai kyunki agar yeh file missing hogi toh poora app crash ho jayega.
+
+// 🚨 PRECAUTION: Agar video-tracker.js file server par maujud nahi hui, toh ES6 script ko crash kar dega.
+// Agar aapke paas yeh file completely ready hai, tabhi is comment (//) ko hatayein.
 // import './video-tracker.js'; 
 
 // ==========================================
 // 1. CORE BUSINESS LOGIC (Secure Functions)
 // ==========================================
 async function switchBatch(batchId) {
-    if (!batchId) {
-        alert("System Notice: Target Batch ID missing.");
-        return;
-    }
+    if (!batchId) return;
 
     try {
         const batchNameEl = document.getElementById('current-batch-name');
@@ -34,9 +23,10 @@ async function switchBatch(batchId) {
         localStorage.setItem('vp_batch', batchId);
         AppState.currentBatchId = batchId;
         
+        // 🎯 MASTER ROUTING FIX: Default screen ab 'dashboard' rahegi
         let initialScreen = window.location.hash.replace('#', '');
         if (!initialScreen) {
-            initialScreen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
+            initialScreen = 'dashboard'; 
         }
         
         window.handleScreenRender(initialScreen); 
@@ -93,14 +83,13 @@ async function switchBatch(batchId) {
         window.handleScreenRender(initialScreen); 
 
     } catch (error) { 
-        // 🚨 YEH SEEDHA PHONE PAR ERROR DIKHAYEGA
-        alert("Security/Network System Error: " + error.message);
         console.error("Batch Authorization Error:", error); 
         if (error.code === 'permission-denied') {
             window.location.replace("explore.html");
         }
     }
 }
+
 // ==========================================
 // 2. API GATEWAY 
 // ==========================================
@@ -143,7 +132,7 @@ window.handleScreenRender = (screenId) => {
         if (screenId === 'classroom' && AppState.currentChapter) window.filterClassroom('all');
         if (screenId === 'tests') window.renderTestsList('live'); 
     } catch(e) {
-        alert("Render Error: " + e.message);
+        console.error("Render Error:", e);
     }
 };
 
@@ -151,8 +140,11 @@ window.addEventListener('hashchange', () => {
     if(window.closeInstructions) window.closeInstructions();
     if(window.closeModals) window.closeModals();
     
+    // 🎯 MASTER ROUTING FIX: Default screen 'dashboard'
     let screen = window.location.hash.replace('#', '');
-    if (!screen) screen = window.location.pathname.includes('study') ? 'subjects' : 'dashboard';
+    if (!screen) {
+        screen = 'dashboard';
+    }
     window.handleScreenRender(screen); 
 });
 
@@ -422,6 +414,7 @@ window.renderTestsList = async (type = 'live') => {
         container.insertAdjacentHTML('beforeend', cardHtml);
     });
 };
+
 window.currentActiveTestId = null;
 
 window.openInstructions = (testId) => {
@@ -473,7 +466,7 @@ const setupDropdown = async (batchIds) => {
             }
         }
     } catch(err) {
-        alert("Initialization Error: " + err.message);
+        console.error("Initialization Error:", err);
     }
 };
 
@@ -483,5 +476,5 @@ try {
         setupDropdown(batches);
     });
 } catch(err) {
-    alert("Auth/Video Init Error: " + err.message);
+    console.error("Auth/Video Init Error:", err);
 }
