@@ -474,35 +474,50 @@ window.startTestPlayer = () => {
 
 
 // ==========================================
-// 6. INITIALIZATION (Decoupled Architecture)
+// 6. INITIALIZATION (Highly Optimized & Non-Blocking)
 // ==========================================
 const setupDropdown = async (batchIds) => {
     const urlParams = new URLSearchParams(window.location.search);
     let targetBatchId = urlParams.get('batch');
 
-    // 1. Identify Target Batch
+    // 1. Validation & Prioritization Logic
     if (!targetBatchId) targetBatchId = AppState.currentBatchId;
-    if (!targetBatchId && batchIds.length > 0) targetBatchId = batchIds[0];
+    
+    // 🚨 SECURITY FIX: Ensure the requested batch actually exists in the user's enrolled list.
+    // If it's a stale ID from localStorage, reject it.
+    if (targetBatchId && !batchIds.includes(targetBatchId)) {
+        targetBatchId = null; 
+    }
+    
+    // Default to the first enrolled batch if nothing else is valid
+    if (!targetBatchId && batchIds.length > 0) {
+        targetBatchId = batchIds[0];
+    }
 
-    // 2. CORE EXECUTION: Data loading should never depend on a UI element
+    // 2. PARALLEL EXECUTION: Instantly trigger data fetch (Do NOT wait for UI to load)
     if (targetBatchId) {
         window.switchBatch(targetBatchId);
     }
 
-    // 3. UI EXECUTION: Only update dropdown if the element exists on this specific page
+    // 3. UI RENDERING (Background Process using Promise.all)
     const dropdown = document.getElementById('batch-dropdown');
     if (dropdown) {
         dropdown.innerHTML = '';
-        for (const bId of batchIds) {
-            try {
+        
+        try {
+            // Fetch all batch titles parallelly for maximum speed
+            const batchPromises = batchIds.map(async (bId) => {
                 const bSnap = await getDoc(doc(db, "batches", bId));
-                if (bSnap.exists()) { 
-                    const title = bSnap.data().title;
-                    dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
+                if (bSnap.exists()) {
+                    return `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${bSnap.data().title}</div>`;
                 }
-            } catch (error) {
-                console.error("Error fetching batch detail:", error);
-            }
+                return "";
+            });
+            
+            const dropdownItems = await Promise.all(batchPromises);
+            dropdown.innerHTML = dropdownItems.join('');
+        } catch (error) {
+            console.error("Error generating batch dropdown:", error);
         }
     }
 };
