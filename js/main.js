@@ -477,15 +477,16 @@ const setupDropdown = async (batchIds) => {
     
     let firstBatchLoaded = false;
 
-    // Har batch ID ke liye loop chalega aur data layega
+    // Har batch ID ke liye sequentially data fetch karo
     for (const bId of batchIds) {
         try {
             const bSnap = await getDoc(doc(db, "batches", bId));
             if (bSnap.exists()) { 
                 const title = bSnap.data().title;
+                // Dropdown me option add karo
                 dropdown.innerHTML += `<div class="dropdown-item" onclick="window.switchBatch('${bId}')">${title}</div>`; 
                 
-                // 🚨 THE FIX: Agar user ne koi batch select nahi kiya hai, toh pehle wale ko apne aap load kardo
+                // 🚨 MASTER FIX: Agar memory (localStorage) khali hai, toh pehla batch khud select kardo
                 if (!AppState.currentBatchId && !firstBatchLoaded) {
                     window.switchBatch(bId);
                     firstBatchLoaded = true;
@@ -496,8 +497,8 @@ const setupDropdown = async (batchIds) => {
         }
     }
     
-    // Agar user ka pehle se koi currentBatch selected hai, toh direct usko load karo
-    if (AppState.currentBatchId) {
+    // Agar memory me pehle se batch hai (history clear nahi ki hai), toh usko load karo
+    if (AppState.currentBatchId && !firstBatchLoaded) {
         window.switchBatch(AppState.currentBatchId);
     }
 };
