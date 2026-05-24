@@ -474,38 +474,25 @@ window.startTestPlayer = () => {
 
 
 // ==========================================
-// 6. INITIALIZATION (Highly Optimized & Non-Blocking)
+// 6. INITIALIZATION (Mobile Debug Mode)
 // ==========================================
 const setupDropdown = async (batchIds) => {
-    const urlParams = new URLSearchParams(window.location.search);
-    let targetBatchId = urlParams.get('batch');
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetBatchId = urlParams.get('batch');
 
-    // 1. Validation & Prioritization Logic
-    if (!targetBatchId) targetBatchId = AppState.currentBatchId;
-    
-    // 🚨 SECURITY FIX: Ensure the requested batch actually exists in the user's enrolled list.
-    // If it's a stale ID from localStorage, reject it.
-    if (targetBatchId && !batchIds.includes(targetBatchId)) {
-        targetBatchId = null; 
-    }
-    
-    // Default to the first enrolled batch if nothing else is valid
-    if (!targetBatchId && batchIds.length > 0) {
-        targetBatchId = batchIds[0];
-    }
+        if (!targetBatchId) targetBatchId = AppState.currentBatchId;
+        if (!targetBatchId && batchIds.length > 0) targetBatchId = batchIds[0];
 
-    // 2. PARALLEL EXECUTION: Instantly trigger data fetch (Do NOT wait for UI to load)
-    if (targetBatchId) {
-        window.switchBatch(targetBatchId);
-    }
+        // 🚨 EXECUTION CORE: Ab yeh UI/Dropdown par nirbhar nahi karega
+        if (targetBatchId) {
+            window.switchBatch(targetBatchId);
+        }
 
-    // 3. UI RENDERING (Background Process using Promise.all)
-    const dropdown = document.getElementById('batch-dropdown');
-    if (dropdown) {
-        dropdown.innerHTML = '';
-        
-        try {
-            // Fetch all batch titles parallelly for maximum speed
+        // Dropdown Rendering (Sirf tab chalega jab dropdown element hoga)
+        const dropdown = document.getElementById('batch-dropdown');
+        if (dropdown) {
+            dropdown.innerHTML = '';
             const batchPromises = batchIds.map(async (bId) => {
                 const bSnap = await getDoc(doc(db, "batches", bId));
                 if (bSnap.exists()) {
@@ -513,12 +500,12 @@ const setupDropdown = async (batchIds) => {
                 }
                 return "";
             });
-            
             const dropdownItems = await Promise.all(batchPromises);
             dropdown.innerHTML = dropdownItems.join('');
-        } catch (error) {
-            console.error("Error generating batch dropdown:", error);
         }
+    } catch (error) {
+        // PHONE CONSOLE HACK: Error seedha aapki screen par dikhega
+        alert("System Setup Error: " + error.message);
     }
 };
 
