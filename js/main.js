@@ -17,7 +17,7 @@ async function switchBatch(batchId) {
 
     try {
         const batchNameEl = document.getElementById('current-batch-name');
-        if (batchNameEl) batchNameEl.innerText = "Authenticating & Loading...";
+        if (batchNameEl) batchNameEl.innerText = "Loading...";
         
         localStorage.setItem('vp_batch', batchId);
         AppState.currentBatchId = batchId;
