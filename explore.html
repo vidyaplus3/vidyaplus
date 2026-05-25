@@ -38,7 +38,7 @@
         @media (min-width: 768px) { .main-content-area { padding-bottom: 20px; } }
     </style>
 </head>
-<body class="flex h-screen w-full">
+<body class="flex h-[100dvh] w-full">
 
     <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] hidden md:hidden" onclick="toggleSidebar()"></div>
     <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-64 bg-slate-900 text-white z-[70] transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
@@ -46,14 +46,14 @@
             <h1 class="text-2xl font-extrabold tracking-tight">Vidya<span class="text-blue-500">Plus</span></h1>
             <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
         </div>
-        <div class="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-2">
-            <a href="explore.html" class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white font-bold rounded-lg"><i class="fas fa-compass w-5"></i> Explore</a>
-            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-slate-300 font-semibold hover:bg-slate-800 hover:text-white rounded-lg transition"><i class="fas fa-home w-5"></i> Dashboard</a>
-            <a href="study.html" class="flex items-center gap-3 px-4 py-3 text-slate-300 font-semibold hover:bg-slate-800 hover:text-white rounded-lg transition"><i class="fas fa-book-open w-5"></i> Study</a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-300 font-semibold hover:bg-slate-800 hover:text-white rounded-lg transition"><i class="fas fa-robot w-5"></i> AI Guru</a>
+        <div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1.5">
+            <a href="explore.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-md"><i class="fas fa-compass w-4"></i> Explore</a>
+            <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-300 text-sm font-semibold hover:bg-slate-800 hover:text-white rounded-md transition"><i class="fas fa-home w-4"></i> Dashboard</a>
+            <a href="study.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-300 text-sm font-semibold hover:bg-slate-800 hover:text-white rounded-md transition"><i class="fas fa-book-open w-4"></i> Study</a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-300 text-sm font-semibold hover:bg-slate-800 hover:text-white rounded-md transition"><i class="fas fa-robot w-4"></i> AI Guru</a>
         </div>
-        <div class="p-4 border-t border-slate-800 shrink-0">
-            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-slate-800 text-red-400 font-bold rounded-lg hover:bg-red-500 hover:text-white transition">
+        <div class="p-3 border-t border-slate-800 shrink-0">
+            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-3 py-2 bg-slate-800 text-red-400 text-sm font-bold rounded-md hover:bg-red-500 hover:text-white transition">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
@@ -82,7 +82,7 @@
             </div>
         </header>
 
-        <div id="filter-bar-container" class="bg-white border-b border-slate-200 px-3 py-2 shrink-0 flex items-center gap-2 overflow-x-auto z-[45]">
+        <div id="filter-bar-container" class="bg-white border-b border-slate-200 px-3 py-2 shrink-0 flex flex-wrap items-center gap-2 relative z-[60]">
             
             <div class="relative shrink-0">
                 <button onclick="window.toggleCustomDrop('drop-class', event)" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-slate-100">
@@ -195,13 +195,12 @@
         let activeFilters = { class: 'all', stream: 'all', category: 'all' };
         let tempFilters = { class: 'all', stream: 'all', category: 'all' }; 
 
-        // Point 1: 60fps Mobile Nav Scroll Logic
         const scroller = document.getElementById('main-scroll-area');
         const bottomNav = document.getElementById('mobile-bottom-nav');
         let lastScroll = 0;
         
         scroller.addEventListener('scroll', () => {
-            if(window.location.hash.startsWith('#batch_')) return; // Details page pe scroll matter nahi karta
+            if(window.location.hash.startsWith('#batch_')) return; 
             
             const currentScroll = scroller.scrollTop;
             if (currentScroll > lastScroll && currentScroll > 50) {
@@ -212,7 +211,6 @@
             lastScroll = currentScroll;
         }, { passive: true });
 
-        // Setup Dropdowns UI Interactions
         window.toggleCustomDrop = (id, e) => {
             e.stopPropagation();
             document.querySelectorAll('.vp-dropdown').forEach(d => {
@@ -277,8 +275,9 @@
             grid.innerHTML = '';
 
             const filtered = allBatches.filter(b => {
-                // Point 3: Robust Class Matching Fix
-                const bClass = b.classTarget ? b.classTarget.toLowerCase().trim() : '';
+                // 🚨 FIX: Strict logic to map class appropriately to fix issue 6
+                const rawClass = b.class || b.classTarget || '';
+                const bClass = rawClass.toLowerCase().trim();
                 const fClass = activeFilters.class.toLowerCase().trim();
                 const matchClass = fClass === 'all' || bClass.includes(fClass) || fClass.includes(bClass);
                 
@@ -301,7 +300,7 @@
                     const finalPrice = batch.price > 0 ? `₹${batch.price}` : 'Free';
                     const startDate = batch.startDate || "11th May'26";
 
-                    // Point 7: Ultra Modern PW-style Minimalist Card
+                    // 🚨 FIX: Included batch.class to resolve issue where class string wasn't loading
                     grid.innerHTML += `
                         <div class="bg-white border border-slate-200 rounded-xl overflow-hidden card-shadow hover:shadow-lg transition-all cursor-pointer flex flex-col relative" onclick="window.location.hash = 'batch_${batch.id}'">
                             <div class="h-36 bg-indigo-50 relative border-b border-slate-100 p-1">
@@ -310,7 +309,7 @@
                             
                             <div class="p-4 flex-1 flex flex-col">
                                 <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-[#d84a1b] text-[11px] font-extrabold uppercase tracking-tight">${batch.classTarget || 'Class'} • ${batch.stream || 'Gen'}</span>
+                                    <span class="text-[#d84a1b] text-[11px] font-extrabold uppercase tracking-tight">${batch.class || batch.classTarget || 'Class'} • ${batch.stream || 'Gen'}</span>
                                     <span class="border border-slate-200 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Hinglish</span>
                                 </div>
                                 
@@ -345,7 +344,6 @@
 
             const isEnrolled = enrolledBatchIds.includes(batch.id);
 
-            // Point 2 & 6: Fixed Overlap and mapped all metadata beautifully
             container.innerHTML = `
                 <div class="w-full flex flex-col bg-slate-50 min-h-screen pb-20">
                     <div class="h-48 sm:h-64 bg-slate-900 relative w-full shrink-0">
@@ -358,7 +356,7 @@
                         <div class="bg-white border border-slate-200 sm:rounded-xl rounded-lg p-5 sm:p-8 card-shadow mb-5">
                             <div class="flex flex-wrap gap-2 mb-3">
                                 <span class="bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-blue-200">${batch.stream || 'General'}</span>
-                                <span class="bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-200">${batch.classTarget || 'Standard'}</span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-200">${batch.class || batch.classTarget || 'Standard'}</span>
                             </div>
                             <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-2 leading-tight">${batch.title}</h1>
                             
@@ -393,7 +391,7 @@
                             <div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
                                 <i class="fas fa-book-open text-purple-500 text-lg mb-1"></i>
                                 <div class="text-[10px] font-bold text-slate-400 uppercase">Subjects</div>
-                                <div class="text-xs font-bold text-slate-800 mt-0.5 truncate px-1">${batch.subject || "Full Course"}</div>
+                                <div class="text-xs font-bold text-slate-800 mt-0.5 line-clamp-2 px-1 break-words">${batch.subject || "Full Course"}</div>
                             </div>
                         </div>
 
@@ -420,7 +418,6 @@
                 viewList.classList.add('hidden');
                 filterBar.classList.add('hidden');
                 
-                // Point 5: Explicitly hide nav bar in description view
                 if(bottomNav) bottomNav.classList.add('hidden');
                 
                 viewDetail.classList.remove('hidden');
@@ -431,7 +428,6 @@
                 viewList.classList.remove('hidden');
                 filterBar.classList.remove('hidden');
                 
-                // Show nav bar back
                 if(bottomNav) {
                     bottomNav.classList.remove('hidden');
                     bottomNav.style.transform = 'translateY(0)';
@@ -443,7 +439,6 @@
         };
         window.addEventListener('hashchange', handleRouting);
 
-        // Point 4: Apply logic for custom dropdowns
         window.applyQuickFilter = (type, val, label) => {
             activeFilters[type] = val;
             document.getElementById(`btn-txt-${type}`).innerText = label;
@@ -492,7 +487,6 @@
         window.applyAdvancedFilters = () => {
             activeFilters = { ...tempFilters };
             
-            // Sync texts for custom buttons
             document.getElementById('btn-txt-class').innerText = activeFilters.class === 'all' ? 'All Classes' : 'Class ' + activeFilters.class;
             document.getElementById('btn-txt-stream').innerText = activeFilters.stream === 'all' ? 'All Streams' : activeFilters.stream;
             document.getElementById('btn-txt-category').innerText = activeFilters.category === 'all' ? 'All Categories' : activeFilters.category;
