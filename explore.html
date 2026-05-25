@@ -4,392 +4,479 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Explore Batches | VidyaPlus</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* CORE VARIABLES (Matched with your index.html) */
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg-color: #f1f5f9;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --white: #ffffff;
-            --success: #10b981;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow: hidden; }
+        /* Solid UI - No Transparency */
+        .solid-border { border: 1px solid #e2e8f0; }
+        .solid-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
         
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow-x: hidden; min-height: 100vh; }
-
-        /* --- 1. SUPER SLIM TOP BAR DESIGN --- */
-        .header {
-            background: #ffffff;
-            padding: 0.8rem 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50; /* Changed to 50 so Bottom Sheet can overlay */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .header-left { display: flex; align-items: center; }
-        .menu-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; margin-right: 15px; }
-        .logo { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
-
-        /* User Avatar instead of login button */
-        .user-avatar {
-            width: 35px; height: 35px; background: var(--primary); color: white;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 1.1rem;
-        }
-
-        /* --- 2. SLIM & PROFESSIONAL SIDEBAR --- */
-        .sidebar {
-            width: 240px;
-            height: 100vh;
-            background: var(--sidebar-bg);
-            position: fixed;
-            top: 0;
-            left: -240px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            transition: 0.3s ease;
-            z-index: 1002;
-        }
-
-        .brand-sidebar {
-            padding: 1.2rem; font-size: 1.3rem; font-weight: 800; color: var(--primary);
-            border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;
-        }
-
-        .close-btn { background: none; border: none; font-size: 1.3rem; color: var(--text-main); cursor: pointer; }
-        .nav-menu { list-style: none; padding: 1.2rem 1rem; flex-grow: 1; }
-        .nav-item { margin-bottom: 0.4rem; }
-        .nav-link {
-            display: flex; align-items: center; padding: 0.7rem 0.9rem; color: var(--text-muted);
-            text-decoration: none; font-weight: 600; border-radius: 8px; transition: 0.2s ease; font-size: 0.95rem;
-        }
-        .nav-link i { margin-right: 12px; font-size: 1.1rem; width: 22px; text-align: center; }
-        .nav-link:hover, .nav-link.active { background-color: #eff6ff; color: var(--primary); }
-        .sidebar.show { left: 0; }
-
-        .overlay { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 998; transition: 0.3s; }
-        .overlay.show { display: block; }
-
-        /* --- 3. BATCH GRID SYSTEM --- */
-        .page-header { padding: 1.5rem 1.5rem 0.5rem; }
-        .page-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+        /* Smooth Dropdown & Modals */
+        .dropdown-menu { transform-origin: top right; transition: all 0.2s ease-out; opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .dropdown-menu.active { opacity: 1; transform: scale(1); pointer-events: auto; }
         
-        .batch-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem; padding: 1rem 1.5rem 3rem;
-        }
-
-        .batch-card {
-            background: var(--white); border-radius: 12px; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;
-            border: 1px solid #e2e8f0;
-        }
-        .batch-card:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-
-        .card-img-container { width: 100%; height: 150px; position: relative; background: #e2e8f0; }
-        .card-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .status-badge {
-            position: absolute; top: 10px; right: 10px; background: var(--success);
-            color: white; font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 700;
-        }
-
-        .card-details { padding: 1rem; }
-        .card-subject { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 5px; }
-        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
+        /* Amazon Style Filter Layout */
+        .amz-filter-grid { display: grid; grid-template-columns: 120px 1fr; height: 350px; }
+        .amz-tab { padding: 12px; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600; font-size: 0.9rem; }
+        .amz-tab.active { background: #ffffff; border-left-color: #2563eb; color: #2563eb; }
         
-        .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .card-price { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
-        .btn-view { background: #eff6ff; color: var(--primary); border: none; padding: 5px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        /* Skeleton Animation */
+        @keyframes pulse-solid { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .skeleton-box { background-color: #e2e8f0; animation: pulse-solid 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: 0.5rem; }
 
-        /* --- 4. BOTTOM SHEET MODAL --- */
-        .bottom-sheet-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4);
-            z-index: 2000; opacity: 0; pointer-events: none; transition: 0.3s ease; backdrop-filter: blur(2px);
-        }
-        .bottom-sheet-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .bottom-sheet {
-            position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--white);
-            border-radius: 20px 20px 0 0; z-index: 2001; padding: 1.5rem; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
-            max-height: 80vh; overflow-y: auto; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        }
-        .bottom-sheet.active { bottom: 0; }
-
-        .sheet-handle { width: 40px; height: 5px; background: #cbd5e1; border-radius: 10px; margin: 0 auto 1.5rem; }
-        .sheet-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
-        .sheet-subject { color: var(--primary); font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; }
-        .sheet-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
+        /* Hide scrollbar for clean minimal look */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        .price-box { background: #f8fafc; padding: 1rem; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .price-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; }
-        .price-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
-
-        .btn-enroll {
-            width: 100%; background: var(--primary); color: white; border: none; padding: 12px;
-            border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
-        }
-        .btn-enroll:active { transform: scale(0.98); }
-
-        .loader { text-align: center; padding: 2rem; color: var(--text-muted); font-weight: 600; grid-column: 1/-1; }
+        /* Bottom Nav Safe Area */
+        .main-content-area { padding-bottom: 70px; }
+        @media (min-width: 768px) { .main-content-area { padding-bottom: 20px; } }
     </style>
 </head>
-<body>
+<body class="flex h-screen w-full">
 
-    <div class="overlay" id="overlay"></div>
-
-    <nav class="sidebar" id="sidebar">
-        <div class="brand-sidebar">
-            VidyaPlus
-            <button class="close-btn" id="close-btn"><i class="fas fa-times"></i></button>
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-64 bg-white solid-border z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+        <div class="h-16 flex items-center px-6 solid-border border-b">
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Vidya<span class="text-blue-600">Plus</span></h1>
+            <button class="ml-auto md:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-lg"></i></button>
         </div>
-        <ul class="nav-menu">
-            <li class="nav-item"><a href="explore.html" class="nav-link active"><i class="fas fa-compass"></i> Explore Batches</a></li>
-            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-book-open"></i> My Batches</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-play-circle"></i> Study</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-robot"></i> AI Guru</a></li>
-        </ul>
+        <div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">
+            <a href="explore.html" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 font-bold rounded-lg"><i class="fas fa-compass"></i> Explore</a>
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="study.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg"><i class="fas fa-book-open"></i> Study</a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg"><i class="fas fa-robot"></i> AI Guru</a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full relative w-full min-w-0">
+        
+        <header class="h-16 bg-white solid-border border-b flex items-center justify-between px-4 lg:px-8 z-30 shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-600" onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+                <h2 class="text-lg font-bold text-slate-800" id="header-title">Explore Batches</h2>
+            </div>
+            
+            <div class="relative">
+                <div id="profile-btn" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center cursor-pointer solid-border hover:bg-slate-200 transition" onclick="toggleProfileMenu()">
+                    <span id="profile-initial" class="font-bold text-slate-700">U</span>
+                </div>
+                <div id="profile-menu" class="dropdown-menu absolute right-0 mt-2 w-48 bg-white solid-border solid-shadow rounded-lg py-2 z-50">
+                    <div class="px-4 py-2 border-b border-slate-100 mb-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Signed in as</p>
+                        <p id="profile-email" class="text-sm font-semibold text-slate-800 truncate">loading...</p>
+                    </div>
+                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 font-medium hover:bg-slate-50"><i class="fas fa-user-circle mr-2 text-slate-400"></i> View Profile</a>
+                    <a href="#" onclick="logoutUser()" class="block px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2"></i> Secure Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <div id="filter-bar-container" class="bg-white solid-border border-b px-4 py-3 shrink-0 flex items-center gap-3 overflow-x-auto">
+            <select id="quick-class" onchange="applyQuickFilters()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg px-3 py-2 outline-none focus:border-blue-500 shrink-0">
+                <option value="all">All Classes</option>
+                <option value="9th">Class 9th</option>
+                <option value="10th">Class 10th</option>
+                <option value="11th">Class 11th</option>
+                <option value="12th">Class 12th</option>
+                <option value="Dropper">Dropper</option>
+                <option value="Gov Exam">Gov Exam</option>
+            </select>
+            
+            <select id="quick-stream" onchange="applyQuickFilters()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg px-3 py-2 outline-none focus:border-blue-500 shrink-0">
+                <option value="all">All Streams</option>
+                <option value="JEE">JEE</option>
+                <option value="NEET">NEET</option>
+                <option value="CUET">CUET</option>
+                <option value="NDA">NDA</option>
+                <option value="WBJEE">WBJEE</option>
+            </select>
+
+            <select id="quick-category" onchange="applyQuickFilters()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg px-3 py-2 outline-none focus:border-blue-500 shrink-0">
+                <option value="all">All Categories</option>
+                <option value="Batches">Batches</option>
+                <option value="Tests">Test Series</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <button onclick="openAdvancedFilter()" class="ml-auto bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold shrink-0 flex items-center gap-2 hover:bg-slate-900 transition">
+                <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Advanced</span>
+            </button>
+        </div>
+
+        <main class="flex-1 overflow-y-auto bg-slate-50 main-content-area" id="main-scroll-area">
+            
+            <div id="view-list" class="p-4 lg:p-8 max-w-7xl mx-auto">
+                <div id="batches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+                <div id="no-results" class="hidden text-center py-20">
+                    <i class="fas fa-search text-4xl text-slate-300 mb-4"></i>
+                    <h3 class="text-xl font-bold text-slate-800">No batches found</h3>
+                    <p class="text-slate-500 font-medium mt-2">Try adjusting your filters.</p>
+                </div>
+            </div>
+
+            <div id="view-detail" class="hidden bg-white min-h-full">
+                </div>
+
+        </main>
+    </div>
+
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white solid-border border-t flex justify-around items-center h-[65px] z-40 px-2 pb-safe">
+        <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-blue-600">
+            <i class="fas fa-compass text-xl mb-1"></i><span class="text-[10px] font-bold">Explore</span>
+        </a>
+        <a href="dashboard.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700">
+            <i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-bold">Dashboard</span>
+        </a>
+        <a href="study.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700">
+            <i class="fas fa-book-open text-xl mb-1"></i><span class="text-[10px] font-bold">Study</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700">
+            <i class="fas fa-robot text-xl mb-1"></i><span class="text-[10px] font-bold">AI Guru</span>
+        </a>
     </nav>
 
-    <header class="header">
-        <div class="header-left">
-            <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
-            <div class="logo">VidyaPlus</div>
-        </div>
-        <div class="user-avatar" id="userIcon">S</div>
-    </header>
-
-    <div class="page-header">
-        <h1>Explore Premium Batches</h1>
-    </div>
-
-    <main class="batch-grid" id="batchGrid">
-        <div class="loader" id="loader"><i class="fas fa-spinner fa-spin"></i> Loading Batches...</div>
-    </main>
-
-    <div class="bottom-sheet-overlay" id="sheetOverlay"></div>
-    <div class="bottom-sheet" id="bottomSheet">
-        <div class="sheet-handle"></div>
-        <div class="sheet-subject" id="sheetSubject">Subject</div>
-        <h2 class="sheet-title" id="sheetTitle">Batch Title</h2>
-        <p class="sheet-desc" id="sheetDesc">Description</p>
-        
-        <div class="price-box">
-            <span class="price-label">Enrollment Fee</span>
-            <span class="price-value" id="sheetPrice">₹0</span>
-        </div>
-        
-        <button class="btn-enroll" id="btnEnroll">Enroll Now</button>
-    </div>
-
-    <script>
-        // Sidebar Logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeBtn = document.getElementById('close-btn');
-
-        function toggleMenu() {
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
-        }
-        menuToggle.addEventListener('click', toggleMenu);
-        closeBtn.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
-        // Bottom Sheet Logic
-        const sheetOverlay = document.getElementById('sheetOverlay');
-        const bottomSheet = document.getElementById('bottomSheet');
-        let selectedBatchId = null;
-
-        function closeBottomSheet() {
-            sheetOverlay.classList.remove('active');
-            bottomSheet.classList.remove('active');
-            document.body.style.overflow = 'auto'; // Re-enable scroll
-        }
-        sheetOverlay.addEventListener('click', closeBottomSheet);
-    </script>
-    
-        <script type="module">
+    <div id="advanced-filter-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[100] hidden flex justify-center items-end sm:items-center">
+        <div class="bg-white w-full sm:w-[500px] sm:rounded-xl rounded-t-xl overflow-hidden flex flex-col h-[80vh] sm:h-[500px]">
+            <div class="px-5 py-4 solid-border border-b flex justify-between items-center bg-white">
+                <h3 class="font-extrabold text-lg text-slate-900">Advanced Filters</h3>
+                <button onclick="closeAdvancedFilter()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times text-xl"></i></button>
+            </div>
             
+            <div class="flex-1 bg-slate-50 amz-filter-grid overflow-hidden">
+                <div class="bg-slate-100 solid-border border-r flex flex-col">
+                    <div class="amz-tab active" onclick="switchFilterTab('Class', this)">Class</div>
+                    <div class="amz-tab" onclick="switchFilterTab('Stream', this)">Stream</div>
+                    <div class="amz-tab" onclick="switchFilterTab('Category', this)">Category</div>
+                </div>
+                <div class="bg-white overflow-y-auto p-4" id="amz-options-container">
+                    </div>
+            </div>
+
+            <div class="px-5 py-4 solid-border border-t bg-white flex justify-between items-center">
+                <button onclick="resetAdvancedFilters()" class="text-sm font-bold text-slate-500 hover:text-slate-800">Clear All</button>
+                <button onclick="applyAdvancedFilters()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-blue-700">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+    <script type="module">
         import { db, auth } from './js/firebase-init.js';
-        // Subcollection se user ki enrollments check karne ke liye functions
-        import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const batchGrid = document.getElementById('batchGrid');
-        const loader = document.getElementById('loader');
-        
-        let currentUser = null;
-        let selectedBatchId = null;
-        let selectedBatchPrice = "0"; 
-        let userEnrolledBatches = [];
+        // Global State
+        let allBatches = [];
+        let enrolledBatchIds = [];
+        let activeFilters = { class: 'all', stream: 'all', category: 'all' };
+        let tempFilters = { class: 'all', stream: 'all', category: 'all' }; // For Amazon Modal
 
-        // Check if user is logged in & Fetch their enrolled batches from Subcollection
+        // 1. Auth & Security Initialization
         onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
             if (user) {
-                document.getElementById('userIcon').innerText = user.email.charAt(0).toUpperCase();
-
-                try {
-                    const enrollmentsRef = collection(db, "users", user.uid, "enrollments");
-                    const enrollmentsSnap = await getDocs(enrollmentsRef);
-                    
-                    enrollmentsSnap.forEach(docSnap => {
-                        userEnrolledBatches.push(docSnap.id);
-                    });
-                } catch(e) {
-                    console.error("Error loading enrollments:", e);
-                }
+                document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
+                document.getElementById('profile-email').innerText = user.email;
+                await fetchUserEnrollments(user.uid);
+                await fetchAllBatches();
+                handleRouting(); // Render content based on current hash
+            } else {
+                window.location.replace("login.html");
             }
         });
 
-        async function fetchBatches() {
+        const fetchUserEnrollments = async (uid) => {
             try {
-                const q = query(collection(db, "batches"), where("status", "==", "Active"));
-                const querySnapshot = await getDocs(q);
-                
-                loader.style.display = 'none';
+                const snap = await getDocs(collection(db, "users", uid, "enrollments"));
+                enrolledBatchIds = snap.docs.map(doc => doc.id);
+            } catch (err) { console.error("Enrollment check failed", err); }
+        };
 
-                if (querySnapshot.empty) {
-                    batchGrid.innerHTML = '<p style="text-align:center; width:100%; color:gray;">No active batches available.</p>';
-                    return;
-                }
-
+        const fetchAllBatches = async () => {
+            renderSkeletons();
+            try {
+                const querySnapshot = await getDocs(collection(db, "batches"));
+                allBatches = [];
                 querySnapshot.forEach((doc) => {
-                    renderBatch(doc.id, doc.data());
+                    allBatches.push({ id: doc.id, ...doc.data() });
                 });
-
+                renderBatchesList();
             } catch (error) {
-                console.error("Error fetching batches:", error);
-                loader.innerHTML = '<p style="color:red;">Error loading data.</p>';
+                console.error("Error loading catalog:", error);
+                document.getElementById('batches-grid').innerHTML = `<p class="text-red-500 font-bold col-span-full">Database connection error.</p>`;
             }
-        }
+        };
 
-        function renderBatch(id, data) {
-            const card = document.createElement('div');
-            card.className = 'batch-card';
-            
-            const imgUrl = data.imageUrl ? data.imageUrl : 'https://via.placeholder.com/300x150?text=VidyaPlus';
-            
-            let displayPrice = "Free";
-            if(data.price && data.price !== "0" && data.price !== "" && data.price.toLowerCase() !== "free") {
-                displayPrice = `₹${data.price}`;
-            }
-
-            card.innerHTML = `
-                <div class="card-img-container">
-                    <span class="status-badge">Live</span>
-                    <img src="${imgUrl}" alt="Batch Image">
+        // 2. UI Presentation (Cards & Details)
+        const renderSkeletons = () => {
+            const grid = document.getElementById('batches-grid');
+            grid.innerHTML = Array(6).fill(`
+                <div class="bg-white solid-border rounded-xl p-5">
+                    <div class="skeleton-box h-40 w-full mb-4"></div>
+                    <div class="skeleton-box h-6 w-3/4 mb-2"></div>
+                    <div class="skeleton-box h-4 w-1/2 mb-4"></div>
+                    <div class="skeleton-box h-10 w-full"></div>
                 </div>
-                <div class="card-details">
-                    <div class="card-subject">${data.subject || 'All Subjects'}</div>
-                    <div class="card-title">${data.title}</div>
-                    <div class="card-bottom">
-                        <div class="card-price">${displayPrice}</div>
-                        <button class="btn-view">View</button>
+            `).join('');
+        };
+
+        const renderBatchesList = () => {
+            const grid = document.getElementById('batches-grid');
+            const noResults = document.getElementById('no-results');
+            grid.innerHTML = '';
+
+            const filtered = allBatches.filter(b => {
+                const matchClass = activeFilters.class === 'all' || (b.classTarget && b.classTarget.includes(activeFilters.class));
+                const matchStream = activeFilters.stream === 'all' || (b.stream && b.stream.includes(activeFilters.stream));
+                // Basic category logic (extend based on your DB schema)
+                const matchCat = activeFilters.category === 'all' || true; 
+                return matchClass && matchStream && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                filtered.forEach(batch => {
+                    const isEnrolled = enrolledBatchIds.includes(batch.id);
+                    const btnStatus = isEnrolled 
+                        ? `<button class="w-full bg-emerald-50 text-emerald-700 font-bold py-2.5 rounded-lg border border-emerald-200 mt-4 cursor-default"><i class="fas fa-check-circle"></i> Enrolled</button>`
+                        : `<button class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-lg mt-4 hover:bg-slate-800 transition"><i class="fas fa-lock"></i> Explore & Enroll</button>`;
+
+                    const priceTag = batch.price > 0 ? `₹${batch.price}` : 'Free';
+
+                    grid.innerHTML += `
+                        <div class="bg-white solid-border rounded-xl overflow-hidden hover:solid-shadow transition-shadow cursor-pointer flex flex-col" onclick="window.location.hash = 'batch_${batch.id}'">
+                            <div class="h-40 bg-slate-100 relative">
+                                ${batch.thumbnailUrl ? `<img src="${batch.thumbnailUrl}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-image text-4xl"></i></div>`}
+                                <div class="absolute top-3 left-3 bg-white px-2 py-1 rounded text-xs font-bold text-slate-700 shadow-sm">${batch.classTarget || 'Standard'}</div>
+                            </div>
+                            <div class="p-5 flex-1 flex flex-col">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-lg font-extrabold text-slate-900 leading-tight">${batch.title}</h3>
+                                </div>
+                                <p class="text-sm text-slate-500 font-medium line-clamp-2 mb-4 flex-1">${batch.description || 'Premium academic batch.'}</p>
+                                <div class="flex items-center justify-between mt-auto">
+                                    <div class="text-xl font-extrabold text-blue-600">${priceTag}</div>
+                                </div>
+                                ${btnStatus}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        const renderDetailedBatch = (batchId) => {
+            const batch = allBatches.find(b => b.id === batchId);
+            const container = document.getElementById('view-detail');
+            
+            if (!batch) {
+                container.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold text-slate-800">Batch not found.</h2><button onclick="window.history.back()" class="mt-4 text-blue-600 font-bold underline">Go Back</button></div>`;
+                return;
+            }
+
+            const isEnrolled = enrolledBatchIds.includes(batch.id);
+
+            container.innerHTML = `
+                <div class="h-48 md:h-64 bg-slate-800 relative w-full">
+                    ${batch.thumbnailUrl ? `<img src="${batch.thumbnailUrl}" class="w-full h-full object-cover opacity-60">` : ''}
+                    <button onclick="window.history.back()" class="absolute top-4 left-4 bg-white text-slate-900 w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-slate-100 z-10"><i class="fas fa-arrow-left"></i></button>
+                </div>
+                
+                <div class="max-w-4xl mx-auto px-4 sm:px-8 -mt-16 relative z-20 pb-24">
+                    <div class="bg-white solid-border rounded-xl p-6 sm:p-8 solid-shadow mb-8">
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded border border-blue-200">${batch.stream || 'General'}</span>
+                            <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1 rounded border border-slate-200">${batch.classTarget || 'Standard'}</span>
+                        </div>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">${batch.title}</h1>
+                        <p class="text-slate-600 font-medium leading-relaxed mb-6">${batch.description || 'No detailed description provided by the administration.'}</p>
+                        
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-bold text-slate-500 uppercase">Enrollment Fee</p>
+                                <p class="text-3xl font-extrabold text-slate-900">${batch.price > 0 ? '₹' + batch.price : 'Free'}</p>
+                            </div>
+                            
+                            ${isEnrolled 
+                                ? `<button onclick="window.location.href='dashboard.html'" class="bg-emerald-600 text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-emerald-700 shadow-sm">Go to Study Area <i class="fas fa-arrow-right ml-2"></i></button>`
+                                : `<button id="secure-enroll-btn" onclick="executeSecureEnrollment('${batch.id}', this)" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-blue-700 shadow-sm">Secure Enroll Now <i class="fas fa-lock ml-2"></i></button>`
+                            }
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-900 mb-4">Batch Features & Curriculum</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="solid-border rounded-lg p-4 bg-white"><i class="fas fa-video text-blue-500 mb-2 text-xl"></i><h4 class="font-bold text-slate-800">HD Lectures</h4><p class="text-sm text-slate-500">Access strictly structured premium video modules.</p></div>
+                        <div class="solid-border rounded-lg p-4 bg-white"><i class="fas fa-file-pdf text-red-500 mb-2 text-xl"></i><h4 class="font-bold text-slate-800">Study Materials</h4><p class="text-sm text-slate-500">Downloadable academic notes and DPPs.</p></div>
+                        <div class="solid-border rounded-lg p-4 bg-white"><i class="fas fa-clipboard-list text-emerald-500 mb-2 text-xl"></i><h4 class="font-bold text-slate-800">Test Series</h4><p class="text-sm text-slate-500">Secure assessment portal for accurate evaluation.</p></div>
+                        <div class="solid-border rounded-lg p-4 bg-white"><i class="fas fa-comments text-amber-500 mb-2 text-xl"></i><h4 class="font-bold text-slate-800">Doubts Center</h4><p class="text-sm text-slate-500">Direct academic resolution.</p></div>
                     </div>
                 </div>
             `;
-
-            // Card click event
-            card.addEventListener('click', () => {
-                document.getElementById('sheetTitle').innerText = data.title;
-                document.getElementById('sheetSubject').innerText = data.subject || 'All Subjects';
-                document.getElementById('sheetDesc').innerText = data.description || 'No description available.';
-                document.getElementById('sheetPrice').innerText = displayPrice;
-                
-                selectedBatchId = id;
-                selectedBatchPrice = data.price || "0";
-                
-                const btnEnroll = document.getElementById('btnEnroll');
-
-                // Check if user is already enrolled
-                if (userEnrolledBatches.includes(selectedBatchId)) {
-                    btnEnroll.innerText = "Let's Study 📖";
-                    btnEnroll.style.background = "#10b981"; 
-                    btnEnroll.setAttribute('data-action', 'study'); 
-                } else {
-                    btnEnroll.innerText = "Enroll Now";
-                    btnEnroll.style.background = "var(--primary)"; 
-                    btnEnroll.setAttribute('data-action', 'enroll'); 
-                }
-                
-                document.getElementById('sheetOverlay').classList.add('active');
-                document.getElementById('bottomSheet').classList.add('active');
-                document.body.style.overflow = 'hidden'; 
-            });
-
-            batchGrid.appendChild(card);
-        }
-
-        document.addEventListener('DOMContentLoaded', fetchBatches);
-
-        // 🚀 ENROLL / STUDY BUTTON LOGIC (Secured via Vercel Backend) 🚀
-        document.getElementById('btnEnroll').addEventListener('click', async () => {
-            if (!currentUser) {
-                alert("Please login to enroll or study!");
-                window.location.replace("login.html");
-                return;
-            }
-
-            const btn = document.getElementById('btnEnroll');
-            const action = btn.getAttribute('data-action');
-
-            if (action === 'study') {
-                window.location.href = "dashboard.html";
-                return;
-            }
             
-            // Secure Backend Enrollment
-            if (selectedBatchPrice === "0" || selectedBatchPrice === "" || selectedBatchPrice.toLowerCase() === "free") {
-                
-                const originalText = btn.innerText;
-                btn.innerText = "Securing Enrollment...";
-                
-                try {
-                    // 🚨 NAYA LOGIC: Secure Backend ko JWT bhejna
-                    const idToken = await auth.currentUser.getIdToken();
+            // Scroll to top of content area
+            document.getElementById('main-scroll-area').scrollTo(0,0);
+        };
 
-                    const response = await fetch("https://vidyaplus-backend.vercel.app/enrollBatch", {
-                        method: "POST",
-                        headers: { 
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${idToken}` 
-                        },
-                        body: JSON.stringify({ batchId: selectedBatchId })
-                    });
+        // 3. Routing Engine (Hashtag System)
+        const handleRouting = () => {
+            const hash = window.location.hash;
+            const viewList = document.getElementById('view-list');
+            const viewDetail = document.getElementById('view-detail');
+            const filterBar = document.getElementById('filter-bar-container');
+            const headerTitle = document.getElementById('header-title');
 
-                    const result = await response.json();
-
-                    if (!response.ok) throw new Error(result.error || "Enrollment failed");
-
-                    // Local array ko update karo taaki button turant green ho jaye
-                    userEnrolledBatches.push(selectedBatchId);
-                    
-                    alert("Successfully Enrolled! Welcome to the secure batch.");
-                    window.location.replace("dashboard.html"); 
-
-                } catch (error) {
-                    console.error("Enrollment failed:", error);
-                    alert(error.message || "Something went wrong. Please try again.");
-                    btn.innerText = originalText;
-                }
-
+            if (hash.startsWith('#batch_')) {
+                // Show Details
+                const batchId = hash.replace('#batch_', '');
+                viewList.classList.add('hidden');
+                filterBar.classList.add('hidden');
+                viewDetail.classList.remove('hidden');
+                headerTitle.innerText = "Batch Overview";
+                renderDetailedBatch(batchId);
             } else {
-                alert(`Payment Gateway Integration pending for Paid Batch ID: ${selectedBatchId}`);
+                // Show List
+                viewDetail.classList.add('hidden');
+                viewList.classList.remove('hidden');
+                filterBar.classList.remove('hidden');
+                headerTitle.innerText = "Explore Batches";
+                renderBatchesList();
+            }
+        };
+        window.addEventListener('hashchange', handleRouting);
+
+        // 4. Filtering Logic (Quick & Advanced)
+        window.applyQuickFilters = () => {
+            activeFilters.class = document.getElementById('quick-class').value;
+            activeFilters.stream = document.getElementById('quick-stream').value;
+            activeFilters.category = document.getElementById('quick-category').value;
+            renderBatchesList();
+        };
+
+        // --- Advanced Modal Amazon Style Logic ---
+        const optionsData = {
+            'Class': ['all', '9th', '10th', '11th', '12th', 'Dropper', 'Gov Exam'],
+            'Stream': ['all', 'JEE', 'NEET', 'CUET', 'NDA', 'WBJEE'],
+            'Category': ['all', 'Batches', 'Tests', 'Other']
+        };
+
+        window.openAdvancedFilter = () => {
+            tempFilters = { ...activeFilters }; // Clone current state
+            document.getElementById('advanced-filter-modal').classList.remove('hidden');
+            renderAmzOptions('Class'); // Default tab
+        };
+
+        window.closeAdvancedFilter = () => {
+            document.getElementById('advanced-filter-modal').classList.add('hidden');
+        };
+
+        window.switchFilterTab = (tabName, el) => {
+            document.querySelectorAll('.amz-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            renderAmzOptions(tabName);
+        };
+
+        const renderAmzOptions = (tabName) => {
+            const container = document.getElementById('amz-options-container');
+            const filterKey = tabName.toLowerCase();
+            const currentSelected = tempFilters[filterKey];
+            
+            container.innerHTML = optionsData[tabName].map(opt => `
+                <label class="flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer rounded border border-transparent hover:border-slate-200 transition mb-1">
+                    <input type="radio" name="amz-${filterKey}" value="${opt}" ${currentSelected === opt ? 'checked' : ''} 
+                           onchange="updateTempFilter('${filterKey}', '${opt}')" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm font-semibold text-slate-800 capitalize">${opt === 'all' ? 'All ' + tabName + 's' : opt}</span>
+                </label>
+            `).join('');
+        };
+        window.updateTempFilter = (key, val) => { tempFilters[key] = val; };
+
+        window.applyAdvancedFilters = () => {
+            activeFilters = { ...tempFilters };
+            // Sync quick bar selects
+            document.getElementById('quick-class').value = activeFilters.class;
+            document.getElementById('quick-stream').value = activeFilters.stream;
+            document.getElementById('quick-category').value = activeFilters.category;
+            
+            renderBatchesList();
+            closeAdvancedFilter();
+        };
+
+        window.resetAdvancedFilters = () => {
+            tempFilters = { class: 'all', stream: 'all', category: 'all' };
+            // Re-render currently active tab options visually
+            const activeTab = document.querySelector('.amz-tab.active').innerText;
+            renderAmzOptions(activeTab);
+        };
+
+
+        // 5. Secure JWT Enrollment Logic (Vercel Backend)
+        window.executeSecureEnrollment = async (batchId, btnElement) => {
+            if (!auth.currentUser) return alert("System Error: Unauthorized.");
+            
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
+            btnElement.disabled = true;
+
+            try {
+                // Generate fresh JWT token
+                const idToken = await auth.currentUser.getIdToken(true);
+
+                const response = await fetch("https://vidyaplus-backend.vercel.app/enrollBatch", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${idToken}` 
+                    },
+                    body: JSON.stringify({ batchId: batchId })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.error || "Enrollment Server Error");
+
+                enrolledBatchIds.push(batchId); // Update local state instantly
+                alert("Authorization Successful! Access granted to premium resources.");
+                window.location.replace("dashboard.html"); 
+
+            } catch (error) {
+                console.error("Enrollment failed:", error);
+                alert("Security Gateway: " + error.message);
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
+        };
+
+        // 6. UI Interactions
+        window.toggleSidebar = () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobile-sidebar-overlay').classList.toggle('hidden');
+        };
+
+        window.toggleProfileMenu = () => {
+            document.getElementById('profile-menu').classList.toggle('active');
+        };
+
+        // Close profile menu if clicked outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('profile-menu');
+            const btn = document.getElementById('profile-btn');
+            if (menu.classList.contains('active') && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('active');
             }
         });
-        </script>
+
+        window.logoutUser = () => {
+            if(confirm("Strictly terminate this session?")) {
+                signOut(auth).then(() => window.location.replace("index.html"));
+            }
+        };
+    </script>
 </body>
 </html>
