@@ -3,465 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VidyaPlus | Advanced Learning Platform</title>
+    <title>Dashboard | VidyaPlus</title>
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com;">
-
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
-                        surface: '#f8fafc',
-                        dark: '#0f172a'
-                    },
-                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
-                }
-            }
-        }
-    </script>
-
     <style>
-        body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; overflow-y: scroll; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow: hidden; }
+        .solid-border { border: 1px solid #e2e8f0; }
+        .solid-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .card-shadow { box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.08); }
         
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
+        /* 60FPS Hardware Accelerated Mobile Nav Anim */
+        #mobile-bottom-nav {
+            will-change: transform;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Skeleton Animation */
+        @keyframes pulse-solid { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .skeleton-box { background-color: #e2e8f0; animation: pulse-solid 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: 0.5rem; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .skeleton {
-            background: #e2e8f0;
-            background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite linear;
-        }
-
-        #app-container { display: flex; min-height: 100vh; opacity: 0; transition: opacity 0.4s ease; }
         
-        .sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid #f1f5f9; background: white; position: fixed; height: 100vh; z-index: 50; transition: transform 0.3s ease; display: flex; flex-direction: column; }
-        .main-content { flex-grow: 1; margin-left: 240px; display: flex; flex-direction: column; min-width: 0; }
-        
-        .top-navbar { height: 72px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
+        .main-content-area { padding-bottom: 60px; }
+        @media (min-width: 768px) { .main-content-area { padding-bottom: 20px; } }
 
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin: 2px 12px; border-radius: 6px; color: #64748b; font-weight: 500; font-size: 0.85rem; transition: all 0.2s ease; cursor: pointer; }
-        .nav-item:hover { background: #f8fafc; color: #0f172a; }
-        .nav-item.active { background: #f0f6ff; color: #2563eb; font-weight: 600; }
-
-        .target-selector { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-
-        .pw-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: var(--box-shadow-soft); transition: transform 0.2s; display: flex; flex-direction: column; }
-        .pw-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        
-        #global-loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        /* Full page loader */
+        #global-loader { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f1f5f9; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .notification-drawer { position: fixed; top: 0; right: -350px; width: 320px; max-width: 100vw; height: 100vh; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.05); z-index: 100; transition: right 0.3s ease; display: flex; flex-direction: column; }
-        .notification-drawer.open { right: 0; }
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 90; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-        .drawer-overlay.active { opacity: 1; visibility: visible; }
-
-        .profile-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 180px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; z-index: 50; }
-        .profile-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
-        .dropdown-item { padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: #475569; cursor: pointer; transition: background 0.2s; }
-        .dropdown-item:hover { background: #f8fafc; color: #0f172a; }
-        .dropdown-item.danger { color: #dc2626; border-top: 1px solid #e2e8f0; }
-        .dropdown-item.danger:hover { background: #fef2f2; }
-
-        .mobile-bottom-nav { display: none; }
-        .mobile-header-menu { display: none; }
-
-        @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; }
-            .mobile-header-menu { display: block; }
-        }
-
-        @media (max-width: 768px) {
-            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; z-index: 45; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; }
-            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
-            .bottom-nav-item.active { color: #3b82f6; }
-            .main-content { padding-bottom: 70px; }
-            .top-navbar { padding: 0 1rem; }
-        }
     </style>
 </head>
-<body>
+<body class="flex h-[100dvh] w-full">
 
     <div id="global-loader">
         <div class="spinner mb-4"></div>
-        <h2 class="text-lg font-bold text-slate-800">Establishing Secure Session</h2>
+        <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-widest">Decrypting Identity...</h2>
     </div>
 
-    <div class="drawer-overlay" id="notif-overlay" onclick="toggleNotifications()"></div>
-    <div class="notification-drawer" id="notif-drawer">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="font-bold text-slate-900">Notifications</h3>
-            <button onclick="toggleNotifications()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] hidden md:hidden" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-64 bg-slate-900 text-white z-[70] transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 shrink-0">
+            <h1 class="text-2xl font-extrabold tracking-tight">Vidya<span class="text-blue-500">Plus</span></h1>
+            <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
         </div>
-        <div class="flex-1 overflow-y-auto p-4 flex flex-col items-center justify-center">
-            <i class="fas fa-bell-slash text-4xl text-slate-200 mb-2"></i>
-            <p class="text-slate-500 text-sm font-medium">No new notifications</p>
+        <div class="flex-1 overflow-y-auto py-3 px-3 flex flex-col gap-1">
+            <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 bg-blue-600 text-white text-[13px] font-bold rounded"><i class="fas fa-home w-4 text-center"></i> Dashboard</a>
+            <a href="explore.html" class="flex items-center gap-2.5 px-3 py-2 text-slate-300 text-[13px] font-semibold hover:bg-slate-800 hover:text-white rounded transition"><i class="fas fa-compass w-4 text-center"></i> Explore</a>
+            <a href="study.html" class="flex items-center gap-2.5 px-3 py-2 text-slate-300 text-[13px] font-semibold hover:bg-slate-800 hover:text-white rounded transition"><i class="fas fa-book-open w-4 text-center"></i> Study</a>
+            <a href="#" class="flex items-center gap-2.5 px-3 py-2 text-slate-300 text-[13px] font-semibold hover:bg-slate-800 hover:text-white rounded transition"><i class="fas fa-robot w-4 text-center"></i> AI Guru</a>
         </div>
-    </div>
+        <div class="p-3 border-t border-slate-800 shrink-0">
+            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-3 py-1.5 bg-slate-800 text-red-400 text-[13px] font-bold rounded hover:bg-red-500 hover:text-white transition">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </aside>
 
-    <div id="app-container">
+    <div class="flex-1 flex flex-col h-full relative w-full min-w-0">
         
-        <aside class="sidebar" id="sidebar">
-            <div class="p-5 flex items-center justify-between border-b border-slate-50">
-                <div class="flex items-center gap-2 text-blue-600">
-                    <i class="fas fa-graduation-cap text-xl"></i>
-                    <span class="text-lg font-extrabold text-slate-900 tracking-tight">VidyaPlus</span>
-                </div>
-                <button class="lg:hidden text-slate-500" onclick="toggleSidebar()"><i class="fas fa-times text-sm"></i></button>
+        <header class="h-16 bg-white solid-border border-b flex items-center justify-between px-4 lg:px-8 z-[50] shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-700" onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+                <h2 class="text-lg font-extrabold text-slate-800 tracking-tight">My Workspace</h2>
             </div>
             
-            <div class="flex-1 overflow-y-auto hide-scroll py-4">
-                <div class="px-5 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">My Workspace</div>
-                <div class="nav-item active"><i class="fas fa-layer-group text-center w-5"></i> Dashboard</div>
-                <div class="nav-item" onclick="window.location.href='study.html'"><i class="fas fa-book-open text-center w-5"></i> Study Material</div>
-                <div class="nav-item"><i class="fas fa-clipboard-list text-center w-5"></i> Test Series</div>
-                <div class="px-5 mt-6 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Explore</div>
-                <div class="nav-item" onclick="window.location.href='explore.html'"><i class="fas fa-compass text-center w-5"></i> Explore</div>
-            </div>
-
-            <div class="p-4 border-t border-slate-50">
-                <button onclick="logoutSystem()" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-transparent hover:bg-slate-50 text-slate-500 hover:text-slate-800 text-xs font-semibold rounded-md transition">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-        </aside>
-
-        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
-
-        <main class="main-content">
-            
-            <header class="top-navbar">
-                <div class="flex items-center gap-4 flex-1">
-                    <button class="mobile-header-menu text-slate-600 focus:outline-none" onclick="toggleSidebar()">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-
-                <div class="flex items-center gap-4 sm:gap-6 ml-4">
-                    <button class="text-slate-600 hover:text-blue-600 relative" onclick="toggleNotifications()">
-                        <i class="fas fa-bell text-xl"></i>
-                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    
-                    <div class="relative" id="profile-container">
-                        <div class="flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer" onclick="toggleProfileDropdown(event)">
-                            <div id="profile-skeleton" class="w-9 h-9 rounded-full skeleton"></div>
-                            <div id="profile-data" class="hidden flex items-center gap-2">
-                                <div class="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm" id="user-avatar">S</div>
-                            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <div id="profile-btn" class="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center cursor-pointer border border-slate-300 hover:bg-slate-200 transition" onclick="window.toggleCustomDrop('profile-menu', event)">
+                        <span id="profile-initial" class="font-bold text-slate-700 text-sm">U</span>
+                    </div>
+                    <div id="profile-menu" class="vp-dropdown hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 shadow-lg rounded-lg py-1 z-[60]">
+                        <div class="px-4 py-2 border-b border-slate-100 mb-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Signed in as</p>
+                            <p id="profile-email" class="text-xs font-bold text-slate-800 truncate">loading...</p>
                         </div>
-                        
-                        <div class="profile-dropdown" id="profile-dropdown">
-                            <div class="dropdown-item" onclick="window.location.href='profile.html'"><i class="fas fa-user w-5"></i> View Profile</div>
-                            <div class="dropdown-item danger" onclick="logoutSystem()"><i class="fas fa-sign-out-alt w-5"></i> Logout</div>
-                        </div>
+                        <a href="#" class="block px-4 py-2 text-sm text-slate-700 font-semibold hover:bg-slate-50"><i class="fas fa-user-circle mr-2 text-slate-400"></i> View Profile</a>
+                        <a href="#" onclick="logoutUser()" class="block px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                     </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <div class="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto">
-                <div class="max-w-7xl mx-auto"> 
+        <main class="flex-1 overflow-y-auto bg-slate-50 main-content-area" id="main-scroll-area">
+            <div class="p-4 lg:p-8 max-w-7xl mx-auto space-y-6">
+                
+                <div class="flex flex-col gap-4 mb-2">
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight" id="welcome-text">Welcome Back!</h1>
                     
-                    <div class="target-selector max-w-sm mb-8 shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center"><i class="fas fa-crown text-xs"></i></div>
-                            <div>
-                                <p class="text-xs text-slate-500 font-semibold">Your Target</p>
-                                <p class="text-sm font-bold text-slate-900">Class 12th + JEE</p>
-                            </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
+                            <i class="fas fa-fire text-orange-500 text-lg mb-1"></i>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Streak</span>
+                            <div class="text-lg font-extrabold text-slate-800" id="stat-streak">0 Days</div>
                         </div>
-                        <button class="text-blue-600 text-sm font-bold hover:underline">Change</button>
-                    </div>
-
-                    <div class="mb-10">
-                        <h2 class="text-xl font-bold text-slate-900 mb-4">My Enrolled Courses</h2>
-                        
-                        <div id="batch-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            
-                            <div class="pw-card skeleton-card">
-                                <div class="h-44 skeleton"></div>
-                                <div class="p-4 flex flex-col gap-3">
-                                    <div class="flex justify-between"><div class="h-4 w-24 skeleton rounded"></div><div class="h-4 w-12 skeleton rounded"></div></div>
-                                    <div class="h-6 w-3/4 skeleton rounded"></div>
-                                    <div class="h-4 w-1/2 skeleton rounded"></div>
-                                    <div class="flex items-center gap-2 mt-2"><div class="h-8 w-16 skeleton rounded"></div><div class="h-8 flex-1 skeleton rounded"></div></div>
-                                </div>
-                            </div>
-                            <div class="pw-card skeleton-card hidden md:flex">
-                                <div class="h-44 skeleton"></div>
-                                <div class="p-4 flex flex-col gap-3">
-                                    <div class="flex justify-between"><div class="h-4 w-24 skeleton rounded"></div><div class="h-4 w-12 skeleton rounded"></div></div>
-                                    <div class="h-6 w-3/4 skeleton rounded"></div>
-                                    <div class="h-4 w-1/2 skeleton rounded"></div>
-                                    <div class="flex items-center gap-2 mt-2"><div class="h-8 w-16 skeleton rounded"></div><div class="h-8 flex-1 skeleton rounded"></div></div>
-                                </div>
-                            </div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
+                            <i class="fas fa-clock text-blue-500 text-lg mb-1"></i>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Watch Time</span>
+                            <div class="text-lg font-extrabold text-slate-800" id="stat-watchtime">0h 0m</div>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
+                            <i class="fas fa-calendar-day text-emerald-500 text-lg mb-1"></i>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Today's Focus</span>
+                            <div class="text-lg font-extrabold text-slate-800" id="stat-dailytime">0 Mins</div>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
+                            <i class="fas fa-trophy text-purple-500 text-lg mb-1"></i>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Batches Enrolled</span>
+                            <div class="text-lg font-extrabold text-slate-800" id="stat-enrolled">0</div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mb-10">
-                        <h2 class="text-xl font-bold text-slate-900 mb-4">Upcoming Events (Live)</h2>
-                        <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
-                            
-                            <div class="p-3 flex items-center gap-4 skeleton-row">
-                                <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
-                                <div class="flex-1 space-y-2">
-                                    <div class="h-3 w-20 skeleton rounded"></div>
-                                    <div class="h-4 w-1/2 skeleton rounded"></div>
-                                    <div class="h-3 w-3/4 skeleton rounded"></div>
-                                </div>
-                            </div>
-                            <div class="p-3 flex items-center gap-4 skeleton-row">
-                                <div class="w-14 h-14 rounded-lg skeleton shrink-0"></div>
-                                <div class="flex-1 space-y-2">
-                                    <div class="h-3 w-20 skeleton rounded"></div>
-                                    <div class="h-4 w-1/2 skeleton rounded"></div>
-                                    <div class="h-3 w-3/4 skeleton rounded"></div>
-                                </div>
-                            </div>
-
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight"><i class="fas fa-layer-group text-slate-400 mr-2 text-base"></i> My Classroom</h2>
+                        <a href="explore.html" class="text-xs font-bold text-blue-600 hover:underline">Explore More</a>
+                    </div>
+                    
+                    <div id="batch-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                         </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <div class="col-span-1 lg:col-span-2">
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight mb-4"><i class="fas fa-calendar-alt text-slate-400 mr-2 text-base"></i> Today's Schedule</h2>
+                        <div id="schedule-container" class="bg-white border border-slate-200 rounded-xl p-3 card-shadow space-y-2">
+                            </div>
                     </div>
 
-                    <div class="mb-10">
-                        <h2 class="text-xl font-bold text-slate-900 mb-4">Explore Platform</h2>
-                        <div class="flex gap-4 overflow-x-auto hide-scroll pb-4">
-                            
-                            <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-yellow-50/50 border-yellow-100">
-                                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-                                    <i class="fas fa-clipboard-check text-yellow-600 text-xl"></i>
+                    <div class="col-span-1">
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight mb-4"><i class="fas fa-bolt text-slate-400 mr-2 text-base"></i> Quick Launch</h2>
+                        <div class="space-y-3">
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:bg-yellow-100 transition">
+                                <div class="w-10 h-10 rounded-full bg-yellow-200 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-clipboard-check text-yellow-700"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900">Real Test Pass</h3>
-                                    <p class="text-xs text-slate-500 mt-1">NTA like Real Tests & Rank Booster Practice.</p>
-                                    <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
+                                    <h3 class="font-bold text-slate-900 text-sm">Attempt Pending Tests</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Evaluate your preparation</p>
                                 </div>
                             </div>
-
-                            <div class="pw-card min-w-[280px] p-4 flex items-start gap-4 cursor-pointer bg-blue-50/50 border-blue-100">
-                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                    <i class="fas fa-book text-blue-600 text-xl"></i>
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:bg-blue-100 transition">
+                                <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-book-open text-blue-700"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900">Modules & Books</h3>
-                                    <p class="text-xs text-slate-500 mt-1">Hardcopy material for UP Board & JEE.</p>
-                                    <div class="mt-3 text-sm font-bold text-blue-600">Explore <i class="fas fa-arrow-right text-xs"></i></div>
+                                    <h3 class="font-bold text-slate-900 text-sm">Revision Notes</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Access saved DPPs & PDFs</p>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </main>
-
-        <nav class="mobile-bottom-nav">
-            <div class="bottom-nav-item active"><i class="fas fa-layer-group text-xl mb-1"></i> Dashboard</div>
-            <div class="bottom-nav-item" onclick="window.location.href='study.html'"><i class="fas fa-book-open text-xl mb-1"></i> Study</div>
-            <div class="bottom-nav-item"><i class="fas fa-clipboard-list text-xl mb-1"></i> Test</div>
-            <div class="bottom-nav-item relative">
-                <span class="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-[8px] font-bold px-1 rounded">NEW</span>
-                <i class="fas fa-robot text-xl mb-1"></i> Pi
-            </div>
-            <div class="bottom-nav-item" onclick="window.location.href='explore.html'"><i class="fas fa-compass text-xl mb-1"></i> Explore</div>
-        </nav>
-
     </div>
+    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-[55px] z-[40]">
+        <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-compass text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Explore</span>
+        </a>
+        <a href="dashboard.html" class="flex flex-col items-center justify-center w-full h-full text-blue-600">
+            <i class="fas fa-home text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Dashboard</span>
+        </a>
+        <a href="study.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-book-open text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Study</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-robot text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">AI Guru</span>
+        </a>
+    </nav>
+
     <script type="module">
         import { db, auth } from './js/firebase-init.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const appContainer = document.getElementById('app-container');
+        // Global Elements
         const globalLoader = document.getElementById('global-loader');
         const batchGrid = document.getElementById('batch-grid');
         const scheduleContainer = document.getElementById('schedule-container');
 
-        function sanitizeHTML(str) {
-            if (!str) return '';
-            const temp = document.createElement('div');
-            temp.textContent = str;
-            return temp.innerHTML;
-        }
-
-        window.toggleSidebar = function() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('mobile-overlay').classList.toggle('hidden');
-        }
-
-        window.toggleNotifications = function() {
-            document.getElementById('notif-drawer').classList.toggle('open');
-            document.getElementById('notif-overlay').classList.toggle('active');
-        }
-
-        window.toggleProfileDropdown = function(e) {
-            e.stopPropagation();
-            document.getElementById('profile-dropdown').classList.toggle('active');
-        }
+        // 60fps Mobile Nav Scroll Logic
+        const scroller = document.getElementById('main-scroll-area');
+        const bottomNav = document.getElementById('mobile-bottom-nav');
+        let lastScroll = 0;
         
-        document.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('profile-dropdown');
-            const profileBtn = document.getElementById('profile-container');
-            if (!profileBtn.contains(e.target)) {
-                dropdown.classList.remove('active');
+        scroller.addEventListener('scroll', () => {
+            const currentScroll = scroller.scrollTop;
+            if (currentScroll > lastScroll && currentScroll > 50) {
+                bottomNav.style.transform = 'translateY(100%)';
+            } else {
+                bottomNav.style.transform = 'translateY(0)';
             }
+            lastScroll = currentScroll;
+        }, { passive: true });
+
+        // Dropdown UI Setup
+        window.toggleCustomDrop = (id, e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.vp-dropdown').forEach(d => {
+                if (d.id !== id) d.classList.add('hidden');
+            });
+            document.getElementById(id).classList.toggle('hidden');
+        };
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.vp-dropdown').forEach(d => d.classList.add('hidden'));
         });
 
+        // Formatter Helper
+        const formatTime = (seconds) => {
+            if(!seconds || seconds <= 0) return '0 Mins';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            if(h > 0) return `${h}h ${m}m`;
+            return `${m} Mins`;
+        };
+
+        // Auth & Identity Vault Sequence
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const displayName = sanitizeHTML(user.displayName || user.email.split('@')[0]);
-                const initial = displayName.charAt(0).toUpperCase();
-                
-                document.getElementById('profile-skeleton').classList.add('hidden');
-                document.getElementById('profile-data').classList.remove('hidden');
-                document.getElementById('user-avatar').innerText = initial;
+                // UI Updates
+                document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
+                document.getElementById('profile-email').innerText = user.email;
+                document.getElementById('welcome-text').innerText = `Welcome, ${user.displayName || user.email.split('@')[0]}!`;
 
+                // Fetch User Stats Data (New Feature)
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if(userDoc.exists()) {
+                        const data = userDoc.data();
+                        document.getElementById('stat-streak').innerText = data.streak ? `${data.streak} Days` : '0 Days';
+                        document.getElementById('stat-watchtime').innerText = formatTime(data.totalWatchTimeSeconds);
+                        document.getElementById('stat-dailytime').innerText = formatTime(data.dailyWatchTimeSeconds);
+                    }
+                } catch(e) { console.warn("Could not fetch user stats.", e); }
+
+                // Fade out loader
                 globalLoader.style.opacity = '0';
-                setTimeout(() => {
-                    globalLoader.style.display = 'none';
-                    appContainer.style.opacity = '1';
-                }, 400);
+                setTimeout(() => globalLoader.style.display = 'none', 500);
 
-                await fetchBatches(user.uid);
+                await fetchEnrolledBatches(user.uid);
                 renderDummySchedule(); 
             } else {
                 window.location.replace("login.html");
             }
         });
 
-        async function fetchBatches(uid) {
+        // Secure Batch Fetching
+        const fetchEnrolledBatches = async (uid) => {
+            renderSkeletons();
             try {
+                // Main source: enrollments subcollection
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
+                
+                let enrolledIds = [];
+                enrollmentsSnap.forEach(doc => enrolledIds.push(doc.id));
 
-                const skeletons = document.querySelectorAll('.skeleton-card');
-                skeletons.forEach(el => el.remove());
+                // Fallback check: array in user doc (just in case)
+                if (enrolledIds.length === 0) {
+                    const userDoc = await getDoc(doc(db, "users", uid));
+                    if (userDoc.exists() && userDoc.data().enrolledBatches) {
+                        enrolledIds = userDoc.data().enrolledBatches;
+                    }
+                }
 
-                if (!enrollmentsSnap.empty) {
-                    enrollmentsSnap.forEach(async (docSnap) => {
-                        const batchId = docSnap.id; 
+                batchGrid.innerHTML = '';
+                document.getElementById('stat-enrolled').innerText = enrolledIds.length;
+
+                if (enrolledIds.length > 0) {
+                    for (const batchId of enrolledIds) {
                         const batchRef = doc(db, "batches", batchId);
                         const batchSnap = await getDoc(batchRef);
                         
                         if (batchSnap.exists()) {
                             renderBatchCard(batchId, batchSnap.data());
                         }
-                    });
+                    }
                 } else {
                     renderEmptyState();
                 }
-            } catch (error) {
-                console.error("Secure DB Fetch Error:", error);
-                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">Error retrieving data securely. Check connection.</div>`;
-            }
-        }
 
-        function renderBatchCard(id, data) {
-            const title = sanitizeHTML(data.title || "Untitled Batch");
-            const imgUrl = sanitizeHTML(data.imageUrl || "https://via.placeholder.com/600x340/e2e8f0/64748b?text=Batch+Cover");
-            const target = sanitizeHTML(data.subject || "Class 12th + JEE");
-            const price = data.price ? `₹${data.price}` : 'Enrolled';
+            } catch (error) {
+                console.error("Database connection fault:", error);
+                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-bold">System Error: Failed to retrieve secure enrollments.</div>`;
+            }
+        };
+
+        const renderSkeletons = () => {
+            batchGrid.innerHTML = Array(3).fill(`
+                <div class="bg-white border border-slate-200 rounded-xl p-3">
+                    <div class="skeleton-box h-36 w-full rounded mb-3"></div>
+                    <div class="skeleton-box h-5 w-3/4 rounded mb-2"></div>
+                    <div class="skeleton-box h-4 w-1/2 rounded mb-6"></div>
+                    <div class="skeleton-box h-10 w-full rounded"></div>
+                </div>
+            `).join('');
+        };
+
+        const renderBatchCard = (id, batch) => {
+            const title = batch.title || "Untitled Batch";
+            const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
+            const imgHTML = imgUrl 
+                ? `<img src="${imgUrl}" class="w-full h-full object-cover rounded-t-lg">` 
+                : `<div class="w-full h-full flex flex-col items-center justify-center text-indigo-300 rounded-t-lg bg-indigo-900"><i class="fas fa-graduation-cap text-3xl mb-1"></i><span class="text-xs font-bold uppercase tracking-widest text-indigo-200">VidyaPlus</span></div>`;
+            
+            const rawClass = batch.classLevel || batch["class"] || batch["Class"] || batch.classTarget || 'Class';
 
             const cardHTML = `
-                <div class="pw-card">
-                    <div class="relative h-44 bg-slate-100 overflow-hidden">
-                        <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-slate-800 shadow-sm border border-slate-200 z-10 flex items-center gap-1">
-                            <i class="fas fa-star text-yellow-500"></i> Multiple Plans
-                        </div>
-                        <img src="${imgUrl}" alt="Cover" class="w-full h-full object-cover">
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden card-shadow hover:shadow-lg transition-all cursor-pointer flex flex-col relative" onclick="window.location.href='study.html?batch=${id}'">
+                    
+                    <div class="h-36 bg-indigo-50 relative border-b border-slate-100 p-1 shrink-0">
+                        <div class="absolute top-2 left-2 bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] font-extrabold tracking-wider uppercase z-10 shadow-sm"><i class="fas fa-check-circle mr-1"></i> Enrolled</div>
+                        ${imgHTML}
                     </div>
-                    <div class="p-4 flex flex-col flex-1">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold text-orange-600">${target}</span>
-                            <span class="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">Hindi/Eng</span>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2 line-clamp-2">${title}</h3>
-                        
-                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-4">
-                            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Ongoing</div>
-                            <span class="text-slate-300">|</span>
-                            <span>Syllabus: Physics, Chem, Math</span>
+                    
+                    <div class="p-4 flex-1 flex flex-col">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-[#d84a1b] text-[11px] font-extrabold uppercase tracking-tight">${rawClass} • ${batch.stream || 'Gen'}</span>
+                            <span class="border border-slate-200 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Hinglish</span>
                         </div>
                         
-                        <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-                            <div class="text-lg font-black text-slate-900">${price}</div>
-                            <button class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-6 rounded-lg text-sm transition" onclick="window.location.href='study.html?batch=${id}'">
-                                Access Material <i class="fas fa-chevron-right text-xs ml-1"></i>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-tight mb-2">${title}</h3>
+                        
+                        <div class="flex flex-col gap-1 mt-auto">
+                            <div class="flex items-center text-xs text-slate-600 font-semibold"><i class="fas fa-book mr-1.5 text-slate-400"></i> ${batch.stream || 'Standard Syllabus'}</div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded shadow-sm transition">
+                                Enter Classroom <i class="fas fa-arrow-right ml-1"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             `;
             batchGrid.insertAdjacentHTML('beforeend', cardHTML);
-        }
+        };
 
-        function renderEmptyState() {
+        const renderEmptyState = () => {
             batchGrid.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-xl">
-                    <i class="fas fa-box-open text-4xl text-slate-300 mb-4"></i>
-                    <h3 class="text-lg font-bold text-slate-900">No Batches Yet</h3>
-                    <p class="text-sm text-slate-500 mt-1">Explore our store to find your target batch.</p>
-                    <button class="mt-4 border border-blue-600 text-blue-600 font-bold px-6 py-2 rounded-lg hover:bg-blue-50 transition" onclick="window.location.href='explore.html'">View All Batches</button>
+                <div class="col-span-full flex flex-col items-center justify-center py-16 px-4 bg-white border border-slate-200 rounded-xl border-dashed">
+                    <i class="fas fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                    <h3 class="text-base font-bold text-slate-800">No Authorized Enrollments</h3>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Explore our catalog to find your target batch.</p>
+                    <button class="mt-4 bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded shadow-sm hover:bg-slate-800 transition" onclick="window.location.href='explore.html'">Explore Batches</button>
                 </div>
             `;
-        }
+        };
 
-        function renderDummySchedule() {
-            const skeletens = document.querySelectorAll('.skeleton-row');
-            skeletens.forEach(el => el.remove());
-
+        const renderDummySchedule = () => {
             const scheduleData = [
-                { time: "08:15 AM", type: "Lecture • Physics", title: "Electrostatics 04: Electric Field & Flux", teacher: "S", bg: "bg-green-100" },
-                { time: "11:00 AM", type: "Lecture • Chemistry", title: "Organic Chemistry: SN1 & SN2 Reactions", teacher: "P", bg: "bg-blue-100" }
+                { time: "08:15 AM", type: "Lecture • Physics", title: "Electrostatics 04: Electric Field & Flux", icon: "fa-atom", bg: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+                { time: "11:00 AM", type: "Lecture • Chemistry", title: "Organic Chemistry: SN1 & SN2 Reactions", icon: "fa-flask", bg: "bg-blue-50 text-blue-600 border-blue-100" }
             ];
 
             let html = '';
             scheduleData.forEach(item => {
                 html += `
-                    <div class="p-3 flex items-start gap-4 hover:bg-slate-50 rounded-lg cursor-pointer transition border border-transparent hover:border-slate-100">
-                        <div class="w-14 h-14 rounded-lg ${item.bg} flex items-center justify-center text-xl font-bold text-slate-700 shrink-0 border border-slate-200/50">
-                            ${item.teacher}
+                    <div class="p-2.5 flex items-center gap-3 hover:bg-slate-50 rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200">
+                        <div class="w-10 h-10 rounded-md ${item.bg} border flex items-center justify-center text-lg shrink-0">
+                            <i class="fas ${item.icon}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-slate-500 mb-0.5">${sanitizeHTML(item.time)}</p>
-                            <h4 class="text-sm font-bold text-slate-900 truncate">${sanitizeHTML(item.type)}</h4>
-                            <p class="text-xs text-slate-500 truncate mt-0.5">${sanitizeHTML(item.title)}</p>
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-extrabold text-slate-900 uppercase tracking-tight">${item.type}</h4>
+                                <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">${item.time}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 truncate mt-0.5 font-medium">${item.title}</p>
                         </div>
-                        <i class="fas fa-chevron-right text-slate-300 mt-2"></i>
                     </div>
                 `;
             });
             
-            html += `<button class="w-full text-center text-sm font-bold text-blue-600 border border-blue-200 rounded-lg py-2.5 mt-2 hover:bg-blue-50 transition">View Weekly Schedule</button>`;
-            scheduleContainer.insertAdjacentHTML('beforeend', html);
-        }
+            html += `<button class="w-full text-center text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded py-2 mt-2 hover:bg-slate-100 hover:text-slate-900 transition">View Full Schedule</button>`;
+            scheduleContainer.innerHTML = html;
+        };
 
-        window.logoutSystem = function() {
-            if(confirm("Securely log out of the platform?")) {
-                signOut(auth).then(() => {
-                    window.location.replace("index.html");
-                }).catch((error) => console.error("Sign Out Error:", error));
+        window.toggleSidebar = () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobile-sidebar-overlay').classList.toggle('hidden');
+        };
+
+        window.logoutUser = () => {
+            if(confirm("Strictly terminate this session?")) {
+                signOut(auth).then(() => window.location.replace("index.html"));
             }
         };
     </script>
