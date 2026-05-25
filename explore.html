@@ -22,7 +22,7 @@
         }
 
         /* Amazon Style Filter Layout */
-        .amz-filter-grid { display: grid; grid-template-columns: 110px 1fr; height: 350px; }
+        .amz-filter-grid { display: grid; grid-template-columns: 110px 1fr; min-height: 0; }
         .amz-tab { padding: 12px; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 700; font-size: 0.85rem; }
         .amz-tab.active { background: #ffffff; border-left-color: #2563eb; color: #2563eb; }
         
@@ -46,14 +46,14 @@
             <h1 class="text-2xl font-extrabold tracking-tight">Vidya<span class="text-blue-500">Plus</span></h1>
             <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
         </div>
-        <div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1.5">
-            <a href="explore.html" class="flex items-center gap-3 px-3 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-md"><i class="fas fa-compass w-4"></i> Explore</a>
-            <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-300 text-sm font-semibold hover:bg-slate-800 hover:text-white rounded-md transition"><i class="fas fa-home w-4"></i> Dashboard</a>
-            <a href="study.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-300 text-sm font-semibold hover:bg-slate-800 hover:text-white rounded-md transition"><i class="fas fa-book-open w-4"></i> Study</a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-300 text-sm font-semibold hover:bg-slate-800 hover:text-white rounded-md transition"><i class="fas fa-robot w-4"></i> AI Guru</a>
+        <div class="flex-1 overflow-y-auto py-3 px-3 flex flex-col gap-1">
+            <a href="explore.html" class="flex items-center gap-2.5 px-3 py-2 bg-blue-600 text-white text-[13px] font-bold rounded"><i class="fas fa-compass w-4 text-center"></i> Explore</a>
+            <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 text-slate-300 text-[13px] font-semibold hover:bg-slate-800 hover:text-white rounded transition"><i class="fas fa-home w-4 text-center"></i> Dashboard</a>
+            <a href="study.html" class="flex items-center gap-2.5 px-3 py-2 text-slate-300 text-[13px] font-semibold hover:bg-slate-800 hover:text-white rounded transition"><i class="fas fa-book-open w-4 text-center"></i> Study</a>
+            <a href="#" class="flex items-center gap-2.5 px-3 py-2 text-slate-300 text-[13px] font-semibold hover:bg-slate-800 hover:text-white rounded transition"><i class="fas fa-robot w-4 text-center"></i> AI Guru</a>
         </div>
         <div class="p-3 border-t border-slate-800 shrink-0">
-            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-3 py-2 bg-slate-800 text-red-400 text-sm font-bold rounded-md hover:bg-red-500 hover:text-white transition">
+            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-3 py-1.5 bg-slate-800 text-red-400 text-[13px] font-bold rounded hover:bg-red-500 hover:text-white transition">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
@@ -163,7 +163,7 @@
     </nav>
 
     <div id="advanced-filter-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[100] hidden flex justify-center items-end sm:items-center">
-        <div class="bg-white w-full sm:w-[500px] sm:rounded-xl rounded-t-xl overflow-hidden flex flex-col h-[80vh] sm:h-[500px]">
+        <div class="bg-white w-full sm:w-[500px] sm:rounded-xl rounded-t-xl overflow-hidden flex flex-col h-[85vh] max-h-[500px]">
             <div class="px-5 py-4 solid-border border-b flex justify-between items-center bg-white shrink-0">
                 <h3 class="font-extrabold text-lg text-slate-900">Advanced Filters</h3>
                 <button onclick="closeAdvancedFilter()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times text-xl"></i></button>
@@ -275,8 +275,7 @@
             grid.innerHTML = '';
 
             const filtered = allBatches.filter(b => {
-                // 🚨 FIX: Strict logic to map class appropriately to fix issue 6
-                const rawClass = b.class || b.classTarget || '';
+                const rawClass = b["class"] || b["Class"] || b.classTarget || '';
                 const bClass = rawClass.toLowerCase().trim();
                 const fClass = activeFilters.class.toLowerCase().trim();
                 const matchClass = fClass === 'all' || bClass.includes(fClass) || fClass.includes(bClass);
@@ -300,7 +299,6 @@
                     const finalPrice = batch.price > 0 ? `₹${batch.price}` : 'Free';
                     const startDate = batch.startDate || "11th May'26";
 
-                    // 🚨 FIX: Included batch.class to resolve issue where class string wasn't loading
                     grid.innerHTML += `
                         <div class="bg-white border border-slate-200 rounded-xl overflow-hidden card-shadow hover:shadow-lg transition-all cursor-pointer flex flex-col relative" onclick="window.location.hash = 'batch_${batch.id}'">
                             <div class="h-36 bg-indigo-50 relative border-b border-slate-100 p-1">
@@ -309,7 +307,7 @@
                             
                             <div class="p-4 flex-1 flex flex-col">
                                 <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-[#d84a1b] text-[11px] font-extrabold uppercase tracking-tight">${batch.class || batch.classTarget || 'Class'} • ${batch.stream || 'Gen'}</span>
+                                    <span class="text-[#d84a1b] text-[11px] font-extrabold uppercase tracking-tight">${batch["class"] || batch["Class"] || batch.classTarget || 'Class'} • ${batch.stream || 'Gen'}</span>
                                     <span class="border border-slate-200 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Hinglish</span>
                                 </div>
                                 
@@ -356,7 +354,7 @@
                         <div class="bg-white border border-slate-200 sm:rounded-xl rounded-lg p-5 sm:p-8 card-shadow mb-5">
                             <div class="flex flex-wrap gap-2 mb-3">
                                 <span class="bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-blue-200">${batch.stream || 'General'}</span>
-                                <span class="bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-200">${batch.class || batch.classTarget || 'Standard'}</span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-200">${batch["class"] || batch["Class"] || batch.classTarget || 'Standard'}</span>
                             </div>
                             <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-2 leading-tight">${batch.title}</h1>
                             
