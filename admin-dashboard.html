@@ -413,25 +413,26 @@
             </div>
         </div>
     </div>
-    <script type="module">
-        import { auth } from './js/firebase-init.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const idTokenResult = await user.getIdTokenResult();
-        // Agar token me admin claim nahi hai, toh student portal par redirect karein
-        if (!idTokenResult.claims.admin) {
-            window.location.replace("dashboard.html");
-        }
-    } else {
-        window.location.replace("index.html");
-    }
-});
-        
+        <script type="module">
+        // 🚨 FIX: Sabhi imports ko ek jagah consolidate kar diya gaya hai taaki duplicate declaration error na aaye.
         import { db, auth } from './js/firebase-init.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { collection, getDocs, addDoc, query, where, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // =======================
+        // AUTHENTICATION & SECURITY CHECK
+        // =======================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const idTokenResult = await user.getIdTokenResult();
+                // Custom Claims check
+                if (!idTokenResult.claims.admin) {
+                    window.location.replace("dashboard.html");
+                }
+            } else {
+                window.location.replace("index.html");
+            }
+        });
 
         window.adminLogout = function() {
             if(confirm("Are you sure you want to log out?")) {
@@ -666,6 +667,7 @@ onAuthStateChanged(auth, async (user) => {
             }
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem; color: var(--primary);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Fetching Database...</td></tr>`;
             try {
+                // NOTE: User enrollments ab sub-collections mein hain. Yeh array-contains query abhi 0 results hi degi.
                 const q = query(collection(db, "users"), where("enrolledBatches", "array-contains", batchId));
                 const snap = await getDocs(q);
                 window.loadedStudents = [];
@@ -732,7 +734,8 @@ onAuthStateChanged(auth, async (user) => {
             });
         }
 
+        // Initialize dashboard
         loadBatches();
-    </script>
+                </script>
 </body>
 </html>
