@@ -11,183 +11,166 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow: hidden; }
+        .solid-border { border: 1px solid #e2e8f0; }
+        .solid-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .card-shadow { box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.08); }
         
-        /* Premium Solid Design Architecture - No Transparency */
-        .solid-border { border: 1px solid #cbd5e1; }
-        .solid-shadow { box-shadow: 0 2px 4px 0 rgba(15, 23, 42, 0.04); }
-        .card-shadow { box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06); }
-        
-        /* 60fps Hardware Accelerated Animation Performance Rules */
-        .mobile-nav-anim {
+        /* 60FPS Hardware Accelerated Mobile Nav Anim */
+        #mobile-bottom-nav {
             will-change: transform;
-            transform: translateY(0);
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .mobile-nav-anim.nav-hidden {
-            transform: translateY(100%);
-        }
-        
-        /* Custom UI Dropdown States */
-        .custom-dropdown-content { display: none; }
-        .custom-dropdown-content.show { display: block; }
-        
-        /* Amazon Layout Alignment */
-        .amz-filter-grid { display: grid; grid-template-columns: 130px 1fr; height: 380px; }
-        .amz-tab { padding: 14px 12px; cursor: pointer; border-left: 4px solid transparent; color: #475569; font-weight: 700; font-size: 0.85rem; background: #f1f5f9; }
-        .amz-tab.active { background: #ffffff; border-left-color: #1d4ed8; color: #1d4ed8; }
-        
-        /* Clean Solid Skeleton Pattern */
-        @keyframes pulse-solid { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
-        .skeleton-box { background-color: #e2e8f0; animation: pulse-solid 1.8s ease-in-out infinite; }
 
-        ::-webkit-scrollbar { width: 6px; }
+        /* Amazon Style Filter Layout */
+        .amz-filter-grid { display: grid; grid-template-columns: 110px 1fr; height: 350px; }
+        .amz-tab { padding: 12px; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 700; font-size: 0.85rem; }
+        .amz-tab.active { background: #ffffff; border-left-color: #2563eb; color: #2563eb; }
+        
+        /* Skeleton Animation */
+        @keyframes pulse-solid { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .skeleton-box { background-color: #e2e8f0; animation: pulse-solid 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: 0.5rem; }
+
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .main-content-area { padding-bottom: 60px; }
+        @media (min-width: 768px) { .main-content-area { padding-bottom: 20px; } }
     </style>
 </head>
-<body class="flex h-screen w-full antialiased selection:bg-blue-100">
+<body class="flex h-screen w-full">
 
-    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-40 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
-    
-    <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-64 bg-white solid-border border-r z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col justify-between">
-        <div class="flex flex-col w-full">
-            <div class="h-16 flex items-center px-6 bg-slate-900 text-white">
-                <h1 class="text-xl font-extrabold tracking-tight">Vidya<span class="text-blue-500">Plus</span></h1>
-                <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            <div class="py-4 px-3 flex flex-col gap-1.5">
-                <a href="explore.html" class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-sm"><i class="fas fa-compass w-5"></i> Explore</a>
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-slate-700 font-semibold hover:bg-slate-100 rounded-lg"><i class="fas fa-home w-5"></i> Dashboard</a>
-                <a href="study.html" class="flex items-center gap-3 px-4 py-3 text-slate-700 font-semibold hover:bg-slate-100 rounded-lg"><i class="fas fa-book-open w-5"></i> Study</a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-700 font-semibold hover:bg-slate-100 rounded-lg"><i class="fas fa-robot w-5"></i> AI Guru</a>
-            </div>
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] hidden md:hidden" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-64 bg-slate-900 text-white z-[70] transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 shrink-0">
+            <h1 class="text-2xl font-extrabold tracking-tight">Vidya<span class="text-blue-500">Plus</span></h1>
+            <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
         </div>
-        
-        <div class="p-3 bg-slate-50 border-t border-slate-200">
-            <button onclick="logoutUser()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition">
-                <i class="fas fa-sign-out-alt"></i> Secure Logout
+        <div class="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-2">
+            <a href="explore.html" class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white font-bold rounded-lg"><i class="fas fa-compass w-5"></i> Explore</a>
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-slate-300 font-semibold hover:bg-slate-800 hover:text-white rounded-lg transition"><i class="fas fa-home w-5"></i> Dashboard</a>
+            <a href="study.html" class="flex items-center gap-3 px-4 py-3 text-slate-300 font-semibold hover:bg-slate-800 hover:text-white rounded-lg transition"><i class="fas fa-book-open w-5"></i> Study</a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-300 font-semibold hover:bg-slate-800 hover:text-white rounded-lg transition"><i class="fas fa-robot w-5"></i> AI Guru</a>
+        </div>
+        <div class="p-4 border-t border-slate-800 shrink-0">
+            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-slate-800 text-red-400 font-bold rounded-lg hover:bg-red-500 hover:text-white transition">
+                <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
     </aside>
 
     <div class="flex-1 flex flex-col h-full relative w-full min-w-0">
         
-        <header class="h-16 bg-white solid-border border-b flex items-center justify-between px-4 lg:px-8 z-30 shrink-0">
+        <header class="h-16 bg-white solid-border border-b flex items-center justify-between px-4 lg:px-8 z-[50] shrink-0">
             <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-800 focus:outline-none" onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
-                <h2 class="text-base font-extrabold text-slate-900 tracking-tight uppercase" id="header-title">Explore Batches</h2>
+                <button class="md:hidden text-slate-700" onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+                <h2 class="text-lg font-extrabold text-slate-800 tracking-tight" id="header-title">Explore Batches</h2>
             </div>
             
             <div class="relative">
-                <div id="profile-btn" class="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center cursor-pointer hover:bg-slate-800 transition" onclick="toggleProfileMenu(event)">
-                    <span id="profile-initial" class="font-bold text-white text-sm">U</span>
+                <div id="profile-btn" class="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center cursor-pointer border border-slate-300 hover:bg-slate-200 transition" onclick="window.toggleCustomDrop('profile-menu', event)">
+                    <span id="profile-initial" class="font-bold text-slate-700 text-sm">U</span>
                 </div>
-                <div id="profile-menu" class="hidden absolute right-0 mt-2 w-56 bg-white border border-slate-300 rounded-lg py-1.5 shadow-xl z-50">
+                <div id="profile-menu" class="vp-dropdown hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 shadow-lg rounded-lg py-1 z-[60]">
                     <div class="px-4 py-2 border-b border-slate-100 mb-1">
-                        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Identity Vault</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Signed in as</p>
                         <p id="profile-email" class="text-xs font-bold text-slate-800 truncate">loading...</p>
                     </div>
-                    <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 font-semibold hover:bg-slate-50"><i class="fas fa-user-circle text-slate-400"></i> View Profile</a>
-                    <div class="border-t border-slate-100 my-1"></div>
-                    <a href="#" onclick="logoutUser()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50"><i class="fas fa-sign-out-alt"></i> Terminate Session</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 font-semibold hover:bg-slate-50"><i class="fas fa-user-circle mr-2 text-slate-400"></i> View Profile</a>
+                    <a href="#" onclick="logoutUser()" class="block px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                 </div>
             </div>
         </header>
 
-        <div id="filter-bar-container" class="bg-white solid-border border-b px-4 py-2.5 shrink-0 flex items-center gap-2 overflow-x-auto">
+        <div id="filter-bar-container" class="bg-white border-b border-slate-200 px-3 py-2 shrink-0 flex items-center gap-2 overflow-x-auto z-[45]">
             
-            <div class="relative shrink-0 text-left">
-                <button onclick="toggleCustomDropdown(event, 'dropdown-class')" id="btn-filter-class" class="bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold rounded-md px-3 py-2 flex items-center gap-2 hover:bg-slate-200 transition">
-                    <span>All Classes</span> <i class="fas fa-chevron-down text-[10px] text-slate-500"></i>
+            <div class="relative shrink-0">
+                <button onclick="window.toggleCustomDrop('drop-class', event)" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-slate-100">
+                    <span id="btn-txt-class">All Classes</span> <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
                 </button>
-                <div id="dropdown-class" class="custom-dropdown-content absolute left-0 mt-1.5 w-44 bg-white border border-slate-300 rounded-md py-1 shadow-lg z-40">
-                    <div class="px-3 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase border-b border-slate-100">Select Grade</div>
-                    <button onclick="selectQuickFilter('class', 'all', 'All Classes')" class="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100">All Classes</button>
-                    <button onclick="selectQuickFilter('class', '9th', 'Class 9th')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Class 9th</button>
-                    <button onclick="selectQuickFilter('class', '10th', 'Class 10th')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Class 10th</button>
-                    <button onclick="selectQuickFilter('class', '11th', 'Class 11th')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Class 11th</button>
-                    <button onclick="selectQuickFilter('class', '12th', 'Class 12th')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Class 12th</button>
-                    <button onclick="selectQuickFilter('class', 'Dropper', 'Dropper')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Dropper</button>
-                    <button onclick="selectQuickFilter('class', 'Gov Exam', 'Gov Exam')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Gov Exam</button>
+                <div id="drop-class" class="vp-dropdown hidden absolute left-0 mt-1 w-32 bg-white border border-slate-200 shadow-xl rounded py-1 z-[60]">
+                    <div onclick="applyQuickFilter('class', 'all', 'All Classes')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">All Classes</div>
+                    <div onclick="applyQuickFilter('class', '9th', 'Class 9th')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Class 9th</div>
+                    <div onclick="applyQuickFilter('class', '10th', 'Class 10th')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Class 10th</div>
+                    <div onclick="applyQuickFilter('class', '11th', 'Class 11th')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Class 11th</div>
+                    <div onclick="applyQuickFilter('class', '12th', 'Class 12th')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Class 12th</div>
+                    <div onclick="applyQuickFilter('class', 'Dropper', 'Dropper')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Dropper</div>
+                    <div onclick="applyQuickFilter('class', 'Gov Exam', 'Gov Exam')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Gov Exam</div>
                 </div>
             </div>
 
-            <div class="relative shrink-0 text-left">
-                <button onclick="toggleCustomDropdown(event, 'dropdown-stream')" id="btn-filter-stream" class="bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold rounded-md px-3 py-2 flex items-center gap-2 hover:bg-slate-200 transition">
-                    <span>All Streams</span> <i class="fas fa-chevron-down text-[10px] text-slate-500"></i>
+            <div class="relative shrink-0">
+                <button onclick="window.toggleCustomDrop('drop-stream', event)" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-slate-100">
+                    <span id="btn-txt-stream">All Streams</span> <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
                 </button>
-                <div id="dropdown-stream" class="custom-dropdown-content absolute left-0 mt-1.5 w-44 bg-white border border-slate-300 rounded-md py-1 shadow-lg z-40">
-                    <div class="px-3 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase border-b border-slate-100">Select Stream</div>
-                    <button onclick="selectQuickFilter('stream', 'all', 'All Streams')" class="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100">All Streams</button>
-                    <button onclick="selectQuickFilter('stream', 'JEE', 'JEE')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">JEE</button>
-                    <button onclick="selectQuickFilter('stream', 'NEET', 'NEET')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">NEET</button>
-                    <button onclick="selectQuickFilter('stream', 'CUET', 'CUET')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">CUET</button>
-                    <button onclick="selectQuickFilter('stream', 'NDA', 'NDA')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">NDA</button>
-                    <button onclick="selectQuickFilter('stream', 'WBJEE', 'WBJEE')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">WBJEE</button>
+                <div id="drop-stream" class="vp-dropdown hidden absolute left-0 mt-1 w-32 bg-white border border-slate-200 shadow-xl rounded py-1 z-[60]">
+                    <div onclick="applyQuickFilter('stream', 'all', 'All Streams')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">All Streams</div>
+                    <div onclick="applyQuickFilter('stream', 'JEE', 'JEE')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">JEE</div>
+                    <div onclick="applyQuickFilter('stream', 'NEET', 'NEET')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">NEET</div>
+                    <div onclick="applyQuickFilter('stream', 'CUET', 'CUET')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">CUET</div>
+                    <div onclick="applyQuickFilter('stream', 'NDA', 'NDA')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">NDA</div>
+                    <div onclick="applyQuickFilter('stream', 'WBJEE', 'WBJEE')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">WBJEE</div>
                 </div>
             </div>
 
-            <div class="relative shrink-0 text-left">
-                <button onclick="toggleCustomDropdown(event, 'dropdown-category')" id="btn-filter-category" class="bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold rounded-md px-3 py-2 flex items-center gap-2 hover:bg-slate-200 transition">
-                    <span>All Categories</span> <i class="fas fa-chevron-down text-[10px] text-slate-500"></i>
+            <div class="relative shrink-0">
+                <button onclick="window.toggleCustomDrop('drop-category', event)" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-slate-100">
+                    <span id="btn-txt-category">Category</span> <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
                 </button>
-                <div id="dropdown-category" class="custom-dropdown-content absolute left-0 mt-1.5 w-44 bg-white border border-slate-300 rounded-md py-1 shadow-lg z-40">
-                    <div class="px-3 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase border-b border-slate-100">Select Group</div>
-                    <button onclick="selectQuickFilter('category', 'all', 'All Categories')" class="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100">All Categories</button>
-                    <button onclick="selectQuickFilter('category', 'Batches', 'Batches')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Batches</button>
-                    <button onclick="selectQuickFilter('category', 'Tests', 'Test Series')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Test Series</button>
-                    <button onclick="selectQuickFilter('category', 'Other', 'Other')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">Other</button>
+                <div id="drop-category" class="vp-dropdown hidden absolute left-0 mt-1 w-32 bg-white border border-slate-200 shadow-xl rounded py-1 z-[60]">
+                    <div onclick="applyQuickFilter('category', 'all', 'All Categories')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">All</div>
+                    <div onclick="applyQuickFilter('category', 'Batches', 'Batches')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Batches</div>
+                    <div onclick="applyQuickFilter('category', 'Tests', 'Tests')" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer">Test Series</div>
                 </div>
             </div>
 
-            <button onclick="openAdvancedFilter()" class="ml-auto bg-blue-700 text-white px-3 py-2 rounded-md text-xs font-bold shrink-0 flex items-center gap-1.5 hover:bg-blue-800 transition shadow-sm">
-                <i class="fas fa-sliders-h"></i> Filter Matrix
+            <button onclick="openAdvancedFilter()" class="ml-auto bg-slate-800 text-white px-3 py-1.5 rounded text-xs font-bold shrink-0 flex items-center gap-1.5 hover:bg-slate-900 shadow-sm">
+                <i class="fas fa-sliders-h"></i> <span class="hidden sm:inline">Advanced</span>
             </button>
         </div>
 
-        <main class="flex-1 overflow-y-auto bg-slate-100" id="main-scroll-area">
+        <main class="flex-1 overflow-y-auto bg-slate-50 main-content-area" id="main-scroll-area">
             
-            <div id="view-list" class="p-4 lg:p-6 max-w-7xl mx-auto">
-                <div id="batches-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div id="view-list" class="p-3 lg:p-6 max-w-7xl mx-auto">
+                <div id="batches-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                     </div>
-                <div id="no-results" class="hidden text-center py-24 bg-white rounded-xl border border-slate-200">
-                    <i class="fas fa-folder-open text-4xl text-slate-300 mb-3"></i>
-                    <h3 class="text-base font-bold text-slate-800">No records pass verification checks</h3>
-                    <p class="text-xs text-slate-500 font-medium mt-1">Adjust structural parameters or criteria filters.</p>
+                <div id="no-results" class="hidden text-center py-20">
+                    <i class="fas fa-search text-3xl text-slate-300 mb-3"></i>
+                    <h3 class="text-lg font-bold text-slate-800">No batches found</h3>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Try adjusting your filters.</p>
                 </div>
             </div>
 
-            <div id="view-detail" class="hidden bg-slate-50 min-h-full">
+            <div id="view-detail" class="hidden bg-white min-h-full">
                 </div>
 
         </main>
     </div>
 
-    <nav id="mobile-bottom-navbar" class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-300 flex justify-around items-center h-[52px] z-40 px-2 mobile-nav-anim shadow-lg">
-        <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-blue-700">
-            <i class="fas fa-compass text-base mb-0.5"></i><span class="text-[9px] font-extrabold tracking-tight">Explore</span>
+    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-[55px] z-[40]">
+        <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-blue-600">
+            <i class="fas fa-compass text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Explore</span>
         </a>
-        <a href="dashboard.html" class="flex flex-col items-center justify-center w-full h-full text-slate-500 hover:text-slate-800">
-            <i class="fas fa-home text-base mb-0.5"></i><span class="text-[9px] font-bold tracking-tight">Dashboard</span>
+        <a href="dashboard.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-home text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Dashboard</span>
         </a>
-        <a href="study.html" class="flex flex-col items-center justify-center w-full h-full text-slate-500 hover:text-slate-800">
-            <i class="fas fa-book-open text-base mb-0.5"></i><span class="text-[9px] font-bold tracking-tight">Study</span>
+        <a href="study.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-book-open text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Study</span>
         </a>
-        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-500 hover:text-slate-800">
-            <i class="fas fa-robot text-base mb-0.5"></i><span class="text-[9px] font-bold tracking-tight">AI Guru</span>
+        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-robot text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">AI Guru</span>
         </a>
     </nav>
 
-    <div id="advanced-filter-modal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-[100] hidden flex justify-center items-end sm:items-center">
-        <div class="bg-white w-full sm:w-[480px] sm:rounded-lg rounded-t-xl overflow-hidden flex flex-col h-[75vh] sm:h-[460px] shadow-2xl border border-slate-300">
-            
-            <div class="px-4 py-3 border-b border-slate-300 flex justify-between items-center bg-slate-50">
-                <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Advanced Evaluation Matrix</h3>
-                <button onclick="closeAdvancedFilter()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times text-lg"></i></button>
+    <div id="advanced-filter-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[100] hidden flex justify-center items-end sm:items-center">
+        <div class="bg-white w-full sm:w-[500px] sm:rounded-xl rounded-t-xl overflow-hidden flex flex-col h-[80vh] sm:h-[500px]">
+            <div class="px-5 py-4 solid-border border-b flex justify-between items-center bg-white shrink-0">
+                <h3 class="font-extrabold text-lg text-slate-900">Advanced Filters</h3>
+                <button onclick="closeAdvancedFilter()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times text-xl"></i></button>
             </div>
             
-            <div class="flex-1 bg-white amz-filter-grid overflow-hidden">
-                <div class="bg-slate-100 border-r border-slate-300 flex flex-col">
+            <div class="flex-1 bg-slate-50 amz-filter-grid overflow-hidden">
+                <div class="bg-slate-100 solid-border border-r flex flex-col overflow-y-auto">
                     <div class="amz-tab active" onclick="switchFilterTab('Class', this)">Class</div>
                     <div class="amz-tab" onclick="switchFilterTab('Stream', this)">Stream</div>
                     <div class="amz-tab" onclick="switchFilterTab('Category', this)">Category</div>
@@ -196,9 +179,9 @@
                     </div>
             </div>
 
-            <div class="px-4 py-3 border-t border-slate-300 bg-slate-50 flex justify-between items-center">
-                <button onclick="resetAdvancedFilters()" class="text-xs font-bold text-slate-500 hover:text-slate-800 uppercase">Reset Fields</button>
-                <button onclick="applyAdvancedFilters()" class="bg-slate-900 text-white px-5 py-2 rounded font-bold text-xs uppercase tracking-wider hover:bg-slate-800 transition">Execute Search</button>
+            <div class="px-5 py-4 solid-border border-t bg-white flex justify-between items-center shrink-0">
+                <button onclick="resetAdvancedFilters()" class="text-sm font-bold text-slate-500 hover:text-slate-800">Clear All</button>
+                <button onclick="applyAdvancedFilters()" class="bg-blue-600 text-white px-6 py-2 rounded font-bold text-sm hover:bg-blue-700">Apply Filters</button>
             </div>
         </div>
     </div>
@@ -210,33 +193,45 @@
         let allBatches = [];
         let enrolledBatchIds = [];
         let activeFilters = { class: 'all', stream: 'all', category: 'all' };
-        let tempFilters = { class: 'all', stream: 'all', category: 'all' };
+        let tempFilters = { class: 'all', stream: 'all', category: 'all' }; 
 
-        // 60fps Scroll Management Logic Engine
-        const scrollArea = document.getElementById('main-scroll-area');
-        const bottomNavbar = document.getElementById('mobile-bottom-navbar');
-        let lastScrollTop = 0;
+        // Point 1: 60fps Mobile Nav Scroll Logic
+        const scroller = document.getElementById('main-scroll-area');
+        const bottomNav = document.getElementById('mobile-bottom-nav');
+        let lastScroll = 0;
+        
+        scroller.addEventListener('scroll', () => {
+            if(window.location.hash.startsWith('#batch_')) return; // Details page pe scroll matter nahi karta
+            
+            const currentScroll = scroller.scrollTop;
+            if (currentScroll > lastScroll && currentScroll > 50) {
+                bottomNav.style.transform = 'translateY(100%)';
+            } else {
+                bottomNav.style.transform = 'translateY(0)';
+            }
+            lastScroll = currentScroll;
+        }, { passive: true });
 
-        if (scrollArea && bottomNavbar) {
-            scrollArea.addEventListener('scroll', () => {
-                let scrollTop = scrollArea.scrollTop;
-                if (scrollTop > lastScrollTop && scrollTop > 40) {
-                    bottomNavbar.classList.add('nav-hidden'); // Niche scroll -> hide
-                } else {
-                    bottomNavbar.classList.remove('nav-hidden'); // Upar scroll -> show
-                }
-                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-            }, { passive: true });
-        }
+        // Setup Dropdowns UI Interactions
+        window.toggleCustomDrop = (id, e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.vp-dropdown').forEach(d => {
+                if (d.id !== id) d.classList.add('hidden');
+            });
+            document.getElementById(id).classList.toggle('hidden');
+        };
 
-        // Initialize Session Security Checked Lifecycle
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.vp-dropdown').forEach(d => d.classList.add('hidden'));
+        });
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
                 document.getElementById('profile-email').innerText = user.email;
                 await fetchUserEnrollments(user.uid);
                 await fetchAllBatches();
-                handleRouting();
+                handleRouting(); 
             } else {
                 window.location.replace("login.html");
             }
@@ -246,7 +241,7 @@
             try {
                 const snap = await getDocs(collection(db, "users", uid, "enrollments"));
                 enrolledBatchIds = snap.docs.map(doc => doc.id);
-            } catch (err) { console.error("Identity Vault confirmation error", err); }
+            } catch (err) { console.error("Enrollment check failed", err); }
         };
 
         const fetchAllBatches = async () => {
@@ -259,19 +254,19 @@
                 });
                 renderBatchesList();
             } catch (error) {
-                console.error("Database connection fault:", error);
-                document.getElementById('batches-grid').innerHTML = `<p class="text-red-600 font-bold col-span-full p-4 text-xs">Security Gateway: Failed to sync catalog array data.</p>`;
+                console.error("Error loading catalog:", error);
+                document.getElementById('batches-grid').innerHTML = `<p class="text-red-500 font-bold col-span-full">Database connection error.</p>`;
             }
         };
 
         const renderSkeletons = () => {
             const grid = document.getElementById('batches-grid');
             grid.innerHTML = Array(6).fill(`
-                <div class="bg-white border border-slate-200 rounded-lg p-4">
-                    <div class="skeleton-box h-36 w-full rounded mb-3"></div>
+                <div class="bg-white border border-slate-200 rounded-lg p-3">
+                    <div class="skeleton-box h-32 w-full rounded mb-3"></div>
                     <div class="skeleton-box h-5 w-3/4 rounded mb-2"></div>
-                    <div class="skeleton-box h-4 w-1/2 rounded mb-3"></div>
-                    <div class="skeleton-box h-9 w-full rounded"></div>
+                    <div class="skeleton-box h-4 w-1/2 rounded mb-6"></div>
+                    <div class="flex justify-between items-end"><div class="skeleton-box h-6 w-1/3 rounded"></div><div class="skeleton-box h-8 w-1/3 rounded"></div></div>
                 </div>
             `).join('');
         };
@@ -282,13 +277,13 @@
             grid.innerHTML = '';
 
             const filtered = allBatches.filter(b => {
-                // Fixed Exact Class String Verification Layer
-                const targetClassStr = b.classTarget ? String(b.classTarget).trim() : '';
-                const activeClassStr = String(activeFilters.class).trim();
-                const matchClass = activeFilters.class === 'all' || targetClassStr === activeClassStr;
+                // Point 3: Robust Class Matching Fix
+                const bClass = b.classTarget ? b.classTarget.toLowerCase().trim() : '';
+                const fClass = activeFilters.class.toLowerCase().trim();
+                const matchClass = fClass === 'all' || bClass.includes(fClass) || fClass.includes(bClass);
                 
                 const matchStream = activeFilters.stream === 'all' || (b.stream && b.stream.includes(activeFilters.stream));
-                const matchCat = activeFilters.category === 'all' || (b.category ? b.category === activeFilters.category : true); 
+                const matchCat = activeFilters.category === 'all' || true; 
                 return matchClass && matchStream && matchCat;
             });
 
@@ -299,29 +294,38 @@
                 filtered.forEach(batch => {
                     const isEnrolled = enrolledBatchIds.includes(batch.id);
                     const btnStatus = isEnrolled 
-                        ? `<div class="w-full text-center bg-emerald-50 text-emerald-700 text-xs font-bold py-2 rounded border border-emerald-200 tracking-wide uppercase"><i class="fas fa-check-circle"></i> Authenticated Access</div>`
-                        : `<div class="w-full text-center bg-blue-600 text-white text-xs font-bold py-2 rounded tracking-wide uppercase group-hover:bg-blue-700 transition"><i class="fas fa-shield-alt mr-1"></i> Review Syllabus</div>`;
+                        ? `<button class="bg-slate-100 text-slate-800 text-xs font-bold px-4 py-2 rounded cursor-default border border-slate-200">Enrolled</button>`
+                        : `<button class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded hover:bg-slate-800"><i class="fas fa-chevron-right"></i> Buy Now</button>`;
 
-                    const priceStr = batch.price > 0 ? `₹${batch.price}` : 'Academic Grant (Free)';
+                    const originalPrice = batch.price > 0 ? `<strike class="text-slate-400 text-xs ml-1 font-medium">₹${parseInt(batch.price)+1500}</strike>` : '';
+                    const finalPrice = batch.price > 0 ? `₹${batch.price}` : 'Free';
+                    const startDate = batch.startDate || "11th May'26";
 
-                    // Modern Sleek Card Layout - Removed truncated description
+                    // Point 7: Ultra Modern PW-style Minimalist Card
                     grid.innerHTML += `
-                        <div class="group bg-white border border-slate-300 rounded-lg overflow-hidden card-shadow hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col h-full" onclick="window.location.hash = 'batch_${batch.id}'">
-                            <div class="h-36 bg-slate-100 relative shrink-0 border-b border-slate-200">
-                                ${batch.thumbnailUrl ? `<img src="${batch.thumbnailUrl}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-300 bg-slate-900"><i class="fas fa-layer-group text-3xl"></i></div>`}
-                                <div class="absolute top-2 left-2 bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-extrabold tracking-wider uppercase">${batch.classTarget || 'Standard'}</div>
+                        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden card-shadow hover:shadow-lg transition-all cursor-pointer flex flex-col relative" onclick="window.location.hash = 'batch_${batch.id}'">
+                            <div class="h-36 bg-indigo-50 relative border-b border-slate-100 p-1">
+                                ${batch.thumbnailUrl ? `<img src="${batch.thumbnailUrl}" class="w-full h-full object-cover rounded-t-lg">` : `<div class="w-full h-full flex flex-col items-center justify-center text-indigo-300 rounded-t-lg bg-indigo-900"><i class="fas fa-graduation-cap text-3xl mb-1"></i><span class="text-xs font-bold uppercase tracking-widest text-indigo-200">VidyaPlus</span></div>`}
                             </div>
-                            <div class="p-4 flex-1 flex flex-col justify-between">
-                                <div class="mb-3">
-                                    <h3 class="text-sm font-extrabold text-slate-900 tracking-tight leading-snug">${batch.title}</h3>
-                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-slate-500 font-bold">
-                                        <span><i class="far fa-calendar-alt text-slate-400 mr-1"></i>Starts: ${batch.startDate || 'Immediate'}</span>
-                                        <span><i class="fas fa-language text-slate-400 mr-1"></i>Hinglish</span>
-                                    </div>
+                            
+                            <div class="p-4 flex-1 flex flex-col">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[#d84a1b] text-[11px] font-extrabold uppercase tracking-tight">${batch.classTarget || 'Class'} • ${batch.stream || 'Gen'}</span>
+                                    <span class="border border-slate-200 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Hinglish</span>
                                 </div>
-                                <div class="pt-3 border-t border-slate-100">
-                                    <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1">Fee Matrix</div>
-                                    <div class="text-base font-extrabold text-blue-700 mb-3">${priceStr}</div>
+                                
+                                <h3 class="text-lg font-extrabold text-slate-900 leading-tight mb-2">${batch.title}</h3>
+                                
+                                <div class="flex flex-col gap-1 mt-auto">
+                                    <div class="flex items-center text-xs text-slate-600 font-semibold"><i class="fas fa-book mr-1.5 text-slate-400"></i> ${batch.stream || 'Standard Syllabus'}</div>
+                                    <div class="flex items-center text-xs text-slate-600 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span> Ongoing <span class="mx-1 text-slate-300">|</span> Started on ${startDate}</div>
+                                </div>
+                                
+                                <div class="flex items-end justify-between mt-5 pt-3 border-t border-slate-100">
+                                    <div class="flex flex-col">
+                                        <div class="flex items-baseline text-lg font-extrabold text-slate-900">${finalPrice} ${originalPrice}</div>
+                                        ${batch.price > 0 ? '<span class="text-[10px] font-bold text-emerald-600">DISCOUNT APPLIED</span>' : ''}
+                                    </div>
                                     ${btnStatus}
                                 </div>
                             </div>
@@ -330,77 +334,78 @@
                 });
             }
         };
-
         const renderDetailedBatch = (batchId) => {
             const batch = allBatches.find(b => b.id === batchId);
             const container = document.getElementById('view-detail');
             
             if (!batch) {
-                container.innerHTML = `<div class="p-8 text-center bg-white"><h2 class="text-sm font-bold text-slate-800 uppercase">System Error: Batch Pointer Corrupted.</h2><button onclick="window.history.back()" class="mt-4 text-blue-700 font-bold underline text-xs uppercase">Return to Catalog</button></div>`;
+                container.innerHTML = `<div class="p-8 text-center mt-10"><h2 class="text-xl font-bold text-slate-800">Batch not found.</h2><button onclick="window.history.back()" class="mt-3 text-blue-600 font-bold underline text-sm">Go Back</button></div>`;
                 return;
             }
 
             const isEnrolled = enrolledBatchIds.includes(batch.id);
 
-            // Detailed Structural Grid Presentation - 100% Mobile Stack Fixed Alignment
+            // Point 2 & 6: Fixed Overlap and mapped all metadata beautifully
             container.innerHTML = `
-                <div class="w-full bg-slate-900 px-4 py-4 border-b border-slate-700 flex items-center gap-3">
-                    <button onclick="window.history.back()" class="bg-slate-800 text-white w-9 h-9 rounded flex items-center justify-center border border-slate-700 hover:bg-slate-700 transition"><i class="fas fa-arrow-left"></i></button>
-                    <div>
-                        <span class="text-[9px] bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded tracking-widest uppercase">${batch.stream || 'ACADEMIC'}</span>
-                        <h1 class="text-sm font-extrabold text-white mt-0.5 tracking-tight">${batch.title}</h1>
+                <div class="w-full flex flex-col bg-slate-50 min-h-screen pb-20">
+                    <div class="h-48 sm:h-64 bg-slate-900 relative w-full shrink-0">
+                        ${batch.thumbnailUrl ? `<img src="${batch.thumbnailUrl}" class="w-full h-full object-cover opacity-50">` : ''}
+                        <button onclick="window.history.back()" class="absolute top-4 left-4 bg-white text-slate-900 w-9 h-9 rounded-full flex items-center justify-center shadow-md hover:bg-slate-100 z-10"><i class="fas fa-arrow-left"></i></button>
                     </div>
-                </div>
-                
-                <div class="max-w-4xl mx-auto p-4 sm:p-6 space-y-4">
                     
-                    <div class="bg-white border border-slate-300 rounded-lg p-4 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                        <div>
-                            <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Fee Authorization</p>
-                            <p class="text-2xl font-extrabold text-slate-900 mt-0.5">${batch.price > 0 ? '₹' + batch.price : 'Free Access'}</p>
-                        </div>
-                        ${isEnrolled 
-                            ? `<button onclick="window.location.href='dashboard.html'" class="w-full sm:w-auto bg-emerald-700 text-white px-5 py-2.5 rounded font-bold text-xs uppercase tracking-wider hover:bg-emerald-800 transition shadow-sm text-center">Enter Classroom Platform <i class="fas fa-arrow-right ml-1"></i></button>`
-                            : `<button id="secure-enroll-btn" onclick="executeSecureEnrollment('${batch.id}', this)" class="w-full sm:w-auto bg-blue-700 text-white px-5 py-2.5 rounded font-bold text-xs uppercase tracking-wider hover:bg-blue-800 transition shadow-sm text-center">Verify & Securely Enroll <i class="fas fa-lock ml-1"></i></button>`
-                        }
-                    </div>
-
-                    <div class="bg-white border border-slate-300 rounded-lg p-4 shadow-sm">
-                        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2 mb-3">System Specifications</h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                            <div class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <span class="block text-[10px] font-bold text-slate-400 uppercase">Target Grade</span>
-                                <span class="font-extrabold text-slate-800 mt-0.5 block">${batch.classTarget || 'General'}</span>
+                    <div class="max-w-4xl mx-auto px-4 sm:px-8 w-full transform sm:-translate-y-12 translate-y-0 -mt-4 sm:mt-0 relative z-20">
+                        
+                        <div class="bg-white border border-slate-200 sm:rounded-xl rounded-lg p-5 sm:p-8 card-shadow mb-5">
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-blue-200">${batch.stream || 'General'}</span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-200">${batch.classTarget || 'Standard'}</span>
                             </div>
-                            <div class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <span class="block text-[10px] font-bold text-slate-400 uppercase">Start Date</span>
-                                <span class="font-extrabold text-slate-800 mt-0.5 block">${batch.startDate || 'Synchronized'}</span>
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <span class="block text-[10px] font-bold text-slate-400 uppercase">Valid Up To</span>
-                                <span class="font-extrabold text-slate-800 mt-0.5 block">${batch.endDate || 'Exam End 2026'}</span>
-                            </div>
-                            <div class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <span class="block text-[10px] font-bold text-slate-400 uppercase">Linguistic Core</span>
-                                <span class="font-extrabold text-slate-800 mt-0.5 block">Hinglish</span>
+                            <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-2 leading-tight">${batch.title}</h1>
+                            
+                            <div class="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">Enrollment Fee</p>
+                                    <p class="text-3xl font-extrabold text-slate-900 mt-1">${batch.price > 0 ? '₹' + batch.price : 'Free'}</p>
+                                </div>
+                                ${isEnrolled 
+                                    ? `<button onclick="window.location.href='dashboard.html'" class="w-full sm:w-auto bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-emerald-700 shadow-sm transition">Enter Classroom <i class="fas fa-arrow-right ml-2"></i></button>`
+                                    : `<button id="secure-enroll-btn" onclick="executeSecureEnrollment('${batch.id}', this)" class="w-full sm:w-auto bg-slate-900 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-slate-800 shadow-sm transition">Secure Enroll Now <i class="fas fa-lock ml-2"></i></button>`
+                                }
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-white border border-slate-300 rounded-lg p-4 shadow-sm">
-                        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2 mb-2">Syllabus Framework</h3>
-                        <p class="text-xs text-slate-700 font-medium leading-relaxed bg-slate-50 p-3 rounded border border-slate-200 whitespace-pre-wrap">${batch.description || 'Syllabus guidelines are managed securely under institutional protocols.'}</p>
-                    </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                            <div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
+                                <i class="far fa-calendar-check text-blue-500 text-lg mb-1"></i>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase">Starts On</div>
+                                <div class="text-xs font-bold text-slate-800 mt-0.5">${batch.startDate || "Active"}</div>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
+                                <i class="far fa-calendar-times text-red-500 text-lg mb-1"></i>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase">Valid Till</div>
+                                <div class="text-xs font-bold text-slate-800 mt-0.5">${batch.endDate || "Exams"}</div>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
+                                <i class="fas fa-language text-emerald-500 text-lg mb-1"></i>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase">Language</div>
+                                <div class="text-xs font-bold text-slate-800 mt-0.5">Hinglish</div>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
+                                <i class="fas fa-book-open text-purple-500 text-lg mb-1"></i>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase">Subjects</div>
+                                <div class="text-xs font-bold text-slate-800 mt-0.5 truncate px-1">${batch.subject || "Full Course"}</div>
+                            </div>
+                        </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="border border-slate-300 rounded-lg p-3.5 bg-white"><i class="fas fa-video text-blue-600 mb-1.5 text-base"></i><h4 class="font-bold text-xs text-slate-800 uppercase">Lectures Engine</h4><p class="text-[11px] text-slate-500 font-medium mt-0.5">Strictly structured high-definition visual modules.</p></div>
-                        <div class="border border-slate-300 rounded-lg p-3.5 bg-white"><i class="fas fa-file-pdf text-red-600 mb-1.5 text-base"></i><h4 class="font-bold text-xs text-slate-800 uppercase">Document Vault</h4><p class="text-[11px] text-slate-500 font-medium mt-0.5">Cryptographically signed academic logs and DPPs.</p></div>
-                        <div class="border border-slate-300 rounded-lg p-3.5 bg-white"><i class="fas fa-shield-check text-emerald-600 mb-1.5 text-base"></i><h4 class="font-bold text-xs text-slate-800 uppercase">Assessment Core</h4><p class="text-[11px] text-slate-500 font-medium mt-0.5">Telemetry integrated evaluation matrix checks.</p></div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 mb-6">
+                            <h3 class="text-base font-extrabold text-slate-900 mb-3 flex items-center gap-2"><i class="fas fa-info-circle text-slate-400"></i> Course Overview</h3>
+                            <div class="text-sm text-slate-600 font-medium leading-relaxed whitespace-pre-wrap">${batch.description || 'No detailed syllabus overview provided.'}</div>
+                        </div>
                     </div>
                 </div>
             `;
             
-            if(scrollArea) scrollArea.scrollTo(0,0);
+            document.getElementById('main-scroll-area').scrollTo(0,0);
         };
 
         const handleRouting = () => {
@@ -415,18 +420,22 @@
                 viewList.classList.add('hidden');
                 filterBar.classList.add('hidden');
                 
-                // 🚨 REQUIREMENT 5 FIX: Hide mobile nav completely on description mode
-                if (bottomNavbar) bottomNavbar.classList.add('hidden', 'nav-hidden');
+                // Point 5: Explicitly hide nav bar in description view
+                if(bottomNav) bottomNav.classList.add('hidden');
                 
                 viewDetail.classList.remove('hidden');
-                headerTitle.innerText = "Syllabus Verification Parameters";
+                headerTitle.innerText = "Batch Overview";
                 renderDetailedBatch(batchId);
             } else {
                 viewDetail.classList.add('hidden');
                 viewList.classList.remove('hidden');
                 filterBar.classList.remove('hidden');
                 
-                if (bottomNavbar) bottomNavbar.classList.remove('hidden', 'nav-hidden');
+                // Show nav bar back
+                if(bottomNav) {
+                    bottomNav.classList.remove('hidden');
+                    bottomNav.style.transform = 'translateY(0)';
+                }
                 
                 headerTitle.innerText = "Explore Batches";
                 renderBatchesList();
@@ -434,22 +443,14 @@
         };
         window.addEventListener('hashchange', handleRouting);
 
-        // Core Synchronous Quick Selection Custom Actions
-        window.selectQuickFilter = (type, value, displayLabel) => {
-            activeFilters[type] = value;
-            
-            // UI text sync update
-            const btn = document.getElementById(`btn-filter-${type}`);
-            if (btn) {
-                btn.querySelector('span').innerText = displayLabel;
-            }
-            
-            // Auto-Close Trigger
-            document.getElementById(`dropdown-${type}`).classList.remove('show');
+        // Point 4: Apply logic for custom dropdowns
+        window.applyQuickFilter = (type, val, label) => {
+            activeFilters[type] = val;
+            document.getElementById(`btn-txt-${type}`).innerText = label;
+            document.getElementById(`drop-${type}`).classList.add('hidden');
             renderBatchesList();
         };
 
-        // --- Amazon Style Filter Logic Array Handling ---
         const optionsData = {
             'Class': ['all', '9th', '10th', '11th', '12th', 'Dropper', 'Gov Exam'],
             'Stream': ['all', 'JEE', 'NEET', 'CUET', 'NDA', 'WBJEE'],
@@ -457,9 +458,9 @@
         };
 
         window.openAdvancedFilter = () => {
-            tempFilters = { ...activeFilters };
+            tempFilters = { ...activeFilters }; 
             document.getElementById('advanced-filter-modal').classList.remove('hidden');
-            renderAmzOptions('Class');
+            renderAmzOptions('Class'); 
         };
 
         window.closeAdvancedFilter = () => {
@@ -478,10 +479,10 @@
             const currentSelected = tempFilters[filterKey];
             
             container.innerHTML = optionsData[tabName].map(opt => `
-                <label class="flex items-center gap-3 p-2.5 hover:bg-slate-100 cursor-pointer rounded border border-slate-200 transition mb-1">
+                <label class="flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer rounded border border-transparent hover:border-slate-200 transition mb-1">
                     <input type="radio" name="amz-${filterKey}" value="${opt}" ${currentSelected === opt ? 'checked' : ''} 
-                           onchange="updateTempFilter('${filterKey}', '${opt}')" class="w-4 h-4 text-blue-700 focus:ring-blue-600 border-slate-300">
-                    <span class="text-xs font-bold text-slate-800 uppercase tracking-tight">${opt === 'all' ? 'All ' + tabName + 's' : opt}</span>
+                           onchange="updateTempFilter('${filterKey}', '${opt}')" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm font-semibold text-slate-800 capitalize">${opt === 'all' ? 'All ' + tabName + 's' : opt}</span>
                 </label>
             `).join('');
         };
@@ -491,15 +492,11 @@
         window.applyAdvancedFilters = () => {
             activeFilters = { ...tempFilters };
             
-            // Sync current custom selectors text fields
-            const classLabel = activeFilters.class === 'all' ? 'All Classes' : 'Class ' + activeFilters.class;
-            const streamLabel = activeFilters.stream === 'all' ? 'All Streams' : activeFilters.stream;
-            const catLabel = activeFilters.category === 'all' ? 'All Categories' : activeFilters.category;
-            
-            document.getElementById('btn-filter-class').querySelector('span').innerText = classLabel;
-            document.getElementById('btn-filter-stream').querySelector('span').innerText = streamLabel;
-            document.getElementById('btn-filter-category').querySelector('span').innerText = catLabel;
-            
+            // Sync texts for custom buttons
+            document.getElementById('btn-txt-class').innerText = activeFilters.class === 'all' ? 'All Classes' : 'Class ' + activeFilters.class;
+            document.getElementById('btn-txt-stream').innerText = activeFilters.stream === 'all' ? 'All Streams' : activeFilters.stream;
+            document.getElementById('btn-txt-category').innerText = activeFilters.category === 'all' ? 'All Categories' : activeFilters.category;
+
             renderBatchesList();
             closeAdvancedFilter();
         };
@@ -510,69 +507,43 @@
             renderAmzOptions(activeTab);
         };
 
-
-        // Secure Vercel Router Gateway Transaction Endpoint Linker
         window.executeSecureEnrollment = async (batchId, btnElement) => {
-            if (!auth.currentUser) return alert("Security Error: Identity structure verification failure.");
+            if (!auth.currentUser) return alert("System Error: Unauthorized.");
             
             const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing Authorization...`;
+            btnElement.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing...`;
             btnElement.disabled = true;
 
             try {
                 const idToken = await auth.currentUser.getIdToken(true);
-
                 const response = await fetch("https://vidyaplus-backend.vercel.app/enrollBatch", {
                     method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${idToken}` 
-                    },
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
                     body: JSON.stringify({ batchId: batchId })
                 });
 
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error || "Enrollment transaction fault.");
+                if (!response.ok) throw new Error(result.error || "Enrollment Server Error");
 
-                enrolledBatchIds.push(batchId);
-                alert("Security Gateway Verified: Access token granted successfully.");
+                enrolledBatchIds.push(batchId); 
+                alert("Authorization Successful! Access granted to premium resources.");
                 window.location.replace("dashboard.html"); 
 
             } catch (error) {
-                alert("Security System Refusal: " + error.message);
+                console.error("Enrollment failed:", error);
+                alert("Security Gateway: " + error.message);
                 btnElement.innerHTML = originalText;
                 btnElement.disabled = false;
             }
         };
 
-        // UI Core Control Mapping
         window.toggleSidebar = () => {
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
             document.getElementById('mobile-sidebar-overlay').classList.toggle('hidden');
         };
 
-        window.toggleProfileMenu = (e) => {
-            e.stopPropagation();
-            document.getElementById('profile-menu').classList.toggle('hidden');
-        };
-
-        window.toggleCustomDropdown = (e, dropdownId) => {
-            e.stopPropagation();
-            // Close other dropdowns first
-            document.querySelectorAll('.custom-dropdown-content').forEach(d => {
-                if(d.id !== dropdownId) d.classList.remove('show');
-            });
-            document.getElementById(dropdownId).classList.toggle('show');
-        };
-
-        // Global Event System: Outside click closures
-        document.addEventListener('click', () => {
-            document.getElementById('profile-menu').classList.add('hidden');
-            document.querySelectorAll('.custom-dropdown-content').forEach(d => d.classList.remove('show'));
-        });
-
         window.logoutUser = () => {
-            if(confirm("Strictly terminate validation keys and sign out?")) {
+            if(confirm("Strictly terminate this session?")) {
                 signOut(auth).then(() => window.location.replace("index.html"));
             }
         };
