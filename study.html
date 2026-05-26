@@ -216,24 +216,33 @@
         #video-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 16/9; /* Screen ka size fix rakho */
+    aspect-ratio: 16/9;
     overflow: hidden; 
     background: #000;
+    /* Optional: Container ko center me rakhne ke liye */
+    margin: 0 auto; 
 }
 
 #vp-player {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%; /* Iframe ki width ko container se match karo */
-    height: 100%; /* Iframe ki height ko container se match karo */
-    
-    /* YAHI HAI ASLI JAADU: Iframe ko zoom karo */
-    transform: translate(-75%, -75%) scale(1.2); 
-    
+    /* Normal Screens ke liye cropping */
+    top: -20%;
+    left: -10%;
+    width: 120%;
+    height: 140%;
     pointer-events: none; 
+    border: none;
 }
-        
+
+/* Mobile Landscape Mode ke liye special adjustment */
+@media screen and (max-width: 900px) and (orientation: landscape) {
+    #vp-player {
+        /* Landscape me height zyada stretch hoti hai, isliye cropping increase karni padegi */
+        top: -25%;
+        left: -10%;
+        width: 120%;
+        height: 150%; 
+    }
         /* 🚨 THE YOUTUBE BYPASS HACK 🚨 */
         /* Pro-level Checkbox UI (Animations Removed for Performance) */
         .custom-checkbox-wrapper {
