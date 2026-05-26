@@ -165,7 +165,6 @@
             </div>
         </main>
     </div>
-
     <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-[55px] z-[40]">
         <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
             <i class="fas fa-compass text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Explore</span>
@@ -186,12 +185,10 @@
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Global Elements
         const globalLoader = document.getElementById('global-loader');
         const batchGrid = document.getElementById('batch-grid');
         const scheduleContainer = document.getElementById('schedule-container');
 
-        // 60fps Mobile Nav Scroll Logic
         const scroller = document.getElementById('main-scroll-area');
         const bottomNav = document.getElementById('mobile-bottom-nav');
         let lastScroll = 0;
@@ -206,7 +203,6 @@
             lastScroll = currentScroll;
         }, { passive: true });
 
-        // Dropdown UI Setup
         window.toggleCustomDrop = (id, e) => {
             e.stopPropagation();
             document.querySelectorAll('.vp-dropdown').forEach(d => {
@@ -219,7 +215,6 @@
             document.querySelectorAll('.vp-dropdown').forEach(d => d.classList.add('hidden'));
         });
 
-        // 🚨 UPGRADED FORMATTER: Ab seconds bhi dikhenge testing ke liye!
         const formatTime = (seconds) => {
             if(!seconds || seconds <= 0) return '0 Secs';
             const h = Math.floor(seconds / 3600);
@@ -230,7 +225,7 @@
             if(m > 0) return `${m}m ${s}s`;
             return `${s} Secs`;
         };
-        // Auth & Identity Vault Sequence
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
@@ -250,25 +245,40 @@
                         streakDays = data.streak || 0;
                     }
 
-                    const localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
-                    const localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+                    // 🚨 AUTO-HEAL SYSTEM FOR CORRUPT CACHE 🚨
+                    localStorage.removeItem('vp_cached_total'); // Purana stuck cache hamesha delete hoga
+
+                    let localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
+                    let localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+
+                    // Safety check: Agar local time impossible/bugged (e.g. 24 hours se upar) ho toh reset kar do
+                    if (localDailyTime > 86400 || localDailyTime < 0) {
+                        localDailyTime = 0;
+                        localStorage.setItem('vp_daily_sec', 0);
+                    }
+                    if (localPendingTime > 3600 || localPendingTime < 0) { 
+                        localPendingTime = 0;
+                        localStorage.setItem('vp_pending_sec', 0);
+                    }
 
                     document.getElementById('stat-streak').innerText = `${streakDays} Days`;
                     
-                    // 🚨 THE REAL-TIME CATCH LOGIC FIX 🚨
-                    // Check against cached total to prevent reverse jumping when Cloud sync delays
                     let currentCalculatedTotal = totalCloudTime + localPendingTime;
-                    let cachedTotal = parseInt(localStorage.getItem('vp_cached_total')) || 0;
                     
-                    if (currentCalculatedTotal >= cachedTotal) {
-                        localStorage.setItem('vp_cached_total', currentCalculatedTotal);
+                    // Naya Safe Cache (Tied to UID so testing with other accounts won't clash)
+                    let cacheKey = `vp_total_cache_${user.uid}`;
+                    let cachedTotal = parseInt(localStorage.getItem(cacheKey)) || 0;
+                    
+                    // Agar DB mein sudden drop hua (Difference > 5 mins) toh usko DB wipe mana jayega aur cache clean kar dega
+                    if (currentCalculatedTotal >= cachedTotal || (cachedTotal - currentCalculatedTotal > 300)) {
+                        localStorage.setItem(cacheKey, currentCalculatedTotal);
+                        cachedTotal = currentCalculatedTotal;
                     } else {
-                        currentCalculatedTotal = cachedTotal; // Restore from cache if cloud is lagging behind
+                        currentCalculatedTotal = cachedTotal;
                     }
 
                     document.getElementById('stat-watchtime').innerText = formatTime(currentCalculatedTotal);
                     
-                    // Daily focus time
                     const displayDaily = Math.max(dailyCloudTime, localDailyTime);
                     document.getElementById('stat-dailytime').innerText = formatTime(displayDaily);
 
@@ -284,7 +294,6 @@
             }
         });
 
-        // Secure Batch Fetching
         const fetchEnrolledBatches = async (uid) => {
             renderSkeletons();
             try {
