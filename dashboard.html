@@ -104,12 +104,12 @@
                         <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
                             <i class="fas fa-clock text-blue-500 text-lg mb-1"></i>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Watch Time</span>
-                            <div class="text-lg font-extrabold text-slate-800" id="stat-watchtime">0h 0m</div>
+                            <div class="text-lg font-extrabold text-slate-800" id="stat-watchtime">0 Secs</div>
                         </div>
                         <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
                             <i class="fas fa-calendar-day text-emerald-500 text-lg mb-1"></i>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Today's Focus</span>
-                            <div class="text-lg font-extrabold text-slate-800" id="stat-dailytime">0 Mins</div>
+                            <div class="text-lg font-extrabold text-slate-800" id="stat-dailytime">0 Secs</div>
                         </div>
                         <div class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col items-start card-shadow">
                             <i class="fas fa-trophy text-purple-500 text-lg mb-1"></i>
@@ -165,6 +165,7 @@
             </div>
         </main>
     </div>
+
     <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-[55px] z-[40]">
         <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
             <i class="fas fa-compass text-[18px] mb-0.5"></i><span class="text-[9px] font-bold">Explore</span>
@@ -218,24 +219,24 @@
             document.querySelectorAll('.vp-dropdown').forEach(d => d.classList.add('hidden'));
         });
 
-        // Formatter Helper
+        // 🚨 UPGRADED FORMATTER: Ab seconds bhi dikhenge testing ke liye!
         const formatTime = (seconds) => {
-            if(!seconds || seconds <= 0) return '0 Mins';
+            if(!seconds || seconds <= 0) return '0 Secs';
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
-            if(h > 0) return `${h}h ${m}m`;
-            return `${m} Mins`;
-        };
+            const s = Math.floor(seconds % 60);
 
+            if(h > 0) return `${h}h ${m}m`;
+            if(m > 0) return `${m}m ${s}s`;
+            return `${s} Secs`;
+        };
         // Auth & Identity Vault Sequence
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // UI Updates
                 document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
                 document.getElementById('profile-email').innerText = user.email;
                 document.getElementById('welcome-text').innerText = `Welcome, ${user.displayName || user.email.split('@')[0]}!`;
 
-                // 🚨 PHASE 4 REAL-TIME CATCH LOGIC 🚨
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     let totalCloudTime = 0;
@@ -249,22 +250,30 @@
                         streakDays = data.streak || 0;
                     }
 
-                    // LocalStorage se un-synced/running time catch karo
                     const localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
                     const localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
 
                     document.getElementById('stat-streak').innerText = `${streakDays} Days`;
                     
-                    // Total watch time = Cloud Time + Unsynced Local Time
-                    document.getElementById('stat-watchtime').innerText = formatTime(totalCloudTime + localPendingTime);
+                    // 🚨 THE REAL-TIME CATCH LOGIC FIX 🚨
+                    // Check against cached total to prevent reverse jumping when Cloud sync delays
+                    let currentCalculatedTotal = totalCloudTime + localPendingTime;
+                    let cachedTotal = parseInt(localStorage.getItem('vp_cached_total')) || 0;
                     
-                    // Daily focus time: Local daily counter realtime badhta hai isliye usko priority denge
+                    if (currentCalculatedTotal >= cachedTotal) {
+                        localStorage.setItem('vp_cached_total', currentCalculatedTotal);
+                    } else {
+                        currentCalculatedTotal = cachedTotal; // Restore from cache if cloud is lagging behind
+                    }
+
+                    document.getElementById('stat-watchtime').innerText = formatTime(currentCalculatedTotal);
+                    
+                    // Daily focus time
                     const displayDaily = Math.max(dailyCloudTime, localDailyTime);
                     document.getElementById('stat-dailytime').innerText = formatTime(displayDaily);
 
                 } catch(e) { console.warn("Could not fetch user stats.", e); }
 
-                // Fade out loader
                 globalLoader.style.opacity = '0';
                 setTimeout(() => globalLoader.style.display = 'none', 500);
 
@@ -279,14 +288,12 @@
         const fetchEnrolledBatches = async (uid) => {
             renderSkeletons();
             try {
-                // Main source: enrollments subcollection
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
                 
                 let enrolledIds = [];
                 enrollmentsSnap.forEach(doc => enrolledIds.push(doc.id));
 
-                // Fallback check: array in user doc (just in case)
                 if (enrolledIds.length === 0) {
                     const userDoc = await getDoc(doc(db, "users", uid));
                     if (userDoc.exists() && userDoc.data().enrolledBatches) {
@@ -326,6 +333,7 @@
                 </div>
             `).join('');
         };
+
         const renderBatchCard = (id, batch) => {
             const title = batch.title || "Untitled Batch";
             const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
