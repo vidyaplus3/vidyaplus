@@ -213,36 +213,58 @@
     </div>
 
     <style>
-        #video-container {
+       /* Container ko strictly 16:9 rakhein taaki frame barabar rahe */
+#video-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 16 / 9;
     overflow: hidden; 
     background: #000;
-    /* Optional: Container ko center me rakhne ke liye */
-    margin: 0 auto; 
+    
+    /* Flexbox use karein taaki scaling hamesha center se ho */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #vp-player {
     position: absolute;
-    /* Normal Screens ke liye cropping */
-    top: -20%;
-    left: -10%;
-    width: 120%;
-    height: 140%;
-    pointer-events: none; 
+    width: 100%;
+    height: 100%;
     border: none;
+    
+    /* YouTube player ke direct touch interactions disable karne ke liye */
+    pointer-events: none; 
+    
+    /* Normal Portrait mode me 1.35x scale overlays ko bahar nikal dega */
+    transform: scale(1.35); 
+    
+    /* Smooth transition jab orientation change ho */
+    transition: transform 0.3s ease; 
 }
 
-/* Mobile Landscape Mode ke liye special adjustment */
-@media screen and (max-width: 900px) and (orientation: landscape) {
+/* ---------------------------------------------------
+   YAHAN HAI ASLI FIX: Landscape aur Fullscreen adjustments
+   --------------------------------------------------- */
+
+/* Jab phone Landscape mode me ho */
+@media screen and (orientation: landscape) {
     #vp-player {
-        /* Landscape me height zyada stretch hoti hai, isliye cropping increase karni padegi */
-        top: -25%;
-        left: -10%;
-        width: 120%;
-        height: 150%; 
+        /* Landscape me width bohot stretch hoti hai, isliye scale thoda aur bada chahiye */
+        transform: scale(1.45); 
     }
+}
+
+/* Agar aap API ke through #video-container ko Fullscreen karte hain */
+#video-container:fullscreen #vp-player {
+    transform: scale(1.45); 
+}
+
+/* Safari/Webkit browsers ke liye fallback */
+#video-container:-webkit-full-screen #vp-player {
+    transform: scale(1.45); 
+}
+        
         /* 🚨 THE YOUTUBE BYPASS HACK 🚨 */
         /* Pro-level Checkbox UI (Animations Removed for Performance) */
         .custom-checkbox-wrapper {
