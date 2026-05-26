@@ -235,15 +235,33 @@
                 document.getElementById('profile-email').innerText = user.email;
                 document.getElementById('welcome-text').innerText = `Welcome, ${user.displayName || user.email.split('@')[0]}!`;
 
-                // Fetch User Stats Data (New Feature)
+                // 🚨 PHASE 4 REAL-TIME CATCH LOGIC 🚨
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
+                    let totalCloudTime = 0;
+                    let dailyCloudTime = 0;
+                    let streakDays = 0;
+
                     if(userDoc.exists()) {
                         const data = userDoc.data();
-                        document.getElementById('stat-streak').innerText = data.streak ? `${data.streak} Days` : '0 Days';
-                        document.getElementById('stat-watchtime').innerText = formatTime(data.totalWatchTimeSeconds);
-                        document.getElementById('stat-dailytime').innerText = formatTime(data.dailyWatchTimeSeconds);
+                        totalCloudTime = data.totalWatchTimeSeconds || 0;
+                        dailyCloudTime = data.dailyWatchTimeSeconds || 0;
+                        streakDays = data.streak || 0;
                     }
+
+                    // LocalStorage se un-synced/running time catch karo
+                    const localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
+                    const localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+
+                    document.getElementById('stat-streak').innerText = `${streakDays} Days`;
+                    
+                    // Total watch time = Cloud Time + Unsynced Local Time
+                    document.getElementById('stat-watchtime').innerText = formatTime(totalCloudTime + localPendingTime);
+                    
+                    // Daily focus time: Local daily counter realtime badhta hai isliye usko priority denge
+                    const displayDaily = Math.max(dailyCloudTime, localDailyTime);
+                    document.getElementById('stat-dailytime').innerText = formatTime(displayDaily);
+
                 } catch(e) { console.warn("Could not fetch user stats.", e); }
 
                 // Fade out loader
@@ -308,7 +326,6 @@
                 </div>
             `).join('');
         };
-
         const renderBatchCard = (id, batch) => {
             const title = batch.title || "Untitled Batch";
             const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
