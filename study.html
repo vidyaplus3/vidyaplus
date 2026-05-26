@@ -88,7 +88,6 @@
                 </div>
             </div>
         </div>
-
         <div class="screen" id="subjects">
             <div class="page-header">
                 <button class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button>
@@ -139,7 +138,7 @@
     </div> <div class="classroom-overlay" id="classroom-mode">
         <div class="video-fixed-box" id="video-container">
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
-            <div style="width: 100%; height: 100%; pointer-events: none;"><div id="vp-player"></div></div>
+            <div style="width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative;"><div id="vp-player"></div></div>
             
             <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
@@ -213,59 +212,6 @@
     </div>
 
     <style>
-       /* Container ko strictly 16:9 rakhein taaki frame barabar rahe */
-#video-container {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    overflow: hidden; 
-    background: #000;
-    
-    /* Flexbox use karein taaki scaling hamesha center se ho */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#vp-player {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: none;
-    
-    /* YouTube player ke direct touch interactions disable karne ke liye */
-    pointer-events: none; 
-    
-    /* Normal Portrait mode me 1.35x scale overlays ko bahar nikal dega */
-    transform: scale(1.35); 
-    
-    /* Smooth transition jab orientation change ho */
-    transition: transform 0.3s ease; 
-}
-
-/* ---------------------------------------------------
-   YAHAN HAI ASLI FIX: Landscape aur Fullscreen adjustments
-   --------------------------------------------------- */
-
-/* Jab phone Landscape mode me ho */
-@media screen and (orientation: landscape) {
-    #vp-player {
-        /* Landscape me width bohot stretch hoti hai, isliye scale thoda aur bada chahiye */
-        transform: scale(1.45); 
-    }
-}
-
-/* Agar aap API ke through #video-container ko Fullscreen karte hain */
-#video-container:fullscreen #vp-player {
-    transform: scale(1.45); 
-}
-
-/* Safari/Webkit browsers ke liye fallback */
-#video-container:-webkit-full-screen #vp-player {
-    transform: scale(1.45); 
-}
-        
-        /* 🚨 THE YOUTUBE BYPASS HACK 🚨 */
         /* Pro-level Checkbox UI (Animations Removed for Performance) */
         .custom-checkbox-wrapper {
             display: flex; align-items: flex-start; gap: 15px; padding: 18px; 
@@ -293,8 +239,15 @@
             background: #94a3b8; box-shadow: none; cursor: not-allowed; transform: scale(1);
         }
         .start-btn-pro:not(:disabled):active { transform: scale(0.98); }
-    </style>
 
+        /* YouTube Ultra-wide Hide Hack */
+        #vp-player {
+            width: 300% !important;
+            height: 100% !important;
+            margin-left: -100% !important;
+            border: none !important;
+        }
+    </style>
     <div class="classroom-overlay" id="instruction-mode" style="background: #f1f5f9; display: none; z-index: 2000; flex-direction: column; height: 100dvh; position: fixed; top: 0; left: 0; width: 100%;">
         
         <div class="page-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 16px 20px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
@@ -372,7 +325,6 @@
     </div>
 
     <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/analytics/engine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     
 </body>
