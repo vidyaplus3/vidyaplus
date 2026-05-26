@@ -89,9 +89,16 @@ export const VideoPlayer = {
                     if(event.data === 1) { 
                         icon.className = "fas fa-pause"; 
                         VideoPlayer.showUI(); 
+                        
+                        // 🟢 PHASE 2 INJECTION: Start Tracking when video plays
+                        if (window.VidyaAnalytics) window.VidyaAnalytics.startSession();
+
                     } else { 
                         icon.className = "fas fa-play"; 
                         VideoPlayer.showUI(); 
+
+                        // 🛑 PHASE 2 INJECTION: Pause Tracking when video pauses/buffers
+                        if (window.VidyaAnalytics) window.VidyaAnalytics.pauseSession();
                     }
                 }
             }
@@ -101,6 +108,10 @@ export const VideoPlayer = {
     closeVideo: () => {
         const overlay = document.getElementById('classroom-mode');
         if (overlay.classList.contains('active')) {
+            
+            // 🛑 PHASE 2 INJECTION: Force Sync & Pause when classroom overlay closes
+            if (window.VidyaAnalytics) window.VidyaAnalytics.pauseSession();
+
             if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval); 
             if(VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.pauseVideo) VideoPlayer.ytPlayer.pauseVideo();
             window.history.back(); 
@@ -193,7 +204,6 @@ export const VideoPlayer = {
         }
     },
 
-    // 🚨 RESTORED: All Missing Logical Functions
     handleShieldClick: () => {
         const controls = document.getElementById('custom-controls');
         if(controls && controls.classList.contains('hidden')) {
@@ -228,4 +238,3 @@ export const VideoPlayer = {
         document.getElementById('time-display').innerText = VideoPlayer.formatTime(percentage * duration);
     }
 };
-        
