@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | VidyaPlus Ultra Premium</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0f7ff', 100: '#e0effe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+                        darkCanvas: '#09090b'
+                    },
+                    boxShadow: {
+                        'premium': '0 8px 30px rgb(0 0 0 / 0.02)',
+                        'glass': 'inset 0 1px 0 0 rgb(255 255 255 / 0.05)',
+                        'glow-orange': '0 4px 20px -2px rgba(249, 115, 22, 0.2)',
+                        'glow-brand': '0 10px 40px -10px rgba(37, 99, 235, 0.12)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f6f8fa; color: #0f172a; overflow: hidden; }
+        
+        /* Modern Glassmorphic Top Streak Bar & Cards */
+        .streak-bar { background: linear-gradient(135deg, #ff6b35 0%, #ff9f43 100%); box-shadow: 0 4px 15px rgba(255, 107, 53, 0.15); }
+        .premium-card { background: #ffffff; border: 1px solid rgba(228, 228, 231, 0.7); border-radius: 1.5rem; box-shadow: 0 8px 24px -4px rgba(0,0,0,0.02); transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        .premium-card:hover { box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.05); transform: translateY(-2px); border-color: rgba(228, 228, 231, 1); }
+        
+        /* Custom Shimmer Loading Effect */
+        @keyframes shimmerEffect { 100% { transform: translateX(100%); } }
+        .skeleton-box { position: relative; overflow: hidden; background-color: #f1f5f9; border-radius: 0.75rem; }
+        .skeleton-box::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.7) 20%, rgba(255,255,255,0.4) 60%, rgba(255,255,255,0)); animation: shimmerEffect 2.5s infinite; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 20px; }
+        
+        .main-content-area { padding-bottom: 90px; }
+        @media (min-width: 768px) { .main-content-area { padding-bottom: 40px; } }
+
+        /* Full Cinematic Loader */
+        #global-loader { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .loader-circle { width: 50px; height: 50px; border: 3.5px solid #f1f5f9; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.85s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Active route view controls */
+        .route-view { transition: opacity 0.3s ease, transform 0.3s ease; }
+    </style>
+</head>
+<body class="flex h-[100dvh] w-full select-none antialiased">
+
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-circle mb-5"></div>
+        <div class="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-[0.25em]">
+            <i class="fas fa-lock animate-pulse text-brand-500"></i> Synchronizing Core Systems
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[60] hidden md:hidden" onclick="toggleSidebar()"></div>
+    
+    <!-- Sidebar Left Layout -->
+    <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-66 bg-darkCanvas text-zinc-200 z-[70] transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col border-r border-zinc-800">
+        <div class="h-20 flex items-center px-6 border-b border-zinc-800/60 shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-500 to-indigo-600 flex items-center justify-center text-white mr-3 shadow-glow-brand">
+                <i class="fas fa-graduation-cap text-base"></i>
+            </div>
+            <h1 class="text-xl font-extrabold tracking-tight text-white">Vidya<span class="text-brand-500">Plus</span></h1>
+            <button class="ml-auto md:hidden text-zinc-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times text-lg"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1.5">
+            <span class="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest px-3 mb-2 block">Navigation</span>
+            <a href="#overview" id="nav-overview" class="flex items-center gap-3 px-3 py-2.5 bg-zinc-800 text-white text-sm font-semibold rounded-xl border border-zinc-700/40 transition"><i class="fas fa-home w-5 text-center text-brand-500"></i> Dashboard</a>
+            <a href="explore.html" class="flex items-center gap-3 px-3 py-2.5 text-zinc-400 text-sm font-semibold hover:bg-zinc-800/40 hover:text-white rounded-xl transition"><i class="fas fa-compass w-5 text-center"></i> Explore</a>
+            <a href="study.html" class="flex items-center gap-3 px-3 py-2.5 text-zinc-400 text-sm font-semibold hover:bg-zinc-800/40 hover:text-white rounded-xl transition"><i class="fas fa-book-open w-5 text-center"></i> Study</a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-zinc-400 text-sm font-semibold hover:bg-zinc-800/40 hover:text-white rounded-xl transition"><i class="fas fa-robot w-5 text-center"></i> AI Guru</a>
+        </div>
+        
+        <div class="p-4 border-t border-zinc-800/60 shrink-0">
+            <button onclick="logoutUser()" class="flex items-center justify-center gap-2.5 w-full px-4 py-3 bg-zinc-900 text-red-400 text-sm font-bold rounded-xl hover:bg-red-500/10 hover:text-red-300 transition group">
+                <i class="fas fa-sign-out-alt group-hover:-translate-x-0.5 transition-transform"></i> Secure Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="flex-1 flex flex-col h-full relative w-full min-w-0">
+        
+        <!-- Premium Top Header Layout -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-8 z-[50] shrink-0 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-600 hover:text-slate-900" onclick="toggleSidebar()"><i class="fas fa-bars text-lg"></i></button>
+                <h2 class="text-lg font-extrabold text-slate-800 tracking-tight" id="header-title-text">Workspace Overview</h2>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <div id="profile-btn" class="w-10 h-10 bg-gradient-to-tr from-brand-100 to-indigo-50 rounded-full flex items-center justify-center cursor-pointer border border-brand-200/80 hover:shadow-sm transition" onclick="window.toggleCustomDrop('profile-menu', event)">
+                        <span id="profile-initial" class="font-extrabold text-brand-600 text-sm">U</span>
+                    </div>
+                    <div id="profile-menu" class="vp-dropdown hidden absolute right-0 mt-3 w-52 bg-white border border-slate-200 shadow-xl rounded-2xl py-1.5 z-[60]">
+                        <div class="px-4 py-2.5 border-b border-slate-100 mb-1">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Account Identity</p>
+                            <p id="profile-email" class="text-xs font-bold text-slate-700 truncate mt-0.5">loading...</p>
+                        </div>
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-600 font-semibold hover:bg-slate-50"><i class="fas fa-user-circle mr-2.5 text-slate-400"></i> My Profile</a>
+                        <a href="#" onclick="logoutUser()" class="flex items-center px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2.5"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content View Area -->
+        <main class="flex-1 overflow-y-auto main-content-area relative" id="main-scroll-area">
+            
+            <!-- Thin Streak Ribbon/Bar at the Top -->
+            <div class="w-full bg-white border-b border-slate-200/50 px-6 lg:px-8 py-2 flex items-center justify-between shadow-sm sticky top-0 z-40">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping"></div>
+                    <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Consistency Tracker:</span>
+                </div>
+                <div class="streak-bar text-white px-4 py-1.5 rounded-full text-xs font-extrabold tracking-wide flex items-center gap-2 shadow-glow-orange">
+                    <i class="fas fa-fire text-amber-200 animate-bounce"></i>
+                    <span id="stat-streak">0 Days</span>
+                </div>
+            </div>
+
+            <div class="p-5 lg:p-8 max-w-7xl mx-auto space-y-8">
+                
+                <!-- PAGE 1: VIEW OVERVIEW -->
+                <div id="view-overview" class="route-view space-y-8">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight" id="welcome-text">Welcome Back!</h1>
+                            <p class="text-sm text-slate-500 font-medium mt-1">Here is a structured overview of your current performance metrics.</p>
+                        </div>
+                    </div>
+
+                    <!-- Master Unified "Dashboard" Card Container -->
+                    <div class="premium-card p-6 md:p-8 bg-gradient-to-br from-white via-white to-brand-50/20 relative overflow-hidden">
+                        <div class="absolute -right-16 -bottom-16 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                        
+                        <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center text-sm"><i class="fas fa-chart-pie"></i></div>
+                                <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Dashboard Metrics</h3>
+                            </div>
+                            <a href="#details" class="text-xs font-bold text-brand-600 bg-brand-50 hover:bg-brand-100 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                                View Deep Analytics <i class="fas fa-chevron-right text-[10px]"></i>
+                            </a>
+                        </div>
+
+                        <!-- Inside Metrics Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                            <div class="bg-slate-50/60 border border-slate-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Total Watch Time</span>
+                                    <i class="fas fa-clock text-blue-500 text-sm"></i>
+                                </div>
+                                <div class="text-xl font-extrabold text-slate-800 tracking-tight" id="stat-watchtime">0 Secs</div>
+                            </div>
+                            
+                            <div class="bg-slate-50/60 border border-slate-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Today's Focus Time</span>
+                                    <i class="fas fa-stopwatch text-emerald-500 text-sm"></i>
+                                </div>
+                                <div class="text-xl font-extrabold text-slate-800 tracking-tight" id="stat-dailytime">0 Secs</div>
+                            </div>
+                            
+                            <div class="bg-slate-50/60 border border-slate-200/50 rounded-2xl p-4 flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Batches Enrolled</span>
+                                    <i class="fas fa-layer-group text-purple-500 text-sm"></i>
+                                </div>
+                                <div class="text-xl font-extrabold text-slate-800 tracking-tight" id="stat-enrolled">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classroom Space -->
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
+                                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">My Classrooms</h2>
+                            </div>
+                            <a href="explore.html" class="text-xs font-bold text-brand-600 hover:underline">Explore More</a>
+                        </div>
+                        <div id="batch-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+                            <!-- Populated Dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Split Layout: Schedule & Launchpad -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="col-span-1 lg:col-span-2">
+                            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight mb-4 flex items-center gap-2"><i class="fas fa-calendar-day text-slate-400 text-base"></i> Today's Schedule</h2>
+                            <div id="schedule-container" class="premium-card p-3 space-y-1.5">
+                                <!-- Populated Dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="col-span-1">
+                            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight mb-4 flex items-center gap-2"><i class="fas fa-bolt text-slate-400 text-base"></i> Quick Launch</h2>
+                            <div class="space-y-4">
+                                <div class="premium-card p-4 flex items-center gap-4 cursor-pointer hover:border-amber-300 transition group">
+                                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                        <i class="fas fa-clipboard-list text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-800 text-sm">Attempt Pending Tests</h3>
+                                        <p class="text-[11px] text-slate-500 font-medium">Evaluate current readiness</p>
+                                    </div>
+                                </div>
+                                <div class="premium-card p-4 flex items-center gap-4 cursor-pointer hover:border-brand-300 transition group">
+                                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-brand-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                        <i class="fas fa-folder-open text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-800 text-sm">Revision Resources</h3>
+                                        <p class="text-[11px] text-slate-500 font-medium">Access stored notes & PDF materials</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: VIEW DETAILS (#details Hash Routing View) -->
+                <div id="view-details" class="route-view space-y-8 hidden">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                        <div>
+                            <a href="#overview" class="text-xs font-bold text-slate-500 hover:text-brand-600 flex items-center gap-1.5 mb-1"><i class="fas fa-arrow-left"></i> Back to Overview</a>
+                            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Granular Insights & Analytics</h1>
+                        </div>
+                    </div>
+
+                    <!-- Deep Analytics Bento Setup -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        <!-- Watch Velocity Progress Meter -->
+                        <div class="premium-card p-6 md:col-span-2 space-y-5">
+                            <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2"><i class="fas fa-tachometer-alt text-brand-500"></i> Retention & Metric Targets</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                                        <span>Daily Target Achieved</span>
+                                        <span class="text-brand-600">Adaptive Progress</span>
+                                    </div>
+                                    <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-brand-500 to-indigo-600 rounded-full" style="width: 78%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                                        <span>Weekly Syllabus Coverage</span>
+                                        <span class="text-emerald-600">On Schedule</span>
+                                    </div>
+                                    <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style="width: 62%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                                        <span>Concept Test Retention</span>
+                                        <span class="text-purple-600">High Tier</span>
+                                    </div>
+                                    <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Integrity / Session Status Card -->
+                        <div class="premium-card p-6 flex flex-col justify-between bg-slate-900 text-white border-0 relative overflow-hidden">
+                            <div class="absolute -right-8 -top-8 w-32 h-32 bg-brand-500/20 rounded-full blur-2xl"></div>
+                            <div>
+                                <span class="text-[10px] uppercase font-extrabold tracking-widest text-brand-400">Security Architecture</span>
+                                <h3 class="text-xl font-extrabold tracking-tight mt-1 text-white">Cache Shield Active</h3>
+                                <p class="text-xs text-zinc-400 font-medium mt-2 leading-relaxed">Your streaming logs and real-time statistics are locally dynamic and system-synchronized with zero drift.</p>
+                            </div>
+                            <div class="pt-4 border-t border-zinc-800 mt-6 flex items-center justify-between text-xs font-bold text-emerald-400">
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> DB Connected</span>
+                                <span class="text-zinc-500 text-[10px]">v2.4-Premium</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Bar -->
+    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center h-[65px] z-[40] shadow-lg px-2">
+        <a href="explore.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-compass text-lg mb-0.5"></i><span class="text-[9px] font-bold">Explore</span>
+        </a>
+        <a href="#overview" class="flex flex-col items-center justify-center w-full h-full text-brand-600">
+            <i class="fas fa-home text-lg mb-0.5"></i><span class="text-[9px] font-bold">Dashboard</span>
+        </a>
+        <a href="study.html" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-book-open text-lg mb-0.5"></i><span class="text-[9px] font-bold">Study</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-700 transition">
+            <i class="fas fa-robot text-lg mb-0.5"></i><span class="text-[9px] font-bold">AI Guru</span>
+        </a>
+    </nav>
+
+    <!-- Core Underlying Architecture & State Logic [COMPLETELY UNCHANGED] -->
+    <script type="module">
+        import { db, auth } from './js/firebase-init.js';
+        import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const globalLoader = document.getElementById('global-loader');
+        const batchGrid = document.getElementById('batch-grid');
+        const scheduleContainer = document.getElementById('schedule-container');
+
+        const scroller = document.getElementById('main-scroll-area');
+        const bottomNav = document.getElementById('mobile-bottom-nav');
+        let lastScroll = 0;
+        
+        // Mobile bottom nav hide/show logic
+        scroller.addEventListener('scroll', () => {
+            const currentScroll = scroller.scrollTop;
+            if (currentScroll > lastScroll && currentScroll > 50) {
+                if(bottomNav) bottomNav.style.transform = 'translateY(100%)';
+            } else {
+                if(bottomNav) bottomNav.style.transform = 'translateY(0)';
+            }
+            lastScroll = currentScroll;
+        }, { passive: true });
+
+        // Hash Routing Router Logic
+        const router = () => {
+            const currentHash = window.location.hash || '#overview';
+            const overviewEl = document.getElementById('view-overview');
+            const detailsEl = document.getElementById('view-details');
+            const headerTitle = document.getElementById('header-title-text');
+            const sideNavBtn = document.getElementById('nav-overview');
+
+            if (currentHash === '#details') {
+                if (overviewEl) overviewEl.classList.add('hidden');
+                if (detailsEl) detailsEl.classList.remove('hidden');
+                if (headerTitle) headerTitle.innerText = "Detailed Analytics Space";
+                if (sideNavBtn) sideNavBtn.classList.remove('bg-zinc-800', 'text-white');
+            } else {
+                if (detailsEl) detailsEl.classList.add('hidden');
+                if (overviewEl) overviewEl.classList.remove('hidden');
+                if (headerTitle) headerTitle.innerText = "Workspace Overview";
+                if (sideNavBtn) sideNavBtn.classList.add('bg-zinc-800', 'text-white');
+            }
+        };
+        window.addEventListener('hashchange', router);
+
+        window.toggleCustomDrop = (id, e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.vp-dropdown').forEach(d => {
+                if (d.id !== id) d.classList.add('hidden');
+            });
+            document.getElementById(id).classList.toggle('hidden');
+        };
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.vp-dropdown').forEach(d => d.classList.add('hidden'));
+        });
+
+        const formatTime = (seconds) => {
+            if(!seconds || seconds <= 0) return '0 Secs';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+
+            if(h > 0) return `${h}h ${m}m`;
+            if(m > 0) return `${m}m ${s}s`;
+            return `${s} Secs`;
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
+                document.getElementById('profile-email').innerText = user.email;
+                document.getElementById('welcome-text').innerText = `Welcome, ${user.displayName || user.email.split('@')[0]}!`;
+
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    let totalCloudTime = 0;
+                    let dailyCloudTime = 0;
+                    let streakDays = 0;
+
+                    if(userDoc.exists()) {
+                        const data = userDoc.data();
+                        totalCloudTime = data.totalWatchTimeSeconds || 0;
+                        dailyCloudTime = data.dailyWatchTimeSeconds || 0;
+                        streakDays = data.streak || 0;
+                    }
+
+                    // AUTO-HEAL SYSTEM FOR CORRUPT CACHE
+                    localStorage.removeItem('vp_cached_total'); 
+
+                    let localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
+                    let localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+
+                    if (localDailyTime > 86400 || localDailyTime < 0) {
+                        localDailyTime = 0;
+                        localStorage.setItem('vp_daily_sec', 0);
+                    }
+                    if (localPendingTime > 3600 || localPendingTime < 0) { 
+                        localPendingTime = 0;
+                        localStorage.setItem('vp_pending_sec', 0);
+                    }
+
+                    document.getElementById('stat-streak').innerText = `${streakDays} Days`;
+                    
+                    let currentCalculatedTotal = totalCloudTime + localPendingTime;
+                    
+                    let cacheKey = `vp_total_cache_${user.uid}`;
+                    let cachedTotal = parseInt(localStorage.getItem(cacheKey)) || 0;
+                    
+                    if (currentCalculatedTotal >= cachedTotal || (cachedTotal - currentCalculatedTotal > 300)) {
+                        localStorage.setItem(cacheKey, currentCalculatedTotal);
+                        cachedTotal = currentCalculatedTotal;
+                    } else {
+                        currentCalculatedTotal = cachedTotal;
+                    }
+
+                    document.getElementById('stat-watchtime').innerText = formatTime(currentCalculatedTotal);
+                    
+                    const displayDaily = Math.max(dailyCloudTime, localDailyTime);
+                    document.getElementById('stat-dailytime').innerText = formatTime(displayDaily);
+
+                } catch(e) { console.warn("Could not fetch user stats.", e); }
+
+                globalLoader.style.opacity = '0';
+                setTimeout(() => globalLoader.style.display = 'none', 500);
+
+                await fetchEnrolledBatches(user.uid);
+                renderDummySchedule(); 
+                router(); // Trigger structural routing matrix state
+            } else {
+                window.location.replace("login.html");
+            }
+        });
+
+        const fetchEnrolledBatches = async (uid) => {
+            renderSkeletons();
+            try {
+                const enrollmentsRef = collection(db, "users", uid, "enrollments");
+                const enrollmentsSnap = await getDocs(enrollmentsRef);
+                
+                let enrolledIds = [];
+                enrollmentsSnap.forEach(doc => enrolledIds.push(doc.id));
+
+                if (enrolledIds.length === 0) {
+                    const userDoc = await getDoc(doc(db, "users", uid));
+                    if (userDoc.exists() && userDoc.data().enrolledBatches) {
+                        enrolledIds = userDoc.data().enrolledBatches;
+                    }
+                }
+
+                batchGrid.innerHTML = '';
+                document.getElementById('stat-enrolled').innerText = enrolledIds.length;
+
+                if (enrolledIds.length > 0) {
+                    for (const batchId of enrolledIds) {
+                        const batchRef = doc(db, "batches", batchId);
+                        const batchSnap = await getDoc(batchRef);
+                        
+                        if (batchSnap.exists()) {
+                            renderBatchCard(batchId, batchSnap.data());
+                        }
+                    }
+                } else {
+                    renderEmptyState();
+                }
+
+            } catch (error) {
+                console.error("Database connection fault:", error);
+                batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-sm font-bold">System Error: Failed to retrieve secure enrollments.</div>`;
+            }
+        };
+
+        const renderSkeletons = () => {
+            batchGrid.innerHTML = Array(3).fill(`
+                <div class="premium-card p-3 flex flex-col">
+                    <div class="skeleton-box h-36 w-full mb-3"></div>
+                    <div class="skeleton-box h-5 w-3/4 mb-2"></div>
+                    <div class="skeleton-box h-4 w-1/2 mb-5"></div>
+                    <div class="skeleton-box h-10 w-full mt-auto"></div>
+                </div>
+            `).join('');
+        };
+
+        const renderBatchCard = (id, batch) => {
+            const title = batch.title || "Untitled Batch";
+            const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
+            const imgHTML = imgUrl 
+                ? `<img src="${imgUrl}" class="w-full h-full object-cover rounded-t-xl group-hover:scale-105 transition-transform duration-500">` 
+                : `<div class="w-full h-full flex flex-col items-center justify-center text-indigo-200 bg-gradient-to-br from-indigo-950 to-slate-900 rounded-t-xl"><i class="fas fa-graduation-cap text-3xl mb-1"></i><span class="text-[10px] font-bold uppercase tracking-widest text-indigo-300">VidyaPlus</span></div>`;
+            
+            const rawClass = batch.classLevel || batch["class"] || batch["Class"] || batch.classTarget || 'Class';
+
+            const cardHTML = `
+                <div class="premium-card overflow-hidden flex flex-col relative group" onclick="window.location.href='study.html?batch=${id}'">
+                    <div class="h-36 bg-slate-100 relative overflow-hidden shrink-0">
+                        <div class="absolute top-3 left-3 bg-white/95 backdrop-blur text-emerald-600 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider uppercase z-10 shadow-sm flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Enrolled</div>
+                        ${imgHTML}
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-brand-600 bg-brand-50 rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">${rawClass} • ${batch.stream || 'Gen'}</span>
+                            <span class="text-slate-400 text-[10px] font-bold"><i class="fas fa-globe-asia"></i> Hinglish</span>
+                        </div>
+                        <h3 class="text-base font-extrabold text-slate-800 leading-snug mb-3 line-clamp-2 group-hover:text-brand-600 transition-colors">${title}</h3>
+                        <div class="mt-auto pt-3 border-t border-slate-100">
+                            <button class="w-full bg-slate-900 group-hover:bg-brand-600 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5">
+                                Enter Classroom <i class="fas fa-arrow-right text-[10px] group-hover:translate-x-0.5 transition-transform"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            batchGrid.insertAdjacentHTML('beforeend', cardHTML);
+        };
+
+        const renderEmptyState = () => {
+            batchGrid.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center py-14 px-4 bg-white border border-slate-200 border-dashed rounded-2xl">
+                    <i class="fas fa-folder-open text-3xl text-slate-300 mb-2"></i>
+                    <h3 class="text-sm font-bold text-slate-700">No Authorized Enrollments</h3>
+                    <button class="mt-3 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm hover:bg-slate-800 transition" onclick="window.location.href='explore.html'">Explore Batches</button>
+                </div>
+            `;
+        };
+
+        const renderDummySchedule = () => {
+            const scheduleData = [
+                { time: "08:15 AM", type: "Lecture • Physics", title: "Electrostatics 04: Electric Field & Flux", icon: "fa-atom", bg: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+                { time: "11:00 AM", type: "Lecture • Chemistry", title: "Organic Chemistry: SN1 & SN2 Reactions", icon: "fa-flask", bg: "bg-blue-50 text-blue-600 border-blue-100" }
+            ];
+
+            let html = '';
+            scheduleData.forEach(item => {
+                html += `
+                    <div class="p-2.5 flex items-center gap-3.5 hover:bg-slate-50 rounded-xl cursor-pointer transition border border-transparent hover:border-slate-200/60 group">
+                        <div class="w-10 h-10 rounded-xl ${item.bg} border flex items-center justify-center text-base shrink-0 transition-transform group-hover:scale-105">
+                            <i class="fas ${item.icon}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">${item.type}</h4>
+                                <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">${item.time}</span>
+                            </div>
+                            <p class="text-xs text-slate-700 truncate font-bold group-hover:text-brand-600 transition-colors">${item.title}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `<button class="w-full text-center text-xs font-bold text-slate-500 bg-slate-50 border border-slate-200/60 rounded-xl py-2.5 mt-2 hover:bg-slate-100 hover:text-slate-800 transition">View Full Schedule</button>`;
+            scheduleContainer.innerHTML = html;
+        };
+
+        window.toggleSidebar = () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobile-sidebar-overlay').classList.toggle('hidden');
+        };
+
+        window.logoutUser = () => {
+            if(confirm("Strictly terminate this session?")) {
+                signOut(auth).then(() => window.location.replace("index.html"));
+            }
+        };
+    </script>
+</body>
+</html>
