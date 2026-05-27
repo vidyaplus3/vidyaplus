@@ -2,110 +2,138 @@
 import { auth } from '../firebase-init.js'; 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const CONFIG = {
-    SYNC_INTERVAL_MS: 3 * 60 * 1000, // 3 Mins interval
-    MAX_SYNC_CAP_SEC: 190,           // Anti-cheat cap
-    STREAK_TARGET_SEC: 600           // 10 Mins (600s) for streak
-};
+// ==========================================
+// 1. ENTERPRISE CONFIG & CREDENTIALS
+// ==========================================
+const CONFIG = Object.freeze({
+    SYNC_INTERVAL_MS: 3 * 60 * 1000, 
+    MAX_SYNC_CAP_SEC: 190,           
+    STREAK_TARGET_SEC: 600,
+    MAX_RETRIES: 3                   // Network fail hone par 3 baar retry karega
+});
 
-// Tumhare credentials
 const SUPA_URL = "https://ukbkyyfvjvdurnvfdwur.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
 
-const SecureState = {
+// Object.seal ensures no hacker can add/remove properties from state via console
+const SecureState = Object.seal({
     uid: null,
     validPendingSeconds: 0, 
     dailySessionSeconds: 0, 
     isTracking: false,
-    syncTimerId: null,
-    lastTickTime: 0,
-    animationFrameId: null
-};
+    syncTimerId: null
+});
 
-// 1. ENGINE LOOP (Local Tracking)
-const engineLoop = () => {
-    if (!SecureState.isTracking) return;
+// ==========================================
+// 2. BACKGROUND WEB WORKER (Anti-Throttling)
+// ==========================================
+// Browsers throttle JS timers on inactive tabs. We inject a Web Worker dynamically 
+// via Blob to keep the stopwatch running flawlessly in a separate CPU thread.
+const workerCode = `
+    let timer = null;
+    self.onmessage = function(e) {
+        if (e.data === 'START' && !timer) {
+            timer = setInterval(() => self.postMessage('TICK'), 1000);
+        } else if (e.data === 'STOP') {
+            clearInterval(timer);
+            timer = null;
+        }
+    };
+`;
+const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+const timerWorker = new Worker(URL.createObjectURL(workerBlob));
 
-    const now = Date.now();
-    const delta = (now - SecureState.lastTickTime) / 1000;
-
-    // Reject abnormal time jumps (Speed hacks)
-    if (delta > 0 && delta < 2.0) {
-        SecureState.validPendingSeconds += delta;
-        SecureState.dailySessionSeconds += delta;
+// Handle ticks from the isolated background thread
+timerWorker.onmessage = (e) => {
+    if (e.data === 'TICK' && SecureState.isTracking) {
+        SecureState.validPendingSeconds += 1;
+        SecureState.dailySessionSeconds += 1;
         
         let currentLocalTotal = parseInt(localStorage.getItem('vp_total_sec')) || 0;
-        localStorage.setItem('vp_total_sec', Math.floor(currentLocalTotal + delta));
+        localStorage.setItem('vp_total_sec', currentLocalTotal + 1);
         
         if(SecureState.validPendingSeconds < 300) {
-            localStorage.setItem('vp_pending_sec', Math.floor(SecureState.validPendingSeconds));
-            localStorage.setItem('vp_daily_sec', Math.floor(SecureState.dailySessionSeconds));
+            localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
+            localStorage.setItem('vp_daily_sec', SecureState.dailySessionSeconds);
         }
+
+        // Silent UI Broadcast (So dashboard updates live without tight coupling)
+        window.dispatchEvent(new CustomEvent('vp-telemetry-tick', { 
+            detail: { daily: SecureState.dailySessionSeconds } 
+        }));
     }
-    
-    SecureState.lastTickTime = now;
-    SecureState.animationFrameId = requestAnimationFrame(engineLoop);
 };
 
 const startStopwatch = () => {
     if (SecureState.isTracking || document.hidden) return;
     SecureState.isTracking = true;
-    SecureState.lastTickTime = Date.now();
-    engineLoop();
+    timerWorker.postMessage('START'); // Command worker to start clock
 };
 
 const pauseStopwatch = () => {
     if (!SecureState.isTracking) return;
     SecureState.isTracking = false;
-    cancelAnimationFrame(SecureState.animationFrameId);
+    timerWorker.postMessage('STOP');
 };
 
-// 2. RPC CLOUD SYNC (Direct Database Communication)
-const syncToCloud = async (isClosingTab = false) => {
+// ==========================================
+// 3. ADVANCED RPC SYNC WITH EXPONENTIAL BACKOFF
+// ==========================================
+const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     if (!SecureState.uid || secondsToSync <= 0) return;
 
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
     
-    // Clear pending instantly for optimistic UI
+    // Optimistic Reset
     SecureState.validPendingSeconds = 0; 
     localStorage.setItem('vp_pending_sec', 0);
 
     const todayStr = new Date().toISOString().split('T')[0];
     const isStreakValid = SecureState.dailySessionSeconds >= CONFIG.STREAK_TARGET_SEC;
+    
+    const payload = JSON.stringify({
+        p_uid: SecureState.uid,
+        p_watch_seconds: finalSyncSeconds,
+        p_is_streak_valid: isStreakValid,
+        p_today_date: todayStr
+    });
 
     try {
-        // ✨ THE MAGIC: Calling your Supabase RPC Function directly!
+        // If tab is closing, prioritize Beacon API / Keepalive for guaranteed delivery
+        if (isClosingTab && navigator.sendBeacon) {
+            const blobData = new Blob([payload], { type: 'application/json' });
+            // SendBeacon bypassing complex CORS is tricky, so we rely on fetch keepalive as fallback
+        }
+
         const fetchOptions = {
             method: 'POST',
-            headers: {
-                'apikey': SUPA_KEY,
-                'Authorization': `Bearer ${SUPA_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                p_uid: SecureState.uid,
-                p_watch_seconds: finalSyncSeconds,
-                p_is_streak_valid: isStreakValid,
-                p_today_date: todayStr
-            }),
+            headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
+            body: payload,
             keepalive: isClosingTab 
         };
 
         const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
+        if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        if(!response.ok) throw new Error("RPC Execution Blocked");
-
-        console.log(`[VidyaPlus Pro Engine] Sent +${finalSyncSeconds}s via RPC.`);
+        console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s (Retry: ${retryCount})`);
 
     } catch (error) {
-        console.error("[VidyaPlus Pro Engine] RPC Sync Failed. Retrying later.", error);
-        // Put time back if network completely fails
-        SecureState.validPendingSeconds += finalSyncSeconds;
+        console.warn(`[VidyaPlus Pro Engine] Sync Failed.`, error.message);
+        SecureState.validPendingSeconds += finalSyncSeconds; // Revert time safely
+
+        // Exponential Backoff Retry Logic
+        if (!isClosingTab && retryCount < CONFIG.MAX_RETRIES) {
+            const backoffDelay = Math.pow(2, retryCount) * 2000; // 2s, 4s, 8s
+            console.log(`[VidyaPlus Pro Engine] Retrying in ${backoffDelay}ms...`);
+            setTimeout(() => syncToCloud(false, retryCount + 1), backoffDelay);
+        }
     }
 };
 
-// 3. LIFECYCLE MANAGEMENT
+// ==========================================
+// 4. AUTONOMOUS LIFECYCLE & EVENT HOOKS
+// ==========================================
 const initializeDailySession = () => {
     const savedDate = localStorage.getItem('vp_active_date');
     const todayStr = new Date().toISOString().split('T')[0];
@@ -126,12 +154,17 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-window.addEventListener("beforeunload", () => {
+// Critical exit sync
+window.addEventListener("pagehide", () => {
     pauseStopwatch();
     if (SecureState.validPendingSeconds > 0) syncToCloud(true); 
 });
 
-window.VidyaAnalytics = {
+// ==========================================
+// 5. HARDENED GLOBAL API EXPORT
+// ==========================================
+// Object.freeze ensures that the student cannot modify these functions via console
+window.VidyaAnalytics = Object.freeze({
     startSession: () => {
         if(!SecureState.uid) return;
         startStopwatch();
@@ -144,8 +177,9 @@ window.VidyaAnalytics = {
         syncToCloud(false);
     },
     forceSync: () => syncToCloud(false)
-};
+});
 
+// Init Sequence
 onAuthStateChanged(auth, (user) => {
     if (user) {
         SecureState.uid = user.uid;
@@ -153,6 +187,9 @@ onAuthStateChanged(auth, (user) => {
     } else {
         SecureState.uid = null;
         pauseStopwatch();
-        if(SecureState.syncTimerId) clearInterval(SecureState.syncTimerId);
+        if(SecureState.syncTimerId) {
+            clearInterval(SecureState.syncTimerId);
+            SecureState.syncTimerId = null;
+        }
     }
 });
