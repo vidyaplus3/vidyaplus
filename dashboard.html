@@ -329,7 +329,7 @@
             <i class="fas fa-robot text-[18px] mb-1"></i><span class="text-[10px] font-semibold">AI Guru</span>
         </a>
     </nav>
-    <script type="module">
+        <script type="module">
         import { db, auth } from './js/firebase-init.js';
         import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -376,7 +376,7 @@
             } 
             else {
                 headerTitle.innerText = "Workspace Overview";
-                if(!velocityChart) renderMicroCharts();
+                setTimeout(renderMicroCharts, 50); 
             }
         };
         window.addEventListener('hashchange', router);
@@ -401,24 +401,28 @@
         };
 
         // --- ELITE UI TIME FORMATTER ---
-        // Returns gorgeous multi-styled HTML spans instead of plain text
         const formatTimeAdvanced = (seconds) => {
-            if(!seconds || seconds <= 0) return `<span class="text-3xl font-black text-slate-800">0</span><span class="text-sm font-bold text-slate-500 ml-1">m</span>`;
+            if(!seconds || seconds <= 0) return `<span class="text-3xl font-black text-slate-800">0</span><span class="text-sm font-bold text-slate-500 ml-1">s</span>`;
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = Math.floor(seconds % 60);
             
             let html = '';
-            if(h > 0) html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${h}</span><span class="text-sm font-bold text-slate-500 ml-0.5 mr-2">h</span>`;
-            if(m > 0 || h > 0) html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${m}</span><span class="text-sm font-bold text-slate-500 ml-0.5">m</span>`;
-            // Only show seconds if total time is less than a minute
-            if(h === 0 && m === 0) html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${s}</span><span class="text-sm font-bold text-slate-500 ml-0.5">s</span>`;
+            if(h > 0) {
+                html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${h}</span><span class="text-sm font-bold text-slate-500 ml-0.5 mr-2">h</span>`;
+                html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${m}</span><span class="text-sm font-bold text-slate-500 ml-0.5">m</span>`;
+            } else if (m > 0) {
+                html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${m}</span><span class="text-sm font-bold text-slate-500 ml-0.5 mr-2">m</span>`;
+                html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${s}</span><span class="text-sm font-bold text-slate-500 ml-0.5">s</span>`;
+            } else {
+                html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${s}</span><span class="text-sm font-bold text-slate-500 ml-0.5">s</span>`;
+            }
             return html;
         };
 
         const renderMicroCharts = () => {
-            // Velocity Chart (Sparkline)
-            if(!velocityChart && document.getElementById('chart-velocity')) {
+            if(document.getElementById('chart-velocity')) {
+                if(velocityChart) velocityChart.destroy();
                 const options1 = {
                     series: [{ data: [12, 28, 15, 35, 20, 45, 52] }],
                     chart: { type: 'area', height: 70, sparkline: { enabled: true } },
@@ -430,10 +434,13 @@
                 velocityChart.render();
             }
             
-            // Premium Donut Chart for Goal
-            if(!focusChart && document.getElementById('chart-focus')) {
+            if(document.getElementById('chart-focus')) {
+                if(focusChart) focusChart.destroy();
+                let localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+                let goalPercentage = Math.floor((localDailyTime / 600) * 100);
+                
                 const options2 = {
-                    series: [0], // Initial state
+                    series: [Math.min(goalPercentage, 100)], 
                     chart: { type: 'radialBar', height: 160, sparkline: { enabled: true } },
                     plotOptions: { radialBar: { 
                         startAngle: -135, endAngle: 135, 
@@ -477,29 +484,38 @@
                         totalSeconds = parseInt(serverStats.total_watch_seconds) || 0;
                         dailySeconds = parseInt(serverStats.daily_watch_seconds) || 0;
                         streakDays = parseInt(serverStats.streak_count) || 0;
+
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        if (localStorage.getItem('vp_active_date') === todayStr) {
+                            localStorage.setItem('vp_daily_sec', dailySeconds); 
+                        } else {
+                            localStorage.setItem('vp_daily_sec', 0);
+                            localStorage.setItem('vp_active_date', todayStr);
+                            dailySeconds = 0; 
+                        }
+                        localStorage.setItem('vp_total_sec', totalSeconds);
                     }
 
                     const localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
-                    const localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
 
-                    // Calculate true data
                     let currentCalculatedTotal = totalSeconds + localPendingTime;
-                    const displayDaily = Math.max(dailySeconds, localDailyTime);
+                    const displayDaily = dailySeconds + localPendingTime;
                     
-                    // Render using the elite formatter
                     document.getElementById('stat-watchtime-advanced').innerHTML = formatTimeAdvanced(currentCalculatedTotal);
                     document.getElementById('stat-dailytime-val').innerHTML = formatTimeAdvanced(displayDaily);
                     document.getElementById('stat-streak-advanced').innerText = streakDays;
                     
-                    // Update the Apple-style Goal Donut (Target: 600s / 10m)
                     let goalPercentage = Math.floor((displayDaily / 600) * 100);
-                    if(goalPercentage > 100) goalPercentage = 100; // Cap at 100% visually
-                    if(focusChart) focusChart.updateSeries([goalPercentage]);
+                    if(focusChart) focusChart.updateSeries([Math.min(goalPercentage, 100)]);
 
                 } catch(e) { 
-                    console.warn("[Dashboard Sync] Secure ledger fetch bypassed. Using offline cache.", e); 
+                    console.warn("[Dashboard Sync] Fetch bypassed. Using offline cache.", e); 
+                    const localTotalTime = parseInt(localStorage.getItem('vp_total_sec')) || 0;
                     const localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+
+                    document.getElementById('stat-watchtime-advanced').innerHTML = formatTimeAdvanced(localTotalTime);
                     document.getElementById('stat-dailytime-val').innerHTML = formatTimeAdvanced(localDailyTime);
+                    
                     let localPercent = Math.floor((localDailyTime / 600) * 100);
                     if(focusChart) focusChart.updateSeries([Math.min(localPercent, 100)]);
                 }
@@ -520,15 +536,12 @@
                 const enrollmentsRef = collection(db, "users", uid, "enrollments");
                 const enrollmentsSnap = await getDocs(enrollmentsRef);
                 let enrolledIds = []; enrollmentsSnap.forEach(doc => enrolledIds.push(doc.id));
-                
                 if (enrolledIds.length === 0) {
                     const userDoc = await getDoc(doc(db, "users", uid));
                     if (userDoc.exists() && userDoc.data().enrolledBatches) enrolledIds = userDoc.data().enrolledBatches;
                 }
-
                 document.getElementById('stat-enrolled-badge').innerText = `${enrolledIds.length} Active`;
                 batchGrid.innerHTML = '';
-
                 if (enrolledIds.length > 0) {
                     for (const batchId of enrolledIds) {
                         const batchRef = doc(db, "batches", batchId);
@@ -544,46 +557,34 @@
         const renderBatchCard = (id, batch) => {
             const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
             const imgHTML = imgUrl ? `<img src="${imgUrl}" class="w-full h-full object-cover rounded-t-[0.9rem]">` : `<div class="w-full h-full flex flex-col justify-center items-center bg-slate-800 text-slate-400 rounded-t-[0.9rem]"><i class="fas fa-laptop-code text-2xl mb-1"></i></div>`;
-            const cardHTML = `
-                <div class="pro-card flex flex-col h-full cursor-pointer group" onclick="window.location.href='study.html?batch=${id}'">
-                    <div class="h-40 relative shrink-0 p-1">
-                        <div class="absolute top-3 left-3 bg-white/95 text-slate-800 px-2 py-1 rounded shadow-sm text-[10px] font-bold tracking-wide uppercase z-10">Enrolled</div>
-                        ${imgHTML}
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col">
-                        <span class="text-brand-600 text-[10px] font-bold uppercase tracking-wider mb-2">${batch.classLevel || 'Class'} • ${batch.stream || 'Gen'}</span>
-                        <h3 class="text-base font-bold text-slate-900 leading-tight mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">${batch.title || 'Untitled'}</h3>
-                        <div class="mt-auto pt-4 border-t border-slate-100">
-                            <button class="w-full py-2 bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-lg group-hover:bg-brand-50 group-hover:text-brand-700 group-hover:border-brand-200 transition-colors">Go to Classroom</button>
-                        </div>
-                    </div>
-                </div>`;
+            const cardHTML = `<div class="pro-card flex flex-col h-full cursor-pointer group" onclick="window.location.href='study.html?batch=${id}'"><div class="h-40 relative shrink-0 p-1"><div class="absolute top-3 left-3 bg-white/95 text-slate-800 px-2 py-1 rounded shadow-sm text-[10px] font-bold tracking-wide uppercase z-10">Enrolled</div>${imgHTML}</div><div class="p-5 flex-1 flex flex-col"><span class="text-brand-600 text-[10px] font-bold uppercase tracking-wider mb-2">${batch.classLevel || 'Class'} • ${batch.stream || 'Gen'}</span><h3 class="text-base font-bold text-slate-900 leading-tight mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">${batch.title || 'Untitled'}</h3><div class="mt-auto pt-4 border-t border-slate-100"><button class="w-full py-2 bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-lg group-hover:bg-brand-50 group-hover:text-brand-700 group-hover:border-brand-200 transition-colors">Go to Classroom</button></div></div></div>`;
             batchGrid.insertAdjacentHTML('beforeend', cardHTML);
         };
 
+        // 🔥 THE FIX: Sahi Test Analytics Function (Direct exam_results loop wala)
         const fetchTestAnalytics = async (uid) => {
             const tableBodyOverview = document.getElementById('overview-test-table');
             const tableBodyDetails = document.getElementById('analytics-table-body');
             let testHistory = [], chartScores = [], chartLabels = [];
-
+            
             try {
                 const examResultsRef = collection(db, `users/${uid}/exam_results`);
                 const examsSnap = await getDocs(examResultsRef);
-
+                
                 if (examsSnap.empty) { renderDummyAnalytics(tableBodyOverview, tableBodyDetails); return; }
-
+                
                 examsSnap.forEach(examDoc => {
-                    const testId = examDoc.id;
+                    const testId = examDoc.id; 
                     const data = examDoc.data();
                     
                     testHistory.push({
                         testId: testId, 
                         attemptId: data.latestAttemptId || testId,
-                        title: data.testTitle || `Mock Test`,
+                        title: data.testTitle || `Mock Test`, 
                         batch: data.batchName || 'Standard Assessment',
-                        attemptNo: data.totalAttempts || 1,
+                        attemptNo: data.totalAttempts || 1, 
                         score: data.latestScore !== undefined ? data.latestScore : (data.score || 0), 
-                        maxMarks: data.maxMarks || 0,
+                        maxMarks: data.maxMarks || 0, 
                         accuracy: data.overallAccuracy || (data.maxMarks ? Math.round(((data.latestScore || data.score || 0) / data.maxMarks) * 100) : 0),
                         dateStr: data.submittedAt ? new Date(data.submittedAt.toMillis()).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : 'Recently',
                         dateMs: data.submittedAt ? data.submittedAt.toMillis() : Date.now()
@@ -592,35 +593,16 @@
                 
                 testHistory.sort((a, b) => b.dateMs - a.dateMs);
                 tableBodyOverview.innerHTML = ''; tableBodyDetails.innerHTML = '';
-
+                
                 testHistory.forEach((record, index) => {
                     if(index < 10) { chartScores.unshift(record.score); chartLabels.unshift(record.title.substring(0,8) + '..'); }
-                    
-                    let percentile = (record.accuracy + (Math.random() * 5)).toFixed(1); 
-                    if(percentile > 99.9) percentile = 99.9;
-
-                    const rowHTML = `
-                        <tr class="group hover:bg-slate-50 transition-colors cursor-default">
-                            <td class="px-5 py-4"><p class="font-semibold text-slate-800">${record.title}</p><p class="text-[10px] text-slate-500 mt-0.5">Attempt #${record.attemptNo}</p></td>
-                            <td class="px-5 py-4 text-xs font-medium text-slate-600">${record.batch}</td>
-                            <td class="px-5 py-4 text-xs font-medium text-slate-600">${record.dateStr}</td>
-                            <td class="px-5 py-4 font-bold text-slate-900">${record.score}<span class="text-slate-400 font-normal text-xs">/${record.maxMarks}</span></td>
-                            <td class="px-5 py-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-bold">${record.accuracy}%</span></td>
-                            <td class="px-5 py-4 text-xs font-bold text-slate-700">${percentile} PR</td>
-                            <td class="px-5 py-4 text-right">
-                                <a href="analytics.html?testId=${record.testId}&attemptId=${record.attemptId}" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 transition">
-                                    <i class="fas fa-file-alt"></i> Report
-                                </a>
-                            </td>
-                        </tr>
-                    `;
+                    let percentile = (record.accuracy + (Math.random() * 5)).toFixed(1); if(percentile > 99.9) percentile = 99.9;
+                    const rowHTML = `<tr class="group hover:bg-slate-50 transition-colors cursor-default"><td class="px-5 py-4"><p class="font-semibold text-slate-800">${record.title}</p><p class="text-[10px] text-slate-500 mt-0.5">Attempt #${record.attemptNo}</p></td><td class="px-5 py-4 text-xs font-medium text-slate-600">${record.batch}</td><td class="px-5 py-4 text-xs font-medium text-slate-600">${record.dateStr}</td><td class="px-5 py-4 font-bold text-slate-900">${record.score}<span class="text-slate-400 font-normal text-xs">/${record.maxMarks}</span></td><td class="px-5 py-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-bold">${record.accuracy}%</span></td><td class="px-5 py-4 text-xs font-bold text-slate-700">${percentile} PR</td><td class="px-5 py-4 text-right"><a href="analytics.html?testId=${record.testId}&attemptId=${record.attemptId}" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 transition"><i class="fas fa-file-alt"></i> Report</a></td></tr>`;
                     if(index < 3) tableBodyOverview.insertAdjacentHTML('beforeend', rowHTML); 
                     tableBodyDetails.insertAdjacentHTML('beforeend', rowHTML);
                 });
-
-                if (chartLabels.length > 0) renderMainChart(chartLabels, chartScores);
-                else renderMainChart(['No Data'], [0]);
-
+                
+                if (chartLabels.length > 0) renderMainChart(chartLabels, chartScores); else renderMainChart(['No Data'], [0]);
             } catch (e) { 
                 console.error("Test Analytics Fetch Error:", e); 
                 renderDummyAnalytics(tableBodyOverview, tableBodyDetails); 
@@ -628,34 +610,15 @@
         };
 
         const renderDummyAnalytics = (ov, dt) => {
-            const dummyHTML = `
-                <tr class="group hover:bg-slate-50 transition-colors">
-                    <td class="px-5 py-4"><p class="font-semibold text-slate-800">Physics Mock #4</p><p class="text-[10px] text-slate-500 mt-0.5">JEE Main Batch A</p></td>
-                    <td class="px-5 py-4 text-xs font-medium text-slate-600">JEE Advanced</td>
-                    <td class="px-5 py-4 text-xs font-medium text-slate-600">Oct 28</td>
-                    <td class="px-5 py-4 font-bold text-slate-900">91<span class="text-slate-400 font-normal text-xs">/100</span></td>
-                    <td class="px-5 py-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-bold">94%</span></td>
-                    <td class="px-5 py-4 text-xs font-bold text-slate-700">98.2 PR</td>
-                    <td class="px-5 py-4 text-right"><a href="#" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600"><i class="fas fa-file-alt"></i> View</a></td>
-                </tr>
-            `;
+            const dummyHTML = `<tr class="group hover:bg-slate-50 transition-colors"><td class="px-5 py-4"><p class="font-semibold text-slate-800">Physics Mock #4</p><p class="text-[10px] text-slate-500 mt-0.5">JEE Main Batch A</p></td><td class="px-5 py-4 text-xs font-medium text-slate-600">JEE Advanced</td><td class="px-5 py-4 text-xs font-medium text-slate-600">Oct 28</td><td class="px-5 py-4 font-bold text-slate-900">91<span class="text-slate-400 font-normal text-xs">/100</span></td><td class="px-5 py-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-bold">94%</span></td><td class="px-5 py-4 text-xs font-bold text-slate-700">98.2 PR</td><td class="px-5 py-4 text-right"><a href="#" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600"><i class="fas fa-file-alt"></i> View</a></td></tr>`;
             ov.innerHTML = dummyHTML; dt.innerHTML = dummyHTML + dummyHTML;
             renderMainChart(['Mock 1', 'Mock 2'], [45, 91]);
         };
 
         const renderMainChart = (labels, scores) => {
-            const options = {
-                series: [{ name: 'Score', data: scores }],
-                chart: { type: 'area', height: 250, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
-                colors: ['#0d9488'], stroke: { curve: 'smooth', width: 2 },
-                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0, stops: [0, 100] } },
-                dataLabels: { enabled: false }, xaxis: { categories: labels, axisBorder: { show: false }, axisTicks: { show: false } },
-                grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
-            };
+            const options = { series: [{ name: 'Score', data: scores }], chart: { type: 'area', height: 250, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' }, colors: ['#0d9488'], stroke: { curve: 'smooth', width: 2 }, fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0, stops: [0, 100] } }, dataLabels: { enabled: false }, xaxis: { categories: labels, axisBorder: { show: false }, axisTicks: { show: false } }, grid: { borderColor: '#f1f5f9', strokeDashArray: 4 } };
             if(dashboardChartInstance) dashboardChartInstance.destroy();
             dashboardChartInstance = new ApexCharts(document.querySelector("#dashboard-analytics-chart"), options);
             dashboardChartInstance.render();
         };
     </script>
-</body>
-</html>
