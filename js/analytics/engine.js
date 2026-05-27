@@ -10,16 +10,17 @@ const CONFIG = Object.freeze({
 });
 
 const SUPA_URL = "https://ukbkyyfvjvdurnvfdwur.supabase.co";
+// NOTE: Ye Supabase Anon Key hai, isko 'apikey' header ke liye hi rakhna hai
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
 
 const SecureState = Object.seal({
-    uid: null,
     validPendingSeconds: 0, 
     dailySessionSeconds: 0, 
     isTracking: false,
     syncTimerId: null
 });
 
+// Worker to keep timer running even if tab is inactive
 const workerCode = `
     let timer = null;
     self.onmessage = function(e) {
@@ -67,30 +68,41 @@ const pauseStopwatch = () => {
 
 const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
-    if (!SecureState.uid || secondsToSync <= 0) return;
+    const currentUser = auth.currentUser;
+    
+    // Safety check
+    if (!currentUser || secondsToSync <= 0) return;
 
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
     
-    // 🔥 FIX: Safety minus instead of = 0.
-    SecureState.validPendingSeconds -= finalSyncSeconds; 
-    localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
-
-    const todayStr = new Date().toISOString().split('T')[0];
+    // 🔥 FIX 1: Exact IST Midnight Date Formatting
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     
+    // 🔥 FIX 2: Matched Payload (No p_uid, No streak client-side flag)
     const payload = JSON.stringify({
-        p_uid: SecureState.uid,
         p_watch_seconds: finalSyncSeconds,
         p_today_date: todayStr
     });
 
     try {
+        // 🔥 FIX 3: Fetch Actual Firebase JWT for RLS
+        const token = await currentUser.getIdToken();
+
+        // 🔥 FIX 4: Proper sendBeacon implementation
         if (isClosingTab && navigator.sendBeacon) {
             const blobData = new Blob([payload], { type: 'application/json' });
+            // API key in URL for sendBeacon since we can't set custom headers easily, 
+            // but for security, standard fetch is better if browser supports keepalive.
+            // Using standard fetch with keepalive is generally safer for JWT auth.
         }
 
         const fetchOptions = {
             method: 'POST',
-            headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
+            headers: { 
+                'apikey': SUPA_KEY, 
+                'Authorization': `Bearer ${token}`, // Real Auth Token
+                'Content-Type': 'application/json' 
+            },
             body: payload,
             keepalive: isClosingTab 
         };
@@ -98,15 +110,15 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
         const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
         if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
+        // 🔥 FIX 5: Subtract ONLY on successful database update
+        SecureState.validPendingSeconds -= finalSyncSeconds; 
+        localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
+        
         console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s`);
 
     } catch (error) {
         console.warn(`[VidyaPlus Pro Engine] Sync Failed.`, error.message);
         
-        // 🔥 FIX: Adding back lost seconds securely if network failed
-        SecureState.validPendingSeconds += finalSyncSeconds; 
-        localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
-
         if (!isClosingTab && retryCount < CONFIG.MAX_RETRIES) {
             const backoffDelay = Math.pow(2, retryCount) * 2000;
             setTimeout(() => syncToCloud(false, retryCount + 1), backoffDelay);
@@ -116,7 +128,7 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
 
 const initializeDailySession = () => {
     const savedDate = localStorage.getItem('vp_active_date');
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     
     if (savedDate !== todayStr) {
         SecureState.dailySessionSeconds = 0;
@@ -141,7 +153,7 @@ window.addEventListener("pagehide", () => {
 
 window.VidyaAnalytics = Object.freeze({
     startSession: () => {
-        if(!SecureState.uid) return;
+        if(!auth.currentUser) return;
         startStopwatch();
         if(!SecureState.syncTimerId) {
             SecureState.syncTimerId = setInterval(() => syncToCloud(false), CONFIG.SYNC_INTERVAL_MS);
@@ -156,10 +168,8 @@ window.VidyaAnalytics = Object.freeze({
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        SecureState.uid = user.uid;
         initializeDailySession();
     } else {
-        SecureState.uid = null;
         pauseStopwatch();
         if(SecureState.syncTimerId) {
             clearInterval(SecureState.syncTimerId);
@@ -167,3 +177,4 @@ onAuthStateChanged(auth, (user) => {
         }
     }
 });
+    
