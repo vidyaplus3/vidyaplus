@@ -17,7 +17,6 @@ export const VideoPlayer = {
             document.head.appendChild(ytScript);
         }
         
-        // 🚨 MISSING FIX 1: Video Container ke asli listeners
         const vContainer = document.getElementById('video-container');
         if(vContainer) {
             vContainer.addEventListener('mousemove', VideoPlayer.showUI);
@@ -25,7 +24,6 @@ export const VideoPlayer = {
             vContainer.addEventListener('click', VideoPlayer.showUI);
         }
 
-        // Settings Menu band karne ka global click
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('settings-menu');
             if (menu && menu.classList.contains('show') && !e.target.closest('.custom-controls')) {
@@ -46,19 +44,14 @@ export const VideoPlayer = {
         let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
         let vidId = match ? match[1] : vidUrl;
         
-        if(typeof YT === 'undefined' || !YT.Player) return alert("Player initialization in progress. Please wait a moment.");
+        if(typeof YT === 'undefined' || !YT.Player) return alert("Player initializing. Please try again in 2 seconds.");
 
         document.getElementById('play-icon').className = "fas fa-pause";
         document.getElementById('progress-fill').style.width = "0%";
         document.getElementById('time-display').innerText = "0:00";
-                document.getElementById('play-icon').className = "fas fa-pause";
-        document.getElementById('progress-fill').style.width = "0%";
-        document.getElementById('time-display').innerText = "0:00";
         
-        // 🚨 UI SYNC FIX: Jab video start ho, toh icon ko bhi permanently Mute dikhao
         const muteIconEl = document.getElementById('mute-icon');
         if(muteIconEl) muteIconEl.className = "fas fa-volume-mute"; 
-        
         
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
@@ -86,19 +79,19 @@ export const VideoPlayer = {
                 },
                 'onStateChange': (event) => {
                     let icon = document.getElementById('play-icon');
+                    // 1 = Playing
                     if(event.data === 1) { 
                         icon.className = "fas fa-pause"; 
                         VideoPlayer.showUI(); 
-                        
-                        // 🟢 PHASE 2 INJECTION: Start Tracking when video plays
-                        if (window.VidyaAnalytics) window.VidyaAnalytics.startSession();
-
-                    } else { 
+                        // Dispatch secure event for engine.js to catch
+                        window.dispatchEvent(new CustomEvent('vp-yt-play'));
+                    } 
+                    // 2 = Paused, 0 = Ended, 3 = Buffering
+                    else if (event.data === 2 || event.data === 0 || event.data === 3) { 
                         icon.className = "fas fa-play"; 
                         VideoPlayer.showUI(); 
-
-                        // 🛑 PHASE 2 INJECTION: Pause Tracking when video pauses/buffers
-                        if (window.VidyaAnalytics) window.VidyaAnalytics.pauseSession();
+                        // Dispatch secure event for engine.js to catch
+                        window.dispatchEvent(new CustomEvent('vp-yt-pause'));
                     }
                 }
             }
@@ -108,13 +101,11 @@ export const VideoPlayer = {
     closeVideo: () => {
         const overlay = document.getElementById('classroom-mode');
         if (overlay.classList.contains('active')) {
-            
-            // 🛑 PHASE 2 INJECTION: Force Sync & Pause when classroom overlay closes
-            if (window.VidyaAnalytics) window.VidyaAnalytics.pauseSession();
-
+            window.dispatchEvent(new CustomEvent('vp-yt-pause')); // Force pause analytics
             if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval); 
             if(VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.pauseVideo) VideoPlayer.ytPlayer.pauseVideo();
-            window.history.back(); 
+            overlay.classList.remove('active'); // Close UI manually
+            // window.history.back(); // Optional: depend on your routing
         }
     },
 
@@ -175,9 +166,11 @@ export const VideoPlayer = {
         if(VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.getCurrentTime && !VideoPlayer.isDragging) {
             let current = VideoPlayer.ytPlayer.getCurrentTime();
             let duration = VideoPlayer.ytPlayer.getDuration();
-            let percentage = (current / duration) * 100;
-            document.getElementById('progress-fill').style.width = percentage + "%";
-            document.getElementById('time-display').innerText = VideoPlayer.formatTime(current);
+            if(duration > 0) {
+                let percentage = (current / duration) * 100;
+                document.getElementById('progress-fill').style.width = percentage + "%";
+                document.getElementById('time-display').innerText = VideoPlayer.formatTime(current);
+            }
         }
     },
 
@@ -238,3 +231,20 @@ export const VideoPlayer = {
         document.getElementById('time-display').innerText = VideoPlayer.formatTime(percentage * duration);
     }
 };
+
+// 🔥 FIX 1: GLOBAL BINDINGS SO HTML INLINE ONCLICKS WORK
+window.togglePlay = VideoPlayer.togglePlay;
+window.skipVideo = VideoPlayer.skipVideo;
+window.toggleMute = VideoPlayer.toggleMute;
+window.toggleFullScreen = VideoPlayer.toggleFullScreen;
+window.toggleSettings = VideoPlayer.toggleSettings;
+window.setSpeed = VideoPlayer.setSpeed;
+window.handleShieldClick = VideoPlayer.handleShieldClick;
+window.startDrag = VideoPlayer.startDrag;
+window.stopDrag = VideoPlayer.stopDrag;
+window.doDrag = VideoPlayer.doDrag;
+window.closeClassroom = VideoPlayer.closeVideo; // Mapping closeClassroom directly
+window.openVideo = VideoPlayer.openVideo;
+
+// Init the API as soon as file loads
+VideoPlayer.initAPI();
