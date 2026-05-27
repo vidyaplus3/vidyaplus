@@ -2,20 +2,16 @@
 import { auth } from '../firebase-init.js'; 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// ==========================================
-// 1. ENTERPRISE CONFIG & CREDENTIALS
-// ==========================================
 const CONFIG = Object.freeze({
     SYNC_INTERVAL_MS: 3 * 60 * 1000, 
     MAX_SYNC_CAP_SEC: 190,           
-    STREAK_TARGET_SEC: 600,          // Frontend only uses this for UI charts now
-    MAX_RETRIES: 3                   // Network fail hone par 3 baar retry karega
+    STREAK_TARGET_SEC: 600,
+    MAX_RETRIES: 3
 });
 
 const SUPA_URL = "https://ukbkyyfvjvdurnvfdwur.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
 
-// Object.seal ensures no hacker can add/remove properties from state via console
 const SecureState = Object.seal({
     uid: null,
     validPendingSeconds: 0, 
@@ -24,11 +20,6 @@ const SecureState = Object.seal({
     syncTimerId: null
 });
 
-// ==========================================
-// 2. BACKGROUND WEB WORKER (Anti-Throttling)
-// ==========================================
-// Browsers throttle JS timers on inactive tabs. We inject a Web Worker dynamically 
-// via Blob to keep the stopwatch running flawlessly in a separate CPU thread.
 const workerCode = `
     let timer = null;
     self.onmessage = function(e) {
@@ -43,7 +34,6 @@ const workerCode = `
 const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
 const timerWorker = new Worker(URL.createObjectURL(workerBlob));
 
-// Handle ticks from the isolated background thread
 timerWorker.onmessage = (e) => {
     if (e.data === 'TICK' && SecureState.isTracking) {
         SecureState.validPendingSeconds += 1;
@@ -57,7 +47,6 @@ timerWorker.onmessage = (e) => {
             localStorage.setItem('vp_daily_sec', SecureState.dailySessionSeconds);
         }
 
-        // Silent UI Broadcast (So dashboard updates live without tight coupling)
         window.dispatchEvent(new CustomEvent('vp-telemetry-tick', { 
             detail: { daily: SecureState.dailySessionSeconds } 
         }));
@@ -67,7 +56,7 @@ timerWorker.onmessage = (e) => {
 const startStopwatch = () => {
     if (SecureState.isTracking || document.hidden) return;
     SecureState.isTracking = true;
-    timerWorker.postMessage('START'); // Command worker to start clock
+    timerWorker.postMessage('START');
 };
 
 const pauseStopwatch = () => {
@@ -76,24 +65,18 @@ const pauseStopwatch = () => {
     timerWorker.postMessage('STOP');
 };
 
-// ==========================================
-// 3. ZERO-TRUST RPC SYNC WITH EXPONENTIAL BACKOFF
-// ==========================================
 const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     if (!SecureState.uid || secondsToSync <= 0) return;
 
-    // Frontend strict cap - limits max payload injection
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
     
-    // Optimistic Reset
-    SecureState.validPendingSeconds = 0; 
-    localStorage.setItem('vp_pending_sec', 0);
+    // 🔥 FIX: Safety minus instead of = 0.
+    SecureState.validPendingSeconds -= finalSyncSeconds; 
+    localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
 
     const todayStr = new Date().toISOString().split('T')[0];
     
-    // 🔥 SECURITY UPGRADE: p_is_streak_valid completely removed.
-    // Server will calculate validity using its own backend logic.
     const payload = JSON.stringify({
         p_uid: SecureState.uid,
         p_watch_seconds: finalSyncSeconds,
@@ -101,10 +84,8 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     });
 
     try {
-        // If tab is closing, prioritize Keepalive for guaranteed delivery
         if (isClosingTab && navigator.sendBeacon) {
             const blobData = new Blob([payload], { type: 'application/json' });
-            // Fallback for beacon
         }
 
         const fetchOptions = {
@@ -117,24 +98,22 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
         const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
         if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s (Retry: ${retryCount})`);
+        console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s`);
 
     } catch (error) {
         console.warn(`[VidyaPlus Pro Engine] Sync Failed.`, error.message);
-        SecureState.validPendingSeconds += finalSyncSeconds; // Revert time safely
+        
+        // 🔥 FIX: Adding back lost seconds securely if network failed
+        SecureState.validPendingSeconds += finalSyncSeconds; 
+        localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
 
-        // Exponential Backoff Retry Logic
         if (!isClosingTab && retryCount < CONFIG.MAX_RETRIES) {
-            const backoffDelay = Math.pow(2, retryCount) * 2000; // 2s, 4s, 8s
-            console.log(`[VidyaPlus Pro Engine] Retrying in ${backoffDelay}ms...`);
+            const backoffDelay = Math.pow(2, retryCount) * 2000;
             setTimeout(() => syncToCloud(false, retryCount + 1), backoffDelay);
         }
     }
 };
 
-// ==========================================
-// 4. AUTONOMOUS LIFECYCLE & EVENT HOOKS
-// ==========================================
 const initializeDailySession = () => {
     const savedDate = localStorage.getItem('vp_active_date');
     const todayStr = new Date().toISOString().split('T')[0];
@@ -155,16 +134,11 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-// Critical exit sync
 window.addEventListener("pagehide", () => {
     pauseStopwatch();
     if (SecureState.validPendingSeconds > 0) syncToCloud(true); 
 });
 
-// ==========================================
-// 5. HARDENED GLOBAL API EXPORT
-// ==========================================
-// Object.freeze ensures that the student cannot modify these functions via console
 window.VidyaAnalytics = Object.freeze({
     startSession: () => {
         if(!SecureState.uid) return;
@@ -180,7 +154,6 @@ window.VidyaAnalytics = Object.freeze({
     forceSync: () => syncToCloud(false)
 });
 
-// Init Sequence
 onAuthStateChanged(auth, (user) => {
     if (user) {
         SecureState.uid = user.uid;
