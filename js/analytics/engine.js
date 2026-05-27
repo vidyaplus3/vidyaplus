@@ -8,7 +8,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 const CONFIG = Object.freeze({
     SYNC_INTERVAL_MS: 3 * 60 * 1000, 
     MAX_SYNC_CAP_SEC: 190,           
-    STREAK_TARGET_SEC: 600,
+    STREAK_TARGET_SEC: 600,          // Frontend only uses this for UI charts now
     MAX_RETRIES: 3                   // Network fail hone par 3 baar retry karega
 });
 
@@ -77,12 +77,13 @@ const pauseStopwatch = () => {
 };
 
 // ==========================================
-// 3. ADVANCED RPC SYNC WITH EXPONENTIAL BACKOFF
+// 3. ZERO-TRUST RPC SYNC WITH EXPONENTIAL BACKOFF
 // ==========================================
 const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     if (!SecureState.uid || secondsToSync <= 0) return;
 
+    // Frontend strict cap - limits max payload injection
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
     
     // Optimistic Reset
@@ -90,20 +91,20 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     localStorage.setItem('vp_pending_sec', 0);
 
     const todayStr = new Date().toISOString().split('T')[0];
-    const isStreakValid = SecureState.dailySessionSeconds >= CONFIG.STREAK_TARGET_SEC;
     
+    // 🔥 SECURITY UPGRADE: p_is_streak_valid completely removed.
+    // Server will calculate validity using its own backend logic.
     const payload = JSON.stringify({
         p_uid: SecureState.uid,
         p_watch_seconds: finalSyncSeconds,
-        p_is_streak_valid: isStreakValid,
         p_today_date: todayStr
     });
 
     try {
-        // If tab is closing, prioritize Beacon API / Keepalive for guaranteed delivery
+        // If tab is closing, prioritize Keepalive for guaranteed delivery
         if (isClosingTab && navigator.sendBeacon) {
             const blobData = new Blob([payload], { type: 'application/json' });
-            // SendBeacon bypassing complex CORS is tricky, so we rely on fetch keepalive as fallback
+            // Fallback for beacon
         }
 
         const fetchOptions = {
