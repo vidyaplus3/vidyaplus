@@ -2,23 +2,16 @@
 import { auth } from '../firebase-init.js'; 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// ==========================================
-// 1. ENGINE CONFIGURATION & SECURE CONSTANTS
-// ==========================================
 const CONFIG = {
-    SYNC_INTERVAL_MS: 3 * 60 * 1000, // Sync every 3 minutes
-    MAX_SYNC_CAP_SEC: 190,           // Strict cap per sync to prevent massive injection
-    STREAK_TARGET_SEC: 600           // 10 Mins focus required for streak
+    SYNC_INTERVAL_MS: 3 * 60 * 1000, // 3 Mins interval
+    MAX_SYNC_CAP_SEC: 190,           // Anti-cheat cap
+    STREAK_TARGET_SEC: 600           // 10 Mins (600s) for streak
 };
 
-// Supabase Credentials (from your dashboard config)
+// Tumhare credentials
 const SUPA_URL = "https://ukbkyyfvjvdurnvfdwur.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
 
-// ==========================================
-// 2. ENCAPSULATED MEMORY STATE (Hacker-Proof)
-// ==========================================
-// By keeping this outside the window object, console hackers cannot access or modify these values.
 const SecureState = {
     uid: null,
     validPendingSeconds: 0, 
@@ -29,22 +22,21 @@ const SecureState = {
     animationFrameId: null
 };
 
-// ==========================================
-// 3. CORE TRACKING LOGIC (Delta Verification)
-// ==========================================
+// 1. ENGINE LOOP (Local Tracking)
 const engineLoop = () => {
     if (!SecureState.isTracking) return;
 
     const now = Date.now();
     const delta = (now - SecureState.lastTickTime) / 1000;
 
-    // SECURITY CHECK: Accept only if time jump is natural (less than 2 seconds).
-    // This blocks speed-hacks or system clock manipulation.
+    // Reject abnormal time jumps (Speed hacks)
     if (delta > 0 && delta < 2.0) {
         SecureState.validPendingSeconds += delta;
         SecureState.dailySessionSeconds += delta;
         
-        // Minor local backup for UI transitions only (capped at 5 mins to prevent exploit)
+        let currentLocalTotal = parseInt(localStorage.getItem('vp_total_sec')) || 0;
+        localStorage.setItem('vp_total_sec', Math.floor(currentLocalTotal + delta));
+        
         if(SecureState.validPendingSeconds < 300) {
             localStorage.setItem('vp_pending_sec', Math.floor(SecureState.validPendingSeconds));
             localStorage.setItem('vp_daily_sec', Math.floor(SecureState.dailySessionSeconds));
@@ -52,19 +44,11 @@ const engineLoop = () => {
     }
     
     SecureState.lastTickTime = now;
-    
-    // Check Streak Milestone 
-    if (Math.floor(SecureState.dailySessionSeconds) === CONFIG.STREAK_TARGET_SEC) {
-        console.log("🔥 Milestone Reached: Streak valid for today.");
-    }
-
     SecureState.animationFrameId = requestAnimationFrame(engineLoop);
 };
 
 const startStopwatch = () => {
-    // SECURITY CHECK: Do not track if the tab is hidden
     if (SecureState.isTracking || document.hidden) return;
-    
     SecureState.isTracking = true;
     SecureState.lastTickTime = Date.now();
     engineLoop();
@@ -76,83 +60,52 @@ const pauseStopwatch = () => {
     cancelAnimationFrame(SecureState.animationFrameId);
 };
 
-// ==========================================
-// 4. SECURE SUPABASE BATCHED SYNC (UPSERT)
-// ==========================================
+// 2. RPC CLOUD SYNC (Direct Database Communication)
 const syncToCloud = async (isClosingTab = false) => {
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     if (!SecureState.uid || secondsToSync <= 0) return;
 
-    // Anti-Cheat: Cap the maximum time that can be uploaded at once
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
     
-    // Optimistic Reset (prevents double counting if user spams buttons)
+    // Clear pending instantly for optimistic UI
     SecureState.validPendingSeconds = 0; 
     localStorage.setItem('vp_pending_sec', 0);
 
     const todayStr = new Date().toISOString().split('T')[0];
+    const isStreakValid = SecureState.dailySessionSeconds >= CONFIG.STREAK_TARGET_SEC;
 
     try {
-        // Step 1: Fetch Current Truth from Supabase
-        const getRes = await fetch(`${SUPA_URL}/rest/v1/user_analytics?uid=eq.${SecureState.uid}&select=*`, {
-            method: 'GET',
-            headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
-        });
-        
-        const serverData = await getRes.json();
-        
-        let newTotal = finalSyncSeconds;
-        let newDaily = finalSyncSeconds;
-        let streak = 0;
-
-        if (serverData && serverData.length > 0) {
-            const row = serverData[0];
-            newTotal += parseInt(row.total_watch_seconds) || 0;
-            
-            // Logic for Daily Reset vs Continuation
-            if (row.last_active_date === todayStr) {
-                newDaily += parseInt(row.daily_watch_seconds) || 0;
-                streak = parseInt(row.streak_count) || 0;
-            } else {
-                // It's a new day! Add streak only if they hit the target today
-                streak = (parseInt(row.streak_count) || 0) + (newDaily >= CONFIG.STREAK_TARGET_SEC ? 1 : 0);
-            }
-        }
-
-        // Step 2: Push Master Data using Upsert (POST with merge-duplicates)
+        // ✨ THE MAGIC: Calling your Supabase RPC Function directly!
         const fetchOptions = {
             method: 'POST',
             headers: {
                 'apikey': SUPA_KEY,
                 'Authorization': `Bearer ${SUPA_KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates' // Critical for Upsert functionality
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                uid: SecureState.uid,
-                total_watch_seconds: newTotal,
-                daily_watch_seconds: newDaily,
-                last_active_date: todayStr,
-                streak_count: streak
+                p_uid: SecureState.uid,
+                p_watch_seconds: finalSyncSeconds,
+                p_is_streak_valid: isStreakValid,
+                p_today_date: todayStr
             }),
-            keepalive: isClosingTab // Ensures request completes even if tab closes
+            keepalive: isClosingTab 
         };
 
-        await fetch(`${SUPA_URL}/rest/v1/user_analytics`, fetchOptions);
+        const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
         
-        console.log(`[VidyaPlus Pro Engine] Synced ${finalSyncSeconds}s successfully to Supabase.`);
+        if(!response.ok) throw new Error("RPC Execution Blocked");
+
+        console.log(`[VidyaPlus Pro Engine] Sent +${finalSyncSeconds}s via RPC.`);
 
     } catch (error) {
-        console.error("[VidyaPlus Pro Engine] Network Sync Failed. Recovering state.", error);
-        // Put the valid time back into the local queue if network fails
+        console.error("[VidyaPlus Pro Engine] RPC Sync Failed. Retrying later.", error);
+        // Put time back if network completely fails
         SecureState.validPendingSeconds += finalSyncSeconds;
     }
 };
 
-// ==========================================
-// 5. AUTONOMOUS LIFECYCLE & ANTI-AFK
-// ==========================================
-
+// 3. LIFECYCLE MANAGEMENT
 const initializeDailySession = () => {
     const savedDate = localStorage.getItem('vp_active_date');
     const todayStr = new Date().toISOString().split('T')[0];
@@ -166,28 +119,18 @@ const initializeDailySession = () => {
     }
 };
 
-// Anti-AFK Listener: Pauses timer instantly if student opens another tab
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         pauseStopwatch();
-        syncToCloud(false); // Force a sync on backgrounding
-    } else {
-        // We DO NOT auto-resume. The video player logic should re-trigger this 
-        // to ensure the student is actually watching.
+        syncToCloud(false); 
     }
 });
 
-// Window Close Listener
 window.addEventListener("beforeunload", () => {
     pauseStopwatch();
-    if (SecureState.validPendingSeconds > 0) {
-        syncToCloud(true); // 'keepalive' sync
-    }
+    if (SecureState.validPendingSeconds > 0) syncToCloud(true); 
 });
 
-// ==========================================
-// 6. ISOLATED GLOBAL EXPORT (For Player Control)
-// ==========================================
 window.VidyaAnalytics = {
     startSession: () => {
         if(!SecureState.uid) return;
@@ -203,7 +146,6 @@ window.VidyaAnalytics = {
     forceSync: () => syncToCloud(false)
 };
 
-// Auth Initialization
 onAuthStateChanged(auth, (user) => {
     if (user) {
         SecureState.uid = user.uid;
