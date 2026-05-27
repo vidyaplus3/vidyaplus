@@ -191,3 +191,17 @@ onAuthStateChanged(auth, (user) => {
         }
     }
 });
+// engine.js me kahin bhi neeche ye add kar do
+window.addEventListener('vp-yt-play', () => {
+    if(auth.currentUser) {
+        if(!SecureState.syncTimerId) {
+            SecureState.syncTimerId = setInterval(() => syncToCloud(false), CONFIG.SYNC_INTERVAL_MS);
+        }
+        startStopwatch();
+    }
+});
+
+window.addEventListener('vp-yt-pause', () => {
+    pauseStopwatch();
+});
+
