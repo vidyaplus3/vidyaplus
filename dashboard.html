@@ -397,8 +397,17 @@
     };
 
     window.logoutUser = () => {
-        if(confirm("Terminate current session?")) signOut(auth).then(() => window.location.replace("index.html"));
-    };
+    if(confirm("Terminate current session?")) {
+        // Log out hone par purana analytics cache uda do
+        localStorage.removeItem('vp_total_sec');
+        localStorage.removeItem('vp_daily_sec');
+        localStorage.removeItem('vp_pending_sec');
+        localStorage.removeItem('vp_active_date');
+        
+        signOut(auth).then(() => window.location.replace("index.html"));
+    }
+};
+            
 
     // --- ELITE UI TIME FORMATTER ---
     const formatTimeAdvanced = (seconds) => {
