@@ -10,7 +10,6 @@ const CONFIG = Object.freeze({
 });
 
 const SUPA_URL = "https://ukbkyyfvjvdurnvfdwur.supabase.co";
-// NOTE: Ye Supabase Anon Key hai, isko 'apikey' header ke liye hi rakhna hai
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
 
 const SecureState = Object.seal({
@@ -20,7 +19,9 @@ const SecureState = Object.seal({
     syncTimerId: null
 });
 
-// Worker to keep timer running even if tab is inactive
+// 🔥 NEW: Cross-Tab Communication Channel
+const tabChannel = new BroadcastChannel('vp-analytics-channel');
+
 const workerCode = `
     let timer = null;
     self.onmessage = function(e) {
@@ -54,10 +55,24 @@ timerWorker.onmessage = (e) => {
     }
 };
 
+// Listen for other tabs claiming tracking authority
+tabChannel.onmessage = (event) => {
+    if (event.data.type === 'OTHER_TAB_PLAYING') {
+        // Agar doosri tab me video play hui, toh is tab ka tracking turant band karo
+        if (SecureState.isTracking) {
+            console.log("[VidyaPlus Engine] Yielding tracking to another tab.");
+            pauseStopwatch();
+        }
+    }
+};
+
 const startStopwatch = () => {
     if (SecureState.isTracking || document.hidden) return;
     SecureState.isTracking = true;
     timerWorker.postMessage('START');
+    
+    // Broadcast to all other tabs to stop their tracking
+    tabChannel.postMessage({ type: 'OTHER_TAB_PLAYING' });
 };
 
 const pauseStopwatch = () => {
@@ -70,47 +85,34 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     const currentUser = auth.currentUser;
     
-    // Safety check
     if (!currentUser || secondsToSync <= 0) return;
 
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
-    
-    // 🔥 FIX 1: Exact IST Midnight Date Formatting
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     
-    // 🔥 FIX 2: Matched Payload (No p_uid, No streak client-side flag)
     const payload = JSON.stringify({
         p_watch_seconds: finalSyncSeconds,
         p_today_date: todayStr
     });
 
     try {
-        // 🔥 FIX 3: Fetch Actual Firebase JWT for RLS
         const token = await currentUser.getIdToken();
-
-        // 🔥 FIX 4: Proper sendBeacon implementation
-        if (isClosingTab && navigator.sendBeacon) {
-            const blobData = new Blob([payload], { type: 'application/json' });
-            // API key in URL for sendBeacon since we can't set custom headers easily, 
-            // but for security, standard fetch is better if browser supports keepalive.
-            // Using standard fetch with keepalive is generally safer for JWT auth.
-        }
 
         const fetchOptions = {
             method: 'POST',
             headers: { 
                 'apikey': SUPA_KEY, 
-                'Authorization': `Bearer ${token}`, // Real Auth Token
+                'Authorization': `Bearer ${token}`, 
                 'Content-Type': 'application/json' 
             },
             body: payload,
-            keepalive: isClosingTab 
+            keepalive: isClosingTab // SendBeacon replacement that allows headers
         };
 
         const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
         if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        // 🔥 FIX 5: Subtract ONLY on successful database update
+        // Subtract ONLY on absolute success
         SecureState.validPendingSeconds -= finalSyncSeconds; 
         localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
         
@@ -151,18 +153,30 @@ window.addEventListener("pagehide", () => {
     if (SecureState.validPendingSeconds > 0) syncToCloud(true); 
 });
 
+// 🔥 NEW: Removed the manual start/pause API so hackers can't call it. 
+// Instead, we export a binding function that attaches directly to the video element.
 window.VidyaAnalytics = Object.freeze({
-    startSession: () => {
-        if(!auth.currentUser) return;
-        startStopwatch();
-        if(!SecureState.syncTimerId) {
-            SecureState.syncTimerId = setInterval(() => syncToCloud(false), CONFIG.SYNC_INTERVAL_MS);
-        }
+    bindToVideoPlayer: (videoElement) => {
+        if(!videoElement || !auth.currentUser) return;
+        
+        console.log("[VidyaPlus Engine] Securely bound to video player.");
+
+        // Attach events to actual video playback status
+        videoElement.addEventListener('play', () => {
+            if(!SecureState.syncTimerId) {
+                SecureState.syncTimerId = setInterval(() => syncToCloud(false), CONFIG.SYNC_INTERVAL_MS);
+            }
+            startStopwatch();
+        });
+        
+        videoElement.addEventListener('pause', pauseStopwatch);
+        videoElement.addEventListener('waiting', pauseStopwatch);
+        videoElement.addEventListener('ended', () => {
+            pauseStopwatch();
+            syncToCloud(false);
+        });
     },
-    pauseSession: () => {
-        pauseStopwatch();
-        syncToCloud(false);
-    },
+    
     forceSync: () => syncToCloud(false)
 });
 
@@ -177,4 +191,3 @@ onAuthStateChanged(auth, (user) => {
         }
     }
 });
-    
