@@ -1,7 +1,7 @@
 /**
- * @fileoverview Enterprise-Grade Telemetry Engine for VidyaPlus
- * Integrates Firebase Auth (JWT) with Supabase RPC for zero-trust tracking.
- * Features: Beacon Fallback, Token Auto-Refresh, Optimistic Offline Queueing, Atomic State.
+ * @fileoverview Ultra-Enterprise Telemetry Engine v3.0 | VidyaPlus
+ * Features: BroadcastChannel (Multi-tab protection), Exponential Backoff, 
+ * Network Navigator, sendBeacon API Fallback.
  */
 
 import { auth } from '../firebase-init.js';
@@ -12,26 +12,57 @@ const SUPABASE = {
     KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA"
 };
 
-class VidyaTelemetryEngine {
+class UltraTelemetryEngine {
     constructor() {
         this.uid = null;
-        this.sessionStart = null;
+        this.sessionAnchor = null;
         this.isTracking = false;
         this.syncTimer = null;
+        this.retryCount = 0;
         
-        // Strict Constants
-        this.SYNC_INTERVAL = 5 * 60 * 1000; // 5 Mins heartbeat
-        this.MAX_SYNC_CAP = 310;            // 5 Mins + 10s buffer max per packet
-        this.STREAK_THRESHOLD = 600;         // 10 Mins daily required for streak
+        // Strict Constraints
+        this.SYNC_INTERVAL = 4 * 60 * 1000;  // 4 Mins optimal heartbeat
+        this.MAX_SYNC_CAP = 300;             // Max 5 mins packet
+        this.STREAK_THRESHOLD = 600;         // 10 Mins daily requirement
 
+        // Cross-Tab Communication (Anti-Cheat)
+        this.tabChannel = new BroadcastChannel('vidyaplus_telemetry_bus');
+        this.isMasterTab = true; 
+
+        this._initNetworkListeners();
         this._bindLifecycleEvents();
+        this._initTabElection();
     }
 
-    // Initialize user session upon auth state verification
+    // =========================================
+    // 1. CROSS-TAB ELECTION (Multi-Tab Protection)
+    // =========================================
+    _initTabElection() {
+        // Jab naya tab khule, baakiyo ko batao
+        this.tabChannel.postMessage({ type: 'NEW_TAB_OPENED', time: Date.now() });
+
+        this.tabChannel.onmessage = (event) => {
+            const data = event.data;
+            if (data.type === 'NEW_TAB_OPENED') {
+                // Agar main purana tab hu, toh naye tab ko bolunga main Master hu
+                this.tabChannel.postMessage({ type: 'I_AM_MASTER' });
+            } 
+            else if (data.type === 'I_AM_MASTER') {
+                // Agar kisi aur tab ne kaha wo master hai, toh main tracking band kar dunga
+                console.warn("[Telemetry] Multiple tabs detected. Yielding tracking to Master Tab.");
+                this.isMasterTab = false;
+                this.stopTracking(true); // Force stop locally
+            }
+        };
+    }
+
+    // =========================================
+    // 2. CORE ENGINE INITIALIZATION
+    // =========================================
     initUser(user) {
         if (user) {
             this.uid = user.uid;
-            this._recoverLocalQueue();
+            this._recoverState();
             this._startHeartbeat();
         } else {
             this.uid = null;
@@ -40,33 +71,32 @@ class VidyaTelemetryEngine {
         }
     }
 
-    // Core Time tracking immune to browser background throttling
     _calculateDelta() {
-        if (!this.sessionStart) return 0;
+        if (!this.sessionAnchor || !this.isMasterTab) return 0;
         const now = Date.now();
-        const deltaSec = Math.floor((now - this.sessionStart) / 1000);
-        this.sessionStart = now; // Reset anchor point
+        const deltaSec = Math.floor((now - this.sessionAnchor) / 1000);
+        this.sessionAnchor = now; 
         return deltaSec;
     }
 
     startTracking() {
-        if (this.isTracking || !this.uid) return;
+        if (this.isTracking || !this.uid || !this.isMasterTab) return;
         this.isTracking = true;
-        this.sessionStart = Date.now();
-        console.info("[Telemetry] Active monitoring started");
+        this.sessionAnchor = Date.now();
+        console.info("[Telemetry] High-precision monitoring engaged.");
     }
 
-    stopTracking() {
-        if (!this.isTracking) return;
+    stopTracking(force = false) {
+        if (!this.isTracking && !force) return;
         const elapsed = this._calculateDelta();
-        this._queueTimeLocally(elapsed);
+        this._queueTime(elapsed);
         
         this.isTracking = false;
-        this.sessionStart = null;
-        this.syncWithCloud(); // Attempt push immediately on pause/stop
+        this.sessionAnchor = null;
+        if(navigator.onLine) this.syncWithCloud(); 
     }
 
-    _queueTimeLocally(seconds) {
+    _queueTime(seconds) {
         if (seconds <= 0) return;
         let pending = parseInt(localStorage.getItem('vp_pending_sec') || '0');
         let daily = parseInt(localStorage.getItem('vp_daily_sec') || '0');
@@ -75,18 +105,14 @@ class VidyaTelemetryEngine {
         localStorage.setItem('vp_daily_sec', daily + seconds);
     }
 
-    /**
-     * Executes atomic sync with Supabase PostgreSQL via RPC.
-     * @param {boolean} isClosing - Set to true if triggered via beforeunload
-     */
+    // =========================================
+    // 3. ADVANCED NETWORK & SYNC LOGIC
+    // =========================================
     async syncWithCloud(isClosing = false) {
-        // Flush any active session time to queue before syncing
-        if (this.isTracking) {
-            this._queueTimeLocally(this._calculateDelta());
-        }
+        if (this.isTracking) this._queueTime(this._calculateDelta());
 
         let pending = parseInt(localStorage.getItem('vp_pending_sec') || '0');
-        if (pending <= 0 || !this.uid || !auth.currentUser) return;
+        if (pending <= 0 || !this.uid || !auth.currentUser || !navigator.onLine) return;
 
         let syncAmount = Math.min(pending, this.MAX_SYNC_CAP);
         let daily = parseInt(localStorage.getItem('vp_daily_sec') || '0');
@@ -97,16 +123,21 @@ class VidyaTelemetryEngine {
             p_today_date: new Date().toISOString().split('T')[0]
         };
 
-        // Optimistic State Update: Remove from local queue immediately to prevent race conditions
+        // Optimistic Deduction
         localStorage.setItem('vp_pending_sec', pending - syncAmount);
 
         try {
-            // Attempt graceful token fetch, fallback to forced refresh if cache fails
-            const token = await auth.currentUser.getIdToken(false).catch(() => auth.currentUser.getIdToken(true));
+            const token = await auth.currentUser.getIdToken();
+            
+            // OS-Level Guarantee during Tab Close
+            if (isClosing && navigator.sendBeacon) {
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                navigator.sendBeacon(SUPABASE.URL, blob);
+                return;
+            }
 
             const response = await fetch(SUPABASE.URL, {
                 method: 'POST',
-                keepalive: isClosing, // Guarantees network transmission even if OS closes the tab
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': SUPABASE.KEY,
@@ -115,62 +146,89 @@ class VidyaTelemetryEngine {
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-            console.info(`[Telemetry] Verified Sync: ${syncAmount}s packet securely transmitted.`);
+            if (!response.ok) throw new Error(`Server Rejected: ${response.status}`);
+            
+            console.info(`[Telemetry] Packet secured: ${syncAmount}s`);
+            this.retryCount = 0; // Reset retry logic on success
 
         } catch (error) {
-            console.warn("[Telemetry] Transmission failed. Data restored to secure queue.", error);
-            // Revert queue on failure
+            console.error("[Telemetry] Transmission Error:", error);
+            
+            // Revert Deduction
             let currentPending = parseInt(localStorage.getItem('vp_pending_sec') || '0');
             localStorage.setItem('vp_pending_sec', currentPending + syncAmount);
+            
+            // Exponential Backoff Trigger (Max 3 retries)
+            if (!isClosing && this.retryCount < 3) {
+                this.retryCount++;
+                const backoffTime = Math.pow(2, this.retryCount) * 2000; // 4s, 8s, 16s
+                console.warn(`[Telemetry] Retrying in ${backoffTime/1000}s...`);
+                setTimeout(() => this.syncWithCloud(), backoffTime);
+            }
         }
     }
 
     _startHeartbeat() {
         if (this.syncTimer) clearInterval(this.syncTimer);
-        this.syncTimer = setInterval(() => this.syncWithCloud(), this.SYNC_INTERVAL);
+        this.syncTimer = setInterval(() => {
+            // Adjust sync dynamically based on network connection (Slow 3G gets fewer syncs)
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection && connection.effectiveType === 'slow-2g') return; // Skip heartbeat if net is extremely poor
+            
+            this.syncWithCloud();
+        }, this.SYNC_INTERVAL);
     }
 
-    _recoverLocalQueue() {
+    // =========================================
+    // 4. LIFECYCLE & RECOVERY
+    // =========================================
+    _recoverState() {
         const todayStr = new Date().toISOString().split('T')[0];
         const savedDate = localStorage.getItem('vp_active_date');
         
-        // Reset daily accumulator on a new day
         if (savedDate !== todayStr) {
             localStorage.setItem('vp_daily_sec', '0');
             localStorage.setItem('vp_active_date', todayStr);
         }
-        
-        this.syncWithCloud();
+        if(navigator.onLine) this.syncWithCloud();
+    }
+
+    _initNetworkListeners() {
+        window.addEventListener('online', () => {
+            console.info("[Telemetry] Network restored. Flushing offline queue.");
+            this.retryCount = 0;
+            this.syncWithCloud();
+        });
+        window.addEventListener('offline', () => {
+            console.warn("[Telemetry] Connection lost. Storing data in secure offline queue.");
+        });
     }
 
     _bindLifecycleEvents() {
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
                 this.syncWithCloud(false);
-            } else if (this.isTracking) {
-                // Readjust session anchor when returning from background
-                this.sessionStart = Date.now();
+            } else if (this.isTracking && this.isMasterTab) {
+                this.sessionAnchor = Date.now();
             }
         });
 
-        // The beacon fallback trigger
-        window.addEventListener("beforeunload", () => {
-            this.syncWithCloud(true);
-        });
+        window.addEventListener("pagehide", () => this.syncWithCloud(true)); // More reliable than beforeunload on mobile
+        window.addEventListener("beforeunload", () => this.syncWithCloud(true));
     }
 }
 
-// ==========================================
-// SINGLETON EXPORT & AUTH BINDING
-// ==========================================
+// =========================================
+// SINGLETON EXPORT & BINDINGS
+// =========================================
 
-const AnalyticsEngine = new VidyaTelemetryEngine();
+const Engine = new UltraTelemetryEngine();
 
-onAuthStateChanged(auth, (user) => AnalyticsEngine.initUser(user));
+onAuthStateChanged(auth, (user) => Engine.initUser(user));
 
 window.VidyaAnalytics = {
-    startSession: () => AnalyticsEngine.startTracking(),
-    pauseSession: () => AnalyticsEngine.stopTracking(),
-    forceSync: () => AnalyticsEngine.syncWithCloud()
+    startSession: () => Engine.startTracking(),
+    pauseSession: () => Engine.stopTracking(),
+    forceSync: () => Engine.syncWithCloud()
 };
+                                
