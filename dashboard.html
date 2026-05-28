@@ -473,7 +473,7 @@
         }
     };
 
-    // --- AUTH AND SYNC FLOW ---
+        // --- AUTH AND SYNC FLOW ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
@@ -506,17 +506,12 @@
                     dailySeconds = parseInt(serverStats.daily_watch_seconds) || 0;
                     streakDays = parseInt(serverStats.streak_count) || 0;
 
-                    // ✅ NAYA
-const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                    // ✅ IST Timezone Conversion
+                    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
                     
-                    
-                    if (localStorage.getItem('vp_active_date') === todayStr) {
-                        localStorage.setItem('vp_daily_sec', dailySeconds); 
-                    } else {
-                        localStorage.setItem('vp_daily_sec', 0);
-                        localStorage.setItem('vp_active_date', todayStr);
-                        dailySeconds = 0; 
-                    }
+                    // 🔥 THE FIX: ALWAYS trust the server! "if/else" removed.
+                    localStorage.setItem('vp_daily_sec', dailySeconds);
+                    localStorage.setItem('vp_active_date', todayStr);
                     localStorage.setItem('vp_total_sec', totalSeconds);
                 }
 
@@ -557,6 +552,7 @@ const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkat
             window.location.replace("login.html");
         }
     });
+            
     
     // 🔥 FIX: Batched Promise Fetch (Resolves sequential N+1 delay)
     const fetchEnrolledBatches = async (uid) => {
