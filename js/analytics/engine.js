@@ -81,23 +81,37 @@ const pauseStopwatch = () => {
     timerWorker.postMessage('STOP');
 };
 
+let isSyncInProgress = false; // 🔥 Global Lock flag to prevent duplicate calls
+
 const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
+    // 1. Race Condition Prevention: Agar ek sync already chal raha hai, toh doosre ko block kardo
+    if (isSyncInProgress) return;
+    
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     const currentUser = auth.currentUser;
     
+    // 2. Safety Check
     if (!currentUser || secondsToSync <= 0) return;
 
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
-    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     
-    const payload = JSON.stringify({
-        p_watch_seconds: finalSyncSeconds,
-        p_today_date: todayStr
+    // 3. OPTIMISTIC LOCKING: Payload bhejne se PEHLE hi subtract kar lo 
+    // taaki visibilitychange aur pagehide dono ek sath isse read na kar sakein
+    SecureState.validPendingSeconds -= finalSyncSeconds; 
+    localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
+    
+    isSyncInProgress = true; // Lock active!
+
+    // Exact IST Midnight Date Formatting
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    const payload = JSON.stringify({ 
+        p_watch_seconds: finalSyncSeconds, 
+        p_today_date: todayStr 
     });
 
     try {
         const token = await currentUser.getIdToken();
-
+        
         const fetchOptions = {
             method: 'POST',
             headers: { 
@@ -106,21 +120,25 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
                 'Content-Type': 'application/json' 
             },
             body: payload,
-            keepalive: isClosingTab // SendBeacon replacement that allows headers
+            keepalive: isClosingTab 
         };
 
         const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
         if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        // Subtract ONLY on absolute success
-        SecureState.validPendingSeconds -= finalSyncSeconds; 
-        localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
-        
         console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s`);
+        isSyncInProgress = false; // Sync successful, lock khol do
 
     } catch (error) {
         console.warn(`[VidyaPlus Pro Engine] Sync Failed.`, error.message);
         
+        // 4. Rollback: Agar internet ya network absolute fail ho gaya, toh seconds wapas add karo
+        SecureState.validPendingSeconds += finalSyncSeconds; 
+        localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
+        
+        isSyncInProgress = false; // Error aaya, lock fir bhi khol do taaki agla attempt chal sake
+        
+        // 5. SAFE RETRY LOGIC (Jo tumne poocha, wo yahan safely embedded hai)
         if (!isClosingTab && retryCount < CONFIG.MAX_RETRIES) {
             const backoffDelay = Math.pow(2, retryCount) * 2000;
             setTimeout(() => syncToCloud(false, retryCount + 1), backoffDelay);
