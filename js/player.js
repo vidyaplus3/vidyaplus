@@ -3,6 +3,8 @@ import { auth } from './firebase-init.js';
 
 export const VideoPlayer = {
     ytPlayer: null,
+    vjsPlayer: null, 
+    activeEngine: null, // 'youtube' ya 'hls'
     progressInterval: null,
     isDragging: false,
     uiTimeout: null,
@@ -11,12 +13,14 @@ export const VideoPlayer = {
     currentClassroomData: null,
 
     initAPI: () => {
+        // 1. Load YouTube Iframe API
         if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
             const ytScript = document.createElement('script');
             ytScript.src = "https://www.youtube.com/iframe_api";
             document.head.appendChild(ytScript);
         }
         
+        // 2. Setup UI Listeners
         const vContainer = document.getElementById('video-container');
         if(vContainer) {
             vContainer.addEventListener('mousemove', VideoPlayer.showUI);
@@ -33,7 +37,7 @@ export const VideoPlayer = {
     },
 
     formatTime: (time) => {
-        if(isNaN(time)) return "0:00";
+        if(isNaN(time) || !isFinite(time)) return "0:00";
         let min = Math.floor(time / 60);
         let sec = Math.floor(time % 60);
         return min + ":" + (sec < 10 ? "0" + sec : sec);
@@ -41,100 +45,167 @@ export const VideoPlayer = {
 
     openVideo: (vidUrl, title, pdfUrl) => {
         if(!vidUrl) return alert("Playback URL is invalid.");
-        let match = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-        let vidId = match ? match[1] : vidUrl;
         
-        if(typeof YT === 'undefined' || !YT.Player) return alert("Player initializing. Please try again in 2 seconds.");
-
+        // Reset UI
         document.getElementById('play-icon').className = "fas fa-pause";
         document.getElementById('progress-fill').style.width = "0%";
         document.getElementById('time-display').innerText = "0:00";
-        
         const muteIconEl = document.getElementById('mute-icon');
         if(muteIconEl) muteIconEl.className = "fas fa-volume-mute"; 
         
+        // Show Overlay
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
             window.history.pushState({ videoOpen: true }, '', window.location.href);
             overlay.classList.add('active');
         }
 
+        // Set Watermark
         VideoPlayer.currentClassroomData = { title, pdfUrl };
         let userEmail = auth.currentUser ? auth.currentUser.email : "Authenticated User";
-        document.getElementById('video-watermark').innerText = userEmail + " | VidyaPlus";
+        document.getElementById('video-watermark').innerText = userEmail + " | VidyaPlus Secure";
+
+        // Hybrid Engine Router: Check if YouTube or HLS/MP4
+        let ytMatch = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+        
+        if (ytMatch) {
+            VideoPlayer.activeEngine = 'youtube';
+            VideoPlayer.initYouTube(ytMatch[1]);
+        } else {
+            VideoPlayer.activeEngine = 'hls';
+            VideoPlayer.initVideoJS(vidUrl);
+        }
+    },
+
+    initYouTube: (vidId) => {
+        document.getElementById('hls-player').style.display = 'none';
+        document.getElementById('yt-player').style.display = 'block';
+
+        // Destroy VJS if exists
+        if (VideoPlayer.vjsPlayer) { VideoPlayer.vjsPlayer.dispose(); VideoPlayer.vjsPlayer = null; }
+
+        if(typeof YT === 'undefined' || !YT.Player) return alert("YouTube Engine initializing. Try again in 2 seconds.");
 
         if (VideoPlayer.ytPlayer && typeof VideoPlayer.ytPlayer.destroy === 'function') {
             VideoPlayer.ytPlayer.destroy();
             VideoPlayer.ytPlayer = null;
         }
         
-        VideoPlayer.ytPlayer = new YT.Player('vp-player', {
+        // Custom CSS Hack for YouTube Wide screen
+        document.getElementById('yt-player').style.cssText = "width: 300% !important; height: 100% !important; margin-left: -100% !important; border: none !important;";
+
+        VideoPlayer.ytPlayer = new YT.Player('yt-player', {
             videoId: vidId,
             playerVars: { 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'fs': 0, 'modestbranding': 1, 'rel': 0, 'showinfo': 0, 'playsinline': 1, 'origin': window.location.origin, 'mute': 1 },
             events: {
                 'onReady': (event) => { 
                     event.target.playVideo(); 
-                    if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval);
-                    VideoPlayer.progressInterval = setInterval(VideoPlayer.updateProgressBar, 500);
+                    VideoPlayer.startProgressTracking();
                 },
                 'onStateChange': (event) => {
                     let icon = document.getElementById('play-icon');
-                    // 1 = Playing
                     if(event.data === 1) { 
-                        icon.className = "fas fa-pause"; 
-                        VideoPlayer.showUI(); 
-                        // Dispatch secure event for engine.js to catch
+                        icon.className = "fas fa-pause"; VideoPlayer.showUI(); 
                         window.dispatchEvent(new CustomEvent('vp-yt-play'));
-                    } 
-                    // 2 = Paused, 0 = Ended, 3 = Buffering
-                    else if (event.data === 2 || event.data === 0 || event.data === 3) { 
-                        icon.className = "fas fa-play"; 
-                        VideoPlayer.showUI(); 
-                        // Dispatch secure event for engine.js to catch
+                    } else if (event.data === 2 || event.data === 0 || event.data === 3) { 
+                        icon.className = "fas fa-play"; VideoPlayer.showUI(); 
                         window.dispatchEvent(new CustomEvent('vp-yt-pause'));
                     }
                 }
             }
         });
     },
+    initVideoJS: (vidUrl) => {
+        // Destroy old elements
+        if (VideoPlayer.ytPlayer && typeof VideoPlayer.ytPlayer.destroy === 'function') { VideoPlayer.ytPlayer.destroy(); VideoPlayer.ytPlayer = null; }
+        if (VideoPlayer.vjsPlayer) { VideoPlayer.vjsPlayer.dispose(); VideoPlayer.vjsPlayer = null; }
+
+        // Recreate VJS Video Tag (Because dispose() removes it from DOM)
+        document.getElementById('yt-player').style.display = 'none';
+        let wrapper = document.getElementById('player-wrapper');
+        let newVjsEl = document.createElement('video');
+        newVjsEl.id = 'hls-player';
+        newVjsEl.className = 'video-js vjs-default-skin';
+        newVjsEl.style.cssText = "width: 100%; height: 100%;";
+        newVjsEl.setAttribute('playsinline', '');
+        wrapper.appendChild(newVjsEl);
+
+        let sourceType = vidUrl.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4';
+
+        VideoPlayer.vjsPlayer = videojs('hls-player', {
+            controls: false, // Strict UI Control
+            autoplay: true,
+            muted: true,
+            fluid: false,
+            sources: [{ src: vidUrl, type: sourceType }]
+        });
+
+        // Initialize Quality Selector Plugin internally
+        if (typeof VideoPlayer.vjsPlayer.httpSourceSelector === 'function') {
+            VideoPlayer.vjsPlayer.httpSourceSelector();
+        }
+
+        VideoPlayer.vjsPlayer.ready(() => {
+            VideoPlayer.startProgressTracking();
+            VideoPlayer.vjsPlayer.play();
+        });
+
+        VideoPlayer.vjsPlayer.on('play', () => {
+            document.getElementById('play-icon').className = "fas fa-pause";
+            window.dispatchEvent(new CustomEvent('vp-yt-play'));
+        });
+
+        VideoPlayer.vjsPlayer.on('pause', () => {
+            document.getElementById('play-icon').className = "fas fa-play";
+            window.dispatchEvent(new CustomEvent('vp-yt-pause'));
+        });
+        
+        VideoPlayer.vjsPlayer.on('ended', () => window.dispatchEvent(new CustomEvent('vp-yt-pause')));
+        VideoPlayer.vjsPlayer.on('waiting', () => window.dispatchEvent(new CustomEvent('vp-yt-pause')));
+    },
+
+    startProgressTracking: () => {
+        if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval);
+        VideoPlayer.progressInterval = setInterval(VideoPlayer.updateProgressBar, 500);
+    },
 
     closeVideo: () => {
         const overlay = document.getElementById('classroom-mode');
         if (overlay.classList.contains('active')) {
-            window.dispatchEvent(new CustomEvent('vp-yt-pause')); // Force pause analytics
+            window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
             if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval); 
-            if(VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.pauseVideo) VideoPlayer.ytPlayer.pauseVideo();
-            overlay.classList.remove('active'); // Close UI manually
-            // window.history.back(); // Optional: depend on your routing
+            
+            if(VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) VideoPlayer.ytPlayer.pauseVideo();
+            if(VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) VideoPlayer.vjsPlayer.pause();
+            
+            overlay.classList.remove('active'); 
         }
     },
 
     togglePlay: () => {
-        if(!VideoPlayer.ytPlayer || !VideoPlayer.ytPlayer.getPlayerState) return;
-        if(VideoPlayer.ytPlayer.isMuted()) {
-            VideoPlayer.ytPlayer.unMute();
-            document.getElementById('mute-icon').className = "fas fa-volume-up";
-        }
-        let state = VideoPlayer.ytPlayer.getPlayerState();
         let icon = document.getElementById('play-icon');
-        if (state === 1) { 
-            VideoPlayer.ytPlayer.pauseVideo();
-            icon.className = "fas fa-play";
-        } else { 
-            VideoPlayer.ytPlayer.playVideo();
-            icon.className = "fas fa-pause";
+        
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) {
+            if(VideoPlayer.ytPlayer.isMuted()) { VideoPlayer.ytPlayer.unMute(); document.getElementById('mute-icon').className = "fas fa-volume-up"; }
+            if (VideoPlayer.ytPlayer.getPlayerState() === 1) VideoPlayer.ytPlayer.pauseVideo();
+            else VideoPlayer.ytPlayer.playVideo();
+        } 
+        else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) {
+            if(VideoPlayer.vjsPlayer.muted()) { VideoPlayer.vjsPlayer.muted(false); document.getElementById('mute-icon').className = "fas fa-volume-up"; }
+            if (!VideoPlayer.vjsPlayer.paused()) VideoPlayer.vjsPlayer.pause();
+            else VideoPlayer.vjsPlayer.play();
         }
     },
 
     toggleMute: () => {
-        if(!VideoPlayer.ytPlayer) return;
         let icon = document.getElementById('mute-icon');
-        if (VideoPlayer.ytPlayer.isMuted()) {
-            VideoPlayer.ytPlayer.unMute();
-            icon.className = "fas fa-volume-up";
-        } else {
-            VideoPlayer.ytPlayer.mute();
-            icon.className = "fas fa-volume-mute";
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) {
+            if (VideoPlayer.ytPlayer.isMuted()) { VideoPlayer.ytPlayer.unMute(); icon.className = "fas fa-volume-up"; } 
+            else { VideoPlayer.ytPlayer.mute(); icon.className = "fas fa-volume-mute"; }
+        } 
+        else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) {
+            if (VideoPlayer.vjsPlayer.muted()) { VideoPlayer.vjsPlayer.muted(false); icon.className = "fas fa-volume-up"; } 
+            else { VideoPlayer.vjsPlayer.muted(true); icon.className = "fas fa-volume-mute"; }
         }
     },
 
@@ -150,27 +221,37 @@ export const VideoPlayer = {
     },
 
     skipVideo: (seconds) => {
-        if(!VideoPlayer.ytPlayer || !VideoPlayer.ytPlayer.getCurrentTime) return;
-        let newTime = VideoPlayer.ytPlayer.getCurrentTime() + seconds;
-        VideoPlayer.ytPlayer.seekTo(newTime, true);
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) {
+            VideoPlayer.ytPlayer.seekTo(VideoPlayer.ytPlayer.getCurrentTime() + seconds, true);
+        } else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) {
+            VideoPlayer.vjsPlayer.currentTime(VideoPlayer.vjsPlayer.currentTime() + seconds);
+        }
     },
 
     setSpeed: (rate) => {
-        if(!VideoPlayer.ytPlayer || !VideoPlayer.ytPlayer.setPlaybackRate) return;
-        VideoPlayer.ytPlayer.setPlaybackRate(rate);
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) VideoPlayer.ytPlayer.setPlaybackRate(rate);
+        else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) VideoPlayer.vjsPlayer.playbackRate(rate);
+        
         document.querySelectorAll('.speed-opt').forEach(el => el.classList.remove('active'));
         document.getElementById('spd-' + rate).classList.add('active');
     },
 
     updateProgressBar: () => {
-        if(VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.getCurrentTime && !VideoPlayer.isDragging) {
-            let current = VideoPlayer.ytPlayer.getCurrentTime();
-            let duration = VideoPlayer.ytPlayer.getDuration();
-            if(duration > 0) {
-                let percentage = (current / duration) * 100;
-                document.getElementById('progress-fill').style.width = percentage + "%";
-                document.getElementById('time-display').innerText = VideoPlayer.formatTime(current);
-            }
+        if (VideoPlayer.isDragging) return;
+        
+        let current = 0, duration = 0;
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.getCurrentTime) {
+            current = VideoPlayer.ytPlayer.getCurrentTime();
+            duration = VideoPlayer.ytPlayer.getDuration();
+        } else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) {
+            current = VideoPlayer.vjsPlayer.currentTime();
+            duration = VideoPlayer.vjsPlayer.duration();
+        }
+
+        if(duration > 0) {
+            let percentage = (current / duration) * 100;
+            document.getElementById('progress-fill').style.width = percentage + "%";
+            document.getElementById('time-display').innerText = VideoPlayer.formatTime(current);
         }
     },
 
@@ -186,8 +267,11 @@ export const VideoPlayer = {
         if(backBtn) backBtn.classList.remove('hidden');
         clearTimeout(VideoPlayer.uiTimeout);
         
-        let state = VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.getPlayerState ? VideoPlayer.ytPlayer.getPlayerState() : -1;
-        if (state === 1) { 
+        let isPlaying = false;
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) isPlaying = (VideoPlayer.ytPlayer.getPlayerState() === 1);
+        else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) isPlaying = !VideoPlayer.vjsPlayer.paused();
+
+        if (isPlaying) { 
             VideoPlayer.uiTimeout = setTimeout(() => {
                 const menu = document.getElementById('settings-menu');
                 if (menu && menu.classList.contains('show')) return; 
@@ -199,11 +283,8 @@ export const VideoPlayer = {
 
     handleShieldClick: () => {
         const controls = document.getElementById('custom-controls');
-        if(controls && controls.classList.contains('hidden')) {
-            VideoPlayer.showUI();
-        } else {
-            VideoPlayer.togglePlay();
-        }
+        if(controls && controls.classList.contains('hidden')) VideoPlayer.showUI();
+        else VideoPlayer.togglePlay();
     },
 
     toggleSettings: (e) => { 
@@ -217,7 +298,6 @@ export const VideoPlayer = {
     doDrag: (e) => { if(VideoPlayer.isDragging) VideoPlayer.updateScrub(e); },
 
     updateScrub: (e) => {
-        if(!VideoPlayer.ytPlayer || !VideoPlayer.ytPlayer.getDuration) return;
         let bg = document.getElementById('progress-bg');
         if(!bg) return;
         let rect = bg.getBoundingClientRect();
@@ -225,14 +305,21 @@ export const VideoPlayer = {
         if(clientX === 0 && e.changedTouches) clientX = e.changedTouches[0].clientX; 
         let clickX = clientX - rect.left;
         let percentage = Math.max(0, Math.min(1, clickX / rect.width));
-        let duration = VideoPlayer.ytPlayer.getDuration();
-        VideoPlayer.ytPlayer.seekTo(percentage * duration, true);
+        
+        let duration = 0;
+        if (VideoPlayer.activeEngine === 'youtube' && VideoPlayer.ytPlayer) {
+            duration = VideoPlayer.ytPlayer.getDuration();
+            VideoPlayer.ytPlayer.seekTo(percentage * duration, true);
+        } else if (VideoPlayer.activeEngine === 'hls' && VideoPlayer.vjsPlayer) {
+            duration = VideoPlayer.vjsPlayer.duration();
+            VideoPlayer.vjsPlayer.currentTime(percentage * duration);
+        }
+
         document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
         document.getElementById('time-display').innerText = VideoPlayer.formatTime(percentage * duration);
     }
 };
 
-// 🔥 FIX 1: GLOBAL BINDINGS SO HTML INLINE ONCLICKS WORK
 window.togglePlay = VideoPlayer.togglePlay;
 window.skipVideo = VideoPlayer.skipVideo;
 window.toggleMute = VideoPlayer.toggleMute;
@@ -243,8 +330,7 @@ window.handleShieldClick = VideoPlayer.handleShieldClick;
 window.startDrag = VideoPlayer.startDrag;
 window.stopDrag = VideoPlayer.stopDrag;
 window.doDrag = VideoPlayer.doDrag;
-window.closeClassroom = VideoPlayer.closeVideo; // Mapping closeClassroom directly
+window.closeClassroom = VideoPlayer.closeVideo; 
 window.openVideo = VideoPlayer.openVideo;
 
-// Init the API as soon as file loads
 VideoPlayer.initAPI();
