@@ -19,7 +19,13 @@ const SecureState = Object.seal({
     syncTimerId: null
 });
 
-// 🔥 NEW: Cross-Tab Communication Channel
+// 🔥 SAFE PARSER: LocalStorage se NaN / null values ko safely handle karega
+const getSafeLocalInt = (key) => {
+    const val = parseInt(localStorage.getItem(key), 10);
+    return isNaN(val) ? 0 : val;
+};
+
+// 🔥 Cross-Tab Communication Channel (Anti-Multi-Tab Tracking)
 const tabChannel = new BroadcastChannel('vp-analytics-channel');
 
 const workerCode = `
@@ -41,7 +47,8 @@ timerWorker.onmessage = (e) => {
         SecureState.validPendingSeconds += 1;
         SecureState.dailySessionSeconds += 1;
         
-        let currentLocalTotal = parseInt(localStorage.getItem('vp_total_sec')) || 0;
+        // 🔥 FIX: Using Safe Parser here
+        let currentLocalTotal = getSafeLocalInt('vp_total_sec');
         localStorage.setItem('vp_total_sec', currentLocalTotal + 1);
         
         if(SecureState.validPendingSeconds < 300) {
@@ -60,7 +67,7 @@ tabChannel.onmessage = (event) => {
     if (event.data.type === 'OTHER_TAB_PLAYING') {
         // Agar doosri tab me video play hui, toh is tab ka tracking turant band karo
         if (SecureState.isTracking) {
-            console.log("[VidyaPlus Engine] Yielding tracking to another tab.");
+            console.warn("[VidyaPlus Engine] Multiple tabs detected. Yielding tracking to active tab.");
             pauseStopwatch();
         }
     }
@@ -84,25 +91,22 @@ const pauseStopwatch = () => {
 let isSyncInProgress = false; // 🔥 Global Lock flag to prevent duplicate calls
 
 const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
-    // 1. Race Condition Prevention: Agar ek sync already chal raha hai, toh doosre ko block kardo
+    // Race Condition Prevention
     if (isSyncInProgress) return;
     
     const secondsToSync = Math.floor(SecureState.validPendingSeconds);
     const currentUser = auth.currentUser;
     
-    // 2. Safety Check
     if (!currentUser || secondsToSync <= 0) return;
 
     const finalSyncSeconds = Math.min(secondsToSync, CONFIG.MAX_SYNC_CAP_SEC);
     
-    // 3. OPTIMISTIC LOCKING: Payload bhejne se PEHLE hi subtract kar lo 
-    // taaki visibilitychange aur pagehide dono ek sath isse read na kar sakein
+    // OPTIMISTIC LOCKING: Payload bhejne se PEHLE hi subtract kar lo
     SecureState.validPendingSeconds -= finalSyncSeconds; 
     localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
     
-    isSyncInProgress = true; // Lock active!
+    isSyncInProgress = true; 
 
-    // Exact IST Midnight Date Formatting
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     const payload = JSON.stringify({ 
         p_watch_seconds: finalSyncSeconds, 
@@ -127,18 +131,18 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
         if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
         console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s`);
-        isSyncInProgress = false; // Sync successful, lock khol do
+        isSyncInProgress = false; // Sync successful
 
     } catch (error) {
         console.warn(`[VidyaPlus Pro Engine] Sync Failed.`, error.message);
         
-        // 4. Rollback: Agar internet ya network absolute fail ho gaya, toh seconds wapas add karo
+        // Rollback: network fail hua toh seconds wapas de do
         SecureState.validPendingSeconds += finalSyncSeconds; 
         localStorage.setItem('vp_pending_sec', SecureState.validPendingSeconds);
         
-        isSyncInProgress = false; // Error aaya, lock fir bhi khol do taaki agla attempt chal sake
+        isSyncInProgress = false; 
         
-        // 5. SAFE RETRY LOGIC (Jo tumne poocha, wo yahan safely embedded hai)
+        // SAFE RETRY LOGIC
         if (!isClosingTab && retryCount < CONFIG.MAX_RETRIES) {
             const backoffDelay = Math.pow(2, retryCount) * 2000;
             setTimeout(() => syncToCloud(false, retryCount + 1), backoffDelay);
@@ -155,7 +159,8 @@ const initializeDailySession = () => {
         localStorage.setItem('vp_daily_sec', 0);
         localStorage.setItem('vp_active_date', todayStr);
     } else {
-        SecureState.dailySessionSeconds = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+        // 🔥 FIX: Using Safe Parser here too
+        SecureState.dailySessionSeconds = getSafeLocalInt('vp_daily_sec');
     }
 };
 
@@ -171,15 +176,12 @@ window.addEventListener("pagehide", () => {
     if (SecureState.validPendingSeconds > 0) syncToCloud(true); 
 });
 
-// 🔥 NEW: Removed the manual start/pause API so hackers can't call it. 
-// Instead, we export a binding function that attaches directly to the video element.
 window.VidyaAnalytics = Object.freeze({
     bindToVideoPlayer: (videoElement) => {
         if(!videoElement || !auth.currentUser) return;
         
         console.log("[VidyaPlus Engine] Securely bound to video player.");
 
-        // Attach events to actual video playback status
         videoElement.addEventListener('play', () => {
             if(!SecureState.syncTimerId) {
                 SecureState.syncTimerId = setInterval(() => syncToCloud(false), CONFIG.SYNC_INTERVAL_MS);
@@ -209,7 +211,8 @@ onAuthStateChanged(auth, (user) => {
         }
     }
 });
-// engine.js me kahin bhi neeche ye add kar do
+
+// YouTube Events Binding (from player.js)
 window.addEventListener('vp-yt-play', () => {
     if(auth.currentUser) {
         if(!SecureState.syncTimerId) {
@@ -222,4 +225,3 @@ window.addEventListener('vp-yt-play', () => {
 window.addEventListener('vp-yt-pause', () => {
     pauseStopwatch();
 });
-
