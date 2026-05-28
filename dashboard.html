@@ -333,6 +333,19 @@
     import { db, auth } from './js/firebase-init.js';
     import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+            // 🔥 XSS SANITIZER & SAFE PARSER
+const escapeHTML = (str) => {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, tag => 
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+};
+
+const getSafeLocalInt = (key) => {
+    const val = parseInt(localStorage.getItem(key), 10);
+    return isNaN(val) ? 0 : val;
+};
+            
 
     const globalLoader = document.getElementById('global-loader');
     const batchGrid = document.getElementById('batch-grid');
