@@ -506,8 +506,9 @@
                     dailySeconds = parseInt(serverStats.daily_watch_seconds) || 0;
                     streakDays = parseInt(serverStats.streak_count) || 0;
 
-                    // 🔥 FIX: Exact IST Midnight Date Formatting
-                    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                    // ✅ NAYA
+const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                    
                     
                     if (localStorage.getItem('vp_active_date') === todayStr) {
                         localStorage.setItem('vp_daily_sec', dailySeconds); 
