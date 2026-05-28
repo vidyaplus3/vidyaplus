@@ -333,20 +333,20 @@
     import { db, auth } from './js/firebase-init.js';
     import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-            // 🔥 XSS SANITIZER & SAFE PARSER
-const escapeHTML = (str) => {
-    if (!str) return '';
-    return String(str).replace(/[&<>'"]/g, tag => 
-        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
-};
+    
+    // 🔥 XSS SANITIZER & SAFE PARSER
+    const escapeHTML = (str) => {
+        if (!str) return '';
+        return String(str).replace(/[&<>'"]/g, tag => 
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+    };
 
-const getSafeLocalInt = (key) => {
-    const val = parseInt(localStorage.getItem(key), 10);
-    return isNaN(val) ? 0 : val;
-};
+    const getSafeLocalInt = (key) => {
+        const val = parseInt(localStorage.getItem(key), 10);
+        return isNaN(val) ? 0 : val;
+    };
             
-
     const globalLoader = document.getElementById('global-loader');
     const batchGrid = document.getElementById('batch-grid');
     let dashboardChartInstance = null;
@@ -410,18 +410,17 @@ const getSafeLocalInt = (key) => {
     };
 
     window.logoutUser = () => {
-    if(confirm("Terminate current session?")) {
-        // Log out hone par purana analytics cache uda do
-        localStorage.removeItem('vp_total_sec');
-        localStorage.removeItem('vp_daily_sec');
-        localStorage.removeItem('vp_pending_sec');
-        localStorage.removeItem('vp_active_date');
-        
-        signOut(auth).then(() => window.location.replace("index.html"));
-    }
-};
+        if(confirm("Terminate current session?")) {
+            // Log out hone par purana analytics cache uda do
+            localStorage.removeItem('vp_total_sec');
+            localStorage.removeItem('vp_daily_sec');
+            localStorage.removeItem('vp_pending_sec');
+            localStorage.removeItem('vp_active_date');
             
-
+            signOut(auth).then(() => window.location.replace("index.html"));
+        }
+    };
+            
     // --- ELITE UI TIME FORMATTER ---
     const formatTimeAdvanced = (seconds) => {
         if(!seconds || seconds <= 0) return `<span class="text-3xl font-black text-slate-800">0</span><span class="text-sm font-bold text-slate-500 ml-1">s</span>`;
@@ -462,7 +461,8 @@ const getSafeLocalInt = (key) => {
         
         // Focus Chart Memory Leak Fix
         if(document.getElementById('chart-focus')) {
-            let localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+            // 🔥 APPLYING SAFE PARSER HERE
+            let localDailyTime = getSafeLocalInt('vp_daily_sec');
             let goalPercentage = Math.floor((localDailyTime / 600) * 100);
             
             if(focusChart) {
@@ -486,7 +486,7 @@ const getSafeLocalInt = (key) => {
         }
     };
 
-        // --- AUTH AND SYNC FLOW ---
+    // --- AUTH AND SYNC FLOW ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
@@ -528,7 +528,8 @@ const getSafeLocalInt = (key) => {
                     localStorage.setItem('vp_total_sec', totalSeconds);
                 }
 
-                const localPendingTime = parseInt(localStorage.getItem('vp_pending_sec')) || 0;
+                // 🔥 APPLYING SAFE PARSER HERE
+                const localPendingTime = getSafeLocalInt('vp_pending_sec');
 
                 let currentCalculatedTotal = totalSeconds + localPendingTime;
                 const displayDaily = dailySeconds + localPendingTime;
@@ -542,8 +543,9 @@ const getSafeLocalInt = (key) => {
 
             } catch(e) { 
                 console.warn("[Dashboard Sync] Fetch bypassed. Using offline cache.", e); 
-                const localTotalTime = parseInt(localStorage.getItem('vp_total_sec')) || 0;
-                const localDailyTime = parseInt(localStorage.getItem('vp_daily_sec')) || 0;
+                // 🔥 APPLYING SAFE PARSER HERE
+                const localTotalTime = getSafeLocalInt('vp_total_sec');
+                const localDailyTime = getSafeLocalInt('vp_daily_sec');
 
                 document.getElementById('stat-watchtime-advanced').innerHTML = formatTimeAdvanced(localTotalTime);
                 document.getElementById('stat-dailytime-val').innerHTML = formatTimeAdvanced(localDailyTime);
@@ -566,7 +568,6 @@ const getSafeLocalInt = (key) => {
         }
     });
             
-    
     // 🔥 FIX: Batched Promise Fetch (Resolves sequential N+1 delay)
     const fetchEnrolledBatches = async (uid) => {
         batchGrid.innerHTML = Array(3).fill(`<div class="pro-card p-4"><div class="skeleton-loader h-32 w-full mb-4"></div><div class="skeleton-loader h-4 w-2/3 mb-2"></div><div class="skeleton-loader h-4 w-1/3 mb-4"></div><div class="skeleton-loader h-10 w-full"></div></div>`).join('');
@@ -576,11 +577,6 @@ const getSafeLocalInt = (key) => {
             let enrolledIds = []; 
             
             enrollmentsSnap.forEach(doc => enrolledIds.push(doc.id));
-            
-            if (enrolledIds.length === 0) {
-                const userDoc = await getDoc(doc(db, "users", uid));
-                if (userDoc.exists() && userDoc.data().enrolledBatches) enrolledIds = userDoc.data().enrolledBatches;
-            }
             
             document.getElementById('stat-enrolled-badge').innerText = `${enrolledIds.length} Active`;
             batchGrid.innerHTML = '';
@@ -604,7 +600,11 @@ const getSafeLocalInt = (key) => {
     const renderBatchCard = (id, batch) => {
         const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
         const imgHTML = imgUrl ? `<img src="${imgUrl}" class="w-full h-full object-cover rounded-t-[0.9rem]">` : `<div class="w-full h-full flex flex-col justify-center items-center bg-slate-800 text-slate-400 rounded-t-[0.9rem]"><i class="fas fa-laptop-code text-2xl mb-1"></i></div>`;
-        const cardHTML = `<div class="pro-card flex flex-col h-full cursor-pointer group" onclick="window.location.href='study.html?batch=${id}'"><div class="h-40 relative shrink-0 p-1"><div class="absolute top-3 left-3 bg-white/95 text-slate-800 px-2 py-1 rounded shadow-sm text-[10px] font-bold tracking-wide uppercase z-10">Enrolled</div>${imgHTML}</div><div class="p-5 flex-1 flex flex-col"><span class="text-brand-600 text-[10px] font-bold uppercase tracking-wider mb-2">${batch.classLevel || 'Class'} • ${batch.stream || 'Gen'}</span><h3 class="text-base font-bold text-slate-900 leading-tight mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">${batch.title || 'Untitled'}</h3><div class="mt-auto pt-4 border-t border-slate-100"><button class="w-full py-2 bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-lg group-hover:bg-brand-50 group-hover:text-brand-700 group-hover:border-brand-200 transition-colors">Go to Classroom</button></div></div></div>`;
+        
+        // 🔥 APPLYING ESCAPE HTML HERE TO PREVENT XSS
+        const safeTitle = escapeHTML(batch.title || 'Untitled');
+        
+        const cardHTML = `<div class="pro-card flex flex-col h-full cursor-pointer group" onclick="window.location.href='study.html?batch=${id}'"><div class="h-40 relative shrink-0 p-1"><div class="absolute top-3 left-3 bg-white/95 text-slate-800 px-2 py-1 rounded shadow-sm text-[10px] font-bold tracking-wide uppercase z-10">Enrolled</div>${imgHTML}</div><div class="p-5 flex-1 flex flex-col"><span class="text-brand-600 text-[10px] font-bold uppercase tracking-wider mb-2">${batch.classLevel || 'Class'} • ${batch.stream || 'Gen'}</span><h3 class="text-base font-bold text-slate-900 leading-tight mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">${safeTitle}</h3><div class="mt-auto pt-4 border-t border-slate-100"><button class="w-full py-2 bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-lg group-hover:bg-brand-50 group-hover:text-brand-700 group-hover:border-brand-200 transition-colors">Go to Classroom</button></div></div></div>`;
         batchGrid.insertAdjacentHTML('beforeend', cardHTML);
     };
 
@@ -626,7 +626,8 @@ const getSafeLocalInt = (key) => {
                 testHistory.push({
                     testId: testId, 
                     attemptId: data.latestAttemptId || testId,
-                    title: data.testTitle || `Mock Test`, 
+                    // 🔥 APPLYING ESCAPE HTML HERE TO PREVENT XSS
+                    title: escapeHTML(data.testTitle || `Mock Test`), 
                     batch: data.batchName || 'Standard Assessment',
                     attemptNo: data.totalAttempts || 1, 
                     score: data.latestScore !== undefined ? data.latestScore : (data.score || 0), 
@@ -683,6 +684,6 @@ const getSafeLocalInt = (key) => {
             dashboardChartInstance.render();
         }
     };
-        </script>
+    </script>
 </body>
 </html>
