@@ -7,6 +7,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Enterprise Video.js Core CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css?v=god_mode">
 </head>
 <body>
@@ -138,7 +140,12 @@
     </div> <div class="classroom-overlay" id="classroom-mode">
         <div class="video-fixed-box" id="video-container">
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
-            <div style="width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative;"><div id="vp-player"></div></div>
+            
+            <!-- Enterprise Hybrid Video Wrapper Updated -->
+            <div style="width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative;" id="player-wrapper">
+                <div id="yt-player" style="width: 100%; height: 100%;"></div>
+                <video id="hls-player" class="video-js vjs-default-skin" style="width: 100%; height: 100%; display: none;" playsinline></video>
+            </div>
             
             <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
@@ -240,8 +247,8 @@
         }
         .start-btn-pro:not(:disabled):active { transform: scale(0.98); }
 
-        /* YouTube Ultra-wide Hide Hack */
-        #vp-player {
+        /* YouTube Ultra-wide Hide Hack Updated for new ID */
+        #yt-player {
             width: 300% !important;
             height: 100% !important;
             margin-left: -100% !important;
@@ -324,7 +331,12 @@
         </div>
     </div>
 
-        <script type="module" src="js/main.js"></script>
+    <!-- Enterprise Video.js Scripts Added Here -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-quality-levels@4.1.0/dist/videojs-contrib-quality-levels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.min.js"></script>
+
+    <script type="module" src="js/main.js"></script>
     <script type="module" src="js/analytics/engine.js"></script>
     <script type="module" src="js/player.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
