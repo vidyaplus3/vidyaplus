@@ -5,5 +5,5 @@
 #EXT-X-PLAYLIST-TYPE:VOD
 #EXT-X-KEY:METHOD=AES-128,URI="https://vidyaplus-backend.vercel.app/api/getVideoKey",IV=0x00000000000000000000000000000000
 #EXTINF:5.466667,
-output_000 (2).ts
+output_000.ts
 #EXT-X-ENDLIST
