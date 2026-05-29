@@ -73,16 +73,32 @@ export const VideoPlayer = {
         }
     },
 
-    closeVideo: () => {
-        const overlay = document.getElementById('classroom-mode');
-        if (overlay.classList.contains('active')) {
-            window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
+    // js/player/index.js ke andar is function ko update karo 👇
+closeVideo: () => {
+    const overlay = document.getElementById('classroom-mode');
+    if (overlay && overlay.classList.contains('active')) {
+        window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
+        
+        // 1. UI Controller ke interval ko stop karo
+        if (PlayerUI && PlayerUI.stopProgressTracking) {
             PlayerUI.stopProgressTracking();
-            VideoPlayer.getEngine().pause();
-            overlay.classList.remove('active'); 
         }
-    },
+        
+        // 2. 🚨 BULLETPROOF FIX: Dono engines ko explicitely pause/stop karo 
+        // Taaki background mein chalne ka koi chance hi na bache
+        try {
+            if (YtEngine && YtEngine.pause) YtEngine.pause();
+        } catch(e) { console.log("YT pause bypass"); }
 
+        try {
+            if (HlsEngine && HlsEngine.pause) HlsEngine.pause();
+        } catch(e) { console.log("HLS pause bypass"); }
+        
+        // 3. Overlay ko remove karo
+        overlay.classList.remove('active'); 
+    }
+},
+    
     togglePlay: () => {
         const engine = VideoPlayer.getEngine();
         if(engine.isMuted()) { engine.unMute(); document.getElementById('mute-icon').className = "fas fa-volume-up"; }
