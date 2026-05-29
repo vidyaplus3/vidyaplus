@@ -8,6 +8,14 @@ export const VideoPlayer = {
     activeEngineName: null, 
     currentClassroomData: null,
 
+    // 🚨 THE FIX: Jo properties main.js dhoondh raha tha, unhe wapas expose kiya
+    get progressInterval() { return PlayerUI.progressInterval; },
+    showUI: (e) => {
+        const engine = VideoPlayer.getEngine();
+        PlayerUI.showUI(e, engine ? engine.isPlaying() : false);
+    },
+    toggleSettings: (e) => PlayerUI.toggleSettings(e),
+
     getEngine: () => VideoPlayer.activeEngineName === 'youtube' ? YtEngine : HlsEngine,
 
     initAPI: () => {
@@ -19,9 +27,9 @@ export const VideoPlayer = {
         
         const vContainer = document.getElementById('video-container');
         if(vContainer) {
-            vContainer.addEventListener('mousemove', (e) => PlayerUI.showUI(e, VideoPlayer.getEngine().isPlaying()));
-            vContainer.addEventListener('touchstart', (e) => PlayerUI.showUI(e, VideoPlayer.getEngine().isPlaying()));
-            vContainer.addEventListener('click', (e) => PlayerUI.showUI(e, VideoPlayer.getEngine().isPlaying()));
+            vContainer.addEventListener('mousemove', VideoPlayer.showUI);
+            vContainer.addEventListener('touchstart', VideoPlayer.showUI);
+            vContainer.addEventListener('click', VideoPlayer.showUI);
         }
 
         document.addEventListener('click', (e) => {
@@ -31,7 +39,6 @@ export const VideoPlayer = {
             }
         });
 
-        // Global Event Listeners for UI state sync
         window.addEventListener('vp-yt-play', () => PlayerUI.updatePlayPauseIcon(true));
         window.addEventListener('vp-yt-pause', () => PlayerUI.updatePlayPauseIcon(false));
     },
@@ -39,7 +46,6 @@ export const VideoPlayer = {
     openVideo: (vidUrl, title, pdfUrl) => {
         if(!vidUrl) return alert("Playback URL is invalid.");
         
-        // UI Reset
         PlayerUI.updatePlayPauseIcon(false);
         document.getElementById('progress-fill').style.width = "0%";
         document.getElementById('time-display').innerText = "0:00";
@@ -62,7 +68,7 @@ export const VideoPlayer = {
                 (e) => { e.target.playVideo(); PlayerUI.startProgressTracking(YtEngine); },
                 (e) => {
                     PlayerUI.updatePlayPauseIcon(e.data === 1);
-                    PlayerUI.showUI(null, e.data === 1);
+                    VideoPlayer.showUI(null);
                     window.dispatchEvent(new CustomEvent(e.data === 1 ? 'vp-yt-play' : 'vp-yt-pause'));
                 }
             );
@@ -73,40 +79,27 @@ export const VideoPlayer = {
         }
     },
 
-    // js/player/index.js ke andar is function ko update karo 👇
-closeVideo: () => {
-    const overlay = document.getElementById('classroom-mode');
-    if (overlay && overlay.classList.contains('active')) {
-        window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
-        
-        // 1. UI Controller ke interval ko stop karo
-        if (PlayerUI && PlayerUI.stopProgressTracking) {
+    closeVideo: () => {
+        const overlay = document.getElementById('classroom-mode');
+        if (overlay.classList.contains('active')) {
+            window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
             PlayerUI.stopProgressTracking();
+            const engine = VideoPlayer.getEngine();
+            if(engine) engine.pause();
+            overlay.classList.remove('active'); 
         }
-        
-        // 2. 🚨 BULLETPROOF FIX: Dono engines ko explicitely pause/stop karo 
-        // Taaki background mein chalne ka koi chance hi na bache
-        try {
-            if (YtEngine && YtEngine.pause) YtEngine.pause();
-        } catch(e) { console.log("YT pause bypass"); }
+    },
 
-        try {
-            if (HlsEngine && HlsEngine.pause) HlsEngine.pause();
-        } catch(e) { console.log("HLS pause bypass"); }
-        
-        // 3. Overlay ko remove karo
-        overlay.classList.remove('active'); 
-    }
-},
-    
     togglePlay: () => {
         const engine = VideoPlayer.getEngine();
+        if(!engine) return;
         if(engine.isMuted()) { engine.unMute(); document.getElementById('mute-icon').className = "fas fa-volume-up"; }
         engine.isPlaying() ? engine.pause() : engine.play();
     },
 
     toggleMute: () => {
         const engine = VideoPlayer.getEngine();
+        if(!engine) return;
         const icon = document.getElementById('mute-icon');
         if (engine.isMuted()) { engine.unMute(); icon.className = "fas fa-volume-up"; } 
         else { engine.mute(); icon.className = "fas fa-volume-mute"; }
@@ -114,13 +107,15 @@ closeVideo: () => {
 
     skipVideo: (seconds) => {
         const engine = VideoPlayer.getEngine();
-        engine.seek(engine.getCurrentTime() + seconds);
+        if(engine) engine.seek(engine.getCurrentTime() + seconds);
     },
 
     setSpeed: (rate) => {
-        VideoPlayer.getEngine().setSpeed(rate);
+        const engine = VideoPlayer.getEngine();
+        if(engine) engine.setSpeed(rate);
         document.querySelectorAll('.speed-opt').forEach(el => el.classList.remove('active'));
-        document.getElementById('spd-' + rate).classList.add('active');
+        const activeBtn = document.getElementById('spd-' + rate);
+        if(activeBtn) activeBtn.classList.add('active');
     },
 
     toggleFullScreen: () => {
@@ -136,11 +131,10 @@ closeVideo: () => {
 
     handleShieldClick: () => {
         const controls = document.getElementById('custom-controls');
-        if(controls && controls.classList.contains('hidden')) PlayerUI.showUI(null, VideoPlayer.getEngine().isPlaying());
+        if(controls && controls.classList.contains('hidden')) VideoPlayer.showUI(null);
         else VideoPlayer.togglePlay();
     },
 
-    // Drag Logic (Passes calculations to Engine via Seek)
     startDrag: (e) => { PlayerUI.isDragging = true; VideoPlayer.updateScrub(e); },
     stopDrag: (e) => { if(PlayerUI.isDragging) { VideoPlayer.updateScrub(e); PlayerUI.isDragging = false; } },
     doDrag: (e) => { if(PlayerUI.isDragging) VideoPlayer.updateScrub(e); },
@@ -154,20 +148,21 @@ closeVideo: () => {
         
         let percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
         const engine = VideoPlayer.getEngine();
-        let duration = engine.getDuration();
+        if(!engine) return;
         
+        let duration = engine.getDuration();
         engine.seek(percentage * duration);
+        
         document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
         document.getElementById('time-display').innerText = PlayerUI.formatTime(percentage * duration);
     }
 };
 
-// Global Bindings For HTML onclick events
 window.togglePlay = VideoPlayer.togglePlay;
 window.skipVideo = VideoPlayer.skipVideo;
 window.toggleMute = VideoPlayer.toggleMute;
 window.toggleFullScreen = VideoPlayer.toggleFullScreen;
-window.toggleSettings = PlayerUI.toggleSettings;
+window.toggleSettings = VideoPlayer.toggleSettings;
 window.setSpeed = VideoPlayer.setSpeed;
 window.handleShieldClick = VideoPlayer.handleShieldClick;
 window.startDrag = VideoPlayer.startDrag;
@@ -177,4 +172,3 @@ window.closeClassroom = VideoPlayer.closeVideo;
 window.openVideo = VideoPlayer.openVideo;
 
 VideoPlayer.initAPI();
-
