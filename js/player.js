@@ -130,26 +130,29 @@ export const VideoPlayer = {
         newVjsEl.setAttribute('playsinline', '');
         wrapper.appendChild(newVjsEl);
 
-        // ==========================================================
-        // 🚨 GOD-LEVEL SECURITY: Intercepting Key Request
+                // ==========================================================
+        // 🚨 GOD-LEVEL SECURITY: Intercepting Key Request (UPDATED)
         // ==========================================================
         let token = "";
         if (auth.currentUser) {
-            token = await auth.currentUser.getIdToken(true); // Firebase se taaza token laao
+            token = await auth.currentUser.getIdToken(true); 
         }
 
-        // Video.js ka network hijacker: Jab bhi player key mangega, hum use Vercel par bhejenge
         videojs.Vhs.xhr.beforeRequest = function(options) {
-            if (options.uri.includes('.key') || options.uri.includes('enc.key')) {
-                // 👇 YAHAN APNI VERCEL APP KA ASLI URL DAALNA
+            // FIX: Ab ye "getVideoKey" ya kisi bhi vercel link ko pakad lega
+            if (options.uri.includes('getVideoKey') || options.uri.includes('vercel.app')) {
+                
+                // Apna asli Vercel URL yahan set karo
                 options.uri = "https://vidyaplus-backend.vercel.app/api/getVideoKey"; 
                 
                 options.headers = options.headers || {};
-                // Token ko Authorization header me add karo
+                // Token ko securely bhej rahe hain taaki Vercel lock khol de
                 options.headers['Authorization'] = `Bearer ${token}`;
             }
             return options;
         };
+        // ==========================================================
+            
         // ==========================================================
 
         let sourceType = vidUrl.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4';
