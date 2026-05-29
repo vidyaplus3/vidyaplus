@@ -157,14 +157,15 @@ export const VideoPlayer = {
 
         let sourceType = vidUrl.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4';
 
-        VideoPlayer.vjsPlayer = videojs('hls-player', {
+                VideoPlayer.vjsPlayer = videojs('hls-player', {
             controls: false, // Strict UI Control
             autoplay: true,
             muted: true,
+            fill: true, // 🚨 NAYA: Ye video ko screen par force fit karega aur black screen hatayega
             fluid: false,
             sources: [{ src: vidUrl, type: sourceType }]
         });
-
+            
         // Initialize Quality Selector Plugin internally
         if (typeof VideoPlayer.vjsPlayer.httpSourceSelector === 'function') {
             VideoPlayer.vjsPlayer.httpSourceSelector();
