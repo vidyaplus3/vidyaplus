@@ -154,13 +154,12 @@ window.addEventListener('popstate', (e) => {
         let iframe = document.getElementById('pdf-iframe');
         if (iframe) iframe.remove();
         if (e.state && e.state.pdfOpen) window.history.back();
-    } else if (classOverlay && classOverlay.classList.contains('active')) {
+        } else if (classOverlay && classOverlay.classList.contains('active')) {
         if (!e.state || !e.state.videoOpen) {
-            classOverlay.classList.remove('active');
-            if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval);
-            if(VideoPlayer.ytPlayer && VideoPlayer.ytPlayer.pauseVideo) VideoPlayer.ytPlayer.pauseVideo();
+            VideoPlayer.closeVideo(); // 🚨 Bas ab hum apne naye facade pattern function ko call karenge
         }
     }
+    
 });
 
 window.navigate = (screenId, payload = {}) => {
