@@ -196,7 +196,6 @@ function generateItemsHTML(items) {
     });
     return html;
 }
-
 // Ensure the DOM is fully loaded before attaching the event listener
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('upload-form').addEventListener('submit', async (e) => {
@@ -237,10 +236,21 @@ document.addEventListener('DOMContentLoaded', () => {
             payload.targetLayer = "chapter_content";
         }
 
+        // 🚨 PRO FEATURE UPDATED HERE: Detects if HLS (.m3u8) or Standard Link
         if(type === 'lecture') {
             payload.videoUrl = url;
             payload.thumbnailUrl = document.getElementById('inp-thumb').value;
             payload.attachedPdfUrl = document.getElementById('inp-attached-pdf').value;
+            
+            // 🚨 Database me HLS Video ko alag se pehchanne ka flag
+            if(url.includes('.m3u8')) {
+                payload.isSecureHLS = true;
+                payload.streamType = "Private HLS";
+            } else {
+                payload.isSecureHLS = false;
+                payload.streamType = "Public YouTube";
+            }
+            
         } else if (type === 'pdf') {
             payload.pdfUrl = url;
         } else {
@@ -296,10 +306,13 @@ window.triggerEditContent = (matId) => {
     document.getElementById('inp-type').value = data.type || "lecture";
     document.getElementById('inp-title').value = data.title || "";
     
+    // 🚨 PRO FEATURE UPDATED HERE: Edit mode me link pre-fill karna
     if(data.type === 'lecture') {
         document.getElementById('inp-url').value = data.videoUrl || "";
         document.getElementById('inp-thumb').value = data.thumbnailUrl || "";
         document.getElementById('inp-attached-pdf').value = data.attachedPdfUrl || "";
+        // Hint change for edit mode
+        if(data.isSecureHLS) console.log("Editing a Secure HLS Stream.");
     } else if (data.type === 'pdf') {
         document.getElementById('inp-url').value = data.pdfUrl || "";
     } else {
@@ -320,4 +333,3 @@ window.deleteContent = async (matId) => {
         window.loadBatchData();
     } catch (err) { window.showMsg("Deletion failed."); }
 };
-      
