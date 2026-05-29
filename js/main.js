@@ -3,7 +3,7 @@ import { db, auth } from './firebase-init.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initAuth, AppState } from './auth.js'; 
 import { UI } from './ui.js';
-import { VideoPlayer } from './player.js';
+import { VideoPlayer } from './player/index.js';
 import { PDFViewer } from './pdf.js';
 
 // 🚨 PRECAUTION: Video tracker file missing hone par system crash rokne ke liye
