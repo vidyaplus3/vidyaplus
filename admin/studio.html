@@ -83,11 +83,11 @@
 
                     <form id="upload-form">
                         <div style="background: #eff6ff; padding: 1.2rem; border-radius: 12px; border: 1px solid #bfdbfe; margin-bottom: 1.5rem;">
-                            <label style="font-weight:800; font-size:0.9rem; color:var(--primary-dark); margin-bottom: 10px; display:block;">📍 Step 1: Where do you want to upload?</label>
+                            <label style="font-weight:800; font-size:0.9rem; color:var(--primary-dark); margin-bottom: 10px; display:block;">桃 Step 1: Where do you want to upload?</label>
                             <select id="inp-target-area" class="input-control" onchange="toggleFormFields()" style="border-color: #93c5fd; font-weight: 600;">
-                                <option value="chapter_content">📚 Core Chapter Content (Lectures, PDF Notes)</option>
-                                <option value="subject_material">📂 Subject Extra Material (Formula Sheets, Notes)</option>
-                                <option value="batch_resource">🌐 Global Batch Resource (Timetable, Syllabus, Links)</option>
+                                <option value="chapter_content">答 Core Chapter Content (Lectures, PDF Notes)</option>
+                                <option value="subject_material">唐 Subject Extra Material (Formula Sheets, Notes)</option>
+                                <option value="batch_resource">倹 Global Batch Resource (Timetable, Syllabus, Links)</option>
                             </select>
                         </div>
 
@@ -97,7 +97,7 @@
     <select id="inp-subject" class="input-control" required>
         <option value="">-- Automatically loaded from batch --</option>
     </select>
-                            </div>
+    </div>
                             
                             <div class="input-group" id="group-chapter">
                                 <label>Chapter Name</label>
@@ -121,16 +121,19 @@
                         <div style="background: #f8fafc; padding: 1.5rem; border-radius: 16px; margin: 1rem 0; border: 1px solid #e2e8f0;">
                             
                             <div class="input-group">
-                                <label>Resource Format Input Type</label>
+                                <label><i class="fas fa-server text-primary"></i> Resource Source & Security</label>
                                 <select id="inp-format" class="input-control" onchange="toggleFormFields()">
-                                    <option value="url">External URL (YouTube / Drive Link)</option>
+                                    <option value="url">Secure Stream (HLS .m3u8) / YouTube URL</option>
                                     <option value="file">Direct File Upload (Requires Storage Setup)</option>
                                 </select>
                             </div>
 
                             <div class="input-group" id="url-container">
-                                <label>Main URL (Video / PDF / Link)</label>
-                                <input type="url" id="inp-url" class="input-control" required placeholder="https://...">
+                                <label>Video Stream URL (Paste your .m3u8 link here)</label>
+                                <input type="url" id="inp-url" class="input-control" required placeholder="e.g. https://.../output.m3u8">
+                                <div style="font-size: 0.75rem; color: #16a34a; margin-top: 5px; font-weight: 600;">
+                                    <i class="fas fa-shield-check"></i> AES-128 Encrypted HLS links are fully supported.
+                                </div>
                             </div>
 
                             <div class="input-group" id="file-container" style="display: none;">
