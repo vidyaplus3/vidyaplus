@@ -254,6 +254,21 @@
             margin-left: -100% !important;
             border: none !important;
         }
+
+                /* 🚨 PRO FIX: Reset any old YouTube tricks specifically for HLS */
+        .video-js, .video-js video, .vjs-tech {
+            transform: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important; /* Video ko bina kaate screen par fit karega */
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
     </style>
     <div class="classroom-overlay" id="instruction-mode" style="background: #f1f5f9; display: none; z-index: 2000; flex-direction: column; height: 100dvh; position: fixed; top: 0; left: 0; width: 100%;">
         
