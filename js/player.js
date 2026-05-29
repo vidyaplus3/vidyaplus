@@ -115,12 +115,12 @@ export const VideoPlayer = {
             }
         });
     },
-    initVideoJS: (vidUrl) => {
+        initVideoJS: async (vidUrl) => { // 🚨 NAYA: Isko async banaya hai
         // Destroy old elements
         if (VideoPlayer.ytPlayer && typeof VideoPlayer.ytPlayer.destroy === 'function') { VideoPlayer.ytPlayer.destroy(); VideoPlayer.ytPlayer = null; }
         if (VideoPlayer.vjsPlayer) { VideoPlayer.vjsPlayer.dispose(); VideoPlayer.vjsPlayer = null; }
 
-        // Recreate VJS Video Tag (Because dispose() removes it from DOM)
+        // Recreate VJS Video Tag
         document.getElementById('yt-player').style.display = 'none';
         let wrapper = document.getElementById('player-wrapper');
         let newVjsEl = document.createElement('video');
@@ -129,6 +129,28 @@ export const VideoPlayer = {
         newVjsEl.style.cssText = "width: 100%; height: 100%;";
         newVjsEl.setAttribute('playsinline', '');
         wrapper.appendChild(newVjsEl);
+
+        // ==========================================================
+        // 🚨 GOD-LEVEL SECURITY: Intercepting Key Request
+        // ==========================================================
+        let token = "";
+        if (auth.currentUser) {
+            token = await auth.currentUser.getIdToken(true); // Firebase se taaza token laao
+        }
+
+        // Video.js ka network hijacker: Jab bhi player key mangega, hum use Vercel par bhejenge
+        videojs.Vhs.xhr.beforeRequest = function(options) {
+            if (options.uri.includes('.key') || options.uri.includes('enc.key')) {
+                // 👇 YAHAN APNI VERCEL APP KA ASLI URL DAALNA
+                options.uri = "https://vidyaplus-backend.vercel.app/api/getVideoKey"; 
+                
+                options.headers = options.headers || {};
+                // Token ko Authorization header me add karo
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+            return options;
+        };
+        // ==========================================================
 
         let sourceType = vidUrl.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4';
 
@@ -163,6 +185,7 @@ export const VideoPlayer = {
         VideoPlayer.vjsPlayer.on('ended', () => window.dispatchEvent(new CustomEvent('vp-yt-pause')));
         VideoPlayer.vjsPlayer.on('waiting', () => window.dispatchEvent(new CustomEvent('vp-yt-pause')));
     },
+    
 
     startProgressTracking: () => {
         if(VideoPlayer.progressInterval) clearInterval(VideoPlayer.progressInterval);
