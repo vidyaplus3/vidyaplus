@@ -1,0 +1,31 @@
+/* css/base.css */
+:root { --primary: #4F46E5; --navy: #0B1120; --bg-color: #F1F5F9; --surface: #FFFFFF; --text-main: #0F172A; --text-light: #64748B; --border: #E2E8F0; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg-color); color: var(--text-main); }
+
+.app-container { max-width: 100%; margin: 0 auto; background: var(--surface); min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+.screen.active { display: flex; }
+.screen-content { flex: 1; overflow-y: auto; padding-bottom: 30px; }
+
+.header-dark { background: var(--navy); color: white; padding: 1.5rem; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; position: relative; z-index: 100; }
+.top-nav { display: flex; justify-content: space-between; font-size: 1.3rem; margin-bottom: 20px; }
+.top-nav i { cursor: pointer; }
+.batch-selector { display: inline-flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700; cursor: pointer; position: relative; padding: 5px 0; }
+.dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 250px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden; }
+.dropdown-menu.show { display: block; }
+.dropdown-item { padding: 12px 15px; color: var(--text-main); font-size: 0.95rem; font-weight: 600; border-bottom: 1px solid var(--border); cursor: pointer; }
+.dropdown-item:hover { background: var(--bg-color); color: var(--primary); }
+
+.empty-box { text-align: center; padding: 40px 20px; color: var(--text-light); width: 100%; }
+.empty-box i { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
+.empty-box h4 { font-size: 1rem; font-weight: 600; }
+
+.simple-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9000; }
+.simple-modal { display: none; position: fixed; top: 0; width: 280px; height: 100vh; background: var(--surface); z-index: 9999; flex-direction: column; }
+#menu-modal { left: 0; }
+#notif-modal { right: 0; width: 320px; }
+
+@keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+.skeleton { background: #e2e8f0; background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px); background-size: 1000px 100%; animation: shimmer 2s infinite linear forwards; }
+
