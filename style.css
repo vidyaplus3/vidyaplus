@@ -56,12 +56,11 @@
 
         @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
         .skeleton { background: #e2e8f0; background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px); background-size: 1000px 100%; animation: shimmer 2s infinite linear forwards; }        
-
-        /* --- ADVANCED CLASSROOM OVERLAY --- */
+/* --- ADVANCED CLASSROOM OVERLAY --- */
         .classroom-overlay { display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 10000; flex-direction: column; }
         .classroom-overlay.active { display: flex; }
 
-        .video-fixed-box { width: 100%; background: #000; position: relative; aspect-ratio: 16/9; max-height: 50vh; }
+        .video-fixed-box { width: 100%; background: #000; position: relative; aspect-ratio: 16/9; max-height: 50vh; overflow: hidden; }
         #vp-player, iframe#vp-player { width: 100%; height: 100%; border: none; }
         
         .interaction-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); border-top-left-radius: 25px; border-top-right-radius: 25px; margin-top: 0px; position: relative; z-index: 200; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
@@ -78,189 +77,161 @@
         .comment-user { font-size: 0.85rem; font-weight: 800; margin-bottom: 4px; }
         .comment-text { font-size: 0.9rem; color: var(--text-main); line-height: 1.4; }
 
-        .close-classroom { position: absolute; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .close-classroom { position: absolute; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s ease; }
 
-                /* ==========================================
-           🎬 NAYE SMART VIDEO CONTROLS & SETTINGS 
+        /* ==========================================
+           🎬 SLEEK & PREMIUM VIDEO CONTROLS (MONOCHROME)
            ========================================== */
         .custom-controls { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); 
-            padding: 15px 20px; display: flex; align-items: center; gap: 15px; 
-            z-index: 100; transition: opacity 0.3s ease; 
+            position: absolute; bottom: 15px; left: 15px; right: 15px; 
+            background: rgba(10, 10, 10, 0.45); 
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+            padding: 12px 20px; display: flex; align-items: center; gap: 18px; 
+            z-index: 100; transition: opacity 0.4s ease, transform 0.4s ease; 
         }
         
         .ctrl-btn { 
-            background: none; border: none; color: white; font-size: 1.1rem; 
+            background: none; border: none; color: rgba(255,255,255,0.85); font-size: 1.15rem; 
             cursor: pointer; display: flex; justify-content: center; align-items: center; 
-            transition: 0.2s; 
+            transition: all 0.2s ease; 
         }
-        .ctrl-btn:hover { color: #4F46E5; transform: scale(1.1); }
+        .ctrl-btn:hover { color: #FFFFFF; transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(255,255,255,0.4)); }
         
-        .time-display { color: white; font-size: 0.8rem; font-weight: 600; min-width: 45px; text-align: center; }
+        .time-display { color: rgba(255,255,255,0.9); font-size: 0.8rem; font-weight: 600; min-width: 45px; text-align: center; letter-spacing: 0.5px; }
         
-        /* Smooth Progress Bar */
+        /* Sleek Thin Progress Bar */
         .progress-bar-bg { 
-            flex: 1; height: 5px; background: rgba(255,255,255,0.3); 
-            border-radius: 5px; cursor: pointer; position: relative; transition: height 0.2s; 
+            flex: 1; height: 4px; background: rgba(255,255,255,0.25); 
+            border-radius: 4px; cursor: pointer; position: relative; transition: height 0.2s ease; 
         }
-        .progress-bar-bg:hover { height: 8px; }
+        .progress-bar-bg:hover { height: 6px; }
+        
         .progress-fill { 
-            height: 100%; background: #EF4444; width: 0%; border-radius: 5px; 
+            height: 100%; background: #FFFFFF; width: 0%; border-radius: 4px; 
             pointer-events: none; position: relative; 
         }
+        /* Scrubber Dot - Hidden by default, shows on hover */
         .progress-fill::after { 
-            content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); 
-            width: 12px; height: 12px; background: white; border-radius: 50%; 
-            opacity: 0; transition: opacity 0.2s; box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%) scale(0); 
+            width: 12px; height: 12px; background: #FFFFFF; border-radius: 50%; 
+            transition: transform 0.2s ease; box-shadow: 0 0 8px rgba(0,0,0,0.5);
         }
-        .progress-bar-bg:hover .progress-fill::after { opacity: 1; }
+        .progress-bar-bg:hover .progress-fill::after { transform: translateY(-50%) scale(1); }
 
-        /* ⚙️ Settings Menu UI */
+        /* Hover Time Tooltip (Ready for JS) */
+        .progress-tooltip {
+            position: absolute; top: -35px; left: 0; transform: translateX(-50%);
+            background: rgba(10, 10, 10, 0.85); color: white; padding: 4px 10px;
+            border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+            pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap;
+        }
+        .progress-bar-bg:hover .progress-tooltip { opacity: 1; }
+
+        /* 🔊 Expanding Volume Slider UI */
+        .volume-wrapper { display: flex; align-items: center; gap: 8px; }
+        .volume-slider-container {
+            width: 0; overflow: hidden; transition: width 0.3s ease, opacity 0.3s ease; opacity: 0;
+            display: flex; align-items: center;
+        }
+        .volume-wrapper:hover .volume-slider-container { width: 70px; opacity: 1; }
+        .volume-slider {
+            width: 100%; appearance: none; background: rgba(255,255,255,0.25); height: 3px; border-radius: 2px; outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none; width: 10px; height: 10px; border-radius: 50%; background: white; cursor: pointer;
+        }
+
+        /* ⚙️ Minimal Frosted Settings Menu */
         .settings-menu { 
-            display: none; position: absolute; bottom: 65px; right: 20px; 
-            background: rgba(11, 17, 32, 0.95); backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
-            width: 260px; padding: 15px; flex-direction: column; gap: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 150; 
+            display: none; position: absolute; bottom: 80px; right: 20px; 
+            background: rgba(15, 15, 15, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; 
+            width: 260px; padding: 20px; flex-direction: column; gap: 15px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6); z-index: 150; 
         }
-        .settings-menu.show { display: flex; }
-        .settings-header { color: white; font-weight: 700; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .settings-section { display: flex; flex-direction: column; gap: 8px; }
-        .settings-title { color: rgba(255,255,255,0.6); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; }
-        .settings-options { display: flex; flex-wrap: wrap; gap: 8px; }
-        .speed-opt, .quality-opt { 
-            color: white; font-size: 0.8rem; background: rgba(255,255,255,0.1); 
-            padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: 500;
-        }
-        .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.2); }
-        .speed-opt.active, .quality-opt.active { background: #4F46E5; font-weight: 700; }
+        .settings-menu.show { display: flex; animation: slideUpFade 0.3s ease; }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .badge-na { font-size: 0.55rem; background: #EF4444; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
-                /* 🚨 AUTO-HIDE MAGIC 🚨 */
+        .settings-header { color: rgba(255,255,255,0.9); font-weight: 600; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .settings-section { display: flex; flex-direction: column; gap: 10px; }
+        .settings-title { color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; text-transform: uppercase; letter-spacing: 0.5px; }
+        .settings-options { display: flex; flex-wrap: wrap; gap: 6px; }
+        
+        /* Options with Monochrome highlight */
+        .speed-opt, .quality-opt { 
+            color: rgba(255,255,255,0.8); font-size: 0.8rem; background: rgba(255,255,255,0.05); 
+            padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; border: 1px solid transparent;
+        }
+        .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.15); color: white; }
+        .speed-opt.active, .quality-opt.active { background: rgba(255,255,255,0.9); color: #000; font-weight: 700; box-shadow: 0 2px 10px rgba(255,255,255,0.2); }
+        
+        .badge-na { font-size: 0.55rem; background: rgba(255,255,255,0.2); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+
+        /* Double Tap UI Indicator (Hidden by Default) */
+        .tap-indicator { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border-radius: 50%; padding: 25px; color: white; display: none; font-size: 1.5rem; pointer-events: none; z-index: 101; animation: ripple 0.4s ease-out; }
+        .tap-indicator.left { left: 15%; }
+        .tap-indicator.right { right: 15%; }
+        @keyframes ripple { 0% { transform: translateY(-50%) scale(0.8); opacity: 1; } 100% { transform: translateY(-50%) scale(1.5); opacity: 0; } }
+
+        /* 🚨 AUTO-HIDE MAGIC 🚨 */
         .custom-controls.hidden { 
             opacity: 0 !important; 
             pointer-events: none; 
-            transform: translateY(15px); /* Niche slide hoke gayab hoga */
+            transform: translateY(20px); 
         }
-                .close-classroom.hidden { 
+        .close-classroom.hidden { 
             opacity: 0 !important; 
             pointer-events: none;
-        } /* 🚨 FIX: Ye aakhiri bracket lagana zaroori tha */
+        } 
         
-                /* ==========================================
+        /* ==========================================
            7. PROFESSIONAL DESKTOP WEBSITE UI
            ========================================== */
         @media (min-width: 768px) {
             body { padding: 40px 0; background: #E2E8F0; } 
             
-            .app-container {
-                max-width: 1300px; /* Badi website ke liye wide container */
-                border-radius: 16px;
-                min-height: calc(100vh - 80px);
-                border: 1px solid var(--border);
-                box-shadow: 0 10px 40px rgba(0,0,0,0.05);
-            }
-
+            .app-container { max-width: 1300px; border-radius: 16px; min-height: calc(100vh - 80px); border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
             .header-dark { padding: 2.5rem 3rem; border-top-left-radius: 16px; border-top-right-radius: 16px; }
             .top-nav { font-size: 1.5rem; }
-            
             .app-grid { padding: 30px 3rem; gap: 20px; grid-template-columns: repeat(4, 1fr); }
             .grid-icon { width: 80px; height: 80px; font-size: 2rem; }
             .grid-text { font-size: 0.9rem; }
-
-            .list-container {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-                gap: 20px;
-                padding: 30px 3rem;
-                align-content: start; 
-            }
+            .list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 30px 3rem; align-content: start; }
             .lecture-card { margin-bottom: 0; } 
-
-            #live-container, #announcement-container {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                overflow-x: visible;
-                align-content: start; 
-            }
-
+            #live-container, #announcement-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); overflow-x: visible; align-content: start; }
             .page-header { padding: 20px 3rem; }
             .tabs { padding: 20px 3rem; }
 
             /* 🚨 DESKTOP CLASSROOM (CINEMATIC WEB MODE) 🚨 */
-            .classroom-overlay { 
-                flex-direction: row; /* Video aur Notes bagal-bagal me */
-                padding: 30px; 
-                background: rgba(11, 17, 32, 0.98); /* Premium dark theatre effect */
-                align-items: center; 
-                justify-content: center;
-                gap: 30px; 
-            }
-
-            .video-fixed-box { 
-                flex: 2.5; /* Video ko screen ka zyada hissa diya */
-                height: auto; 
-                max-height: 85vh; 
-                border-radius: 16px; /* Video me curve */
-                overflow: hidden;
-                box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-            }
-
-            .interaction-area { 
-                flex: 1; /* Side bar ki tarah discussion/notes */
-                margin-top: 0; 
-                border-radius: 16px; 
-                height: 85vh; /* Video ki height se match kiya */
-                border: none;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            }
-
-            .close-classroom {
-                top: 30px; left: 30px;
-                background: rgba(255,255,255,0.15);
-                backdrop-filter: blur(5px);
-            }
+            .classroom-overlay { flex-direction: row; padding: 30px; background: rgba(11, 17, 32, 0.98); align-items: center; justify-content: center; gap: 30px; }
+            .video-fixed-box { flex: 2.5; height: auto; max-height: 85vh; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+            .interaction-area { flex: 1; margin-top: 0; border-radius: 16px; height: 85vh; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+            .close-classroom { top: 30px; left: 30px; background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); }
             .close-classroom:hover { background: rgba(255,255,255,0.3); }
 
-            /* Desktop me controls ko margin ki zaroorat nahi */
-            .custom-controls { padding-bottom: 15px; } 
-                       }
-.pdf-overlay {
-    display: none; position: fixed; inset: 0; 
-    background: #0F172A; z-index: 10001; flex-direction: column;
-}
-.pdf-overlay.active { display: flex; }
+            /* Desktop spacing for controls */
+            .custom-controls { bottom: 25px; left: 25px; right: 25px; padding: 15px 25px; border-radius: 20px; } 
+            .settings-menu { bottom: 95px; right: 30px; }
+        }
 
-.pdf-header {
-    background: #1E293B; color: white; padding: 12px 20px;
-    display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
-}
+        .pdf-overlay { display: none; position: fixed; inset: 0; background: #0F172A; z-index: 10001; flex-direction: column; }
+        .pdf-overlay.active { display: flex; }
+        .pdf-header { background: #1E293B; color: white; padding: 12px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .pdf-back { font-size: 1.2rem; cursor: pointer; opacity: 0.8; transition: 0.2s; }
+        .pdf-back:hover { opacity: 1; color: #4F46E5; }
+        .pdf-title-box { flex: 1; }
+        .pdf-title-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+        .pdf-badge { font-size: 0.6rem; background: #4F46E5; padding: 2px 8px; border-radius: 4px; font-weight: 800; }
+        .pdf-container { flex: 1; position: relative; background: #334155; display: flex; justify-content: center; overflow: hidden; }
+        #pdf-iframe { width: 100%; height: 100%; border: none; background: white; }
 
-.pdf-back { font-size: 1.2rem; cursor: pointer; opacity: 0.8; transition: 0.2s; }
-.pdf-back:hover { opacity: 1; color: #4F46E5; }
+        @media (min-width: 768px) {
+            .pdf-overlay.active { padding: 20px 50px; background: rgba(11, 17, 32, 0.95); backdrop-filter: blur(10px); }
+            .pdf-header { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+            .pdf-container { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+            #pdf-iframe { max-width: 1000px; }
+        }
 
-.pdf-title-box { flex: 1; }
-.pdf-title-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
-.pdf-badge { font-size: 0.6rem; background: #4F46E5; padding: 2px 8px; border-radius: 4px; font-weight: 800; }
-
-.pdf-container { 
-    flex: 1; position: relative; background: #334155; 
-    display: flex; justify-content: center; overflow: hidden;
-}
-
-#pdf-iframe { width: 100%; height: 100%; border: none; background: white; }
-
-@media (min-width: 768px) {
-    .pdf-overlay.active { padding: 20px 50px; background: rgba(11, 17, 32, 0.95); backdrop-filter: blur(10px); }
-    .pdf-header { border-top-left-radius: 12px; border-top-right-radius: 12px; }
-    .pdf-container { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-    #pdf-iframe { max-width: 1000px; }
-}
-
-.pdf-shield { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
-.pdf-watermark { 
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-    color: rgba(0,0,0,0.05); font-size: 3rem; font-weight: 900; z-index: 5; pointer-events: none; 
-    white-space: nowrap; user-select: none;
-}
+        .pdf-shield { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+        .pdf-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); color: rgba(0,0,0,0.05); font-size: 3rem; font-weight: 900; z-index: 5; pointer-events: none; white-space: nowrap; user-select: none; }
