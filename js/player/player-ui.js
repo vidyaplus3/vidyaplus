@@ -25,7 +25,7 @@ export const PlayerUI = {
         if(PlayerUI.progressInterval) clearInterval(PlayerUI.progressInterval);
     },
 
-    updateProgressBar: (engine) => {
+        updateProgressBar: (engine) => {
         if (PlayerUI.isDragging || !engine) return;
         let current = engine.getCurrentTime();
         let duration = engine.getDuration();
@@ -33,11 +33,15 @@ export const PlayerUI = {
         if(duration > 0) {
             let percentage = (current / duration) * 100;
             const progressFill = document.getElementById('progress-fill');
-            const timeDisplay = document.getElementById('time-display');
+            const timeCurrent = document.getElementById('time-current');
+            const timeDuration = document.getElementById('time-duration');
+            
             if(progressFill) progressFill.style.width = percentage + "%";
-            if(timeDisplay) timeDisplay.innerText = PlayerUI.formatTime(current);
+            if(timeCurrent) timeCurrent.innerText = PlayerUI.formatTime(current);
+            if(timeDuration) timeDuration.innerText = PlayerUI.formatTime(duration);
         }
     },
+    
 
     // 3. UI Visibility (Auto-Hide Logic)
     showUI: (e, isPlaying) => {
