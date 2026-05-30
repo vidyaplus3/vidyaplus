@@ -2,12 +2,13 @@
 export const PlayerUI = {
     progressInterval: null,
     isDragging: false,
+    isSeekLocked: false, // 🚨 NAYA: Slow net e bar firot asa rokhar jonnno
+    seekLockTimeout: null,
     uiTimeout: null,
     lastMouseX: -1,
     lastMouseY: -1,
-    lastTapTime: 0, // Mobile gesture tracking ke liye
+    lastTapTime: 0, 
 
-    // 1. Core Time Formatting
     formatTime: (time) => {
         if(isNaN(time) || !isFinite(time)) return "0:00";
         let min = Math.floor(time / 60);
@@ -15,7 +16,6 @@ export const PlayerUI = {
         return min + ":" + (sec < 10 ? "0" + sec : sec);
     },
 
-    // 2. Progress Bar Tracking
     startProgressTracking: (engine) => {
         if(PlayerUI.progressInterval) clearInterval(PlayerUI.progressInterval);
         PlayerUI.progressInterval = setInterval(() => PlayerUI.updateProgressBar(engine), 500);
@@ -25,8 +25,9 @@ export const PlayerUI = {
         if(PlayerUI.progressInterval) clearInterval(PlayerUI.progressInterval);
     },
 
-        updateProgressBar: (engine) => {
-        if (PlayerUI.isDragging || !engine) return;
+    updateProgressBar: (engine) => {
+        // 🚨 Seek Lock thakle background e bar update hobe na
+        if (PlayerUI.isDragging || PlayerUI.isSeekLocked || !engine) return;
         let current = engine.getCurrentTime();
         let duration = engine.getDuration();
 
@@ -41,9 +42,7 @@ export const PlayerUI = {
             if(timeDuration) timeDuration.innerText = PlayerUI.formatTime(duration);
         }
     },
-    
 
-    // 3. UI Visibility (Auto-Hide Logic)
     showUI: (e, isPlaying) => {
         if (e && e.type === 'mousemove') {
             if (e.clientX === PlayerUI.lastMouseX && e.clientY === PlayerUI.lastMouseY) return; 
@@ -60,14 +59,13 @@ export const PlayerUI = {
         if (isPlaying) { 
             PlayerUI.uiTimeout = setTimeout(() => {
                 const menu = document.getElementById('settings-menu');
-                if (menu && menu.classList.contains('show')) return; // Settings open hai toh hide mat karo
+                if (menu && menu.classList.contains('show')) return; 
                 if(controls) controls.classList.add('hidden');
                 if(backBtn) backBtn.classList.add('hidden');
-            }, 4000); // 4 seconds ke baad controls gayab
+            }, 4000); 
         }
     },
 
-    // 4. Basic Controls Update
     updatePlayPauseIcon: (isPlaying) => {
         const icon = document.getElementById('play-icon');
         if(icon) icon.className = isPlaying ? "fas fa-pause" : "fas fa-play";
@@ -79,28 +77,34 @@ export const PlayerUI = {
         if(menu) menu.classList.toggle('show'); 
     },
 
-    // 5. 🚨 NAYA: Hover Tooltip (Time Preview Netflix Style)
+    // 🚨 FIX: Tooltip hover aur touch dono te perfectly kaaj korbe
     initTooltip: (engine) => {
         const bg = document.getElementById('progress-bg');
         const tooltip = document.getElementById('progress-tooltip');
         if (!bg || !tooltip) return;
 
-        bg.addEventListener('mousemove', (e) => {
+        const updateTooltip = (e) => {
             if (!engine) return;
             const duration = engine.getDuration();
             if (duration <= 0) return;
 
             const rect = bg.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
+            let clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : (e.clientX || 0);
+            if(clientX === 0 && e.changedTouches) clientX = e.changedTouches[0].clientX; 
+
+            const clickX = clientX - rect.left;
             const percentage = Math.max(0, Math.min(1, clickX / rect.width));
             const hoverTime = percentage * duration;
 
             tooltip.innerText = PlayerUI.formatTime(hoverTime);
-            tooltip.style.left = (percentage * 100) + "%"; // Tooltip mouse ke sath move karega
-        });
+            tooltip.style.left = (percentage * 100) + "%"; 
+        };
+
+        bg.addEventListener('mousemove', updateTooltip);
+        bg.addEventListener('touchmove', updateTooltip);
     },
 
-    // 6. 🚨 NAYA: Volume Slider & Dynamic Icons Sync
+    // 🚨 FIX: Volume Slider dynamic white fill (Netflix Style)
     initVolumeSlider: (engine) => {
         const slider = document.getElementById('volume-slider');
         if (!slider) return;
@@ -109,14 +113,16 @@ export const PlayerUI = {
             const vol = parseFloat(e.target.value);
             if (!engine) return;
 
-            // Engine-agnostic volume setting
             if (engine.player && typeof engine.player.volume === 'function') {
-                engine.player.volume(vol); // VideoJS (0.0 to 1.0)
+                engine.player.volume(vol); 
             } else if (engine.player && typeof engine.player.setVolume === 'function') {
-                engine.player.setVolume(vol * 100); // YouTube (0 to 100)
+                engine.player.setVolume(vol * 100); 
             }
 
-            // Sync Mute Icons based on threshold
+            // Visual Fill Update
+            const percentage = vol * 100;
+            e.target.style.background = `linear-gradient(to right, white ${percentage}%, rgba(255, 255, 255, 0.25) ${percentage}%)`;
+
             const muteIcon = document.getElementById('mute-icon');
             if (muteIcon) {
                 if (vol === 0) muteIcon.className = "fas fa-volume-mute";
@@ -126,29 +132,24 @@ export const PlayerUI = {
         });
     },
 
-    // 7. 🚨 NAYA: Advanced Double-Tap Gestures (Mobile/Tablet Only)
     initGestures: (videoContainer, skipFn) => {
         if (!videoContainer || !skipFn) return;
 
         videoContainer.addEventListener('touchend', (e) => {
-            // Agar control buttons ya back button par click hua hai, toh gesture bypass karo
             if (e.target.closest('.custom-controls') || e.target.closest('.close-classroom')) return;
 
             const currentTime = new Date().getTime();
             const tapLength = currentTime - PlayerUI.lastTapTime;
             
-            // Double tap detect kiya (300ms ke andar)
             if (tapLength < 300 && tapLength > 0) {
                 e.preventDefault();
                 const rect = videoContainer.getBoundingClientRect();
                 const touchX = e.changedTouches[0].clientX - rect.left;
                 
                 if (touchX > rect.width / 2) {
-                    // Right Side Tap -> Forward 10s
                     skipFn(10);
                     PlayerUI.triggerRipple('tap-indicator-right');
                 } else {
-                    // Left Side Tap -> Rewind 10s
                     skipFn(-10);
                     PlayerUI.triggerRipple('tap-indicator-left');
                 }
@@ -157,31 +158,24 @@ export const PlayerUI = {
         });
     },
 
-    // Ripple Reflow Hack (Prevents animation freezing on rapid clicks)
     triggerRipple: (elementId) => {
         const el = document.getElementById(elementId);
         if (!el) return;
-        
         el.style.display = 'none';
-        void el.offsetWidth; // DOM Reflow force karta hai taaki animation reset ho
+        void el.offsetWidth; 
         el.style.display = 'block';
-        
         setTimeout(() => { el.style.display = 'none'; }, 400); 
     },
 
-    // 8. 🚨 NAYA: Native Keyboard Shortcuts (Accessibility Standards)
     initKeyboardShortcuts: (togglePlayFn, skipFn, toggleMuteFn, toggleFsFn) => {
         document.addEventListener('keydown', (e) => {
-            // Security check: Agar doubt/chat box me type kar rahe ho, toh video pause na ho jaye
             if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-
-            // Sirf tab trigger hoga jab video full screen / active mode me ho
             const overlay = document.getElementById('classroom-mode');
             if (!overlay || !overlay.classList.contains('active')) return;
 
             switch(e.key.toLowerCase()) {
                 case ' ':
-                    e.preventDefault(); // Screen scroll hone se rokta hai
+                    e.preventDefault(); 
                     togglePlayFn();
                     break;
                 case 'arrowright':
