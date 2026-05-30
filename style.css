@@ -81,7 +81,7 @@
         .close-classroom { position: absolute; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s ease; }
 
 
-                 /* ==========================================
+        /* ==========================================
            🎬 CINEMATIC MONOCHROME CONTROLS (ULTRA MINIMAL)
            ========================================== */
         
@@ -98,7 +98,7 @@
         .controls-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .ctrl-group-left, .ctrl-group-right { display: flex; align-items: center; gap: 20px; }
         
-        /* 🚨 FIX: BUTTONS PURE WHITE */
+        /* 🚨 FIX: BUTTONS PURE WHITE WITH FIXED WIDTH TO PREVENT GLITCHES */
         .ctrl-btn { 
             background: none; border: none; 
             color: #FFFFFF; /* Ekdum pure white */
@@ -106,6 +106,9 @@
             cursor: pointer; display: flex; justify-content: center; align-items: center; 
             transition: all 0.2s ease;
             text-shadow: 0 0 5px rgba(0,0,0,0.5); /* Video ke upar clear dikhne ke liye */
+            width: 32px; /* Fixed width so icon size changes don't shift layout */
+            height: 32px;
+            flex-shrink: 0;
         }
         .ctrl-btn:hover { transform: scale(1.15); }
 
@@ -147,7 +150,7 @@
         .progress-bar-bg:hover .progress-tooltip { opacity: 1; }
 
         /* Volume UI */
-        .volume-wrapper { display: flex; align-items: center; gap: 10px; }
+        .volume-wrapper { display: flex; align-items: center; gap: 4px; } /* Gap reduced due to fixed btn width */
         .volume-slider-container { width: 75px; opacity: 1; display: flex; align-items: center; } 
         .volume-slider { 
             width: 100%; appearance: none; 
@@ -155,49 +158,49 @@
             height: 4px; border-radius: 2px; outline: none; cursor: pointer; 
         }
         .volume-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-
-        /* 🚨 FIX: ULTRA-MINIMAL SETTINGS MENU 🚨 */
+/* 🚨 FIX: ULTRA-MINIMAL PURE WHITE SETTINGS MENU 🚨 */
         .settings-menu { 
             display: none; position: absolute; bottom: 65px; right: 24px; 
-            background: rgba(10, 10, 10, 0.95); /* Deep Black */
+            background: rgba(255, 255, 255, 0.98); /* Pure White */
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; /* Sharp corners */
-            width: 170px; /* Boht compact width */
+            border: 1px solid rgba(0,0,0,0.05); border-radius: 8px; /* Sharp corners */
+            width: 150px; /* Extremely compact width */
             padding: 4px 0; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 150; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 150; 
         }
         .settings-menu.show { display: flex; animation: slideUpFade 0.2s ease; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .settings-menu-item {
-            padding: 10px 14px; color: #FFFFFF; font-size: 0.8rem; font-weight: 600;
+            padding: 8px 14px; color: #000000; /* Pure Black */
+            font-size: 0.8rem; font-weight: 700;
             display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
         }
-        .settings-menu-item:hover { background: rgba(255,255,255,0.15); }
+        .settings-menu-item:hover { background: rgba(0,0,0,0.05); }
         
         .settings-submenu-list {
-            display: none; flex-direction: column; background: rgba(0, 0, 0, 0.5);
-            border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: none; flex-direction: column; background: rgba(245, 245, 245, 0.95); /* Light Grey Submenu */
+            border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05);
         }
         .settings-submenu-list.show { display: flex; }
         
-        /* 🚨 FIX: Strict Black, White & Grey Options */
+        /* Options */
         .speed-opt, .quality-opt { 
             padding: 8px 14px; /* Compact Height */
-            color: #A0A0A0; /* Clean Grey */
+            color: #444444; /* Clean Grey Text */
             font-size: 0.75rem; 
-            cursor: pointer; transition: all 0.2s ease; font-weight: 500; text-align: left;
+            cursor: pointer; transition: all 0.2s ease; font-weight: 600; text-align: left;
         }
-        .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.1); color: #FFFFFF; }
+        .speed-opt:hover, .quality-opt:hover { background: rgba(0,0,0,0.08); color: #000000; }
         
         /* Active Option (Pure Black on White) */
         .speed-opt.active, .quality-opt.active { 
-            color: #000000; 
-            background: #FFFFFF; 
+            color: #FFFFFF; 
+            background: #000000; /* Black highlight */
             font-weight: 700; 
         } 
 
-        .badge-na { font-size: 0.55rem; background: rgba(255,255,255,0.2); color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px; }
+        .badge-na { font-size: 0.55rem; background: rgba(0,0,0,0.08); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-left: 8px; }
 
         /* Double Tap UI Indicator */
         .tap-indicator { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border-radius: 50%; padding: 25px; color: white; display: none; font-size: 1.5rem; pointer-events: none; z-index: 101; animation: ripple 0.4s ease-out; }
@@ -208,7 +211,6 @@
         /* 🚨 AUTO-HIDE MAGIC 🚨 */
         .custom-controls.hidden { opacity: 0 !important; pointer-events: none; transform: translateY(10px); }
         .close-classroom.hidden { opacity: 0 !important; pointer-events: none; } 
-
         
         /* ==========================================
            7. PROFESSIONAL DESKTOP WEBSITE UI
