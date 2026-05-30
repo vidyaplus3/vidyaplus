@@ -37,6 +37,11 @@ export const VideoPlayer = {
             const menu = document.getElementById('settings-menu');
             if (menu && menu.classList.contains('show') && !e.target.closest('.custom-controls')) {
                 menu.classList.remove('show');
+                // Naye dropdowns ko bhi click outside par close karo
+                const spdDrop = document.getElementById('speed-dropdown');
+                const qDrop = document.getElementById('quality-dropdown');
+                if(spdDrop) spdDrop.classList.remove('show');
+                if(qDrop) qDrop.classList.remove('show');
             }
         });
 
@@ -57,7 +62,18 @@ export const VideoPlayer = {
         
         PlayerUI.updatePlayPauseIcon(false);
         document.getElementById('progress-fill').style.width = "0%";
-        document.getElementById('time-display').innerText = "0:00";
+        
+        // 🚨 FIX: Targeting explicit row timers instead of old single block
+        const currentEl = document.getElementById('time-current');
+        const durationEl = document.getElementById('time-duration');
+        if(currentEl) currentEl.innerText = "0:00";
+        if(durationEl) durationEl.innerText = "0:00";
+        
+        // 🚨 FIX: Close active dropdowns on initialization
+        const spdDrop = document.getElementById('speed-dropdown');
+        const qDrop = document.getElementById('quality-dropdown');
+        if(spdDrop) spdDrop.classList.remove('show');
+        if(qDrop) qDrop.classList.remove('show');
         
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
@@ -74,8 +90,8 @@ export const VideoPlayer = {
             HlsEngine.destroy();
             VideoPlayer.activeEngineName = 'youtube';
             document.getElementById('quality-badge').style.display = 'none'; // YouTube handles its own quality
-            document.getElementById('quality-options').style.opacity = '0.5';
-            document.getElementById('quality-options').style.pointerEvents = 'none';
+            document.getElementById('quality-dropdown').style.opacity = '0.5';
+            document.getElementById('quality-dropdown').style.pointerEvents = 'none';
 
             YtEngine.init(ytMatch[1], 
                 (e) => { 
@@ -94,8 +110,8 @@ export const VideoPlayer = {
             YtEngine.destroy();
             VideoPlayer.activeEngineName = 'hls';
             document.getElementById('quality-badge').style.display = 'inline-block'; 
-            document.getElementById('quality-options').style.opacity = '1';
-            document.getElementById('quality-options').style.pointerEvents = 'auto';
+            document.getElementById('quality-dropdown').style.opacity = '1';
+            document.getElementById('quality-dropdown').style.pointerEvents = 'auto';
 
             HlsEngine.init(vidUrl, () => {
                 PlayerUI.startProgressTracking(HlsEngine);
@@ -153,6 +169,9 @@ export const VideoPlayer = {
         document.querySelectorAll('.speed-opt').forEach(el => el.classList.remove('active'));
         const activeBtn = document.getElementById('spd-' + rate);
         if(activeBtn) activeBtn.classList.add('active');
+        
+        // Auto-close dropdown after selection
+        document.getElementById('speed-dropdown').classList.remove('show');
     },
 
     // 🚨 NAYA: Universal Quality Selector API (UI to Engine Router)
@@ -172,6 +191,9 @@ export const VideoPlayer = {
         } else {
             console.warn("Quality selection not supported for the active engine.");
         }
+        
+        // Auto-close dropdown after selection
+        document.getElementById('quality-dropdown').classList.remove('show');
     },
 
     toggleFullScreen: () => {
@@ -210,7 +232,10 @@ export const VideoPlayer = {
         engine.seek(percentage * duration);
         
         document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
-        document.getElementById('time-display').innerText = PlayerUI.formatTime(percentage * duration);
+        
+        // 🚨 FIX: Update ONLY the current time text during scrubbing
+        const timeCurrent = document.getElementById('time-current');
+        if(timeCurrent) timeCurrent.innerText = PlayerUI.formatTime(percentage * duration);
     }
 };
 
