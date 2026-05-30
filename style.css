@@ -85,7 +85,6 @@
            🎬 CINEMATIC MONOCHROME CONTROLS (FULL REFIT)
            ========================================== */
         
-        /* 🚨 NO BOX, EDGE-TO-EDGE PREMIUM GRADIENT */
         .custom-controls { 
             position: absolute; bottom: 0; left: 0; right: 0; 
             background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); 
@@ -93,7 +92,6 @@
             z-index: 100; transition: opacity 0.4s ease, transform 0.4s ease; 
         }
 
-        /* 2-Row Grid Allocation */
         .controls-row-top { display: flex; align-items: center; gap: 14px; width: 100%; }
         .controls-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .ctrl-group-left, .ctrl-group-right { display: flex; align-items: center; gap: 20px; }
@@ -105,7 +103,6 @@
         }
         .ctrl-btn:hover { color: #FFFFFF; transform: scale(1.08); }
 
-        /* Integrated Inline Skip Labels */
         .skip-btn { position: relative; display: flex; align-items: center; justify-content: center; }
         .skip-label {
             position: absolute; font-size: 0.55rem; font-weight: 800; color: #FFFFFF;
@@ -114,7 +111,6 @@
         
         .time-display { color: rgba(255,255,255,0.9); font-size: 0.85rem; font-weight: 600; min-width: 40px; text-align: center; letter-spacing: 0.5px; }
         
-        /* Sleek Thin Progress Bar */
         .progress-bar-bg { 
             flex: 1; height: 4px; background: rgba(255,255,255,0.22); 
             border-radius: 4px; cursor: pointer; position: relative; transition: height 0.15s ease; 
@@ -122,19 +118,18 @@
         .progress-bar-bg:hover { height: 6px; }
         
         .progress-fill { height: 100%; background: #FFFFFF; width: 0%; border-radius: 4px; position: relative; }
-
-/* 🚨 SCRUBBER DOT: Hidden by default, shows only on Hover or Active Drag 🚨 */
+/* 🚨 FIX 1: SCRUBBER DOT PERMANENTLY VISIBLE 🚨 */
         .progress-fill::after { 
             content: ''; position: absolute; right: -6px; top: 50%; 
-            transform: translateY(-50%) scale(0); opacity: 0;
+            transform: translateY(-50%) scale(1); opacity: 1; /* Hamesha dikhega */
             width: 14px; height: 14px; background: #FFFFFF; border-radius: 50%; 
             box-shadow: 0 0 8px rgba(0,0,0,0.7); display: block; 
-            transition: transform 0.2s ease, opacity 0.2s ease;
+            transition: transform 0.2s ease;
         }
-        /* Reveal dot when mouse enters the timeline OR when user is dragging/clicking */
+        /* Hover karne par halka sa bada hoga */
         .progress-bar-bg:hover .progress-fill::after,
         .progress-bar-bg:active .progress-fill::after { 
-            transform: translateY(-50%) scale(1); opacity: 1; 
+            transform: translateY(-50%) scale(1.2); 
         }
 
         .progress-tooltip {
@@ -145,12 +140,15 @@
         }
         .progress-bar-bg:hover .progress-tooltip { opacity: 1; }
 
-        /* Volume UI */
+        /* 🚨 FIX 2: VOLUME UI ALWAYS VISIBLE & READY FOR FILL 🚨 */
         .volume-wrapper { display: flex; align-items: center; gap: 10px; }
-        .volume-slider-container { width: 0; overflow: hidden; transition: width 0.25s ease, opacity 0.25s ease; opacity: 0; display: flex; align-items: center; }
-        .volume-wrapper:hover .volume-slider-container { width: 75px; opacity: 1; }
-        .volume-slider { width: 100%; appearance: none; background: rgba(255,255,255,0.25); height: 3px; border-radius: 2px; outline: none; cursor: pointer; }
-        .volume-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; }
+        .volume-slider-container { width: 75px; opacity: 1; display: flex; align-items: center; } /* Hamesha show */
+        .volume-slider { 
+            width: 100%; appearance: none; 
+            background: rgba(255,255,255,0.25); /* Default grey, JS color fill karega */
+            height: 4px; border-radius: 2px; outline: none; cursor: pointer; 
+        }
+        .volume-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 
         /* ⚙️ Compact Micro Settings Menu & Dropdown list Stack */
         .settings-menu { 
@@ -163,13 +161,13 @@
         .settings-menu.show { display: flex; animation: slideUpFade 0.2s ease; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* 🚨 FIX 3: PURE MONOCHROME GREY/WHITE SETTINGS 🚨 */
         .settings-menu-item {
             padding: 12px 18px; color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 600;
             display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
         }
         .settings-menu-item:hover { background: rgba(255,255,255,0.08); }
         
-        /* Cascading Dropdown List stack (Inside settings) */
         .settings-submenu-list {
             display: none; flex-direction: column; background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -177,11 +175,11 @@
         .settings-submenu-list.show { display: flex; }
         
         .speed-opt, .quality-opt { 
-            padding: 10px 24px; color: rgba(255,255,255,0.65); font-size: 0.85rem; 
-            cursor: pointer; transition: all 0.2s ease; font-weight: 500; text-align: left;
+            padding: 10px 24px; color: rgba(255,255,255,0.65); /* Grey Text */
+            font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; font-weight: 500; text-align: left;
         }
         .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.1); color: white; }
-        .speed-opt.active, .quality-opt.active { color: #FFFFFF; font-weight: 700; }
+        .speed-opt.active, .quality-opt.active { color: #FFFFFF; font-weight: 700; } /* Pure White for Active */
         .speed-opt.active::before, .quality-opt.active::before { content: '• '; margin-right: 6px; color: rgba(255,255,255,0.9); }
 
         .badge-na { font-size: 0.6rem; background: rgba(255,255,255,0.15); color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px; }
@@ -214,14 +212,11 @@
             .page-header { padding: 20px 3rem; }
             .tabs { padding: 20px 3rem; }
 
-            /* 🚨 DESKTOP CLASSROOM (CINEMATIC WEB MODE) 🚨 */
             .classroom-overlay { flex-direction: row; padding: 30px; background: rgba(11, 17, 32, 0.98); align-items: center; justify-content: center; gap: 30px; }
             .video-fixed-box { flex: 2.5; height: auto; max-height: 85vh; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
             .interaction-area { flex: 1; margin-top: 0; border-radius: 16px; height: 85vh; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
             .close-classroom { top: 30px; left: 30px; background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); }
             .close-classroom:hover { background: rgba(255,255,255,0.3); }
-
-            /* Remove desktop box overrides to keep it Edge-to-Edge */
             .settings-menu { bottom: 85px; right: 30px; }
         }
 
