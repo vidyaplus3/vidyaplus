@@ -5,6 +5,7 @@ export const PlayerUI = {
     uiTimeout: null,
     lastMouseX: -1,
     lastMouseY: -1,
+    lastTapTime: 0, // Mobile gesture tracking
 
     formatTime: (time) => {
         if(isNaN(time) || !isFinite(time)) return "0:00";
@@ -29,8 +30,10 @@ export const PlayerUI = {
 
         if(duration > 0) {
             let percentage = (current / duration) * 100;
-            document.getElementById('progress-fill').style.width = percentage + "%";
-            document.getElementById('time-display').innerText = PlayerUI.formatTime(current);
+            const progressFill = document.getElementById('progress-fill');
+            const timeDisplay = document.getElementById('time-display');
+            if(progressFill) progressFill.style.width = percentage + "%";
+            if(timeDisplay) timeDisplay.innerText = PlayerUI.formatTime(current);
         }
     },
 
@@ -65,6 +68,123 @@ export const PlayerUI = {
         if(e) e.stopPropagation(); 
         const menu = document.getElementById('settings-menu');
         if(menu) menu.classList.toggle('show'); 
+    },
+
+    // 🚨 NEW: Hover Tooltip Setup
+    initTooltip: (engine) => {
+        const bg = document.getElementById('progress-bg');
+        const tooltip = document.getElementById('progress-tooltip');
+        if (!bg || !tooltip) return;
+
+        bg.addEventListener('mousemove', (e) => {
+            if (!engine) return;
+            const duration = engine.getDuration();
+            if (duration <= 0) return;
+
+            const rect = bg.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+            const hoverTime = percentage * duration;
+
+            tooltip.innerText = PlayerUI.formatTime(hoverTime);
+            tooltip.style.left = (percentage * 100) + "%";
+        });
+    },
+
+    // 🚨 NEW: Volume Controller & Dynamics Sync
+    initVolumeSlider: (engine) => {
+        const slider = document.getElementById('volume-slider');
+        if (!slider) return;
+
+        slider.addEventListener('input', (e) => {
+            const vol = parseFloat(e.target.value);
+            if (!engine) return;
+
+            // Update Engine volume wrapper
+            if (engine.player && typeof engine.player.volume === 'function') {
+                engine.player.volume(vol); // For VideoJS
+            } else if (engine.player && typeof engine.player.setVolume === 'function') {
+                engine.player.setVolume(vol * 100); // For YouTube (0-100 scale)
+            }
+
+            // Dynamically Swap Icons based on volume thresholds
+            const muteIcon = document.getElementById('mute-icon');
+            if (muteIcon) {
+                if (vol === 0) muteIcon.className = "fas fa-volume-mute";
+                else if (vol < 0.5) muteIcon.className = "fas fa-volume-down";
+                else muteIcon.className = "fas fa-volume-up";
+            }
+        });
+    },
+
+    // 🚨 NEW: Advanced Double-Tap Gestures (Mobile Only)
+    initGestures: (videoContainer, skipFn) => {
+        if (!videoContainer || !skipFn) return;
+
+        videoContainer.addEventListener('touchend', (e) => {
+            // Target layer filter: Do not intercept click events on controls
+            if (e.target.closest('.custom-controls') || e.target.closest('.close-classroom')) return;
+
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - PlayerUI.lastTapTime;
+            
+            if (tapLength < 300 && tapLength > 0) {
+                e.preventDefault();
+                const rect = videoContainer.getBoundingClientRect();
+                const touchX = e.changedTouches[0].clientX - rect.left;
+                
+                if (touchX > rect.width / 2) {
+                    // Right Side Double Tap -> Forward 10s
+                    skipFn(10);
+                    PlayerUI.triggerRipple('tap-indicator-right');
+                } else {
+                    // Left Side Double Tap -> Rewind 10s
+                    skipFn(-10);
+                    PlayerUI.triggerRipple('tap-indicator-left');
+                }
+            }
+            PlayerUI.lastTapTime = currentTime;
+        });
+    },
+
+    triggerRipple: (elementId) => {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 400);
+    },
+
+    // 🚨 NEW: Native Keyboard Event Orchestration (Netflix Standards)
+    initKeyboardShortcuts: (togglePlayFn, skipFn, toggleMuteFn, toggleFsFn) => {
+        document.addEventListener('keydown', (e) => {
+            // Security Check: Agar input box active hai (like query box), toh shortcuts ko bypass karo
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+
+            const overlay = document.getElementById('classroom-mode');
+            if (!overlay || !overlay.classList.contains('active')) return;
+
+            switch(e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlayFn();
+                    break;
+                case 'arrowright':
+                    e.preventDefault();
+                    skipFn(10);
+                    break;
+                case 'arrowleft':
+                    e.preventDefault();
+                    skipFn(-10);
+                    break;
+                case 'm':
+                    e.preventDefault();
+                    toggleMuteFn();
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    toggleFsFn();
+                    break;
+            }
+        });
     }
 };
-
