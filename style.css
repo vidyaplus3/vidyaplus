@@ -56,7 +56,8 @@
 
         @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
         .skeleton { background: #e2e8f0; background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px); background-size: 1000px 100%; animation: shimmer 2s infinite linear forwards; }        
-/* --- ADVANCED CLASSROOM OVERLAY --- */
+
+        /* --- ADVANCED CLASSROOM OVERLAY --- */
         .classroom-overlay { display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 10000; flex-direction: column; }
         .classroom-overlay.active { display: flex; }
 
@@ -79,111 +80,121 @@
 
         .close-classroom { position: absolute; top: 15px; left: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s ease; }
 
+
         /* ==========================================
-           🎬 SLEEK & PREMIUM VIDEO CONTROLS (MONOCHROME)
+           🎬 CINEMATIC MONOCHROME CONTROLS (FULL REFIT)
            ========================================== */
+        
+        /* 🚨 NO BOX, EDGE-TO-EDGE PREMIUM GRADIENT */
         .custom-controls { 
-            position: absolute; bottom: 15px; left: 15px; right: 15px; 
-            background: rgba(10, 10, 10, 0.45); 
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
-            padding: 12px 20px; display: flex; align-items: center; gap: 18px; 
+            position: absolute; bottom: 0; left: 0; right: 0; 
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); 
+            padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; 
             z-index: 100; transition: opacity 0.4s ease, transform 0.4s ease; 
         }
+
+        /* 2-Row Grid Allocation */
+        .controls-row-top { display: flex; align-items: center; gap: 14px; width: 100%; }
+        .controls-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .ctrl-group-left, .ctrl-group-right { display: flex; align-items: center; gap: 20px; }
         
         .ctrl-btn { 
-            background: none; border: none; color: rgba(255,255,255,0.85); font-size: 1.15rem; 
+            background: none; border: none; color: rgba(255,255,255,0.85); font-size: 1.25rem; 
             cursor: pointer; display: flex; justify-content: center; align-items: center; 
             transition: all 0.2s ease; 
         }
-        .ctrl-btn:hover { color: #FFFFFF; transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(255,255,255,0.4)); }
+        .ctrl-btn:hover { color: #FFFFFF; transform: scale(1.08); }
+
+        /* Integrated Inline Skip Labels */
+        .skip-btn { position: relative; display: flex; align-items: center; justify-content: center; }
+        .skip-label {
+            position: absolute; font-size: 0.55rem; font-weight: 800; color: #FFFFFF;
+            top: 52%; left: 50%; transform: translate(-50%, -50%); font-family: 'Inter', sans-serif; pointer-events: none;
+        }
         
-        .time-display { color: rgba(255,255,255,0.9); font-size: 0.8rem; font-weight: 600; min-width: 45px; text-align: center; letter-spacing: 0.5px; }
+        .time-display { color: rgba(255,255,255,0.9); font-size: 0.85rem; font-weight: 600; min-width: 40px; text-align: center; letter-spacing: 0.5px; }
         
         /* Sleek Thin Progress Bar */
         .progress-bar-bg { 
-            flex: 1; height: 4px; background: rgba(255,255,255,0.25); 
-            border-radius: 4px; cursor: pointer; position: relative; transition: height 0.2s ease; 
+            flex: 1; height: 4px; background: rgba(255,255,255,0.22); 
+            border-radius: 4px; cursor: pointer; position: relative; transition: height 0.15s ease; 
         }
         .progress-bar-bg:hover { height: 6px; }
         
-        .progress-fill { 
-            height: 100%; background: #FFFFFF; width: 0%; border-radius: 4px; 
-            pointer-events: none; position: relative; 
-        }
-        /* Scrubber Dot - Hidden by default, shows on hover */
-        .progress-fill::after { 
-            content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%) scale(0); 
-            width: 12px; height: 12px; background: #FFFFFF; border-radius: 50%; 
-            transition: transform 0.2s ease; box-shadow: 0 0 8px rgba(0,0,0,0.5);
-        }
-        .progress-bar-bg:hover .progress-fill::after { transform: translateY(-50%) scale(1); }
+        .progress-fill { height: 100%; background: #FFFFFF; width: 0%; border-radius: 4px; position: relative; }
 
-        /* Hover Time Tooltip (Ready for JS) */
+/* 🚨 SCRUBBER DOT: Hidden by default, shows only on Hover or Active Drag 🚨 */
+        .progress-fill::after { 
+            content: ''; position: absolute; right: -6px; top: 50%; 
+            transform: translateY(-50%) scale(0); opacity: 0;
+            width: 14px; height: 14px; background: #FFFFFF; border-radius: 50%; 
+            box-shadow: 0 0 8px rgba(0,0,0,0.7); display: block; 
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        /* Reveal dot when mouse enters the timeline OR when user is dragging/clicking */
+        .progress-bar-bg:hover .progress-fill::after,
+        .progress-bar-bg:active .progress-fill::after { 
+            transform: translateY(-50%) scale(1); opacity: 1; 
+        }
+
         .progress-tooltip {
             position: absolute; top: -35px; left: 0; transform: translateX(-50%);
-            background: rgba(10, 10, 10, 0.85); color: white; padding: 4px 10px;
+            background: rgba(10, 10, 10, 0.9); color: white; padding: 4px 10px;
             border-radius: 6px; font-size: 0.75rem; font-weight: 600;
-            pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap;
+            pointer-events: none; opacity: 0; transition: opacity 0.15s; white-space: nowrap;
         }
         .progress-bar-bg:hover .progress-tooltip { opacity: 1; }
 
-        /* 🔊 Expanding Volume Slider UI */
-        .volume-wrapper { display: flex; align-items: center; gap: 8px; }
-        .volume-slider-container {
-            width: 0; overflow: hidden; transition: width 0.3s ease, opacity 0.3s ease; opacity: 0;
-            display: flex; align-items: center;
-        }
-        .volume-wrapper:hover .volume-slider-container { width: 70px; opacity: 1; }
-        .volume-slider {
-            width: 100%; appearance: none; background: rgba(255,255,255,0.25); height: 3px; border-radius: 2px; outline: none;
-        }
-        .volume-slider::-webkit-slider-thumb {
-            appearance: none; width: 10px; height: 10px; border-radius: 50%; background: white; cursor: pointer;
-        }
+        /* Volume UI */
+        .volume-wrapper { display: flex; align-items: center; gap: 10px; }
+        .volume-slider-container { width: 0; overflow: hidden; transition: width 0.25s ease, opacity 0.25s ease; opacity: 0; display: flex; align-items: center; }
+        .volume-wrapper:hover .volume-slider-container { width: 75px; opacity: 1; }
+        .volume-slider { width: 100%; appearance: none; background: rgba(255,255,255,0.25); height: 3px; border-radius: 2px; outline: none; cursor: pointer; }
+        .volume-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; }
 
-        /* ⚙️ Minimal Frosted Settings Menu */
+        /* ⚙️ Compact Micro Settings Menu & Dropdown list Stack */
         .settings-menu { 
-            display: none; position: absolute; bottom: 80px; right: 20px; 
-            background: rgba(15, 15, 15, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; 
-            width: 260px; padding: 20px; flex-direction: column; gap: 15px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6); z-index: 150; 
+            display: none; position: absolute; bottom: 65px; right: 24px; 
+            background: rgba(15, 15, 15, 0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
+            width: 220px; padding: 6px 0; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 150; 
         }
-        .settings-menu.show { display: flex; animation: slideUpFade 0.3s ease; }
+        .settings-menu.show { display: flex; animation: slideUpFade 0.2s ease; }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .settings-header { color: rgba(255,255,255,0.9); font-weight: 600; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .settings-section { display: flex; flex-direction: column; gap: 10px; }
-        .settings-title { color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; text-transform: uppercase; letter-spacing: 0.5px; }
-        .settings-options { display: flex; flex-wrap: wrap; gap: 6px; }
-        
-        /* Options with Monochrome highlight */
-        .speed-opt, .quality-opt { 
-            color: rgba(255,255,255,0.8); font-size: 0.8rem; background: rgba(255,255,255,0.05); 
-            padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; border: 1px solid transparent;
+        .settings-menu-item {
+            padding: 12px 18px; color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;
         }
-        .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.15); color: white; }
-        .speed-opt.active, .quality-opt.active { background: rgba(255,255,255,0.9); color: #000; font-weight: 700; box-shadow: 0 2px 10px rgba(255,255,255,0.2); }
+        .settings-menu-item:hover { background: rgba(255,255,255,0.08); }
         
-        .badge-na { font-size: 0.55rem; background: rgba(255,255,255,0.2); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        /* Cascading Dropdown List stack (Inside settings) */
+        .settings-submenu-list {
+            display: none; flex-direction: column; background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .settings-submenu-list.show { display: flex; }
+        
+        .speed-opt, .quality-opt { 
+            padding: 10px 24px; color: rgba(255,255,255,0.65); font-size: 0.85rem; 
+            cursor: pointer; transition: all 0.2s ease; font-weight: 500; text-align: left;
+        }
+        .speed-opt:hover, .quality-opt:hover { background: rgba(255,255,255,0.1); color: white; }
+        .speed-opt.active, .quality-opt.active { color: #FFFFFF; font-weight: 700; }
+        .speed-opt.active::before, .quality-opt.active::before { content: '• '; margin-right: 6px; color: rgba(255,255,255,0.9); }
 
-        /* Double Tap UI Indicator (Hidden by Default) */
+        .badge-na { font-size: 0.6rem; background: rgba(255,255,255,0.15); color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px; }
+
+        /* Double Tap UI Indicator */
         .tap-indicator { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border-radius: 50%; padding: 25px; color: white; display: none; font-size: 1.5rem; pointer-events: none; z-index: 101; animation: ripple 0.4s ease-out; }
         .tap-indicator.left { left: 15%; }
         .tap-indicator.right { right: 15%; }
         @keyframes ripple { 0% { transform: translateY(-50%) scale(0.8); opacity: 1; } 100% { transform: translateY(-50%) scale(1.5); opacity: 0; } }
 
         /* 🚨 AUTO-HIDE MAGIC 🚨 */
-        .custom-controls.hidden { 
-            opacity: 0 !important; 
-            pointer-events: none; 
-            transform: translateY(20px); 
-        }
-        .close-classroom.hidden { 
-            opacity: 0 !important; 
-            pointer-events: none;
-        } 
+        .custom-controls.hidden { opacity: 0 !important; pointer-events: none; transform: translateY(10px); }
+        .close-classroom.hidden { opacity: 0 !important; pointer-events: none; } 
         
         /* ==========================================
            7. PROFESSIONAL DESKTOP WEBSITE UI
@@ -210,9 +221,8 @@
             .close-classroom { top: 30px; left: 30px; background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); }
             .close-classroom:hover { background: rgba(255,255,255,0.3); }
 
-            /* Desktop spacing for controls */
-            .custom-controls { bottom: 25px; left: 25px; right: 25px; padding: 15px 25px; border-radius: 20px; } 
-            .settings-menu { bottom: 95px; right: 30px; }
+            /* Remove desktop box overrides to keep it Edge-to-Edge */
+            .settings-menu { bottom: 85px; right: 30px; }
         }
 
         .pdf-overlay { display: none; position: fixed; inset: 0; background: #0F172A; z-index: 10001; flex-direction: column; }
