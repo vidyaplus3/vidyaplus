@@ -7,7 +7,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Enterprise Video.js Core CSS -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css?v=god_mode">
 </head>
@@ -127,7 +126,7 @@
             <div class="screen-content list-container" id="lecture-list"></div>
         </div>
 
-                <div class="screen" id="tests">
+        <div class="screen" id="tests">
             <div class="page-header"><button class="back-btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></button><div class="page-title">Assessments</div></div>
             <div class="tabs" style="border-bottom: 1px solid #e2e8f0; border-radius: 0; background: white;">
                 <button class="tab-btn active" onclick="switchTestTab('live', this)" style="border-radius: 0; font-weight: 600;">Live</button>
@@ -135,10 +134,11 @@
                 <button class="tab-btn" onclick="switchTestTab('dashboard', this)" style="border-radius: 0; font-weight: 600;">Analytics</button>
             </div>
             <div class="screen-content list-container" id="test-list-container" style="padding: 20px; background: #f8fafc;"></div>
-                </div>
+        </div>
         
-    </div> <div class="classroom-overlay" id="classroom-mode">
-              <div class="video-fixed-box" id="video-container">
+    </div> 
+    <div class="classroom-overlay" id="classroom-mode">
+        <div class="video-fixed-box" id="video-container">
             <div class="close-classroom" onclick="closeClassroom()"><i class="fas fa-arrow-left"></i></div>
             
             <div style="width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative;" id="player-wrapper">
@@ -153,51 +153,66 @@
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
 
             <div class="custom-controls" id="custom-controls">
-                <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
-                <button class="ctrl-btn" onclick="skipVideo(-10)"><i class="fas fa-undo"></i></button>
-                <button class="ctrl-btn" onclick="skipVideo(10)"><i class="fas fa-redo"></i></button>
                 
-                <div class="volume-wrapper">
-                    <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-up" id="mute-icon"></i></button>
-                    <div class="volume-slider-container">
-                        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="window.setVolume && window.setVolume(this.value)">
+                <div class="controls-row-top">
+                    <div class="time-display" id="time-current">0:00</div>
+                    <div class="progress-bar-bg" id="progress-bg" 
+                         onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
+                         ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <div class="progress-tooltip" id="progress-tooltip">0:00</div>
+                    </div>
+                    <div class="time-display" id="time-duration">0:00</div>
+                </div>
+
+                <div class="controls-row-bottom">
+                    <div class="ctrl-group-left">
+                        <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
+                        
+                        <button class="ctrl-btn skip-btn" onclick="skipVideo(-10)">
+                            <i class="fas fa-undo"></i><span class="skip-label">10</span>
+                        </button>
+                        <button class="ctrl-btn skip-btn" onclick="skipVideo(10)">
+                            <i class="fas fa-redo"></i><span class="skip-label">10</span>
+                        </button>
+                        
+                        <div class="volume-wrapper">
+                            <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-up" id="mute-icon"></i></button>
+                            <div class="volume-slider-container">
+                                <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="window.setVolume && window.setVolume(this.value)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-group-right">
+                        <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
+                        <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
                     </div>
                 </div>
-
-                <div class="time-display" id="time-display">0:00</div>
-                
-                <div class="progress-bar-bg" id="progress-bg" 
-                     onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
-                     ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)">
-                    <div class="progress-fill" id="progress-fill"></div>
-                    <div class="progress-tooltip" id="progress-tooltip">0:00</div>
-                </div>
-
-                <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
-                <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
 
                 <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
-                    <div class="settings-header">Playback Settings</div>
                     
-                    <div class="settings-section">
-                        <div class="settings-title">Speed</div>
-                        <div class="settings-options">
-                            <span class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</span>
-                            <span class="speed-opt active" id="spd-1" onclick="setSpeed(1)">Normal</span>
-                            <span class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</span>
-                            <span class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</span>
-                            <span class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</span>
-                        </div>
+                    <div class="settings-menu-item" onclick="document.getElementById('speed-dropdown').classList.toggle('show'); document.getElementById('quality-dropdown').classList.remove('show');">
+                        <span>Playback Speed</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+                    </div>
+                    <div class="settings-submenu-list" id="speed-dropdown">
+                        <div class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</div>
+                        <div class="speed-opt active" id="spd-1" onclick="setSpeed(1)">Normal</div>
+                        <div class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</div>
+                        <div class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</div>
+                        <div class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</div>
                     </div>
 
-                    <div class="settings-section" style="margin-top: 5px;">
-                        <div class="settings-title">Quality <span class="badge-na" id="quality-badge" style="display:none;">AUTO</span></div>
-                        <div class="settings-options" id="quality-options">
-                            <span class="quality-opt active" onclick="window.setQuality && window.setQuality('auto')">Auto</span>
-                            <span class="quality-opt" onclick="window.setQuality && window.setQuality('1080')">1080p</span>
-                            <span class="quality-opt" onclick="window.setQuality && window.setQuality('720')">720p</span>
-                            <span class="quality-opt" onclick="window.setQuality && window.setQuality('480')">480p</span>
-                        </div>
+                    <div class="settings-menu-item" onclick="document.getElementById('quality-dropdown').classList.toggle('show'); document.getElementById('speed-dropdown').classList.remove('show');">
+                        <div>Quality <span class="badge-na" id="quality-badge" style="display:none;">AUTO</span></div>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+                    </div>
+                    <div class="settings-submenu-list" id="quality-dropdown">
+                        <div class="quality-opt active" onclick="window.setQuality && window.setQuality('auto')">Auto</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('1080')">1080p</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('720')">720p</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('480')">480p</div>
                     </div>
                 </div>
             </div>
@@ -213,6 +228,7 @@
             <div class="tab-content-area" id="classroom-dynamic-content"></div>
         </div>
     </div>
+    
     <div class="pdf-overlay" id="pdf-mode">
         <div class="pdf-header">
             <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
@@ -368,16 +384,13 @@
         </div>
     </div>
 
-    <!-- Enterprise Video.js Scripts Added Here -->
-        <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-quality-levels@4.1.0/dist/videojs-contrib-quality-levels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.min.js"></script>
 
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/analytics/engine.js"></script>
-    
     <script type="module" src="js/player/index.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </body>
 </html>
