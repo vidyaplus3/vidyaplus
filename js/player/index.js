@@ -8,7 +8,7 @@ export const VideoPlayer = {
     activeEngineName: null, 
     currentClassroomData: null,
 
-    // 🚨 THE FIX: Jo properties main.js dhoondh raha tha, unhe wapas expose kiya
+    // Exposing properties needed by legacy main.js
     get progressInterval() { return PlayerUI.progressInterval; },
     showUI: (e) => {
         const engine = VideoPlayer.getEngine();
@@ -29,7 +29,8 @@ export const VideoPlayer = {
         if(vContainer) {
             vContainer.addEventListener('mousemove', VideoPlayer.showUI);
             vContainer.addEventListener('touchstart', VideoPlayer.showUI);
-            vContainer.addEventListener('click', VideoPlayer.showUI);
+            // 🚨 NAYA: Gestures initialization (Double Tap)
+            PlayerUI.initGestures(vContainer, VideoPlayer.skipVideo);
         }
 
         document.addEventListener('click', (e) => {
@@ -41,6 +42,14 @@ export const VideoPlayer = {
 
         window.addEventListener('vp-yt-play', () => PlayerUI.updatePlayPauseIcon(true));
         window.addEventListener('vp-yt-pause', () => PlayerUI.updatePlayPauseIcon(false));
+
+        // 🚨 NAYA: Initialize native keyboard shortcuts (Space, Arrows, F, M)
+        PlayerUI.initKeyboardShortcuts(
+            VideoPlayer.togglePlay, 
+            VideoPlayer.skipVideo, 
+            VideoPlayer.toggleMute, 
+            VideoPlayer.toggleFullScreen
+        );
     },
 
     openVideo: (vidUrl, title, pdfUrl) => {
@@ -64,8 +73,17 @@ export const VideoPlayer = {
         if (ytMatch) {
             HlsEngine.destroy();
             VideoPlayer.activeEngineName = 'youtube';
+            document.getElementById('quality-badge').style.display = 'none'; // YouTube handles its own quality
+            document.getElementById('quality-options').style.opacity = '0.5';
+            document.getElementById('quality-options').style.pointerEvents = 'none';
+
             YtEngine.init(ytMatch[1], 
-                (e) => { e.target.playVideo(); PlayerUI.startProgressTracking(YtEngine); },
+                (e) => { 
+                    e.target.playVideo(); 
+                    PlayerUI.startProgressTracking(YtEngine); 
+                    PlayerUI.initTooltip(YtEngine); // 🚨 Tooltip init
+                    PlayerUI.initVolumeSlider(YtEngine); // 🚨 Volume init
+                },
                 (e) => {
                     PlayerUI.updatePlayPauseIcon(e.data === 1);
                     VideoPlayer.showUI(null);
@@ -75,7 +93,15 @@ export const VideoPlayer = {
         } else {
             YtEngine.destroy();
             VideoPlayer.activeEngineName = 'hls';
-            HlsEngine.init(vidUrl, () => PlayerUI.startProgressTracking(HlsEngine));
+            document.getElementById('quality-badge').style.display = 'inline-block'; 
+            document.getElementById('quality-options').style.opacity = '1';
+            document.getElementById('quality-options').style.pointerEvents = 'auto';
+
+            HlsEngine.init(vidUrl, () => {
+                PlayerUI.startProgressTracking(HlsEngine);
+                PlayerUI.initTooltip(HlsEngine); // 🚨 Tooltip init
+                PlayerUI.initVolumeSlider(HlsEngine); // 🚨 Volume init
+            });
         }
     },
 
@@ -101,8 +127,19 @@ export const VideoPlayer = {
         const engine = VideoPlayer.getEngine();
         if(!engine) return;
         const icon = document.getElementById('mute-icon');
-        if (engine.isMuted()) { engine.unMute(); icon.className = "fas fa-volume-up"; } 
-        else { engine.mute(); icon.className = "fas fa-volume-mute"; }
+        
+        // Sync with volume slider natively
+        const slider = document.getElementById('volume-slider');
+
+        if (engine.isMuted()) { 
+            engine.unMute(); 
+            icon.className = "fas fa-volume-up"; 
+            if(slider) slider.value = 1;
+        } else { 
+            engine.mute(); 
+            icon.className = "fas fa-volume-mute"; 
+            if(slider) slider.value = 0;
+        }
     },
 
     skipVideo: (seconds) => {
@@ -116,6 +153,25 @@ export const VideoPlayer = {
         document.querySelectorAll('.speed-opt').forEach(el => el.classList.remove('active'));
         const activeBtn = document.getElementById('spd-' + rate);
         if(activeBtn) activeBtn.classList.add('active');
+    },
+
+    // 🚨 NAYA: Universal Quality Selector API (UI to Engine Router)
+    setQuality: (qualityStr) => {
+        document.querySelectorAll('.quality-opt').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        const badge = document.getElementById('quality-badge');
+        if(badge) {
+            badge.innerText = qualityStr.toUpperCase();
+            badge.style.display = 'inline-block';
+        }
+
+        const engine = VideoPlayer.getEngine();
+        if(engine && engine.setQuality) {
+            engine.setQuality(qualityStr);
+        } else {
+            console.warn("Quality selection not supported for the active engine.");
+        }
     },
 
     toggleFullScreen: () => {
@@ -158,12 +214,14 @@ export const VideoPlayer = {
     }
 };
 
+// Global Bindings for HTML elements
 window.togglePlay = VideoPlayer.togglePlay;
 window.skipVideo = VideoPlayer.skipVideo;
 window.toggleMute = VideoPlayer.toggleMute;
 window.toggleFullScreen = VideoPlayer.toggleFullScreen;
 window.toggleSettings = VideoPlayer.toggleSettings;
 window.setSpeed = VideoPlayer.setSpeed;
+window.setQuality = VideoPlayer.setQuality; // 🚨 NAYA: Quality binding
 window.handleShieldClick = VideoPlayer.handleShieldClick;
 window.startDrag = VideoPlayer.startDrag;
 window.stopDrag = VideoPlayer.stopDrag;
