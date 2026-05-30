@@ -152,9 +152,9 @@
             <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
             <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
 
-            <div class="custom-controls" id="custom-controls">
+                      <div class="custom-controls" id="custom-controls">
                 
-                <div class="controls-row-top">
+                <div class="controls-row-top" style="display: flex; align-items: center; gap: 14px; width: 100%;">
                     <div class="time-display" id="time-current">0:00</div>
                     <div class="progress-bar-bg" id="progress-bg" 
                          onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
@@ -165,8 +165,9 @@
                     <div class="time-display" id="time-duration">0:00</div>
                 </div>
 
-                <div class="controls-row-bottom">
-                    <div class="ctrl-group-left">
+                <div class="controls-row-bottom" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px;">
+                    
+                    <div class="ctrl-group-left" style="display: flex; align-items: center; gap: 20px;">
                         <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
                         
                         <button class="ctrl-btn skip-btn" onclick="skipVideo(-10)">
@@ -176,17 +177,15 @@
                             <i class="fas fa-redo"></i><span class="skip-label">10</span>
                         </button>
                         
-                        <div class="volume-wrapper">
-    <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
-    <div class="volume-slider-container">
-        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0" style="background: linear-gradient(to right, white 0%, rgba(255, 255, 255, 0.25) 0%);" oninput="window.setVolume && window.setVolume(this.value)">
-    </div>
-                        </div>
-                        
+                        <div class="volume-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
+                            <div class="volume-slider-container" style="width: 75px; display: flex; align-items: center;">
+                                <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0" style="background: linear-gradient(to right, #FFFFFF 0%, rgba(255, 255, 255, 0.25) 0%);" oninput="window.setVolume && window.setVolume(this.value)">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="ctrl-group-right">
+                    <div class="ctrl-group-right" style="display: flex; align-items: center; gap: 20px;">
                         <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
                         <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
                     </div>
@@ -216,8 +215,10 @@
                         <div class="quality-opt" onclick="window.setQuality && window.setQuality('720')">720p</div>
                         <div class="quality-opt" onclick="window.setQuality && window.setQuality('480')">480p</div>
                     </div>
+
                 </div>
-            </div>
+                      </div>
+            
         </div> 
         
 
