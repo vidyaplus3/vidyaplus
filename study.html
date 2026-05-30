@@ -177,10 +177,12 @@
                         </button>
                         
                         <div class="volume-wrapper">
-                            <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-up" id="mute-icon"></i></button>
-                            <div class="volume-slider-container">
-                                <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="window.setVolume && window.setVolume(this.value)">
-                            </div>
+    <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
+    <div class="volume-slider-container">
+        <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0" style="background: linear-gradient(to right, white 0%, rgba(255, 255, 255, 0.25) 0%);" oninput="window.setVolume && window.setVolume(this.value)">
+    </div>
+                        </div>
+                        
                         </div>
                     </div>
 
