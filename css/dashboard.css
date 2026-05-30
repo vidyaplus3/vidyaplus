@@ -1,0 +1,45 @@
+/* css/dashboard.css */
+.app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; background: var(--surface); }
+.grid-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+.grid-icon { width: 60px; height: 60px; background: var(--bg-color); color: var(--primary); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border: 1px solid var(--border); transition: 0.2s; }
+.grid-item:active .grid-icon { transform: scale(0.95); background: #E0E7FF; }
+.grid-text { font-size: 0.75rem; font-weight: 700; text-align: center; }
+
+.page-header { display: flex; align-items: center; gap: 15px; padding: 15px 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.back-btn { font-size: 1.2rem; cursor: pointer; border: none; background: transparent; color: var(--text-main); }
+.page-title { font-size: 1.1rem; font-weight: 700; }
+
+.list-container { padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; align-content: flex-start; }
+.list-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer; }
+.list-card:active { background: var(--bg-color); }
+.card-icon { width: 45px; height: 45px; background: #E0E7FF; color: var(--primary); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0; }
+.card-info { flex: 1; overflow: hidden; }
+.card-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-sub { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
+
+.lecture-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px; background: var(--surface); margin-bottom: 15px; display: flex; flex-direction: column;}
+.lec-top { display: flex; gap: 12px; margin-bottom: 15px; }
+.lec-thumb { width: 120px; height: 70px; border-radius: 8px; background: var(--bg-color); object-fit: cover; flex-shrink: 0; }
+.lec-actions { display: flex; gap: 10px; margin-top: auto; }
+.action-btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; border: 1px solid var(--border); background: transparent; }
+.action-btn.play { background: var(--navy); color: white; border-color: var(--navy); }
+
+.tabs { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+.tab-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-weight: 600; font-size: 0.9rem; cursor: pointer; white-space: nowrap; }
+.tab-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+@media (min-width: 768px) {
+    body { padding: 40px 0; background: #E2E8F0; } 
+    .app-container { max-width: 1300px; border-radius: 16px; min-height: calc(100vh - 80px); border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+    .header-dark { padding: 2.5rem 3rem; border-top-left-radius: 16px; border-top-right-radius: 16px; }
+    .top-nav { font-size: 1.5rem; }
+    .app-grid { padding: 30px 3rem; gap: 20px; grid-template-columns: repeat(4, 1fr); }
+    .grid-icon { width: 80px; height: 80px; font-size: 2rem; }
+    .grid-text { font-size: 0.9rem; }
+    .list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 30px 3rem; align-content: start; }
+    .lecture-card { margin-bottom: 0; } 
+    #live-container, #announcement-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); overflow-x: visible; align-content: start; }
+    .page-header { padding: 20px 3rem; }
+    .tabs { padding: 20px 3rem; }
+}
+
