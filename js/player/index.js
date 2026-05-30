@@ -4,11 +4,12 @@ import { YtEngine } from './engine-yt.js';
 import { HlsEngine } from './engine-hls.js';
 import { PlayerUI } from './player-ui.js';
 
+let shieldClickTimer = null; // 🚨 Double Tap Play/Pause fix er jonno
+
 export const VideoPlayer = {
     activeEngineName: null, 
     currentClassroomData: null,
 
-    // Exposing properties needed by legacy main.js
     get progressInterval() { return PlayerUI.progressInterval; },
     showUI: (e) => {
         const engine = VideoPlayer.getEngine();
@@ -29,7 +30,6 @@ export const VideoPlayer = {
         if(vContainer) {
             vContainer.addEventListener('mousemove', VideoPlayer.showUI);
             vContainer.addEventListener('touchstart', VideoPlayer.showUI);
-            // 🚨 NAYA: Gestures initialization (Double Tap)
             PlayerUI.initGestures(vContainer, VideoPlayer.skipVideo);
         }
 
@@ -37,7 +37,6 @@ export const VideoPlayer = {
             const menu = document.getElementById('settings-menu');
             if (menu && menu.classList.contains('show') && !e.target.closest('.custom-controls')) {
                 menu.classList.remove('show');
-                // Naye dropdowns ko bhi click outside par close karo
                 const spdDrop = document.getElementById('speed-dropdown');
                 const qDrop = document.getElementById('quality-dropdown');
                 if(spdDrop) spdDrop.classList.remove('show');
@@ -48,7 +47,6 @@ export const VideoPlayer = {
         window.addEventListener('vp-yt-play', () => PlayerUI.updatePlayPauseIcon(true));
         window.addEventListener('vp-yt-pause', () => PlayerUI.updatePlayPauseIcon(false));
 
-        // 🚨 NAYA: Initialize native keyboard shortcuts (Space, Arrows, F, M)
         PlayerUI.initKeyboardShortcuts(
             VideoPlayer.togglePlay, 
             VideoPlayer.skipVideo, 
@@ -63,18 +61,25 @@ export const VideoPlayer = {
         PlayerUI.updatePlayPauseIcon(false);
         document.getElementById('progress-fill').style.width = "0%";
         
-        // 🚨 FIX: Targeting explicit row timers instead of old single block
         const currentEl = document.getElementById('time-current');
         const durationEl = document.getElementById('time-duration');
         if(currentEl) currentEl.innerText = "0:00";
         if(durationEl) durationEl.innerText = "0:00";
         
-        // 🚨 FIX: Close active dropdowns on initialization
         const spdDrop = document.getElementById('speed-dropdown');
         const qDrop = document.getElementById('quality-dropdown');
+        const menu = document.getElementById('settings-menu');
         if(spdDrop) spdDrop.classList.remove('show');
         if(qDrop) qDrop.classList.remove('show');
+        if(menu) menu.classList.remove('show');
         
+        // Volume default UI fix reset
+        const slider = document.getElementById('volume-slider');
+        if(slider) {
+            slider.value = 0;
+            slider.style.background = `linear-gradient(to right, white 0%, rgba(255, 255, 255, 0.25) 0%)`;
+        }
+
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
             window.history.pushState({ videoOpen: true }, '', window.location.href);
@@ -89,7 +94,7 @@ export const VideoPlayer = {
         if (ytMatch) {
             HlsEngine.destroy();
             VideoPlayer.activeEngineName = 'youtube';
-            document.getElementById('quality-badge').style.display = 'none'; // YouTube handles its own quality
+            document.getElementById('quality-badge').style.display = 'none'; 
             document.getElementById('quality-dropdown').style.opacity = '0.5';
             document.getElementById('quality-dropdown').style.pointerEvents = 'none';
 
@@ -97,8 +102,8 @@ export const VideoPlayer = {
                 (e) => { 
                     e.target.playVideo(); 
                     PlayerUI.startProgressTracking(YtEngine); 
-                    PlayerUI.initTooltip(YtEngine); // 🚨 Tooltip init
-                    PlayerUI.initVolumeSlider(YtEngine); // 🚨 Volume init
+                    PlayerUI.initTooltip(YtEngine); 
+                    PlayerUI.initVolumeSlider(YtEngine); 
                 },
                 (e) => {
                     PlayerUI.updatePlayPauseIcon(e.data === 1);
@@ -115,8 +120,8 @@ export const VideoPlayer = {
 
             HlsEngine.init(vidUrl, () => {
                 PlayerUI.startProgressTracking(HlsEngine);
-                PlayerUI.initTooltip(HlsEngine); // 🚨 Tooltip init
-                PlayerUI.initVolumeSlider(HlsEngine); // 🚨 Volume init
+                PlayerUI.initTooltip(HlsEngine); 
+                PlayerUI.initVolumeSlider(HlsEngine); 
             });
         }
     },
@@ -143,18 +148,22 @@ export const VideoPlayer = {
         const engine = VideoPlayer.getEngine();
         if(!engine) return;
         const icon = document.getElementById('mute-icon');
-        
-        // Sync with volume slider natively
         const slider = document.getElementById('volume-slider');
 
         if (engine.isMuted()) { 
             engine.unMute(); 
             icon.className = "fas fa-volume-up"; 
-            if(slider) slider.value = 1;
+            if(slider) {
+                slider.value = 1;
+                slider.style.background = `linear-gradient(to right, white 100%, rgba(255, 255, 255, 0.25) 100%)`;
+            }
         } else { 
             engine.mute(); 
             icon.className = "fas fa-volume-mute"; 
-            if(slider) slider.value = 0;
+            if(slider) {
+                slider.value = 0;
+                slider.style.background = `linear-gradient(to right, white 0%, rgba(255, 255, 255, 0.25) 0%)`;
+            }
         }
     },
 
@@ -170,11 +179,11 @@ export const VideoPlayer = {
         const activeBtn = document.getElementById('spd-' + rate);
         if(activeBtn) activeBtn.classList.add('active');
         
-        // Auto-close dropdown after selection
+        // 🚨 Pura menu hide koro
         document.getElementById('speed-dropdown').classList.remove('show');
+        document.getElementById('settings-menu').classList.remove('show');
     },
 
-    // 🚨 NAYA: Universal Quality Selector API (UI to Engine Router)
     setQuality: (qualityStr) => {
         document.querySelectorAll('.quality-opt').forEach(el => el.classList.remove('active'));
         event.target.classList.add('active');
@@ -192,8 +201,9 @@ export const VideoPlayer = {
             console.warn("Quality selection not supported for the active engine.");
         }
         
-        // Auto-close dropdown after selection
+        // 🚨 Pura menu hide koro
         document.getElementById('quality-dropdown').classList.remove('show');
+        document.getElementById('settings-menu').classList.remove('show');
     },
 
     toggleFullScreen: () => {
@@ -207,14 +217,42 @@ export const VideoPlayer = {
         }
     },
 
+    // 🚨 FIX: Smart Timer for double tap Play/Pause conflict
     handleShieldClick: () => {
         const controls = document.getElementById('custom-controls');
-        if(controls && controls.classList.contains('hidden')) VideoPlayer.showUI(null);
-        else VideoPlayer.togglePlay();
+        if(controls && controls.classList.contains('hidden')) {
+            VideoPlayer.showUI(null);
+            return;
+        }
+        
+        if (shieldClickTimer) {
+            clearTimeout(shieldClickTimer);
+            shieldClickTimer = null; // Double tap detect hoyeche, Play/Pause cancel koro (Gesture handle korbe)
+        } else {
+            shieldClickTimer = setTimeout(() => {
+                VideoPlayer.togglePlay();
+                shieldClickTimer = null;
+            }, 250); // 250ms wait korbe jate bujhte pare single tap naki double tap
+        }
     },
 
     startDrag: (e) => { PlayerUI.isDragging = true; VideoPlayer.updateScrub(e); },
-    stopDrag: (e) => { if(PlayerUI.isDragging) { VideoPlayer.updateScrub(e); PlayerUI.isDragging = false; } },
+    
+    // 🚨 FIX: Seek Lock Implementation
+    stopDrag: (e) => { 
+        if(PlayerUI.isDragging) { 
+            VideoPlayer.updateScrub(e); 
+            PlayerUI.isDragging = false; 
+            
+            // Lock the progress bar from reverting due to slow net
+            PlayerUI.isSeekLocked = true;
+            clearTimeout(PlayerUI.seekLockTimeout);
+            PlayerUI.seekLockTimeout = setTimeout(() => {
+                PlayerUI.isSeekLocked = false;
+            }, 1500); 
+        } 
+    },
+    
     doDrag: (e) => { if(PlayerUI.isDragging) VideoPlayer.updateScrub(e); },
     
     updateScrub: (e) => {
@@ -233,20 +271,18 @@ export const VideoPlayer = {
         
         document.getElementById('progress-fill').style.width = (percentage * 100) + "%";
         
-        // 🚨 FIX: Update ONLY the current time text during scrubbing
         const timeCurrent = document.getElementById('time-current');
         if(timeCurrent) timeCurrent.innerText = PlayerUI.formatTime(percentage * duration);
     }
 };
 
-// Global Bindings for HTML elements
 window.togglePlay = VideoPlayer.togglePlay;
 window.skipVideo = VideoPlayer.skipVideo;
 window.toggleMute = VideoPlayer.toggleMute;
 window.toggleFullScreen = VideoPlayer.toggleFullScreen;
 window.toggleSettings = VideoPlayer.toggleSettings;
 window.setSpeed = VideoPlayer.setSpeed;
-window.setQuality = VideoPlayer.setQuality; // 🚨 NAYA: Quality binding
+window.setQuality = VideoPlayer.setQuality; 
 window.handleShieldClick = VideoPlayer.handleShieldClick;
 window.startDrag = VideoPlayer.startDrag;
 window.stopDrag = VideoPlayer.stopDrag;
