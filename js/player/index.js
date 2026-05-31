@@ -54,11 +54,22 @@ export const VideoPlayer = {
             VideoPlayer.toggleFullScreen
         );
 
-        // 🚨 NAYA FIX: Hardware Back Button (Mobile) track karne ke liye
+        // 🚨 NAYA FIX: FULLSCREEN HARDWARE BACK & FREEZE PREVENTION 🚨
         window.addEventListener('popstate', (e) => {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+            
+            if (isFullscreen) {
+                // Agar fullscreen mein hardware back dabaya hai, toh sirf fullscreen exit karo
+                if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                
+                // History ko sync mein rakhne ke liye 'Fake Step' wapas daal do, taaki video close na ho.
+                window.history.pushState({ videoOpen: true }, '', window.location.href);
+                return; // Video ko close hone se yahi rok lo
+            }
+
             const overlay = document.getElementById('classroom-mode');
             if (overlay && overlay.classList.contains('active')) {
-                // True means hardware back dabaya gaya hai
                 VideoPlayer.closeVideo(true); 
             }
         });
@@ -90,7 +101,6 @@ export const VideoPlayer = {
 
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
-            // Yahan fake step add hota hai browser history mein
             window.history.pushState({ videoOpen: true }, '', window.location.href);
             overlay.classList.add('active');
         }
@@ -135,20 +145,23 @@ export const VideoPlayer = {
         }
     },
 
-    // 🚨 BUG FIX IN ARGUMENT
     closeVideo: (isFromPopState) => {
+        // 🚨 SAFE EXIT FULLSCREEN: Video close hone se pehle agar fullscreen hai, toh safety ke liye bahar aao
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+        if (isFullscreen) {
+            if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+
         const overlay = document.getElementById('classroom-mode');
-        if (overlay.classList.contains('active')) {
+        if (overlay && overlay.classList.contains('active')) {
             window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
             PlayerUI.stopProgressTracking();
             const engine = VideoPlayer.getEngine();
             if(engine) engine.pause();
             overlay.classList.remove('active'); 
             
-            // 🚨 PERFECT HISTORY SYNC LOGIC
             if (isFromPopState !== true) {
-                // Agar button click se close hua hai, toh history ko clean karo
-                // taaki double back aur UI freeze ki dikkat na aaye
                 window.history.back(); 
             }
         }
@@ -223,7 +236,8 @@ export const VideoPlayer = {
 
     toggleFullScreen: () => {
         let container = document.getElementById('video-container');
-        if (!document.fullscreenElement) {
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+        if (!isFullscreen) {
             if(container.requestFullscreen) container.requestFullscreen();
             else if(container.webkitRequestFullscreen) container.webkitRequestFullscreen(); 
         } else {
