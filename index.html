@@ -388,10 +388,12 @@
         }
     </script>
     <script type="module">
-    // 🚨 NAYA: 'db' aur Firestore ke functions import kiye gaye hain
     import { auth, db } from './js/firebase-init.js';
     import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 🚨 NAYA: Tumhare Vercel Backend ka URL (Isse change mat karna agar URL yahi hai)
+    const VERCEL_API_URL = "https://vidyaplus-backend.vercel.app/api/syncUser";
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -417,17 +419,43 @@
         }, 1500);
     }
 
-    // 🛡️ NAYA FUNCTION: Ye function secure rules ke hisaab se sirf Name aur Email save karega
+    // 🛡️ PURANA FUNCTION: Firestore me save karne ke liye
     async function saveUserToDatabase(user, nameStr) {
         const userRef = doc(db, "users", user.uid);
         const snap = await getDoc(userRef);
-        
-        // Agar database me user pehle se nahi hai, tabhi save karo
         if (!snap.exists()) {
             await setDoc(userRef, {
                 name: nameStr || "Student",
                 email: user.email
             });
+        }
+    }
+
+    // 🚀 NAYA FUNCTION: Supabase/Vercel Sync Engine (Background task)
+    async function syncUserToSupabase(user, nameStr) {
+        try {
+            // 1. Firebase se fresh JWT Token nikalo
+            const token = await user.getIdToken();
+            
+            // 2. Vercel backend ko call karo
+            const response = await fetch(VERCEL_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    name: nameStr || "Student" 
+                })
+            });
+
+            if (!response.ok) {
+                console.warn("[System Warning] Supabase Sync Failed", await response.text());
+            } else {
+                console.log("[System Success] User Synced to Enterprise Database");
+            }
+        } catch (error) {
+            console.error("Vercel API Sync Error:", error);
         }
     }
 
@@ -444,10 +472,14 @@
         try {
             if (currentAuthMode === 'login') {
                 await signInWithEmailAndPassword(auth, email, password);
+                // Note: Login ke time pehle se data saved hai, toh wapas sync karne ki zaroorat nahi hai
             } else {
-                // Email se Signup karne par database me save hoga
                 const userCred = await createUserWithEmailAndPassword(auth, email, password);
-                await saveUserToDatabase(userCred.user, email.split('@')[0]);
+                const extractedName = email.split('@')[0];
+                
+                // Firestore aur Supabase dono mein data bhejo ek sath (Parallel execution)
+                saveUserToDatabase(userCred.user, extractedName);
+                syncUserToSupabase(userCred.user, extractedName); 
             }
             triggerSuccessAndRedirect();
         } catch (error) {
@@ -461,15 +493,17 @@
     document.getElementById('googleBtn').addEventListener('click', async () => {
         const provider = new GoogleAuthProvider();
         try {
-            // Google se Signup/Login karne par database me save hoga
             const userCred = await signInWithPopup(auth, provider);
-            await saveUserToDatabase(userCred.user, userCred.user.displayName);
+            
+            // Google Login/Signup par Firestore aur Supabase dono sync honge
+            saveUserToDatabase(userCred.user, userCred.user.displayName);
+            syncUserToSupabase(userCred.user, userCred.user.displayName);
+            
             triggerSuccessAndRedirect();
         } catch (error) {
             console.error("External Auth Error:", error);
             alert("Google authentication failed. Please try again.");
         }
     });
-                </script>
-</body>
-</html>
+    </script>
+    
