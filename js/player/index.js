@@ -9,6 +9,7 @@ let shieldClickTimer = null;
 export const VideoPlayer = {
     activeEngineName: null, 
     currentClassroomData: null,
+    justExitedFullscreen: false, // 🚨 NAYA FLAG: Race condition fix karne ke liye
 
     get progressInterval() { return PlayerUI.progressInterval; },
     showUI: (e) => {
@@ -54,20 +55,35 @@ export const VideoPlayer = {
             VideoPlayer.toggleFullScreen
         );
 
-        // 🚨 NAYA FIX: FULLSCREEN HARDWARE BACK & FREEZE PREVENTION 🚨
+        // 🚨 NAYA FIX: Fullscreen exit hone par ek 0.5 sec ka safety buffer lagana
+        const fsChangeHandler = () => {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+            if (!isFullscreen) {
+                VideoPlayer.justExitedFullscreen = true;
+                setTimeout(() => { VideoPlayer.justExitedFullscreen = false; }, 500); 
+            }
+        };
+        document.addEventListener('fullscreenchange', fsChangeHandler);
+        document.addEventListener('webkitfullscreenchange', fsChangeHandler);
+        document.addEventListener('mozfullscreenchange', fsChangeHandler);
+
+        // 🚨 UPDATED POPSTATE (BACK BUTTON) HANDLER 🚨
         window.addEventListener('popstate', (e) => {
             const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
             
-            if (isFullscreen) {
-                // Agar fullscreen mein hardware back dabaya hai, toh sirf fullscreen exit karo
-                if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            // Agar fullscreen on hai, YA browser ne just abhi natively fullscreen band kiya hai
+            if (isFullscreen || VideoPlayer.justExitedFullscreen) {
+                if (isFullscreen) {
+                    if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                }
                 
-                // History ko sync mein rakhne ke liye 'Fake Step' wapas daal do, taaki video close na ho.
+                // Classroom overlay ko band hone se rokne ke liye wapas ek history step add kar do
                 window.history.pushState({ videoOpen: true }, '', window.location.href);
-                return; // Video ko close hone se yahi rok lo
+                return; // Code yahin ruk jayega, video close nahi hogi!
             }
 
+            // Normal mode mein back dabane par poora video close karo
             const overlay = document.getElementById('classroom-mode');
             if (overlay && overlay.classList.contains('active')) {
                 VideoPlayer.closeVideo(true); 
@@ -146,7 +162,6 @@ export const VideoPlayer = {
     },
 
     closeVideo: (isFromPopState) => {
-        // 🚨 SAFE EXIT FULLSCREEN: Video close hone se pehle agar fullscreen hai, toh safety ke liye bahar aao
         const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
         if (isFullscreen) {
             if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
