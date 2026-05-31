@@ -4,7 +4,7 @@ import { YtEngine } from './engine-yt.js';
 import { HlsEngine } from './engine-hls.js';
 import { PlayerUI } from './player-ui.js';
 
-let shieldClickTimer = null; // 🚨 Double Tap Play/Pause fix er jonno
+let shieldClickTimer = null; 
 
 export const VideoPlayer = {
     activeEngineName: null, 
@@ -53,6 +53,15 @@ export const VideoPlayer = {
             VideoPlayer.toggleMute, 
             VideoPlayer.toggleFullScreen
         );
+
+        // 🚨 NAYA FIX: Hardware Back Button (Mobile) track karne ke liye
+        window.addEventListener('popstate', (e) => {
+            const overlay = document.getElementById('classroom-mode');
+            if (overlay && overlay.classList.contains('active')) {
+                // True means hardware back dabaya gaya hai
+                VideoPlayer.closeVideo(true); 
+            }
+        });
     },
 
     openVideo: (vidUrl, title, pdfUrl) => {
@@ -73,7 +82,6 @@ export const VideoPlayer = {
         if(qDrop) qDrop.classList.remove('show');
         if(menu) menu.classList.remove('show');
         
-        // Volume default UI fix reset
         const slider = document.getElementById('volume-slider');
         if(slider) {
             slider.value = 0;
@@ -82,6 +90,7 @@ export const VideoPlayer = {
 
         const overlay = document.getElementById('classroom-mode');
         if (!overlay.classList.contains('active')) {
+            // Yahan fake step add hota hai browser history mein
             window.history.pushState({ videoOpen: true }, '', window.location.href);
             overlay.classList.add('active');
         }
@@ -126,7 +135,8 @@ export const VideoPlayer = {
         }
     },
 
-    closeVideo: () => {
+    // 🚨 BUG FIX IN ARGUMENT
+    closeVideo: (isFromPopState) => {
         const overlay = document.getElementById('classroom-mode');
         if (overlay.classList.contains('active')) {
             window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
@@ -134,6 +144,13 @@ export const VideoPlayer = {
             const engine = VideoPlayer.getEngine();
             if(engine) engine.pause();
             overlay.classList.remove('active'); 
+            
+            // 🚨 PERFECT HISTORY SYNC LOGIC
+            if (isFromPopState !== true) {
+                // Agar button click se close hua hai, toh history ko clean karo
+                // taaki double back aur UI freeze ki dikkat na aaye
+                window.history.back(); 
+            }
         }
     },
 
@@ -179,7 +196,6 @@ export const VideoPlayer = {
         const activeBtn = document.getElementById('spd-' + rate);
         if(activeBtn) activeBtn.classList.add('active');
         
-        // 🚨 Pura menu hide koro
         document.getElementById('speed-dropdown').classList.remove('show');
         document.getElementById('settings-menu').classList.remove('show');
     },
@@ -201,7 +217,6 @@ export const VideoPlayer = {
             console.warn("Quality selection not supported for the active engine.");
         }
         
-        // 🚨 Pura menu hide koro
         document.getElementById('quality-dropdown').classList.remove('show');
         document.getElementById('settings-menu').classList.remove('show');
     },
@@ -217,7 +232,6 @@ export const VideoPlayer = {
         }
     },
 
-    // 🚨 FIX: Smart Timer for double tap Play/Pause conflict
     handleShieldClick: () => {
         const controls = document.getElementById('custom-controls');
         if(controls && controls.classList.contains('hidden')) {
@@ -227,24 +241,22 @@ export const VideoPlayer = {
         
         if (shieldClickTimer) {
             clearTimeout(shieldClickTimer);
-            shieldClickTimer = null; // Double tap detect hoyeche, Play/Pause cancel koro (Gesture handle korbe)
+            shieldClickTimer = null; 
         } else {
             shieldClickTimer = setTimeout(() => {
                 VideoPlayer.togglePlay();
                 shieldClickTimer = null;
-            }, 250); // 250ms wait korbe jate bujhte pare single tap naki double tap
+            }, 250); 
         }
     },
 
     startDrag: (e) => { PlayerUI.isDragging = true; VideoPlayer.updateScrub(e); },
     
-    // 🚨 FIX: Seek Lock Implementation
     stopDrag: (e) => { 
         if(PlayerUI.isDragging) { 
             VideoPlayer.updateScrub(e); 
             PlayerUI.isDragging = false; 
             
-            // Lock the progress bar from reverting due to slow net
             PlayerUI.isSeekLocked = true;
             clearTimeout(PlayerUI.seekLockTimeout);
             PlayerUI.seekLockTimeout = setTimeout(() => {
