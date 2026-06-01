@@ -42,12 +42,11 @@ export const CommentEngine = {
         }, 50);
     },
 
-    // 2. HTML Generator Helper (Main Comment + Reply dono ka design)
+    // 2. HTML Generator (With Like & Report Buttons)
     generateCommentHTML: (comment, isReply = false) => {
         const userInit = comment.user_name.charAt(0).toUpperCase();
         const timeString = CommentEngine.timeAgo(comment.created_at);
         
-        // Replies ko thoda indent karke sundar dikhana hai
         const marginStyle = isReply ? "margin-left: 2.5rem; margin-top: 0.8rem; background: #f8fafc; border: 1px solid #f1f5f9; box-shadow: none;" : "";
         const avatarStyle = isReply ? "width: 28px; height: 28px; font-size: 0.75rem;" : "";
         
@@ -58,18 +57,29 @@ export const CommentEngine = {
                     <div class="comment-user">${comment.user_name} <span class="comment-time">${timeString}</span></div>
                     <div class="comment-text">${comment.text}</div>
                     
-                    ${!isReply ? `
-                        <button class="reply-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight: 600; cursor: pointer; background: none; border: none; padding: 0;">
-                            <i class="fas fa-reply pointer-events-none" style="margin-right: 4px;"></i> Reply
+                    <div class="comment-actions" style="display: flex; gap: 15px; margin-top: 8px; align-items: center;">
+                        <button class="like-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: #94a3b8; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 4px; transition: 0.2s;">
+                            <i class="fas fa-thumbs-up pointer-events-none"></i> <span class="like-count pointer-events-none" style="font-weight:600;">${comment.like_count || 0}</span>
                         </button>
                         
+                        ${!isReply ? `
+                            <button class="reply-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: #94a3b8; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 4px; font-weight: 600; transition: 0.2s;">
+                                <i class="fas fa-reply pointer-events-none"></i> Reply
+                            </button>
+                        ` : ''}
+
+                        <button class="report-action-btn" data-id="${comment.id}" title="Report to Admin" style="font-size: 0.75rem; color: #cbd5e1; background: none; border: none; cursor: pointer; padding: 0; margin-left: auto; transition: 0.2s;">
+                            <i class="fas fa-flag pointer-events-none"></i>
+                        </button>
+                    </div>
+                    
+                    ${!isReply ? `
                         <div id="reply-box-${comment.id}" style="display:none; margin-top: 10px;">
                             <div style="display: flex; gap: 8px;">
                                 <input type="text" id="reply-input-${comment.id}" style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:6px 12px; font-size:0.8rem; outline:none;" placeholder="Write a reply...">
                                 <button class="send-reply-btn send-btn" data-id="${comment.id}" style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-paper-plane pointer-events-none"></i></button>
                             </div>
                         </div>
-                        
                         <div class="replies-container" id="replies-${comment.id}"></div>
                     ` : ''}
                 </div>
@@ -77,7 +87,7 @@ export const CommentEngine = {
         `;
     },
 
-    // 3. Fetch Data (Vercel)
+    // 3. Fetch Data
     fetchComments: async (isLoadMore = false) => {
         if (CommentEngine.isLoading || (!CommentEngine.hasMore && isLoadMore)) return;
         CommentEngine.isLoading = true;
@@ -103,11 +113,8 @@ export const CommentEngine = {
                 countSpan.innerText = "0 Comments";
             } else {
                 countSpan.innerText = `${result.totalCount || 0} Comment${result.totalCount > 1 ? 's' : ''}`;
-                
                 result.comments.forEach(comment => {
-                    // Main Comment HTML
                     container.insertAdjacentHTML('beforeend', CommentEngine.generateCommentHTML(comment, false));
-                    // Nested Replies HTML
                     if (comment.replies && comment.replies.length > 0) {
                         const repliesBox = document.getElementById(`replies-${comment.id}`);
                         comment.replies.forEach(reply => {
@@ -115,7 +122,6 @@ export const CommentEngine = {
                         });
                     }
                 });
-
                 CommentEngine.hasMore = result.hasMore;
                 if (CommentEngine.hasMore) CommentEngine.currentPage++;
             }
@@ -127,7 +133,7 @@ export const CommentEngine = {
         }
     },
 
-    // 4. Security & Logic (Event Delegation for infinite buttons)
+    // 4. Security, Logic & Interactive Clicks
     initSecurity: (lectureId) => {
         const input = document.getElementById('comment-input');
         const btn = document.getElementById('send-comment-btn');
@@ -141,13 +147,13 @@ export const CommentEngine = {
             btn.disabled = text.trim().length === 0;
         });
 
-        // 🚀 MAIN COMMENT SEND
+        // 🚀 POST MAIN COMMENT
         btn.addEventListener('click', async () => {
             const text = input.value.trim();
             if (text.length === 0) return; 
 
             const now = Date.now();
-            if (now - lastCommentTime < 10000) return; // Cooldown (silent for better UX)
+            if (now - lastCommentTime < 10000) return;
 
             const tempId = CommentEngine.postOptimistic(text);
             lastCommentTime = now;
@@ -164,16 +170,15 @@ export const CommentEngine = {
                 if (!response.ok) throw new Error("Backend failed");
                 const resultData = await response.json();
 
-                // 🚨 ID SWAP TRICK: Fake ID ko Asli Database UUID se badal do!
                 const card = document.getElementById(`comment_${tempId}`);
                 if (card) {
                     const realId = resultData.id;
                     card.id = `comment_${realId}`;
                     card.classList.remove('optimistic');
                     card.querySelector('.comment-time').innerText = "Just now";
-                    
-                    // Saare reply attributes update kar do naye ID se
+                    card.querySelector('.like-action-btn').setAttribute('data-id', realId);
                     card.querySelector('.reply-action-btn').setAttribute('data-id', realId);
+                    card.querySelector('.report-action-btn').setAttribute('data-id', realId);
                     card.querySelector('.send-reply-btn').setAttribute('data-id', realId);
                     card.querySelector(`#reply-box-${tempId}`).id = `reply-box-${realId}`;
                     card.querySelector(`#reply-input-${tempId}`).id = `reply-input-${realId}`;
@@ -186,9 +191,65 @@ export const CommentEngine = {
             }
         });
 
-        // 🚀 REPLY BOX & REPLY SEND (Event Delegation)
+        // 🚀 INTERACTIVE CATCHER (Likes, Replies, Reports)
         document.getElementById('comments-container').addEventListener('click', async (e) => {
-            // 1. Agar "Reply" text par click kiya
+            
+            // 1. LIKE BUTTON CLICK (Optimistic UI)
+            const likeBtn = e.target.closest('.like-action-btn');
+            if (likeBtn) {
+                const id = likeBtn.getAttribute('data-id');
+                const countSpan = likeBtn.querySelector('.like-count');
+                let count = parseInt(countSpan.innerText) || 0;
+                
+                // Toggle Color & Count instantly!
+                const isLiked = likeBtn.style.color === 'var(--accent)' || likeBtn.style.color === 'rgb(37, 99, 235)';
+                if (isLiked) {
+                    likeBtn.style.color = '#94a3b8';
+                    countSpan.innerText = count > 0 ? count - 1 : 0;
+                } else {
+                    likeBtn.style.color = 'var(--accent)';
+                    countSpan.innerText = count + 1;
+                }
+
+                try {
+                    const token = await auth.currentUser.getIdToken();
+                    await fetch('https://vidyaplus-backend.vercel.app/api/comments/like', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ commentId: id })
+                    });
+                } catch (err) {
+                    // API Fail hui toh reverse kar do
+                    likeBtn.style.color = isLiked ? 'var(--accent)' : '#94a3b8';
+                    countSpan.innerText = count;
+                }
+            }
+
+            // 2. REPORT BUTTON CLICK
+            const reportBtn = e.target.closest('.report-action-btn');
+            if (reportBtn) {
+                const id = reportBtn.getAttribute('data-id');
+                // Agar already laal (red) hai toh dobara API mat bhejo
+                if (reportBtn.style.color === 'rgb(239, 68, 68)' || reportBtn.style.color === '#ef4444') return; 
+
+                if(confirm("Flag this comment for admin review? (Only report inappropriate content)")) {
+                    reportBtn.style.color = '#ef4444'; // Turant Laal kar do
+                    
+                    try {
+                        const token = await auth.currentUser.getIdToken();
+                        await fetch('https://vidyaplus-backend.vercel.app/api/comments/report', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ commentId: id })
+                        });
+                        alert("Report registered successfully.");
+                    } catch (err) {
+                        reportBtn.style.color = '#cbd5e1'; // Fail ho jaye toh revert kar do
+                    }
+                }
+            }
+
+            // 3. REPLY BOX TOGGLE
             const replyActionBtn = e.target.closest('.reply-action-btn');
             if (replyActionBtn) {
                 const id = replyActionBtn.getAttribute('data-id');
@@ -196,7 +257,7 @@ export const CommentEngine = {
                 box.style.display = box.style.display === 'none' ? 'block' : 'none';
             }
 
-            // 2. Agar "Send Reply" wali paper plane par click kiya
+            // 4. POST REPLY BUTTON
             const sendReplyBtn = e.target.closest('.send-reply-btn');
             if (sendReplyBtn) {
                 const parentId = sendReplyBtn.getAttribute('data-id');
@@ -204,11 +265,9 @@ export const CommentEngine = {
                 const text = replyInput.value.trim();
                 
                 if (text.length === 0) return;
-
                 replyInput.value = '';
                 document.getElementById(`reply-box-${parentId}`).style.display = 'none';
 
-                // Optimistic UI for Reply
                 const tempId = CommentEngine.postOptimistic(text, parentId);
 
                 try {
@@ -216,30 +275,30 @@ export const CommentEngine = {
                     const response = await fetch('https://vidyaplus-backend.vercel.app/api/comments', {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ lectureId: lectureId, text: text, parentId: parentId }) // 🚨 Bhej diya Parent
+                        body: JSON.stringify({ lectureId: lectureId, text: text, parentId: parentId })
                     });
                     if (!response.ok) throw new Error("Reply failed");
                     const resultData = await response.json();
 
-                    // Swap Fake ID -> Real DB ID
                     const replyCard = document.getElementById(`comment_${tempId}`);
                     if (replyCard) {
                         replyCard.id = `comment_${resultData.id}`;
                         replyCard.classList.remove('optimistic');
                         replyCard.querySelector('.comment-time').innerText = "Just now";
+                        replyCard.querySelector('.like-action-btn').setAttribute('data-id', resultData.id);
+                        replyCard.querySelector('.report-action-btn').setAttribute('data-id', resultData.id);
                     }
                 } catch (error) {
                     const failedReply = document.getElementById(`comment_${tempId}`);
                     if(failedReply) failedReply.remove();
                     replyInput.value = text;
                     document.getElementById(`reply-box-${parentId}`).style.display = 'block';
-                    alert("Failed to post reply.");
                 }
             }
         });
     },
 
-    // 5. Zero-Lag Fast UI Update (Replies support ke sath)
+    // 5. Zero-Lag Optimistic Render
     postOptimistic: (text, parentId = null) => {
         const userName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : "Student";
         const tempId = "temp_" + Date.now();
@@ -248,24 +307,22 @@ export const CommentEngine = {
             id: tempId,
             user_name: userName,
             created_at: new Date().toISOString(),
-            text: text
+            text: text,
+            like_count: 0
         };
 
         const html = CommentEngine.generateCommentHTML(fakeComment, !!parentId);
         
         if (parentId) {
-            // Agar yeh reply hai toh parent ke dabe (container) mein daalo
             const repliesBox = document.getElementById(`replies-${parentId}`);
             repliesBox.insertAdjacentHTML('beforeend', html);
         } else {
-            // Main comment hai toh sabse upar daalo
             const container = document.getElementById('comments-container');
             const emptyBox = container.querySelector('.empty-box');
             if (emptyBox) container.innerHTML = ''; 
             container.insertAdjacentHTML('afterbegin', html);
         }
         
-        // Optimistic class add karo taaki grey dikhe
         document.getElementById(`comment_${tempId}`).classList.add('optimistic');
         document.querySelector(`#comment_${tempId} .comment-time`).innerText = "Sending...";
         
