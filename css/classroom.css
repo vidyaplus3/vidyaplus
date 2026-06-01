@@ -32,3 +32,63 @@
     #pdf-iframe { max-width: 1000px; }
 }
 
+/* ==========================================
+   PREMIUM COMMENT SECTION STYLING
+   ========================================== */
+/* Sticky Input Area */
+.comment-input-area {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    padding: 15px 0 10px 0;
+    border-top: 1px solid var(--border);
+    z-index: 10;
+}
+
+/* Smart Input Field */
+#comment-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    padding: 8px 0;
+}
+#comment-input::placeholder { color: #94a3b8; font-weight: 500; }
+
+/* Dynamic Send Button */
+.send-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.send-btn:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    transform: scale(0.9);
+}
+.send-btn:not(:disabled):active { transform: scale(0.9); }
+
+/* Optimistic UI Ghosting */
+.comment-card.optimistic {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Timestamp Styling */
+.comment-time {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-left: 8px;
+}
