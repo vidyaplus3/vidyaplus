@@ -4,8 +4,20 @@ import { auth } from './firebase-init.js';
 let lastCommentTime = 0;
 
 export const CommentEngine = {
+    // 🚨 NAYE VARIABLES: Pagination ke liye
+    currentPage: 1,
+    hasMore: true,
+    isLoading: false,
+    currentLecture: null,
+
     // 1. UI Render Karne ka function
     renderUI: (containerElement, lectureId) => {
+        // Purana state reset karo jab naya lecture khule
+        CommentEngine.currentPage = 1;
+        CommentEngine.hasMore = true;
+        CommentEngine.isLoading = false;
+        CommentEngine.currentLecture = lectureId;
+
         containerElement.innerHTML = `
             <div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
                 Academic Discussion <span id="comment-count" style="font-size:0.8rem; color:var(--primary); font-weight:700; background:#E0E7FF; padding:2px 8px; border-radius:12px;">Syncing...</span>
@@ -28,59 +40,93 @@ export const CommentEngine = {
 
         setTimeout(() => {
             CommentEngine.initSecurity(lectureId);
-            CommentEngine.fetchComments(lectureId); // 🚨 THE MAGIC: Asli data layega
+            CommentEngine.fetchComments(); // Pehle 20 comments lao
+            CommentEngine.setupInfiniteScroll(); // Scroll detector chalu karo
         }, 50);
     },
 
-    // 2. 🚀 VERCEL SE ASLI COMMENTS LANA
-    fetchComments: async (lectureId) => {
+    // 2. 🚀 VERCEL SE COMMENTS LANA (Ab Load More logic ke sath)
+    fetchComments: async (isLoadMore = false) => {
+        // Agar pehle se load ho raha hai, ya aage data nahi hai, toh ruk jao
+        if (CommentEngine.isLoading || (!CommentEngine.hasMore && isLoadMore)) return;
+        
+        CommentEngine.isLoading = true;
         const container = document.getElementById('comments-container');
         const countSpan = document.getElementById('comment-count');
         
+        // Agar neeche scroll kiya hai, toh chota loading spinner dikhao
+        if (isLoadMore) {
+            container.insertAdjacentHTML('beforeend', `<div id="scroll-spinner" style="text-align:center; padding:10px;"><i class="fas fa-circle-notch fa-spin text-blue-500"></i></div>`);
+        }
+
         try {
             const token = await auth.currentUser.getIdToken();
-            const response = await fetch(`https://vidyaplus-backend.vercel.app/api/comments/${lectureId}`, {
+            const response = await fetch(`https://vidyaplus-backend.vercel.app/api/comments/${CommentEngine.currentLecture}?page=${CommentEngine.currentPage}&limit=20`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
             if (!response.ok) throw new Error("Fetch failed");
             const result = await response.json();
             
-            // Agar ek bhi comment nahi hai
-            if (result.comments.length === 0) {
+            if (!isLoadMore) container.innerHTML = ''; // Naya lecture khulne par purana clear karo
+            
+            const spinner = document.getElementById('scroll-spinner');
+            if (spinner) spinner.remove();
+
+            if (result.comments.length === 0 && !isLoadMore) {
                 container.innerHTML = `<div class="empty-box" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fas fa-comments" style="font-size:2rem; margin-bottom:10px;"></i><p>No queries yet. Be the first to start the discussion!</p></div>`;
                 countSpan.innerText = "0 Comments";
-                return;
-            }
-
-            countSpan.innerText = `${result.comments.length} Comment${result.comments.length > 1 ? 's' : ''}`;
-            container.innerHTML = ''; // Purana kachra/skeletons clean karo
-
-            // Naye comments ko screen par lagana
-            result.comments.forEach(comment => {
-                const userInit = comment.user_name.charAt(0).toUpperCase();
-                const timeString = CommentEngine.timeAgo(comment.created_at); // Time convert kiya
+            } else {
+                countSpan.innerText = `${result.totalCount || 0} Comment${result.totalCount > 1 ? 's' : ''}`;
                 
-                const commentHTML = `
-                    <div class="comment-card">
-                        <div class="user-avatar">${userInit}</div>
-                        <div class="comment-body">
-                            <div class="comment-user">${comment.user_name} <span class="comment-time">${timeString}</span></div>
-                            <div class="comment-text">${comment.text}</div>
+                result.comments.forEach(comment => {
+                    const userInit = comment.user_name.charAt(0).toUpperCase();
+                    const timeString = CommentEngine.timeAgo(comment.created_at); 
+                    
+                    const commentHTML = `
+                        <div class="comment-card">
+                            <div class="user-avatar">${userInit}</div>
+                            <div class="comment-body">
+                                <div class="comment-user">${comment.user_name} <span class="comment-time">${timeString}</span></div>
+                                <div class="comment-text">${comment.text}</div>
+                            </div>
                         </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', commentHTML);
-            });
+                    `;
+                    container.insertAdjacentHTML('beforeend', commentHTML);
+                });
 
+                // Check karo kya aur data bacha hai
+                CommentEngine.hasMore = result.hasMore;
+                if (CommentEngine.hasMore) {
+                    CommentEngine.currentPage++; // Agli baar page 2, 3 laana
+                }
+            }
         } catch (error) {
             console.error("Failed to load comments:", error);
-            container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; font-weight:600;">Failed to load discussions. Please refresh.</div>`;
+            if (!isLoadMore) container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; font-weight:600;">Failed to load discussions. Please refresh.</div>`;
             countSpan.innerText = "Error";
+        } finally {
+            CommentEngine.isLoading = false;
         }
     },
 
-    // 3. 🕒 TIME CONVERTER (UTC to "2 mins ago")
+    // 🚨 3. THE INFINITE SCROLL SENSOR (YouTube jaisa feel)
+    setupInfiniteScroll: () => {
+        const scrollArea = document.getElementById('classroom-dynamic-content'); // Tumhare tab ka scroll box
+        if (!scrollArea) return;
+
+        scrollArea.addEventListener('scroll', () => {
+            // Check agar user scroll karte karte neeche pahuch gaya hai
+            if (scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 50) {
+                // Turant agle 20 comments ki demand bhej do
+                if (CommentEngine.hasMore && !CommentEngine.isLoading) {
+                    CommentEngine.fetchComments(true);
+                }
+            }
+        });
+    },
+
+    // 🕒 TIME CONVERTER (UTC to "2 mins ago")
     timeAgo: (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -121,14 +167,13 @@ export const CommentEngine = {
                 return;
             }
 
-            const badWords = ['stupid', 'idiot']; 
+            const badWords = ['stupid', 'idiot', 'gali1', 'gali2']; // Profanity Filter
             let cleanText = text;
             badWords.forEach(word => {
                 const regex = new RegExp(word, 'gi');
                 cleanText = cleanText.replace(regex, '***');
             });
 
-            // Optimistic UI dikhao
             const tempId = CommentEngine.postOptimistic(cleanText);
             lastCommentTime = now;
             
@@ -152,7 +197,6 @@ export const CommentEngine = {
                 const cardElement = document.getElementById(tempId);
                 if(cardElement) cardElement.classList.remove('optimistic');
 
-                // 🚨 UPDATE: Comment add hone par count badha do
                 const countSpan = document.getElementById('comment-count');
                 const currentCount = parseInt(countSpan.innerText) || 0;
                 countSpan.innerText = `${currentCount + 1} Comment${currentCount + 1 > 1 ? 's' : ''}`;
@@ -179,7 +223,6 @@ export const CommentEngine = {
         const userName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : "Student";
         const userInit = userName.charAt(0).toUpperCase();
 
-        // Agar empty box dikh raha hai toh usko hata do
         const emptyBox = container.querySelector('.empty-box');
         if (emptyBox) container.innerHTML = ''; 
 
