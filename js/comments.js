@@ -4,15 +4,13 @@ import { auth } from './firebase-init.js';
 let lastCommentTime = 0;
 
 export const CommentEngine = {
-    // 🚨 NAYE VARIABLES: Pagination ke liye
     currentPage: 1,
     hasMore: true,
     isLoading: false,
     currentLecture: null,
 
-    // 1. UI Render Karne ka function
+    // 1. UI Render
     renderUI: (containerElement, lectureId) => {
-        // Purana state reset karo jab naya lecture khule
         CommentEngine.currentPage = 1;
         CommentEngine.hasMore = true;
         CommentEngine.isLoading = false;
@@ -25,7 +23,6 @@ export const CommentEngine = {
             
             <div id="comments-container" style="padding-bottom: 20px; min-height: 200px;">
                 <div class="comment-card" style="opacity:0.5;"><div class="user-avatar" style="background:#e2e8f0; color:transparent;">-</div><div class="comment-body" style="background:#f1f5f9; min-height:60px; border-radius:12px; width:100%;"></div></div>
-                <div class="comment-card" style="opacity:0.3;"><div class="user-avatar" style="background:#e2e8f0; color:transparent;">-</div><div class="comment-body" style="background:#f1f5f9; min-height:40px; border-radius:12px; width:70%;"></div></div>
             </div>
             
             <div class="comment-input-area">
@@ -40,36 +37,64 @@ export const CommentEngine = {
 
         setTimeout(() => {
             CommentEngine.initSecurity(lectureId);
-            CommentEngine.fetchComments(); // Pehle 20 comments lao
-            CommentEngine.setupInfiniteScroll(); // Scroll detector chalu karo
+            CommentEngine.fetchComments(); 
+            CommentEngine.setupInfiniteScroll(); 
         }, 50);
     },
 
-    // 2. 🚀 VERCEL SE COMMENTS LANA (Ab Load More logic ke sath)
-    fetchComments: async (isLoadMore = false) => {
-        // Agar pehle se load ho raha hai, ya aage data nahi hai, toh ruk jao
-        if (CommentEngine.isLoading || (!CommentEngine.hasMore && isLoadMore)) return;
+    // 2. HTML Generator Helper (Main Comment + Reply dono ka design)
+    generateCommentHTML: (comment, isReply = false) => {
+        const userInit = comment.user_name.charAt(0).toUpperCase();
+        const timeString = CommentEngine.timeAgo(comment.created_at);
         
+        // Replies ko thoda indent karke sundar dikhana hai
+        const marginStyle = isReply ? "margin-left: 2.5rem; margin-top: 0.8rem; background: #f8fafc; border: 1px solid #f1f5f9; box-shadow: none;" : "";
+        const avatarStyle = isReply ? "width: 28px; height: 28px; font-size: 0.75rem;" : "";
+        
+        return `
+            <div class="comment-card" id="comment_${comment.id}" style="${marginStyle}">
+                <div class="user-avatar" style="${avatarStyle}">${userInit}</div>
+                <div class="comment-body" style="width: 100%;">
+                    <div class="comment-user">${comment.user_name} <span class="comment-time">${timeString}</span></div>
+                    <div class="comment-text">${comment.text}</div>
+                    
+                    ${!isReply ? `
+                        <button class="reply-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight: 600; cursor: pointer; background: none; border: none; padding: 0;">
+                            <i class="fas fa-reply pointer-events-none" style="margin-right: 4px;"></i> Reply
+                        </button>
+                        
+                        <div id="reply-box-${comment.id}" style="display:none; margin-top: 10px;">
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="reply-input-${comment.id}" style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:6px 12px; font-size:0.8rem; outline:none;" placeholder="Write a reply...">
+                                <button class="send-reply-btn send-btn" data-id="${comment.id}" style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-paper-plane pointer-events-none"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="replies-container" id="replies-${comment.id}"></div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    // 3. Fetch Data (Vercel)
+    fetchComments: async (isLoadMore = false) => {
+        if (CommentEngine.isLoading || (!CommentEngine.hasMore && isLoadMore)) return;
         CommentEngine.isLoading = true;
+        
         const container = document.getElementById('comments-container');
         const countSpan = document.getElementById('comment-count');
-        
-        // Agar neeche scroll kiya hai, toh chota loading spinner dikhao
-        if (isLoadMore) {
-            container.insertAdjacentHTML('beforeend', `<div id="scroll-spinner" style="text-align:center; padding:10px;"><i class="fas fa-circle-notch fa-spin text-blue-500"></i></div>`);
-        }
+        if (isLoadMore) container.insertAdjacentHTML('beforeend', `<div id="scroll-spinner" style="text-align:center; padding:10px;"><i class="fas fa-circle-notch fa-spin text-blue-500"></i></div>`);
 
         try {
             const token = await auth.currentUser.getIdToken();
             const response = await fetch(`https://vidyaplus-backend.vercel.app/api/comments/${CommentEngine.currentLecture}?page=${CommentEngine.currentPage}&limit=20`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
             if (!response.ok) throw new Error("Fetch failed");
+            
             const result = await response.json();
-            
-            if (!isLoadMore) container.innerHTML = ''; // Naya lecture khulne par purana clear karo
-            
+            if (!isLoadMore) container.innerHTML = ''; 
             const spinner = document.getElementById('scroll-spinner');
             if (spinner) spinner.remove();
 
@@ -80,68 +105,29 @@ export const CommentEngine = {
                 countSpan.innerText = `${result.totalCount || 0} Comment${result.totalCount > 1 ? 's' : ''}`;
                 
                 result.comments.forEach(comment => {
-                    const userInit = comment.user_name.charAt(0).toUpperCase();
-                    const timeString = CommentEngine.timeAgo(comment.created_at); 
-                    
-                    const commentHTML = `
-                        <div class="comment-card">
-                            <div class="user-avatar">${userInit}</div>
-                            <div class="comment-body">
-                                <div class="comment-user">${comment.user_name} <span class="comment-time">${timeString}</span></div>
-                                <div class="comment-text">${comment.text}</div>
-                            </div>
-                        </div>
-                    `;
-                    container.insertAdjacentHTML('beforeend', commentHTML);
+                    // Main Comment HTML
+                    container.insertAdjacentHTML('beforeend', CommentEngine.generateCommentHTML(comment, false));
+                    // Nested Replies HTML
+                    if (comment.replies && comment.replies.length > 0) {
+                        const repliesBox = document.getElementById(`replies-${comment.id}`);
+                        comment.replies.forEach(reply => {
+                            repliesBox.insertAdjacentHTML('beforeend', CommentEngine.generateCommentHTML(reply, true));
+                        });
+                    }
                 });
 
-                // Check karo kya aur data bacha hai
                 CommentEngine.hasMore = result.hasMore;
-                if (CommentEngine.hasMore) {
-                    CommentEngine.currentPage++; // Agli baar page 2, 3 laana
-                }
+                if (CommentEngine.hasMore) CommentEngine.currentPage++;
             }
         } catch (error) {
-            console.error("Failed to load comments:", error);
+            console.error("Fetch Error:", error);
             if (!isLoadMore) container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; font-weight:600;">Failed to load discussions. Please refresh.</div>`;
-            countSpan.innerText = "Error";
         } finally {
             CommentEngine.isLoading = false;
         }
     },
 
-    // 🚨 3. THE INFINITE SCROLL SENSOR (YouTube jaisa feel)
-    setupInfiniteScroll: () => {
-        const scrollArea = document.getElementById('classroom-dynamic-content'); // Tumhare tab ka scroll box
-        if (!scrollArea) return;
-
-        scrollArea.addEventListener('scroll', () => {
-            // Check agar user scroll karte karte neeche pahuch gaya hai
-            if (scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 50) {
-                // Turant agle 20 comments ki demand bhej do
-                if (CommentEngine.hasMore && !CommentEngine.isLoading) {
-                    CommentEngine.fetchComments(true);
-                }
-            }
-        });
-    },
-
-    // 🕒 TIME CONVERTER (UTC to "2 mins ago")
-    timeAgo: (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const seconds = Math.round((now - date) / 1000);
-        const minutes = Math.round(seconds / 60);
-        const hours = Math.round(minutes / 60);
-        const days = Math.round(hours / 24);
-
-        if (seconds < 60) return "Just now";
-        if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
-        if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
-        return `${days} day${days > 1 ? 's' : ''} ago`;
-    },
-
-    // 4. Security, Logic aur API Call
+    // 4. Security & Logic (Event Delegation for infinite buttons)
     initSecurity: (lectureId) => {
         const input = document.getElementById('comment-input');
         const btn = document.getElementById('send-comment-btn');
@@ -155,91 +141,160 @@ export const CommentEngine = {
             btn.disabled = text.trim().length === 0;
         });
 
+        // 🚀 MAIN COMMENT SEND
         btn.addEventListener('click', async () => {
             const text = input.value.trim();
             if (text.length === 0) return; 
 
             const now = Date.now();
-            if (now - lastCommentTime < 10000) { 
-                errorBox.innerText = "Please take a breath! Wait 10 seconds before posting again.";
-                errorBox.style.display = 'block';
-                setTimeout(() => { errorBox.style.display = 'none'; }, 4000);
-                return;
-            }
+            if (now - lastCommentTime < 10000) return; // Cooldown (silent for better UX)
 
-            const badWords = ['stupid', 'idiot', 'gali1', 'gali2']; // Profanity Filter
-            let cleanText = text;
-            badWords.forEach(word => {
-                const regex = new RegExp(word, 'gi');
-                cleanText = cleanText.replace(regex, '***');
-            });
-
-            const tempId = CommentEngine.postOptimistic(cleanText);
+            const tempId = CommentEngine.postOptimistic(text);
             lastCommentTime = now;
-            
             const savedText = input.value;
-            input.value = '';
-            btn.disabled = true;
-            counter.innerText = `0/500`;
+            input.value = ''; btn.disabled = true; counter.innerText = `0/500`;
             
             try {
                 const token = await auth.currentUser.getIdToken();
                 const response = await fetch('https://vidyaplus-backend.vercel.app/api/comments', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lectureId: lectureId, text: cleanText })
+                    body: JSON.stringify({ lectureId: lectureId, text: text })
                 });
+                if (!response.ok) throw new Error("Backend failed");
+                const resultData = await response.json();
 
-                if (!response.ok) throw new Error("Backend verification failed");
-
-                const timeElement = document.querySelector(`#${tempId} .comment-time`);
-                if(timeElement) timeElement.innerText = "Just now";
-                const cardElement = document.getElementById(tempId);
-                if(cardElement) cardElement.classList.remove('optimistic');
-
-                const countSpan = document.getElementById('comment-count');
-                const currentCount = parseInt(countSpan.innerText) || 0;
-                countSpan.innerText = `${currentCount + 1} Comment${currentCount + 1 > 1 ? 's' : ''}`;
-
+                // 🚨 ID SWAP TRICK: Fake ID ko Asli Database UUID se badal do!
+                const card = document.getElementById(`comment_${tempId}`);
+                if (card) {
+                    const realId = resultData.id;
+                    card.id = `comment_${realId}`;
+                    card.classList.remove('optimistic');
+                    card.querySelector('.comment-time').innerText = "Just now";
+                    
+                    // Saare reply attributes update kar do naye ID se
+                    card.querySelector('.reply-action-btn').setAttribute('data-id', realId);
+                    card.querySelector('.send-reply-btn').setAttribute('data-id', realId);
+                    card.querySelector(`#reply-box-${tempId}`).id = `reply-box-${realId}`;
+                    card.querySelector(`#reply-input-${tempId}`).id = `reply-input-${realId}`;
+                    card.querySelector(`#replies-${tempId}`).id = `replies-${realId}`;
+                }
             } catch (error) {
-                console.error("Comment Post Failed:", error);
-                const failedComment = document.getElementById(tempId);
+                const failedComment = document.getElementById(`comment_${tempId}`);
                 if(failedComment) failedComment.remove();
+                input.value = savedText; btn.disabled = false; counter.innerText = `${savedText.length}/500`;
+            }
+        });
+
+        // 🚀 REPLY BOX & REPLY SEND (Event Delegation)
+        document.getElementById('comments-container').addEventListener('click', async (e) => {
+            // 1. Agar "Reply" text par click kiya
+            const replyActionBtn = e.target.closest('.reply-action-btn');
+            if (replyActionBtn) {
+                const id = replyActionBtn.getAttribute('data-id');
+                const box = document.getElementById(`reply-box-${id}`);
+                box.style.display = box.style.display === 'none' ? 'block' : 'none';
+            }
+
+            // 2. Agar "Send Reply" wali paper plane par click kiya
+            const sendReplyBtn = e.target.closest('.send-reply-btn');
+            if (sendReplyBtn) {
+                const parentId = sendReplyBtn.getAttribute('data-id');
+                const replyInput = document.getElementById(`reply-input-${parentId}`);
+                const text = replyInput.value.trim();
                 
-                input.value = savedText; 
-                btn.disabled = false;
-                counter.innerText = `${savedText.length}/500`;
-                
-                errorBox.innerText = "Network issue. Failed to post comment.";
-                errorBox.style.display = 'block';
-                setTimeout(() => { errorBox.style.display = 'none'; }, 4000);
+                if (text.length === 0) return;
+
+                replyInput.value = '';
+                document.getElementById(`reply-box-${parentId}`).style.display = 'none';
+
+                // Optimistic UI for Reply
+                const tempId = CommentEngine.postOptimistic(text, parentId);
+
+                try {
+                    const token = await auth.currentUser.getIdToken();
+                    const response = await fetch('https://vidyaplus-backend.vercel.app/api/comments', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lectureId: lectureId, text: text, parentId: parentId }) // 🚨 Bhej diya Parent
+                    });
+                    if (!response.ok) throw new Error("Reply failed");
+                    const resultData = await response.json();
+
+                    // Swap Fake ID -> Real DB ID
+                    const replyCard = document.getElementById(`comment_${tempId}`);
+                    if (replyCard) {
+                        replyCard.id = `comment_${resultData.id}`;
+                        replyCard.classList.remove('optimistic');
+                        replyCard.querySelector('.comment-time').innerText = "Just now";
+                    }
+                } catch (error) {
+                    const failedReply = document.getElementById(`comment_${tempId}`);
+                    if(failedReply) failedReply.remove();
+                    replyInput.value = text;
+                    document.getElementById(`reply-box-${parentId}`).style.display = 'block';
+                    alert("Failed to post reply.");
+                }
             }
         });
     },
 
-    // 5. Zero-Lag Fast UI Update
-    postOptimistic: (text) => {
-        const container = document.getElementById('comments-container');
+    // 5. Zero-Lag Fast UI Update (Replies support ke sath)
+    postOptimistic: (text, parentId = null) => {
         const userName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : "Student";
-        const userInit = userName.charAt(0).toUpperCase();
-
-        const emptyBox = container.querySelector('.empty-box');
-        if (emptyBox) container.innerHTML = ''; 
-
         const tempId = "temp_" + Date.now();
-        const commentHTML = `
-            <div class="comment-card optimistic" id="${tempId}">
-                <div class="user-avatar">${userInit}</div>
-                <div class="comment-body">
-                    <div class="comment-user">${userName} <span class="comment-time">Sending...</span></div>
-                    <div class="comment-text" id="text_${tempId}"></div>
-                </div>
-            </div>
-        `;
         
-        container.insertAdjacentHTML('afterbegin', commentHTML);
-        document.getElementById(`text_${tempId}`).textContent = text; 
+        const fakeComment = {
+            id: tempId,
+            user_name: userName,
+            created_at: new Date().toISOString(),
+            text: text
+        };
+
+        const html = CommentEngine.generateCommentHTML(fakeComment, !!parentId);
+        
+        if (parentId) {
+            // Agar yeh reply hai toh parent ke dabe (container) mein daalo
+            const repliesBox = document.getElementById(`replies-${parentId}`);
+            repliesBox.insertAdjacentHTML('beforeend', html);
+        } else {
+            // Main comment hai toh sabse upar daalo
+            const container = document.getElementById('comments-container');
+            const emptyBox = container.querySelector('.empty-box');
+            if (emptyBox) container.innerHTML = ''; 
+            container.insertAdjacentHTML('afterbegin', html);
+        }
+        
+        // Optimistic class add karo taaki grey dikhe
+        document.getElementById(`comment_${tempId}`).classList.add('optimistic');
+        document.querySelector(`#comment_${tempId} .comment-time`).innerText = "Sending...";
         
         return tempId; 
+    },
+
+    setupInfiniteScroll: () => {
+        const scrollArea = document.getElementById('classroom-dynamic-content'); 
+        if (!scrollArea) return;
+        scrollArea.addEventListener('scroll', () => {
+            if (scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 50) {
+                if (CommentEngine.hasMore && !CommentEngine.isLoading) {
+                    CommentEngine.fetchComments(true);
+                }
+            }
+        });
+    },
+
+    timeAgo: (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.round((now - date) / 1000);
+        const minutes = Math.round(seconds / 60);
+        const hours = Math.round(minutes / 60);
+        const days = Math.round(hours / 24);
+
+        if (seconds < 60) return "Just now";
+        if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+        if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
+        return `${days} day${days > 1 ? 's' : ''} ago`;
     }
 };
