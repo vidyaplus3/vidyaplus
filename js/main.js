@@ -253,18 +253,29 @@ window.switchClassroomTab = (type) => {
     const content = document.getElementById('classroom-dynamic-content');
     if(!content) return;
     
-    // Tab switching classes update karna
-    const tabComm = document.getElementById('tab-comments'); const tabNotes = document.getElementById('tab-notes'); const targetTab = document.getElementById('tab-' + type);
-    if(tabComm) tabComm.classList.remove('active'); if(tabNotes) tabNotes.classList.remove('active'); if(targetTab) targetTab.classList.add('active');
+    const tabComm = document.getElementById('tab-comments'); 
+    const tabNotes = document.getElementById('tab-notes'); 
+    const targetTab = document.getElementById('tab-' + type);
+    
+    if(tabComm) tabComm.classList.remove('active'); 
+    if(tabNotes) tabNotes.classList.remove('active'); 
+    if(targetTab) targetTab.classList.add('active');
     
     if (type === 'comments') {
-        const currentLec = VideoPlayer.currentClassroomData || {};
-        const lectureId = currentLec.id || "lec_" + Date.now(); 
+        // 🚨 THE FIX: Stable ID Logic (Refresh karne par change nahi hoga)
+        // Hum AppState se active chapter ka naam lenge (e.g., "Electromagnetism")
+        let stableLectureId = "general_discussion";
         
-        // 🚀 SMART CALL: Yahan humne naye Comment Engine ko kaam saunp diya!
-        CommentEngine.renderUI(content, lectureId);
+        if (AppState && AppState.currentChapter) {
+            // Spaces ko underscore (_) me badal do taaki ID database friendly rahe
+            stableLectureId = "lec_" + AppState.currentChapter.replace(/\s+/g, '_');
+        }
+        
+        // 🚀 SMART CALL: Yahan humne naye Comment Engine ko finally kaam saunp diya!
+        CommentEngine.renderUI(content, stableLectureId);
 
     } else if (type === 'notes') {
+        // Tumhara Notes wala purana code exactly same rahega
         const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
         if (pdf && pdf !== 'undefined' && pdf !== '') {
             let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes"; let safePdf = pdf.replace(/['"\\]/g, "");
