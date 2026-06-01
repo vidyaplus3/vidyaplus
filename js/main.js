@@ -5,6 +5,8 @@ import { initAuth, AppState } from './auth.js';
 import { UI } from './ui.js';
 import { VideoPlayer } from './player/index.js';
 import { PDFViewer } from './pdf.js';
+import { CommentEngine } from './comments.js'; // 🚨 NAYA IMPORT
+
 
 // 🚨 PRECAUTION: Video tracker file missing hone par system crash rokne ke liye
 // import './video-tracker.js'; 
