@@ -252,10 +252,18 @@ window.renderExtraMaterials = (containerId, items, emptyMsg) => {
 window.switchClassroomTab = (type) => {
     const content = document.getElementById('classroom-dynamic-content');
     if(!content) return;
+    
+    // Tab switching classes update karna
     const tabComm = document.getElementById('tab-comments'); const tabNotes = document.getElementById('tab-notes'); const targetTab = document.getElementById('tab-' + type);
     if(tabComm) tabComm.classList.remove('active'); if(tabNotes) tabNotes.classList.remove('active'); if(targetTab) targetTab.classList.add('active');
+    
     if (type === 'comments') {
-        content.innerHTML = `<div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Academic Discussion</div><div class="comment-card"><div class="user-avatar">AS</div><div class="comment-body"><div class="comment-user">Student <span style="font-weight: 400; opacity: 0.6; font-size: 0.7rem; margin-left: 10px;">Recent</span></div><div class="comment-text">The conceptual breakdown in this lecture was highly effective.</div></div></div><div style="position: sticky; bottom: 0; background: white; padding-top: 10px;"><input type="text" placeholder="Post a query..." style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid var(--border); outline: none;"></div>`;
+        const currentLec = VideoPlayer.currentClassroomData || {};
+        const lectureId = currentLec.id || "lec_" + Date.now(); 
+        
+        // 🚀 SMART CALL: Yahan humne naye Comment Engine ko kaam saunp diya!
+        CommentEngine.renderUI(content, lectureId);
+
     } else if (type === 'notes') {
         const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
         if (pdf && pdf !== 'undefined' && pdf !== '') {
@@ -264,6 +272,7 @@ window.switchClassroomTab = (type) => {
         } else { content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`; }
     }
 };
+
 
 // ==========================================
 // 5. TEST PORTAL ENGINE (100% RESTORED)
