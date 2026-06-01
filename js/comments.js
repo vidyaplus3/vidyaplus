@@ -33,7 +33,7 @@ export const CommentEngine = {
         }, 50);
     },
 
-    // 2. Security aur Logic
+    // 2. Security, Logic aur API Call
     initSecurity: (lectureId) => {
         const input = document.getElementById('comment-input');
         const btn = document.getElementById('send-comment-btn');
@@ -63,23 +63,66 @@ export const CommentEngine = {
             }
 
             // Profanity Filter
-            const badWords = ['stupid', 'idiot']; // Yahan words add kar sakte ho
+            const badWords = ['stupid', 'idiot']; 
             let cleanText = text;
             badWords.forEach(word => {
                 const regex = new RegExp(word, 'gi');
                 cleanText = cleanText.replace(regex, '***');
             });
 
-            // Optimistic UI dikhao
-            CommentEngine.postOptimistic(cleanText);
+            // 1. Optimistic UI dikhao (Yahan se hume tempId milega)
+            const tempId = CommentEngine.postOptimistic(cleanText);
             lastCommentTime = now;
             
-            // Input Reset
+            // 2. Input Box Reset
+            const savedText = input.value;
             input.value = '';
             btn.disabled = true;
             counter.innerText = `0/500`;
             
-            // Note: API integration yahan aayega aage!
+            // 3. 🚀 THE REAL BACKEND CALL TO VERCEL
+            try {
+                // Firebase se secure master key nikalna
+                const token = await auth.currentUser.getIdToken();
+                
+                // Vercel ko request bhejna
+                const response = await fetch('https://vidyaplus-backend.vercel.app/api/comments', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        lectureId: lectureId,
+                        text: cleanText
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Backend verification failed");
+                }
+
+                // 🎉 SUCCESS: "Sending..." ko "Just now" mein badal do aur opacity (grey color) normal kar do
+                const timeElement = document.querySelector(`#${tempId} .comment-time`);
+                if(timeElement) timeElement.innerText = "Just now";
+                const cardElement = document.getElementById(tempId);
+                if(cardElement) cardElement.classList.remove('optimistic');
+
+            } catch (error) {
+                console.error("Comment Post Failed:", error);
+                
+                // 🛑 FAIL SECURELY: Fake comment delete karo, aur data wapas input box mein daalo
+                const failedComment = document.getElementById(tempId);
+                if(failedComment) failedComment.remove();
+                
+                input.value = savedText; // Data loss bach gaya!
+                btn.disabled = false;
+                counter.innerText = `${savedText.length}/500`;
+                
+                errorBox.innerText = "Network issue. Failed to post comment.";
+                errorBox.style.display = 'block';
+                setTimeout(() => { errorBox.style.display = 'none'; }, 4000);
+            }
         });
     },
 
@@ -102,6 +145,8 @@ export const CommentEngine = {
         
         container.insertAdjacentHTML('afterbegin', commentHTML);
         document.getElementById(`text_${tempId}`).textContent = text; // Secure insert (Anti-XSS)
+        
+        return tempId; // 🚨 YAHAN HAI WOH RETURN WALI LINE!
     },
 
     // 4. Dummy Comment Renderer (Temporary)
@@ -118,4 +163,3 @@ export const CommentEngine = {
         `;
     }
 };
-
