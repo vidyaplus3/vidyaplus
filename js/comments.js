@@ -9,12 +9,7 @@ export const CommentEngine = {
     isLoading: false,
     currentLecture: null,
     
-    // 🚨 NAYA: Universal Input State Manage karne ke liye
-    replyState: {
-        isReplying: false,
-        parentId: null,
-        userName: null
-    },
+    replyState: { isReplying: false, parentId: null, userName: null },
 
     renderUI: (containerElement, lectureId) => {
         CommentEngine.currentPage = 1;
@@ -24,22 +19,23 @@ export const CommentEngine = {
         CommentEngine.replyState = { isReplying: false, parentId: null, userName: null };
 
         containerElement.innerHTML = `
-            <div class="chat-layout-wrapper">
-                <div style="padding: 10px 16px; font-weight: 700; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; color: #1e293b;">
-                    Live Discussion <span id="comment-count" style="font-size:0.7rem; color:var(--primary); background:#eff6ff; padding:2px 8px; border-radius:12px;">Syncing...</span>
+            <div class="chat-layout-wrapper" style="display:flex; flex-direction:column; height:100%; width:100%;">
+                
+                <div style="text-align:center; padding: 6px 0; background: #f8fafc; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; font-weight: 700; color: #64748b;">
+                    Total Comments: <span id="comment-count" style="color:var(--primary);">Syncing...</span>
                 </div>
                 
-                <div id="comments-container">
-                    <div id="loading-skeleton" class="comment-card" style="opacity:0.6;">
-                        <div class="skeleton" style="width:32px; height:32px; border-radius:50%;"></div>
-                        <div class="comment-body">
-                            <div class="skeleton" style="height:10px; width:100px; border-radius:4px; margin-bottom:6px;"></div>
-                            <div class="skeleton" style="height:12px; width:80%; border-radius:4px;"></div>
+                <div id="comments-container" style="flex:1; overflow-y:auto; padding: 12px 20px; scroll-behavior: smooth;">
+                    <div id="loading-skeleton" class="comment-card" style="opacity:0.6; display:flex; gap:12px;">
+                        <div class="skeleton" style="width:34px; height:34px; border-radius:50%; background:#e2e8f0;"></div>
+                        <div class="comment-body" style="flex:1;">
+                            <div class="skeleton" style="height:12px; width:100px; border-radius:4px; margin-bottom:8px; background:#e2e8f0;"></div>
+                            <div class="skeleton" style="height:14px; width:80%; border-radius:4px; background:#e2e8f0;"></div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="comment-input-area">
+                <div class="comment-input-area" style="padding: 12px 20px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid #f1f5f9; background: #fff; flex-shrink: 0;">
                     <div id="reply-indicator" class="reply-indicator">
                         <span>Replying to <span id="reply-target-name" style="font-weight: 800;"></span></span>
                         <i class="fas fa-times-circle" id="cancel-reply-btn" style="cursor: pointer; font-size: 1rem;"></i>
@@ -65,22 +61,17 @@ export const CommentEngine = {
         const timeString = CommentEngine.timeAgo(comment.created_at);
         
         const marginStyle = isReply ? "margin-left: 2.5rem; margin-top: 8px; margin-bottom: 8px; padding-bottom: 0; border: none;" : "";
-        const avatarStyle = isReply ? "width: 24px; height: 24px; font-size: 0.7rem;" : "";
+        const avatarStyle = isReply ? "width: 26px; height: 26px; font-size: 0.75rem;" : "";
         const likeColor = comment.is_liked_by_user ? 'var(--primary)' : '#64748b';
         
         let replyLogicHTML = '';
         
         if (!isReply) {
             const hasReplies = comment.replies && comment.replies.length > 0;
-            
-            // 🚨 NAYA: Koi input box render nahi hoga. Sirf Toggle button.
             replyLogicHTML = `
                 <div class="reply-section">
-                    ${hasReplies 
-                        ? `<button class="toggle-replies-btn" data-id="${comment.id}" data-count="${comment.replies.length}"><i class="fas fa-chevron-down"></i> View ${comment.replies.length} Replies</button>` 
-                        : ``
-                    }
-                    <div id="replies-wrapper-${comment.id}" style="display: none; margin-top: 10px; border-left: 2px solid #f1f5f9;">
+                    ${hasReplies ? `<button class="toggle-replies-btn" data-id="${comment.id}" data-count="${comment.replies.length}"><i class="fas fa-chevron-down"></i> View ${comment.replies.length} Replies</button>` : ``}
+                    <div id="replies-wrapper-${comment.id}" style="display: none; margin-top: 10px; border-left: 2px solid #f1f5f9; padding-left: 5px;">
                         <div id="replies-${comment.id}"></div>
                     </div>
                 </div>
@@ -137,10 +128,10 @@ export const CommentEngine = {
             else { const spinner = document.getElementById('scroll-spinner'); if (spinner) spinner.remove(); }
 
             if (result.comments.length === 0 && !isLoadMore) {
-                container.innerHTML = `<div class="empty-box" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#94a3b8;"><p style="font-weight:600; font-size: 0.9rem;">No queries yet. Start the discussion!</p></div>`;
-                countSpan.innerText = "0 Comments";
+                container.innerHTML = `<div class="empty-box" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#94a3b8;"><p style="font-weight:700; font-size: 0.95rem;">No queries yet. Be the first to ask!</p></div>`;
+                countSpan.innerText = "0";
             } else {
-                countSpan.innerText = `${result.totalCount || 0} Comment${result.totalCount > 1 ? 's' : ''}`;
+                countSpan.innerText = `${result.totalCount || 0}`;
                 
                 const sortedComments = result.comments.reverse();
                 let htmlToInsert = '';
@@ -180,7 +171,7 @@ export const CommentEngine = {
                 if (CommentEngine.hasMore) CommentEngine.currentPage++;
             }
         } catch (error) {
-            if (!isLoadMore) container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; font-weight:600;">Failed to load discussions.</div>`;
+            if (!isLoadMore) container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px; font-weight:600;">System Offline.</div>`;
         } finally {
             CommentEngine.isLoading = false;
         }
@@ -196,7 +187,6 @@ export const CommentEngine = {
         });
     },
 
-    // 🚨 NAYA: Universal Input Manager Methods
     enableReplyMode: (parentId, userName) => {
         CommentEngine.replyState = { isReplying: true, parentId, userName };
         document.getElementById('reply-target-name').innerText = userName;
@@ -220,24 +210,15 @@ export const CommentEngine = {
         const btn = document.getElementById('send-comment-btn');
         const container = document.getElementById('comments-container');
 
-        input.addEventListener('input', (e) => {
-            btn.disabled = e.target.value.trim().length === 0;
-        });
+        input.addEventListener('input', (e) => { btn.disabled = e.target.value.trim().length === 0; });
+        document.getElementById('cancel-reply-btn').addEventListener('click', () => { CommentEngine.disableReplyMode(); });
 
-        // Cancel Reply Button
-        document.getElementById('cancel-reply-btn').addEventListener('click', () => {
-            CommentEngine.disableReplyMode();
-        });
-
-        // UNIVERSAL SEND LOGIC
         btn.addEventListener('click', async () => {
             const text = input.value.trim();
             if (text.length === 0) return; 
-
             const now = Date.now();
             if (now - lastCommentTime < 3000) return; 
             
-            // Check if replying to someone or main thread
             const isReply = CommentEngine.replyState.isReplying;
             const targetParentId = isReply ? CommentEngine.replyState.parentId : null;
             
@@ -245,7 +226,6 @@ export const CommentEngine = {
             lastCommentTime = now;
             const savedText = input.value;
             
-            // UI Reset
             CommentEngine.disableReplyMode();
             if (!isReply) container.scrollTop = container.scrollHeight;
 
@@ -256,8 +236,7 @@ export const CommentEngine = {
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ lectureId: lectureId, text: text, parentId: targetParentId })
                 });
-                
-                if (!response.ok) throw new Error("Backend failed");
+                if (!response.ok) throw new Error("Failed");
                 const resultData = await response.json();
 
                 const card = document.getElementById(`comment_${tempId}`);
@@ -265,10 +244,7 @@ export const CommentEngine = {
                     card.id = `comment_${resultData.id}`;
                     card.classList.remove('optimistic');
                     card.querySelector('.comment-time').innerText = "Just now";
-                    
-                    const els = card.querySelectorAll('[data-id]');
-                    els.forEach(el => el.setAttribute('data-id', resultData.id));
-                    
+                    card.querySelectorAll('[data-id]').forEach(el => el.setAttribute('data-id', resultData.id));
                     if(!isReply) {
                         card.querySelector(`#replies-wrapper-${tempId}`).id = `replies-wrapper-${resultData.id}`;
                         card.querySelector(`#replies-${tempId}`).id = `replies-${resultData.id}`;
@@ -282,25 +258,14 @@ export const CommentEngine = {
         });
 
         container.addEventListener('click', async (e) => {
-            
-            // 🚨 Requirement 2: Click anywhere on comment body to toggle replies (or click specific toggle button)
             const clickedBody = e.target.closest('.comment-card');
             const clickedToggleButton = e.target.closest('.toggle-replies-btn');
             
-            // Ignore if clicking action buttons inside the body
             if ((clickedBody || clickedToggleButton) && !e.target.closest('.action-btn-sm')) {
-                let id = null;
-                
-                if (clickedToggleButton) {
-                    id = clickedToggleButton.getAttribute('data-id');
-                } else if (clickedBody && !clickedBody.style.marginLeft) { // Make sure it's a parent comment
-                    id = clickedBody.id.replace('comment_', '');
-                }
-
+                let id = clickedToggleButton ? clickedToggleButton.getAttribute('data-id') : (clickedBody && !clickedBody.style.marginLeft ? clickedBody.id.replace('comment_', '') : null);
                 if (id) {
                     const wrapper = document.getElementById(`replies-wrapper-${id}`);
                     const toggleBtn = document.querySelector(`.toggle-replies-btn[data-id="${id}"]`);
-                    
                     if (wrapper) {
                         if (wrapper.style.display === 'none' || wrapper.style.display === '') {
                             wrapper.style.display = 'block';
@@ -314,46 +279,33 @@ export const CommentEngine = {
                 }
             }
 
-            // 🚨 Requirement 3: Universal Reply Trigger
             const triggerReplyBtn = e.target.closest('.trigger-reply-btn');
             if (triggerReplyBtn) {
                 const parentId = triggerReplyBtn.getAttribute('data-id');
                 const parentName = triggerReplyBtn.getAttribute('data-name');
-                
-                // Open the replies view automatically when trying to reply, so they see their message post
                 const wrapper = document.getElementById(`replies-wrapper-${parentId}`);
                 const toggleBtn = document.querySelector(`.toggle-replies-btn[data-id="${parentId}"]`);
                 if (wrapper && wrapper.style.display === 'none') {
                     wrapper.style.display = 'block';
                     if(toggleBtn) toggleBtn.innerHTML = `<i class="fas fa-chevron-up"></i> Hide Replies`;
                 }
-
                 CommentEngine.enableReplyMode(parentId, parentName);
                 return;
             }
 
-            // LIKES & REPORT
             const likeBtn = e.target.closest('.like-action-btn');
             if (likeBtn) {
                 const id = likeBtn.getAttribute('data-id');
                 const countSpan = likeBtn.querySelector('.like-count');
                 let count = parseInt(countSpan.innerText) || 0;
-                
                 const isLiked = likeBtn.style.color === 'var(--primary)' || likeBtn.style.color === 'rgb(59, 130, 246)';
                 if (isLiked) {
-                    likeBtn.style.color = '#64748b';
-                    countSpan.innerText = count > 0 ? count - 1 : 0;
-                } else {
-                    likeBtn.style.color = 'var(--primary)';
-                    countSpan.innerText = count + 1;
-                }
-
+                    likeBtn.style.color = '#64748b'; countSpan.innerText = count > 0 ? count - 1 : 0;
+                } else { likeBtn.style.color = 'var(--primary)'; countSpan.innerText = count + 1; }
                 try {
                     const token = await auth.currentUser.getIdToken();
                     fetch('https://vidyaplus-backend.vercel.app/api/comments/like', {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ commentId: id })
+                        method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ commentId: id })
                     });
                 } catch (err) {}
             }
@@ -363,7 +315,6 @@ export const CommentEngine = {
     postOptimistic: (text, parentId = null) => {
         const userName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : "Student";
         const tempId = "temp_" + Date.now();
-        
         const fakeComment = { id: tempId, user_name: userName, created_at: new Date().toISOString(), text: text, like_count: 0, is_liked_by_user: false };
         const html = CommentEngine.generateCommentHTML(fakeComment, !!parentId);
         
@@ -378,24 +329,17 @@ export const CommentEngine = {
         }
         
         const newCard = document.getElementById(`comment_${tempId}`);
-        if(newCard) {
-            newCard.classList.add('optimistic');
-            newCard.querySelector('.comment-time').innerText = "Sending...";
-        }
-        
+        if(newCard) { newCard.classList.add('optimistic'); newCard.querySelector('.comment-time').innerText = "Sending..."; }
         return tempId; 
     },
 
     timeAgo: (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const seconds = Math.round((now - date) / 1000);
+        const seconds = Math.round((new Date() - new Date(dateString)) / 1000);
         if (seconds < 60) return "Just now";
         const minutes = Math.round(seconds / 60);
         if (minutes < 60) return `${minutes}m ago`;
         const hours = Math.round(minutes / 60);
         if (hours < 24) return `${hours}h ago`;
-        const days = Math.round(hours / 24);
-        return `${days}d ago`;
+        return `${Math.round(hours / 24)}d ago`;
     }
 };
