@@ -9,7 +9,7 @@ export const CommentEngine = {
     isLoading: false,
     currentLecture: null,
 
-    // 1. UI Render
+    // 1. UI Render (With YouTube style Minimal Skeletons)
     renderUI: (containerElement, lectureId) => {
         CommentEngine.currentPage = 1;
         CommentEngine.hasMore = true;
@@ -22,13 +22,20 @@ export const CommentEngine = {
             </div>
             
             <div id="comments-container" style="padding-bottom: 20px; min-height: 200px;">
-                <div class="comment-card" style="opacity:0.5;"><div class="user-avatar" style="background:#e2e8f0; color:transparent;">-</div><div class="comment-body" style="background:#f1f5f9; min-height:60px; border-radius:12px; width:100%;"></div></div>
+                <div class="comment-card" style="opacity:0.6;">
+                    <div class="skeleton" style="width:36px; height:36px; border-radius:50%;"></div>
+                    <div class="comment-body">
+                        <div class="skeleton" style="height:12px; width:120px; border-radius:4px; margin-bottom:8px;"></div>
+                        <div class="skeleton" style="height:14px; width:90%; border-radius:4px; margin-bottom:4px;"></div>
+                        <div class="skeleton" style="height:14px; width:60%; border-radius:4px;"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="comment-input-area">
                 <div id="comment-error" style="color: #ef4444; font-size: 0.75rem; font-weight: 600; padding: 0 10px 8px; display: none; transition: 0.3s;"></div>
                 <div style="display: flex; gap: 10px; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 25px; padding: 5px 5px 5px 15px;">
-                    <input type="text" id="comment-input" placeholder="Post a query... (max 500 chars)" autocomplete="off" maxlength="500">
+                    <input type="text" id="comment-input" placeholder="Add a query..." autocomplete="off" maxlength="500">
                     <button id="send-comment-btn" class="send-btn" disabled><i class="fas fa-paper-plane"></i></button>
                 </div>
                 <div style="text-align: right; font-size: 0.65rem; color: #94a3b8; margin-top: 4px; padding-right: 15px;" id="char-counter">0/500</div>
@@ -42,45 +49,45 @@ export const CommentEngine = {
         }, 50);
     },
 
-    // 2. HTML Generator (With Like & Report Buttons)
+    // 2. HTML Generator (YouTube Style - Clean & Transparent)
     generateCommentHTML: (comment, isReply = false) => {
         const userInit = comment.user_name.charAt(0).toUpperCase();
         const timeString = CommentEngine.timeAgo(comment.created_at);
         
-        const marginStyle = isReply ? "margin-left: 2.5rem; margin-top: 0.8rem; background: #f8fafc; border: 1px solid #f1f5f9; box-shadow: none;" : "";
-        const avatarStyle = isReply ? "width: 28px; height: 28px; font-size: 0.75rem;" : "";
+        // 🚨 YOUTUBE INDENTATION: Reply hoga toh sirf left se khiskega, koi dabba/border nahi aayega
+        const marginStyle = isReply ? "margin-left: 3.5rem; margin-top: 12px; margin-bottom: 12px;" : "";
+        const avatarStyle = isReply ? "width: 26px; height: 26px; font-size: 0.75rem;" : "";
         
-        // 🚨 NAYA FIX: Button Color dynamically load hoga basis is_liked_by_user
-        const likeColor = comment.is_liked_by_user ? 'var(--accent)' : '#94a3b8';
+        const likeColor = comment.is_liked_by_user ? 'var(--primary)' : '#64748b';
 
         return `
             <div class="comment-card" id="comment_${comment.id}" style="${marginStyle}">
                 <div class="user-avatar" style="${avatarStyle}">${userInit}</div>
-                <div class="comment-body" style="width: 100%;">
+                <div class="comment-body">
                     <div class="comment-user">${comment.user_name} <span class="comment-time">${timeString}</span></div>
                     <div class="comment-text">${comment.text}</div>
                     
-                    <div class="comment-actions" style="display: flex; gap: 15px; margin-top: 8px; align-items: center;">
-                        <button class="like-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: ${likeColor}; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 4px; transition: 0.2s;">
+                    <div class="comment-actions" style="display: flex; gap: 18px; align-items: center;">
+                        <button class="like-action-btn" data-id="${comment.id}" style="font-size: 0.8rem; color: ${likeColor}; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 5px; transition: 0.2s;">
                             <i class="fas fa-thumbs-up pointer-events-none"></i> <span class="like-count pointer-events-none" style="font-weight:600;">${comment.like_count || 0}</span>
                         </button>
                         
                         ${!isReply ? `
-                            <button class="reply-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: #94a3b8; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 4px; font-weight: 600; transition: 0.2s;">
+                            <button class="reply-action-btn" data-id="${comment.id}" style="font-size: 0.8rem; color: #64748b; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 5px; font-weight: 600; transition: 0.2s;">
                                 <i class="fas fa-reply pointer-events-none"></i> Reply
                             </button>
                         ` : ''}
 
-                        <button class="report-action-btn" data-id="${comment.id}" title="Report to Admin" style="font-size: 0.75rem; color: #cbd5e1; background: none; border: none; cursor: pointer; padding: 0; margin-left: auto; transition: 0.2s;">
+                        <button class="report-action-btn" data-id="${comment.id}" title="Report to Admin" style="font-size: 0.8rem; color: #cbd5e1; background: none; border: none; cursor: pointer; padding: 0; margin-left: auto; transition: 0.2s;">
                             <i class="fas fa-flag pointer-events-none"></i>
                         </button>
                     </div>
                     
                     ${!isReply ? `
-                        <div id="reply-box-${comment.id}" style="display:none; margin-top: 10px;">
+                        <div id="reply-box-${comment.id}" style="display:none; margin-top: 12px; padding-bottom: 8px;">
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="reply-input-${comment.id}" style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:6px 12px; font-size:0.8rem; outline:none;" placeholder="Write a reply...">
-                                <button class="send-reply-btn send-btn" data-id="${comment.id}" style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-paper-plane pointer-events-none"></i></button>
+                                <input type="text" id="reply-input-${comment.id}" style="flex:1; background: transparent; border-bottom: 1px solid var(--text-main); padding:6px 2px; font-size:0.85rem; outline:none;" placeholder="Write a reply...">
+                                <button class="send-reply-btn" data-id="${comment.id}" style="background: none; color: var(--primary); border: none; font-weight: 700; cursor: pointer; padding: 0 10px;">Reply</button>
                             </div>
                         </div>
                         <div class="replies-container" id="replies-${comment.id}"></div>
@@ -150,7 +157,6 @@ export const CommentEngine = {
             btn.disabled = text.trim().length === 0;
         });
 
-        // 🚀 POST MAIN COMMENT
         btn.addEventListener('click', async () => {
             const text = input.value.trim();
             if (text.length === 0) return; 
@@ -194,23 +200,21 @@ export const CommentEngine = {
             }
         });
 
-        // 🚀 INTERACTIVE CATCHER (Likes, Replies, Reports)
         document.getElementById('comments-container').addEventListener('click', async (e) => {
             
-            // 1. LIKE BUTTON CLICK (Optimistic UI)
+            // LIKE BUTTON
             const likeBtn = e.target.closest('.like-action-btn');
             if (likeBtn) {
                 const id = likeBtn.getAttribute('data-id');
                 const countSpan = likeBtn.querySelector('.like-count');
                 let count = parseInt(countSpan.innerText) || 0;
                 
-                // Toggle Color & Count instantly!
-                const isLiked = likeBtn.style.color === 'var(--accent)' || likeBtn.style.color === 'rgb(37, 99, 235)';
+                const isLiked = likeBtn.style.color === 'var(--primary)' || likeBtn.style.color === 'rgb(79, 70, 229)';
                 if (isLiked) {
-                    likeBtn.style.color = '#94a3b8';
+                    likeBtn.style.color = '#64748b';
                     countSpan.innerText = count > 0 ? count - 1 : 0;
                 } else {
-                    likeBtn.style.color = 'var(--accent)';
+                    likeBtn.style.color = 'var(--primary)';
                     countSpan.innerText = count + 1;
                 }
 
@@ -222,22 +226,19 @@ export const CommentEngine = {
                         body: JSON.stringify({ commentId: id })
                     });
                 } catch (err) {
-                    // API Fail hui toh reverse kar do
-                    likeBtn.style.color = isLiked ? 'var(--accent)' : '#94a3b8';
+                    likeBtn.style.color = isLiked ? 'var(--primary)' : '#64748b';
                     countSpan.innerText = count;
                 }
             }
 
-            // 2. REPORT BUTTON CLICK
+            // REPORT BUTTON
             const reportBtn = e.target.closest('.report-action-btn');
             if (reportBtn) {
                 const id = reportBtn.getAttribute('data-id');
-                // Agar already laal (red) hai toh dobara API mat bhejo
                 if (reportBtn.style.color === 'rgb(239, 68, 68)' || reportBtn.style.color === '#ef4444') return; 
 
-                if(confirm("Flag this comment for admin review? (Only report inappropriate content)")) {
-                    reportBtn.style.color = '#ef4444'; // Turant Laal kar do
-                    
+                if(confirm("Flag this comment for admin review?")) {
+                    reportBtn.style.color = '#ef4444'; 
                     try {
                         const token = await auth.currentUser.getIdToken();
                         await fetch('https://vidyaplus-backend.vercel.app/api/comments/report', {
@@ -247,12 +248,12 @@ export const CommentEngine = {
                         });
                         alert("Report registered successfully.");
                     } catch (err) {
-                        reportBtn.style.color = '#cbd5e1'; // Fail ho jaye toh revert kar do
+                        reportBtn.style.color = '#cbd5e1'; 
                     }
                 }
             }
 
-            // 3. REPLY BOX TOGGLE
+            // REPLY TOGGLE
             const replyActionBtn = e.target.closest('.reply-action-btn');
             if (replyActionBtn) {
                 const id = replyActionBtn.getAttribute('data-id');
@@ -260,7 +261,7 @@ export const CommentEngine = {
                 box.style.display = box.style.display === 'none' ? 'block' : 'none';
             }
 
-            // 4. POST REPLY BUTTON
+            // SEND REPLY
             const sendReplyBtn = e.target.closest('.send-reply-btn');
             if (sendReplyBtn) {
                 const parentId = sendReplyBtn.getAttribute('data-id');
@@ -312,7 +313,7 @@ export const CommentEngine = {
             created_at: new Date().toISOString(),
             text: text,
             like_count: 0,
-            is_liked_by_user: false // 🚨 NAYA FIX: Taaki locally naya comment default grey dikhe
+            is_liked_by_user: false 
         };
 
         const html = CommentEngine.generateCommentHTML(fakeComment, !!parentId);
@@ -359,3 +360,4 @@ export const CommentEngine = {
         return `${days} day${days > 1 ? 's' : ''} ago`;
     }
 };
+        
