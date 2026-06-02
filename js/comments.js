@@ -50,6 +50,9 @@ export const CommentEngine = {
         const marginStyle = isReply ? "margin-left: 2.5rem; margin-top: 0.8rem; background: #f8fafc; border: 1px solid #f1f5f9; box-shadow: none;" : "";
         const avatarStyle = isReply ? "width: 28px; height: 28px; font-size: 0.75rem;" : "";
         
+        // 🚨 NAYA FIX: Button Color dynamically load hoga basis is_liked_by_user
+        const likeColor = comment.is_liked_by_user ? 'var(--accent)' : '#94a3b8';
+
         return `
             <div class="comment-card" id="comment_${comment.id}" style="${marginStyle}">
                 <div class="user-avatar" style="${avatarStyle}">${userInit}</div>
@@ -58,7 +61,7 @@ export const CommentEngine = {
                     <div class="comment-text">${comment.text}</div>
                     
                     <div class="comment-actions" style="display: flex; gap: 15px; margin-top: 8px; align-items: center;">
-                        <button class="like-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: #94a3b8; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 4px; transition: 0.2s;">
+                        <button class="like-action-btn" data-id="${comment.id}" style="font-size: 0.75rem; color: ${likeColor}; background: none; border: none; cursor: pointer; padding: 0; display:flex; align-items:center; gap: 4px; transition: 0.2s;">
                             <i class="fas fa-thumbs-up pointer-events-none"></i> <span class="like-count pointer-events-none" style="font-weight:600;">${comment.like_count || 0}</span>
                         </button>
                         
@@ -308,7 +311,8 @@ export const CommentEngine = {
             user_name: userName,
             created_at: new Date().toISOString(),
             text: text,
-            like_count: 0
+            like_count: 0,
+            is_liked_by_user: false // 🚨 NAYA FIX: Taaki locally naya comment default grey dikhe
         };
 
         const html = CommentEngine.generateCommentHTML(fakeComment, !!parentId);
