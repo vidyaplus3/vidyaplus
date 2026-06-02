@@ -5,12 +5,6 @@
 .tab-pill.active { background: var(--navy); color: white; border-color: var(--navy); }
 .tab-content-area { flex: 1; overflow-y: auto; padding: 20px; }
 
-.comment-card { display: flex; gap: 12px; margin-bottom: 20px; }
-.user-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 0.8rem; }
-.comment-body { flex: 1; background: var(--bg-color); padding: 12px; border-radius: 12px; }
-.comment-user { font-size: 0.85rem; font-weight: 800; margin-bottom: 4px; }
-.comment-text { font-size: 0.9rem; color: var(--text-main); line-height: 1.4; }
-
 .pdf-overlay { display: none; position: fixed; inset: 0; background: #0F172A; z-index: 10001; flex-direction: column; }
 .pdf-overlay.active { display: flex; }
 .pdf-header { background: #1E293B; color: white; padding: 12px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -33,8 +27,17 @@
 }
 
 /* ==========================================
-   PREMIUM COMMENT SECTION STYLING
+   🚨 YOUTUBE STYLE MINIMAL COMMENTS
    ========================================== */
+.comment-card { display: flex; gap: 14px; margin-bottom: 24px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+
+/* 🚨 No Background, No Dabbe (Box) */
+.comment-body { flex: 1; background: transparent; padding: 0; border-radius: 0; }
+.comment-user { font-size: 0.85rem; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; color: var(--text-main); }
+.comment-time { font-size: 0.75rem; font-weight: 500; color: #64748b; margin-left: 8px; font-family: monospace; }
+.comment-text { font-size: 0.95rem; color: var(--text-main); line-height: 1.5; margin-bottom: 6px; }
+
 /* Sticky Input Area */
 .comment-input-area {
     position: sticky;
@@ -80,15 +83,4 @@
 .send-btn:not(:disabled):active { transform: scale(0.9); }
 
 /* Optimistic UI Ghosting */
-.comment-card.optimistic {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* Timestamp Styling */
-.comment-time {
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: #94a3b8;
-    margin-left: 8px;
-}
+.comment-card.optimistic { opacity: 0.6; pointer-events: none; }
