@@ -249,10 +249,33 @@ window.renderExtraMaterials = (containerId, items, emptyMsg) => {
     });
 };
 
+// ==========================================
+// 🚨 NAYA: PANEL OPEN & CLOSE LOGIC (Advanced UI)
+// ==========================================
+window.closeClassroomPanel = () => {
+    const interactionArea = document.querySelector('.interaction-area');
+    const container = document.getElementById('classroom-mode');
+    
+    // Panel ko wapas niche slide karo aur desktop grid harao
+    if (interactionArea) interactionArea.classList.remove('panel-open');
+    if (container) container.classList.remove('desktop-split');
+    
+    // Saare buttons ko wapas normal (inactive) kardo
+    document.querySelectorAll('.tab-pill').forEach(btn => btn.classList.remove('active'));
+};
+
 window.switchClassroomTab = (type) => {
     const content = document.getElementById('classroom-dynamic-content');
+    const interactionArea = document.querySelector('.interaction-area');
+    const container = document.getElementById('classroom-mode');
+    
     if(!content) return;
     
+    // 🚨 1. OPEN ANIMATION TRIGGER
+    if (interactionArea) interactionArea.classList.add('panel-open');
+    if (container) container.classList.add('desktop-split');
+    
+    // 2. Active Tab Styling
     const tabComm = document.getElementById('tab-comments'); 
     const tabNotes = document.getElementById('tab-notes'); 
     const targetTab = document.getElementById('tab-' + type);
@@ -261,28 +284,38 @@ window.switchClassroomTab = (type) => {
     if(tabNotes) tabNotes.classList.remove('active'); 
     if(targetTab) targetTab.classList.add('active');
     
+    // 3. Dynamic Header with "X" (Close) Button
+    let headerTitle = type === 'notes' ? 'Class Notes' : 'Live Discussion';
+    
+    content.innerHTML = `
+        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid #f1f5f9; background:#fff; flex-shrink:0;">
+            <div style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">${headerTitle}</div>
+            <button onclick="closeClassroomPanel()" style="background:#f1f5f9; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; color:#475569; display:flex; justify-content:center; align-items:center; transition:0.2s;"><i class="fas fa-times" style="font-size:1.1rem;"></i></button>
+        </div>
+        <div id="dynamic-inner-wrapper" style="flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; background:#fff;"></div>
+    `;
+    
+    const innerContent = document.getElementById('dynamic-inner-wrapper');
+
+    // 4. Load Content inside the new Panel
     if (type === 'comments') {
-        // 🚨 THE FIX: Stable ID Logic (Refresh karne par change nahi hoga)
-        // Hum AppState se active chapter ka naam lenge (e.g., "Electromagnetism")
         let stableLectureId = "general_discussion";
-        
         if (AppState && AppState.currentChapter) {
-            // Spaces ko underscore (_) me badal do taaki ID database friendly rahe
             stableLectureId = "lec_" + AppState.currentChapter.replace(/\s+/g, '_');
         }
-        
-        // 🚀 SMART CALL: Yahan humne naye Comment Engine ko finally kaam saunp diya!
-        CommentEngine.renderUI(content, stableLectureId);
+        CommentEngine.renderUI(innerContent, stableLectureId);
 
     } else if (type === 'notes') {
-        // Tumhara Notes wala purana code exactly same rahega
         const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
         if (pdf && pdf !== 'undefined' && pdf !== '') {
             let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes"; let safePdf = pdf.replace(/['"\\]/g, "");
-            content.innerHTML = `<div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div><div class="list-card" style="background: #fdf2f2; border-color: #fecaca;"><div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div><div class="card-info"><div class="card-title">Class_Notes.pdf</div><div class="card-sub">Select to view</div></div><button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button></div>`;
-        } else { content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`; }
+            innerContent.innerHTML = `<div style="padding: 20px;"><div class="list-card" style="background: #fdf2f2; border-color: #fecaca; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 15px; display: flex; align-items: center; border-radius: 12px; gap: 15px;"><div class="card-icon" style="background: #ef4444; color: white; width: 45px; height: 45px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem;"><i class="fas fa-file-pdf"></i></div><div class="card-info" style="flex: 1;"><div class="card-title" style="font-weight: 800; font-size: 1rem; color: #0f172a;">Class_Notes.pdf</div><div class="card-sub" style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Official Material</div></div><button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 10px 20px; color:white; border-radius:8px; font-weight:700; cursor:pointer;">Access</button></div></div>`;
+        } else { 
+            innerContent.innerHTML = `<div class="empty-box" style="margin-top: 40px; text-align: center;"><i class="fas fa-file-excel" style="font-size: 3.5rem; color: #cbd5e1; margin-bottom: 15px;"></i><h4 style="color: #64748b; font-weight: 600;">No notes attached.</h4></div>`; 
+        }
     }
 };
+
 
 
 // ==========================================
