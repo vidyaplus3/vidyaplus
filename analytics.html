@@ -153,7 +153,8 @@
                     let dataToRender = window.allAttemptsData.find(a => a.id === currentAttemptId);
                     if(!dataToRender) dataToRender = window.allAttemptsData[window.allAttemptsData.length - 1];
                     
-                    renderDashboard(dataToRender);
+                    // 🚨 THE FIX: Bridge ke through data ko parse karke bhej rahe hain
+                    renderDashboard(processBackendData(dataToRender));
                 } else {
                     alert("No attempt records found for this test!");
                 }
@@ -183,9 +184,75 @@
             currentAttemptId = newAttemptId;
             const dataToRender = window.allAttemptsData.find(a => a.id === newAttemptId);
             if(dataToRender) {
-                renderDashboard(dataToRender);
+                // 🚨 THE FIX AGAIN
+                renderDashboard(processBackendData(dataToRender));
             }
         };
+
+        // ==========================================
+        // 🚨 NAYA FUNCTION: THE DATA BRIDGE
+        // ==========================================
+        function processBackendData(rawData) {
+            const data = JSON.parse(JSON.stringify(rawData)); // Deep copy
+            
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unattemptedCount = 0;
+            let totalNegativeMarks = 0;
+            let totalTimeSpentMs = 0;
+            const telemetryData = {};
+            
+            // Loop through raw answers saved by the new backend
+            if (data.answers) {
+                Object.keys(data.answers).forEach(qId => {
+                    const ans = data.answers[qId];
+                    
+                    if (ans.isCorrect) {
+                        correctCount++;
+                    } else if (ans.userAnswer && ans.userAnswer.length > 0) {
+                        incorrectCount++;
+                        if (ans.marksAwarded < 0) totalNegativeMarks += Math.abs(ans.marksAwarded);
+                    } else {
+                        unattemptedCount++;
+                    }
+
+                    totalTimeSpentMs += (ans.timeSpent || 0);
+
+                    // Reconstruct telemetry for the Ghost Timeline
+                    telemetryData[qId] = {
+                        timeSpent: ans.timeSpent || 0,
+                        visits: 1, 
+                        status: ans.status || 'not-visited',
+                        actions: [] 
+                    };
+                });
+            }
+
+            // Fill all the variables that the old UI was expecting
+            data.correctCount = correctCount;
+            data.incorrectCount = incorrectCount;
+            data.unattemptedCount = unattemptedCount;
+            data.totalNegativeMarks = totalNegativeMarks;
+            data.timeSpentSeconds = data.timeSpent || 0; // Total time backend sends in seconds
+            
+            const attempted = correctCount + incorrectCount;
+            data.overallAccuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
+            
+            data.detailedTelemetry = telemetryData;
+            data.systemEvents = data.telemetry || []; 
+
+            // Create a fallback "Overall Test" category since backend no longer splits by subject
+            data.subjectWise = {
+                "Overall Test": {
+                    correct: correctCount,
+                    incorrect: incorrectCount,
+                    score: data.score || 0,
+                    timeSpent: totalTimeSpentMs
+                }
+            };
+
+            return data;
+        }
 
         function renderDashboard(data) {
             document.getElementById('loader').style.display = 'none';
