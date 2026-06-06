@@ -220,7 +220,6 @@
                 let attempted = sData.correct + sData.incorrect;
                 let acc = attempted > 0 ? ((sData.correct / attempted) * 100).toFixed(1) : 0;
                 
-                // ⚡ FIXED: Milliseconds to Seconds Math Fix for Table
                 let totalSecsForSub = Math.floor((sData.timeSpent || 0) / 1000);
                 let tMins = Math.floor(totalSecsForSub / 60);
                 let tSecs = totalSecsForSub % 60;
@@ -258,7 +257,6 @@
             window.activeCharts.donut.render();
 
             // 3. Time Bar Chart
-            // ⚡ FIXED: Milliseconds to Seconds fix for Graph
             window.activeCharts.time = new ApexCharts(document.querySelector("#time-chart"), {
                 series: [{ name: 'Time Spent (Seconds)', data: subjects.map(s => Math.floor((data.subjectWise[s].timeSpent || 0) / 1000)) }],
                 chart: { type: 'bar', height: 300, toolbar: { show: false } },
@@ -271,7 +269,13 @@
             // 👻 JADOO: GHOST TIMELINE & PACING MATRIX
             // ==========================================
             const telemetry = data.detailedTelemetry || {};
-            const qIds = Object.keys(telemetry);
+            
+            // 🌟 THE FIX: Firebase ke A-Z sorting (q1, q10, q2) ko Pure Numerical (1, 2, 3...10) me sort karna
+            const qIds = Object.keys(telemetry).sort((a, b) => {
+                const numA = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+                const numB = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+                return numA - numB;
+            });
             
             const timelineContainer = document.getElementById('ghost-timeline');
             timelineContainer.innerHTML = '';
