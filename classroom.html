@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classroom Hub | VidyaPlus Secure</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/classroom.css">
+    <link rel="stylesheet" href="css/player.css">
+</head>
+<body class="classroom-production-body">
+
+    <header class="classroom-secure-header">
+        <div class="nav-left-group">
+            <button id="close-classroom-btn" class="back-action-circle" aria-label="Exit Classroom">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="title-meta-block">
+                <h1 id="classroom-dynamic-title" class="truncate-text">Loading Lecture...</h1>
+                <span id="classroom-subject-badge" class="secure-badge">SYNCING CONTEXT</span>
+            </div>
+        </div>
+        <div class="nav-right-group">
+            <div class="security-status-indicator">
+                <i class="fas fa-shield-alt text-emerald-500"></i>
+                <span class="desktop-only">DRM Protected Stream</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="classroom-split-viewport">
+        
+        <section class="video-playback-container" id="video-canvas-box">
+            <div class="video-aspect-ratio-shield">
+                
+                <div id="player-canvas-wrapper" class="canvas-blackout">
+                    <div id="yt-player" class="player-instance"></div>
+                    </div>
+                
+                <div class="interactive-protection-shield" id="playback-shield"></div>
+                <div class="dynamic-watermark-overlay" id="secure-watermark-text">VidyaPlus Security Active</div>
+
+                <div class="gesture-indicator indicator-left" id="ripple-left"><i class="fas fa-undo"></i> 10s</div>
+                <div class="gesture-indicator indicator-right" id="ripple-right"><i class="fas fa-redo"></i> 10s</div>
+            </div>
+
+            <div class="custom-playback-dashboard" id="custom-controls-panel">
+                <div class="controls-timeline-row">
+                    <span class="playback-timestamp" id="time-current">0:00</span>
+                    <div class="timeline-slider-bg" id="progress-scrub-bar">
+                        <div class="timeline-progress-fill" id="progress-fill"></div>
+                        <div class="timeline-hover-tooltip" id="progress-tooltip">0:00</div>
+                    </div>
+                    <span class="playback-timestamp" id="time-duration">0:00</span>
+                </div>
+
+                <div class="controls-action-row">
+                    <div class="action-cluster-left">
+                        <button class="player-ctrl-icon-btn" id="play-pause-toggle"><i class="fas fa-play" id="play-icon"></i></button>
+                        <button class="player-ctrl-icon-btn" id="skip-back-btn"><i class="fas fa-undo"></i></button>
+                        <button class="player-ctrl-icon-btn" id="skip-forward-btn"><i class="fas fa-redo"></i></button>
+                        
+                        <div class="volume-integration-box">
+                            <button class="player-ctrl-icon-btn" id="mute-toggle"><i class="fas fa-volume-up" id="mute-icon"></i></button>
+                            <input type="range" class="volume-range-slider" id="volume-slider" min="0" max="1" step="0.05" value="0.8">
+                        </div>
+                    </div>
+
+                    <div class="action-cluster-right">
+                        <button class="player-ctrl-icon-btn" id="settings-menu-trigger"><i class="fas fa-cog"></i></button>
+                        <button class="player-ctrl-icon-btn" id="fullscreen-toggle"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+
+                <div class="floating-settings-card" id="playback-settings-card">
+                    <div class="settings-option-row" id="trigger-speed-sub">
+                        <span>Playback Speed</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-sub-panel" id="speed-selection-box">
+                        <button class="speed-option-node" data-speed="0.75">0.75x</button>
+                        <button class="speed-option-node active-node" data-speed="1">Normal</button>
+                        <button class="speed-option-node" data-speed="1.25">1.25x</button>
+                        <button class="speed-option-node" data-speed="1.5">1.5x</button>
+                        <button class="speed-option-node" data-speed="2">2x</button>
+                    </div>
+
+                    <div class="settings-option-row" id="trigger-quality-sub">
+                        <div>Quality <span class="active-quality-tag" id="current-quality-badge">AUTO</span></div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-sub-panel" id="quality-selection-box">
+                        <button class="quality-option-node active-node" data-quality="auto">Auto</button>
+                        <button class="quality-option-node" data-quality="1080">1080p</button>
+                        <button class="quality-option-node" data-quality="720">720p</button>
+                        <button class="quality-option-node" data-quality="480">480p</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="workspace-interaction-hub">
+            <nav class="interaction-tabs-navigation" id="classroom-tabs-bar">
+                <button class="tab-navigation-link active" data-target="comments">
+                    <i class="fas fa-comments"></i> <span>Discussion</span>
+                </button>
+                <button class="tab-navigation-link" data-target="notes">
+                    <i class="fas fa-file-pdf"></i> <span>Notes</span>
+                </button>
+                <button class="tab-navigation-link" data-target="practice">
+                    <i class="fas fa-tasks"></i> <span>Practice</span>
+                </button>
+            </nav>
+            
+            <div class="dynamic-content-viewport" id="classroom-dynamic-viewport">
+                </div>
+        </section>
+
+    </main>
+
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script type="module" src="js/classroom-boot.js"></script>
+</body>
+  </html>
+
