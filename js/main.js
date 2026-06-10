@@ -3,13 +3,7 @@ import { db, auth } from './firebase-init.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initAuth, AppState } from './auth.js'; 
 import { UI } from './ui.js';
-import { VideoPlayer } from './player/index.js';
 import { PDFViewer } from './pdf.js';
-import { CommentEngine } from './comments.js'; // 🚨 NAYA IMPORT
-
-
-// 🚨 PRECAUTION: Video tracker file missing hone par system crash rokne ke liye
-// import './video-tracker.js'; 
 
 // ==========================================
 // 1. CORE BUSINESS LOGIC (Secure Functions)
@@ -24,7 +18,6 @@ async function switchBatch(batchId) {
         localStorage.setItem('vp_batch', batchId);
         AppState.currentBatchId = batchId;
         
-        // 🎯 FIX: Hamesha default 'dashboard' khulega batch switch hone par
         let initialScreen = window.location.hash.replace('#', '');
         if (!initialScreen) {
             initialScreen = 'dashboard'; 
@@ -101,22 +94,28 @@ window.closeModals = UI.closeModals;
 window.toggleDropdown = UI.toggleDropdown;
 window.switchTabUI = UI.switchTabUI;
 
-window.togglePlay = VideoPlayer.togglePlay;
-window.toggleMute = VideoPlayer.toggleMute;
-window.toggleFullScreen = VideoPlayer.toggleFullScreen;
-window.skipVideo = VideoPlayer.skipVideo;
-window.setSpeed = VideoPlayer.setSpeed;
-window.closeClassroom = VideoPlayer.closeVideo;
+// 🚨 UPDATED ROUTER: Send traffic securely to standalone classroom
 window.openVideo = (vidUrl, title, pdfUrl) => {
-    VideoPlayer.openVideo(vidUrl, title, pdfUrl); 
-    window.switchClassroomTab('comments'); 
+    if (!vidUrl) {
+        alert("Playback URL is invalid.");
+        return;
+    }
+
+    const batchId = AppState.currentBatchId || localStorage.getItem('vp_batch') || '';
+    const chapter = AppState.currentChapter || localStorage.getItem('vp_chapter') || 'General';
+    const lectureId = btoa(vidUrl).substring(0, 12).replace(/[/+=]/g, ''); 
+
+    const secureQueryParams = new URLSearchParams({
+        batchId: batchId,
+        chapter: chapter,
+        lectureId: lectureId,
+        v: vidUrl,
+        title: title,
+        pdf: pdfUrl || ''
+    });
+
+    window.location.href = `classroom.html?${secureQueryParams.toString()}`;
 };
-window.showUI = VideoPlayer.showUI;
-window.handleShieldClick = VideoPlayer.handleShieldClick;
-window.toggleSettings = VideoPlayer.toggleSettings;
-window.startDrag = VideoPlayer.startDrag;
-window.stopDrag = VideoPlayer.stopDrag;
-window.doDrag = VideoPlayer.doDrag;
 
 window.openPDF = PDFViewer.openPDF;
 window.closePDF = PDFViewer.closePDF;
@@ -150,18 +149,12 @@ window.addEventListener('hashchange', () => {
 
 window.addEventListener('popstate', (e) => {
     const pdfOverlay = document.getElementById('pdf-mode');
-    const classOverlay = document.getElementById('classroom-mode');
     if (pdfOverlay && pdfOverlay.classList.contains('active')) {
         pdfOverlay.classList.remove('active');
         let iframe = document.getElementById('pdf-iframe');
         if (iframe) iframe.remove();
         if (e.state && e.state.pdfOpen) window.history.back();
-        } else if (classOverlay && classOverlay.classList.contains('active')) {
-        if (!e.state || !e.state.videoOpen) {
-            VideoPlayer.closeVideo(); // 🚨 Bas ab hum apne naye facade pattern function ko call karenge
-        }
     }
-    
 });
 
 window.navigate = (screenId, payload = {}) => {
@@ -249,44 +242,9 @@ window.renderExtraMaterials = (containerId, items, emptyMsg) => {
     });
 };
 
-window.switchClassroomTab = (type) => {
-    const content = document.getElementById('classroom-dynamic-content');
-    if(!content) return;
-    
-    const tabComm = document.getElementById('tab-comments'); 
-    const tabNotes = document.getElementById('tab-notes'); 
-    const targetTab = document.getElementById('tab-' + type);
-    
-    if(tabComm) tabComm.classList.remove('active'); 
-    if(tabNotes) tabNotes.classList.remove('active'); 
-    if(targetTab) targetTab.classList.add('active');
-    
-    if (type === 'comments') {
-        // 🚨 THE FIX: Stable ID Logic (Refresh karne par change nahi hoga)
-        // Hum AppState se active chapter ka naam lenge (e.g., "Electromagnetism")
-        let stableLectureId = "general_discussion";
-        
-        if (AppState && AppState.currentChapter) {
-            // Spaces ko underscore (_) me badal do taaki ID database friendly rahe
-            stableLectureId = "lec_" + AppState.currentChapter.replace(/\s+/g, '_');
-        }
-        
-        // 🚀 SMART CALL: Yahan humne naye Comment Engine ko finally kaam saunp diya!
-        CommentEngine.renderUI(content, stableLectureId);
-
-    } else if (type === 'notes') {
-        // Tumhara Notes wala purana code exactly same rahega
-        const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
-        if (pdf && pdf !== 'undefined' && pdf !== '') {
-            let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\]/g, "") : "Study Notes"; let safePdf = pdf.replace(/['"\\]/g, "");
-            content.innerHTML = `<div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div><div class="list-card" style="background: #fdf2f2; border-color: #fecaca;"><div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div><div class="card-info"><div class="card-title">Class_Notes.pdf</div><div class="card-sub">Select to view</div></div><button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button></div>`;
-        } else { content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`; }
-    }
-};
-
 
 // ==========================================
-// 5. TEST PORTAL ENGINE (100% RESTORED)
+// 5. TEST PORTAL ENGINE
 // ==========================================
 window.testsDataCache = {};
 window.userAttemptedQuizzes = {}; 
@@ -380,6 +338,7 @@ window.renderTestsList = async (type = 'live') => {
         }
         return;
     }
+    
     if (type === 'attempted') {
         const attemptedIds = Object.keys(attemptedMap);
         if (attemptedIds.length === 0) {
@@ -461,7 +420,6 @@ window.renderTestsList = async (type = 'live') => {
 
 window.currentActiveTestId = null;
 
-// 🚨 FIX: Yeh pura block wapas daal diya hai taaki UI par instructions load ho sakein.
 window.openInstructions = (testId) => {
     const test = window.testsDataCache[testId];
     if(!test) return;
@@ -532,11 +490,9 @@ const setupDropdown = async (batchIds) => {
 };
 
 try {
-    if(VideoPlayer && VideoPlayer.initAPI) VideoPlayer.initAPI();
     initAuth((batches) => {
         setupDropdown(batches);
     });
 } catch(err) {
-    console.error("Auth/Video Init Error:", err);
+    console.error("Auth Init Error:", err);
 }
-
