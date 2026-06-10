@@ -1,0 +1,132 @@
+/* css/classroom-production.css */
+:root {
+    --primary: #1d4ed8; 
+    --navy: #0f172a; 
+    --bg-color: #f1f5f9; 
+    --surface: #ffffff; 
+    --text-main: #0f172a; 
+    --text-light: #64748b; 
+    --border: #e2e8f0;
+}
+
+body.classroom-production-body {
+    margin: 0; padding: 0;
+    background: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh;
+    overflow: hidden;
+}
+
+/* ==========================================
+   1. SECURE HEADER LOGIC
+   ========================================== */
+.classroom-secure-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px; background: var(--surface); 
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+.nav-left-group { display: flex; align-items: center; gap: 15px; min-width: 0; flex: 1; }
+.back-action-circle {
+    background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main);
+    width: 38px; height: 38px; border-radius: 50%; cursor: pointer; flex-shrink: 0;
+    display: flex; justify-content: center; align-items: center; transition: 0.2s;
+}
+.back-action-circle:hover { background: #e2e8f0; }
+.title-meta-block { display: flex; flex-direction: column; overflow: hidden; }
+.truncate-text { margin: 0; font-size: 1.1rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--navy); }
+.secure-badge { font-size: 0.65rem; background: #e0e7ff; color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: 800; width: max-content; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.nav-right-group { flex-shrink: 0; }
+.security-status-indicator { font-size: 0.75rem; font-weight: 700; color: #10b981; background: #d1fae5; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+
+/* ==========================================
+   2. DYNAMIC SPLIT VIEWPORT
+   ========================================== */
+.classroom-split-viewport { display: flex; flex: 1; flex-direction: column; overflow: hidden; }
+
+/* LEFT WING: VIDEO CANVAS */
+.video-playback-container { position: relative; background: #000; display: flex; flex-direction: column; width: 100%; flex-shrink: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50;}
+.video-aspect-ratio-shield { position: relative; width: 100%; padding-top: 56.25%; background: #000; overflow: hidden; }
+.canvas-blackout { position: absolute; inset: 0; width: 100%; height: 100%; }
+.player-instance { width: 100%; height: 100%; border: none; }
+.interactive-protection-shield { position: absolute; inset: 0; z-index: 10; cursor: pointer; }
+.dynamic-watermark-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-10deg); color: rgba(255,255,255,0.15); font-weight: 900; font-size: clamp(1rem, 3vw, 2.5rem); z-index: 5; pointer-events: none; user-select: none; white-space: nowrap; }
+
+/* Gestures & Indicators */
+.gesture-indicator { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); border-radius: 50%; width: 60px; height: 60px; color: white; display: none; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; pointer-events: none; z-index: 101; flex-direction: column; gap: 2px; }
+.gesture-indicator i { font-size: 1rem; }
+.indicator-left { left: 15%; animation: rippleLeft 0.4s ease-out; }
+.indicator-right { right: 15%; animation: rippleRight 0.4s ease-out; }
+@keyframes rippleLeft { 0% { transform: translateY(-50%) scale(0.8); opacity: 1; left: 15%; } 100% { transform: translateY(-50%) scale(1.5); opacity: 0; left: 10%; } }
+@keyframes rippleRight { 0% { transform: translateY(-50%) scale(0.8); opacity: 1; right: 15%; } 100% { transform: translateY(-50%) scale(1.5); opacity: 0; right: 10%; } }
+
+/* Custom Playback Controls */
+.custom-playback-dashboard { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); padding: 25px 20px 15px; z-index: 20; display: flex; flex-direction: column; gap: 12px; transition: opacity 0.3s ease, transform 0.3s ease; }
+.custom-playback-dashboard.hidden { opacity: 0 !important; pointer-events: none; transform: translateY(10px); }
+
+.controls-timeline-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+.playback-timestamp { font-size: 0.8rem; font-weight: 600; color: white; min-width: 45px; text-align: center; letter-spacing: 0.5px; font-family: monospace; }
+.timeline-slider-bg { flex: 1; height: 5px; background: rgba(255,255,255,0.25); border-radius: 3px; cursor: pointer; position: relative; transition: height 0.15s; }
+.timeline-slider-bg:hover { height: 7px; }
+.timeline-progress-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 3px; position: relative; }
+.timeline-progress-fill::after { content: ''; position: absolute; right: -7px; top: 50%; transform: translateY(-50%) scale(0); width: 14px; height: 14px; background: white; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.5); transition: transform 0.2s; }
+.timeline-slider-bg:hover .timeline-progress-fill::after { transform: translateY(-50%) scale(1); }
+.timeline-hover-tooltip { position: absolute; top: -35px; left: 0; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+.timeline-slider-bg:hover .timeline-hover-tooltip { opacity: 1; }
+
+.controls-action-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.action-cluster-left, .action-cluster-right { display: flex; align-items: center; gap: 18px; }
+.player-ctrl-icon-btn { background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer; transition: 0.2s ease; display: flex; justify-content: center; align-items: center; width: 30px; height: 30px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.player-ctrl-icon-btn:hover { transform: scale(1.15); color: #60a5fa; }
+.volume-integration-box { display: flex; align-items: center; gap: 8px; width: 90px; }
+.volume-range-slider { width: 100%; height: 4px; appearance: none; background: linear-gradient(to right, white 80%, rgba(255,255,255,0.2) 80%); border-radius: 2px; outline: none; cursor: pointer; }
+.volume-range-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; background: white; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+
+/* Floating Settings Box */
+.floating-settings-card { display: none; position: absolute; bottom: 80px; right: 20px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 220px; z-index: 150; flex-direction: column; padding: 6px 0; box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
+.floating-settings-card.show { display: flex; animation: slideUp 0.2s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.settings-option-row { padding: 12px 18px; font-size: 0.85rem; font-weight: 600; color: white; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+.settings-option-row:hover { background: rgba(255,255,255,0.1); }
+.settings-sub-panel { display: none; flex-direction: column; background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.settings-sub-panel.show { display: flex; }
+.speed-option-node, .quality-option-node { background: none; border: none; color: #94a3b8; text-align: left; padding: 10px 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.speed-option-node:hover, .quality-option-node:hover { color: white; background: rgba(255,255,255,0.05); }
+.active-node { color: white; font-weight: 800; border-left: 3px solid var(--primary); background: rgba(255,255,255,0.05); }
+.active-quality-tag { font-size: 0.65rem; background: var(--primary); padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 800; color: white; }
+
+/* ==========================================
+   3. RIGHT WING: INTERACTION HUB
+   ========================================== */
+.workspace-interaction-hub { flex: 1; display: flex; flex-direction: column; background: var(--bg-color); overflow: hidden; position: relative; z-index: 10; }
+.interaction-tabs-navigation { display: flex; background: var(--surface); padding: 15px 20px 0; gap: 15px; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.interaction-tabs-navigation::-webkit-scrollbar { display: none; }
+.tab-navigation-link { background: transparent; color: var(--text-light); border: none; padding: 12px 24px; border-radius: 12px 12px 0 0; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; transition: 0.2s; position: relative; white-space: nowrap; }
+.tab-navigation-link::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: transparent; border-radius: 3px 3px 0 0; transition: 0.2s; }
+.tab-navigation-link:hover { color: var(--navy); }
+.tab-navigation-link.active { color: var(--primary); }
+.tab-navigation-link.active::after { background: var(--primary); }
+
+.dynamic-content-viewport { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+
+/* Empty States */
+.empty-box { text-align: center; color: var(--text-light); padding: 60px 20px; }
+.empty-box i { font-size: 3.5rem; margin-bottom: 20px; opacity: 0.3; color: var(--primary); }
+.empty-box h4 { font-size: 1.1rem; font-weight: 600; margin: 0; color: var(--navy); }
+
+/* Desktop View (Split Screen) */
+@media (min-width: 900px) {
+    .classroom-split-viewport { flex-direction: row; }
+    .video-playback-container { width: 68%; border-right: 1px solid var(--border); }
+    .video-aspect-ratio-shield { height: 100%; padding-top: 0; display: flex; align-items: center; justify-content: center; }
+    .canvas-blackout { position: relative; width: 100%; height: 100%; max-height: 100vh; aspect-ratio: 16/9; }
+    .workspace-interaction-hub { width: 32%; }
+    .desktop-only { display: inline; }
+}
+@media (max-width: 899px) {
+    .desktop-only { display: none; }
+    .video-playback-container { position: sticky; top: 0; z-index: 100; }
+                }
+
