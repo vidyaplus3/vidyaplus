@@ -77,20 +77,34 @@
     <script type="module" src="js/main.js"></script>
     
     <script type="module">
-        window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const vidUrl = params.get('vidUrl');
-            const title = params.get('title');
-            const pdfUrl = params.get('pdfUrl');
-            
-            if(vidUrl) {
-                // Thoda delay taaki main.js ke functions load ho jayein
-                setTimeout(() => {
-                    window.openVideo(vidUrl, title, pdfUrl);
-                }, 300); 
-            }
-        });
+    // VideoPlayer ko direct import karenge taaki infinite loop ka chance hi na rahe
+    import { VideoPlayer } from './js/player/index.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // URL se nahi, balki secure memory se data nikalenge
+        const vidUrl = sessionStorage.getItem('vp_secure_vid');
+        const title = sessionStorage.getItem('vp_secure_title');
+        const pdfUrl = sessionStorage.getItem('vp_secure_pdf');
+        
+        if(vidUrl) {
+            setTimeout(() => {
+                // Direct player trigger karo (No routing loop)
+                VideoPlayer.openVideo(vidUrl, title, pdfUrl);
+                
+                // Comments tab ko default open karne ke liye
+                if (typeof window.switchClassroomTab === 'function') {
+                    window.switchClassroomTab('comments');
+                }
+            }, 300); 
+        } else {
+            // ANTI-PIRACY SHIELD 🛡️
+            // Agar koi directly player.html type karta hai ya link copy-paste karta hai, 
+            // toh usko wapas study page par bhej diya jayega.
+            window.location.replace('study.html');
+        }
+    });
     </script>
+    
 </body>
 </html>
 
