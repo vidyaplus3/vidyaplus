@@ -115,12 +115,6 @@ export const VideoPlayer = {
             slider.style.background = `linear-gradient(to right, white 0%, rgba(255, 255, 255, 0.25) 0%)`;
         }
 
-        const overlay = document.getElementById('classroom-mode');
-        if (!overlay.classList.contains('active')) {
-            window.history.pushState({ videoOpen: true }, '', window.location.href);
-            overlay.classList.add('active');
-        }
-
         VideoPlayer.currentClassroomData = { title, pdfUrl };
         document.getElementById('video-watermark').innerText = (auth.currentUser ? auth.currentUser.email : "User") + " | VidyaPlus Secure";
 
