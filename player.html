@@ -77,33 +77,73 @@
     <script type="module" src="js/main.js"></script>
     
     <script type="module">
-    // VideoPlayer ko direct import karenge taaki infinite loop ka chance hi na rahe
     import { VideoPlayer } from './js/player/index.js';
+    import { auth } from './js/firebase-init.js';
+    import { AppState } from './js/auth.js'; 
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     window.addEventListener('DOMContentLoaded', () => {
-        // URL se nahi, balki secure memory se data nikalenge
         const vidUrl = sessionStorage.getItem('vp_secure_vid');
         const title = sessionStorage.getItem('vp_secure_title');
         const pdfUrl = sessionStorage.getItem('vp_secure_pdf');
+        const chapter = sessionStorage.getItem('vp_secure_chapter');
         
-        if(vidUrl) {
-            setTimeout(() => {
-                // Direct player trigger karo (No routing loop)
-                VideoPlayer.openVideo(vidUrl, title, pdfUrl);
-                
-                // Comments tab ko default open karne ke liye
-                if (typeof window.switchClassroomTab === 'function') {
-                    window.switchClassroomTab('comments');
-                }
-            }, 300); 
-        } else {
-            // ANTI-PIRACY SHIELD 🛡️
-            // Agar koi directly player.html type karta hai ya link copy-paste karta hai, 
-            // toh usko wapas study page par bhej diya jayega.
+        if (!vidUrl) {
             window.location.replace('study.html');
+            return;
         }
+
+        // 1. Pehle check karo ki Firebase Auth ready hai (No unauthorized or null token crashes)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Chapter context restore karein taaki sahi comments load hon
+                if (AppState && chapter) {
+                    AppState.currentChapter = chapter;
+                }
+
+                let attempts = 0;
+                function tryStartPlayer() {
+                    let isYoutube = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+                    
+                    if (isYoutube) {
+                        // 2. Check karo ki YouTube Engine active hua ya nahi
+                        if (typeof YT !== 'undefined' && YT.Player) {
+                            VideoPlayer.openVideo(vidUrl, title, pdfUrl);
+                            if (typeof window.switchClassroomTab === 'function') {
+                                window.switchClassroomTab('comments');
+                            }
+                        } else {
+                            attempts++;
+                            if (attempts < 50) { // Max 5 seconds polling
+                                setTimeout(tryStartPlayer, 100);
+                            } else {
+                                alert("Video engine loading timeout. Please refresh.");
+                            }
+                        }
+                    } else {
+                        // 3. Check karo ki Video.js (HLS) Engine ready hai ya nahi
+                        if (typeof videojs !== 'undefined') {
+                            VideoPlayer.openVideo(vidUrl, title, pdfUrl);
+                            if (typeof window.switchClassroomTab === 'function') {
+                                window.switchClassroomTab('comments');
+                            }
+                        } else {
+                            attempts++;
+                            if (attempts < 50) {
+                                setTimeout(tryStartPlayer, 100);
+                            }
+                        }
+                    }
+                }
+                tryStartPlayer();
+            } else {
+                // Agar user logged in nahi hai toh seedha login window bhej do
+                window.location.replace('/');
+            }
+        });
     });
     </script>
+    
     
 </body>
 </html>
