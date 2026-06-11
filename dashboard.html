@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VidyaPlus Pro | Workspace</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0fdfa', 100: '#ccfbf1', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 900: '#134e4a' },
+                        surface: '#f8fafc',
+                        sidebar: '#0f172a',
+                        cardborder: 'rgba(226, 232, 240, 0.8)'
+                    },
+                    boxShadow: {
+                        'soft': '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+                        'glow': '0 4px 14px 0 rgba(249, 115, 22, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; overflow: hidden; }
+        
+        .pro-card { background: #ffffff; border: 1px solid var(--tw-colors-cardborder); border-radius: 1rem; box-shadow: var(--tw-shadow-soft); transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+        .pro-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.03); border-color: #cbd5e1; }
+        
+        .nav-link.active { background-color: rgba(20, 184, 166, 0.1); color: #2dd4bf; font-weight: 600; }
+        .nav-link.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background-color: #14b8a6; border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+        
+        .mob-nav-link.active { color: #0d9488; }
+        
+        @keyframes shimmerPulse { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton-loader { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmerPulse 1.5s infinite; border-radius: 0.5rem; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .main-content-area { padding-bottom: 90px; }
+        @media (min-width: 768px) { .main-content-area { padding-bottom: 30px; } }
+
+        #global-loader { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.4s ease; }
+        .spinner-pro { width: 40px; height: 40px; border: 3px solid #f1f5f9; border-top-color: #0d9488; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .route-view { transition: opacity 0.2s ease; }
+
+        .timeline-item::before { content: ''; position: absolute; left: 6px; top: 24px; bottom: -24px; width: 2px; background-color: #e2e8f0; }
+        .timeline-item:last-child::before { display: none; }
+    </style>
+</head>
+<body class="flex h-[100dvh] w-full select-none antialiased">
+
+    <div id="global-loader">
+        <div class="spinner-pro mb-4"></div>
+        <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Authenticating...</div>
+    </div>
+
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] hidden md:hidden" onclick="toggleSidebar()"></div>
+    
+    <aside id="sidebar" class="fixed md:static top-0 left-0 h-full w-[260px] bg-sidebar text-slate-300 z-[70] transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+        <div class="h-20 flex items-center px-6 shrink-0">
+            <div class="w-8 h-8 rounded bg-brand-500 flex items-center justify-center text-white mr-3 shadow-md shadow-brand-500/20">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-white">VidyaPlus <span class="text-brand-400 font-medium text-sm ml-1">Pro</span></h1>
+            <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1">
+            <a href="#overview" id="nav-overview" class="nav-link active relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-home w-5 text-center"></i> Home</a>
+            <a href="#details" id="nav-analytics" class="nav-link relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-chart-bar w-5 text-center"></i> Test Analysis</a>
+            <a href="study.html" class="nav-link relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-book-open w-5 text-center"></i> Study Materials</a>
+            <a href="#batches" id="nav-batches" class="nav-link relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-users w-5 text-center"></i> My Batches</a>
+            <a href="explore.html" class="nav-link relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-compass w-5 text-center"></i> Explore Courses</a>
+            
+            <div class="mt-6 mb-2 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Account</div>
+            <a href="#" class="nav-link relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-user-circle w-5 text-center"></i> Profile</a>
+            <a href="#" class="nav-link relative flex items-center gap-3 px-6 py-2.5 text-sm transition-colors hover:text-white"><i class="fas fa-cog w-5 text-center"></i> Settings</a>
+        </div>
+        
+        <div class="p-5 shrink-0 border-t border-slate-800/50">
+            <div class="flex items-center gap-2 mb-4 px-1 text-[11px] text-slate-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 relative"><span class="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75"></span></span>
+                System Status: <span class="text-emerald-400">Operational</span>
+            </div>
+            <button onclick="logoutUser()" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-transparent border border-slate-700 text-slate-300 text-sm font-semibold rounded-lg hover:bg-slate-800 hover:text-white transition">
+                Logout <i class="fas fa-sign-out-alt ml-1"></i>
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full relative w-full min-w-0 bg-surface">
+        
+        <header class="h-20 bg-surface/90 backdrop-blur-md flex items-center justify-between px-6 lg:px-10 z-[50] shrink-0 sticky top-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-500 hover:text-slate-800" onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+                <h2 class="text-xl font-bold text-slate-800 tracking-tight hidden sm:block" id="header-title-text">Workspace Overview</h2>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="hidden md:flex relative w-64">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" placeholder="Global Search" class="w-full bg-white border border-slate-200 text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-sm placeholder-slate-400">
+                </div>
+                
+                <button class="text-slate-400 hover:text-slate-700 relative">
+                    <i class="far fa-bell text-lg"></i>
+                    <span class="absolute 0 top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                </button>
+                
+                <div class="relative flex items-center gap-2 cursor-pointer" onclick="window.toggleCustomDrop('profile-menu', event)">
+                    <div id="profile-btn" class="w-9 h-9 bg-slate-200 rounded-full flex items-center justify-center border border-slate-300 overflow-hidden">
+                        <span id="profile-initial" class="font-bold text-slate-600 text-sm">U</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                    
+                    <div id="profile-menu" class="vp-dropdown hidden absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 shadow-lg rounded-xl py-2 z-[60]">
+                        <div class="px-4 py-2 border-b border-slate-100 mb-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Signed in as</p>
+                            <p id="profile-email" class="text-sm font-semibold text-slate-800 truncate mt-0.5">loading...</p>
+                        </div>
+                        <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="far fa-user w-4 text-center"></i> View Profile</a>
+                        <a href="#" onclick="logoutUser()" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-4 text-center"></i> Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto main-content-area relative" id="main-scroll-area">
+            <div class="p-5 lg:p-10 max-w-[1400px] mx-auto">
+                
+                <div id="view-overview" class="route-view">
+                    
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900 tracking-tight" id="welcome-text">Welcome Back!</h1>
+                        <p class="text-slate-500 mt-1.5 font-medium">Here is your learning pulse.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        
+                        <div class="xl:col-span-2 space-y-8">
+                            
+                            <div class="pro-card p-7 relative overflow-hidden bg-white">
+                                <h3 class="text-base font-bold text-slate-900 mb-6 flex items-center gap-2"><i class="fas fa-bolt text-brand-500"></i> Performance Matrix</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 md:divide-x divide-slate-100">
+                                    
+                                    <div class="md:pr-8 flex flex-col justify-between">
+                                        <div>
+                                            <p class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2">Total Focus Time</p>
+                                            <div id="stat-watchtime-advanced" class="flex items-baseline mt-1 text-slate-800">
+                                                <span class="text-3xl font-black">0</span><span class="text-sm font-bold text-slate-500 ml-1">m</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-6 bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100/60 rounded-xl p-3.5 shadow-glow relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                                            <div class="absolute -right-4 -bottom-6 text-orange-200/40 text-[5rem] rotate-12 group-hover:rotate-[20deg] transition-transform duration-500"><i class="fas fa-fire"></i></div>
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-10 h-10 rounded-full bg-white shadow-sm border border-orange-100 flex items-center justify-center text-orange-500 text-xl"><i class="fas fa-fire"></i></div>
+                                                <div>
+                                                    <p class="text-[9px] font-bold text-orange-600 uppercase tracking-widest mb-0.5">Active Streak</p>
+                                                    <p class="text-xl font-black text-slate-800 leading-none"><span id="stat-streak-advanced">0</span> Days</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="md:px-8 flex flex-col items-center justify-between">
+                                        <p class="text-[11px] font-bold tracking-widest text-slate-400 uppercase w-full text-center mb-1">Today's Session</p>
+                                        <div class="flex-1 flex items-center justify-center relative w-full mt-2">
+                                            <div id="chart-focus" class="h-36 w-36"></div>
+                                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-2">
+                                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Current</span>
+                                                <div id="stat-dailytime-val" class="flex items-baseline justify-center">
+                                                    <span class="text-xl font-black text-slate-800">0</span><span class="text-xs font-bold text-slate-500 ml-0.5">m</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-400 text-center mt-3 uppercase tracking-wide">Daily Target: <span class="text-brand-600 font-black">10 Mins</span></p>
+                                    </div>
+                                    
+                                    <div class="md:pl-8 flex flex-col justify-between">
+                                        <div>
+                                            <p class="text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-1">Weekly Velocity</p>
+                                            <div class="mt-2 -ml-2 mb-2">
+                                                <div id="chart-velocity" class="h-[70px] w-full"></div>
+                                            </div>
+                                        </div>
+                                        <div class="pt-4 border-t border-slate-100 mt-auto">
+                                            <div class="flex items-center justify-between mb-2.5">
+                                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">My Classrooms</p>
+                                                <span class="bg-brand-50 border border-brand-100 text-brand-600 text-[10px] font-black px-2 py-0.5 rounded-md" id="stat-enrolled-badge">0 Active</span>
+                                            </div>
+                                            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                <div class="bg-brand-500 h-1.5 rounded-full relative" style="width: 100%">
+                                                    <div class="absolute inset-0 bg-white/20 w-full animate-[shimmerPulse_2s_infinite]"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Test Performance</h3>
+                                <div class="pro-card overflow-x-auto">
+                                    <table class="w-full text-left min-w-[700px]">
+                                        <thead>
+                                            <tr class="border-b border-slate-200">
+                                                <th class="px-5 py-3 text-xs font-semibold text-slate-500">Test Name</th>
+                                                <th class="px-5 py-3 text-xs font-semibold text-slate-500">Batch</th>
+                                                <th class="px-5 py-3 text-xs font-semibold text-slate-500">Date</th>
+                                                <th class="px-5 py-3 text-xs font-semibold text-slate-500">Score</th>
+                                                <th class="px-5 py-3 text-xs font-semibold text-slate-500">Accuracy</th>
+                                                <th class="px-5 py-3 text-xs font-semibold text-slate-500">Percentile</th>
+                                                <th class="px-5 py-3 text-right text-xs font-semibold text-slate-500">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="overview-test-table" class="divide-y divide-slate-100 text-sm">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="xl:col-span-1">
+                            <div class="sticky top-28">
+                                <h3 class="text-lg font-bold text-slate-900 mb-5">Live Learning Stream</h3>
+                                <div class="bg-transparent space-y-6">
+                                    <div class="relative pl-6 timeline-item">
+                                        <span class="absolute left-0 top-1 w-2.5 h-2.5 rounded-full bg-brand-500 ring-4 ring-surface"></span>
+                                        <p class="text-sm font-semibold text-slate-800">New Study Notes Uploaded</p>
+                                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Chemistry Organic Mechanisms (JEE Advanced) material is now available in your batch.</p>
+                                    </div>
+                                    <div class="relative pl-6 timeline-item">
+                                        <span class="absolute left-0 top-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-4 ring-surface animate-pulse"></span>
+                                        <p class="text-sm font-semibold text-slate-800">Live Lecture starting in 15m</p>
+                                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Electrostatics DPP discussion with Prof. Verma. Join the virtual classroom.</p>
+                                    </div>
+                                    <div class="relative pl-6 timeline-item">
+                                        <span class="absolute left-0 top-1 w-2.5 h-2.5 rounded-full bg-slate-300 ring-4 ring-surface"></span>
+                                        <p class="text-sm font-semibold text-slate-800">AI Guru Insight</p>
+                                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Practice plan updated for Maths based on your recent Mock Test #4 performance.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="view-details" class="route-view hidden space-y-8">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Test Analytics Overview</h1>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Comprehensive historical data of your performance.</p>
+                    </div>
+
+                    <div class="pro-card p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-base font-bold text-slate-900">Performance Trend Matrix</h3>
+                            <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-md border border-emerald-100 flex items-center gap-1.5"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> Live DB Synced</span>
+                        </div>
+                        
+                        <div id="dashboard-analytics-chart" class="w-full h-64 mb-8"></div>
+
+                        <div class="border border-slate-200 rounded-xl overflow-x-auto">
+                            <table class="w-full text-left min-w-[800px]">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 font-semibold">
+                                        <th class="p-4">Target Batch</th>
+                                        <th class="p-4">Assessment Name</th>
+                                        <th class="p-4 text-center">Attempt</th>
+                                        <th class="p-4 text-center">Score</th>
+                                        <th class="p-4 text-center">Accuracy</th>
+                                        <th class="p-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-table-body" class="divide-y divide-slate-100 text-sm">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-batches" class="route-view hidden space-y-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">My Batches</h1>
+                            <p class="text-sm text-slate-500 font-medium mt-1">Your enrolled classrooms and active modules.</p>
+                        </div>
+                        <a href="explore.html" class="text-sm font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-lg transition">
+                            Explore Catalog
+                        </a>
+                    </div>
+                    
+                    <div id="batch-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center h-[65px] z-[40] shadow-[0_-4px_15px_rgba(0,0,0,0.03)] px-1">
+        <a href="#overview" id="mob-nav-overview" class="mob-nav-link active flex flex-col items-center justify-center w-full h-full text-slate-400 transition">
+            <i class="fas fa-home text-[18px] mb-1"></i><span class="text-[10px] font-semibold">Dashboard</span>
+        </a>
+        <a href="#details" id="mob-nav-analytics" class="mob-nav-link flex flex-col items-center justify-center w-full h-full text-slate-400 transition">
+            <i class="fas fa-chart-bar text-[18px] mb-1"></i><span class="text-[10px] font-semibold">Test Analysis</span>
+        </a>
+        <a href="#batches" id="mob-nav-batches" class="mob-nav-link flex flex-col items-center justify-center w-full h-full text-slate-400 transition">
+            <i class="fas fa-layer-group text-[18px] mb-1"></i><span class="text-[10px] font-semibold">My Batches</span>
+        </a>
+        <a href="#" class="mob-nav-link flex flex-col items-center justify-center w-full h-full text-slate-400 transition">
+            <i class="fas fa-robot text-[18px] mb-1"></i><span class="text-[10px] font-semibold">AI Guru</span>
+        </a>
+    </nav>
+        <script type="module">
+    import { db, auth } from './js/firebase-init.js';
+    import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    // 🔥 XSS SANITIZER & SAFE PARSER
+    const escapeHTML = (str) => {
+        if (!str) return '';
+        return String(str).replace(/[&<>'"]/g, tag => 
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+    };
+
+    const getSafeLocalInt = (key) => {
+        const val = parseInt(localStorage.getItem(key), 10);
+        return isNaN(val) ? 0 : val;
+    };
+            
+    const globalLoader = document.getElementById('global-loader');
+    const batchGrid = document.getElementById('batch-grid');
+    let dashboardChartInstance = null;
+    let velocityChart = null;
+    let focusChart = null;
+
+    // --- HASH ROUTING LOGIC ---
+    const router = () => {
+        const currentHash = window.location.hash || '#overview';
+        const views = ['overview', 'details', 'batches'];
+        
+        views.forEach(v => {
+            const el = document.getElementById('view-' + v);
+            if (el) el.classList.add('hidden');
+            
+            const nav = document.getElementById('nav-' + v);
+            if(nav) nav.classList.remove('active');
+            
+            const mobNav = document.getElementById('mob-nav-' + v);
+            if(mobNav) { mobNav.classList.remove('active'); mobNav.classList.add('text-slate-400'); }
+        });
+
+        const headerTitle = document.getElementById('header-title-text');
+        const activeView = currentHash.replace('#', '');
+        
+        const targetEl = document.getElementById('view-' + activeView);
+        const targetNav = document.getElementById('nav-' + activeView);
+        const targetMob = document.getElementById('mob-nav-' + activeView);
+
+        if(targetEl) targetEl.classList.remove('hidden');
+        if(targetNav) targetNav.classList.add('active');
+        if(targetMob) { targetMob.classList.add('active'); targetMob.classList.remove('text-slate-400'); }
+
+        if (activeView === 'details') {
+            headerTitle.innerText = "Performance Analysis";
+            if(dashboardChartInstance) setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+        } 
+        else if (activeView === 'batches') {
+            headerTitle.innerText = "My Classrooms";
+        } 
+        else {
+            headerTitle.innerText = "Workspace Overview";
+            setTimeout(renderMicroCharts, 50); 
+        }
+    };
+    window.addEventListener('hashchange', router);
+
+    // --- UI UTILS ---
+    window.toggleCustomDrop = (id, e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.vp-dropdown').forEach(d => {
+            if (d.id !== id) d.classList.add('hidden');
+        });
+        document.getElementById(id).classList.toggle('hidden');
+    };
+    document.addEventListener('click', () => { document.querySelectorAll('.vp-dropdown').forEach(d => d.classList.add('hidden')); });
+    
+    window.toggleSidebar = () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        document.getElementById('mobile-sidebar-overlay').classList.toggle('hidden');
+    };
+
+    window.logoutUser = () => {
+        if(confirm("Terminate current session?")) {
+            // Log out hone par purana analytics cache uda do
+            localStorage.removeItem('vp_total_sec');
+            localStorage.removeItem('vp_daily_sec');
+            localStorage.removeItem('vp_pending_sec');
+            localStorage.removeItem('vp_active_date');
+            
+            signOut(auth).then(() => window.location.replace("index.html"));
+        }
+    };
+            
+    // --- ELITE UI TIME FORMATTER ---
+    const formatTimeAdvanced = (seconds) => {
+        if(!seconds || seconds <= 0) return `<span class="text-3xl font-black text-slate-800">0</span><span class="text-sm font-bold text-slate-500 ml-1">s</span>`;
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        
+        let html = '';
+        if(h > 0) {
+            html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${h}</span><span class="text-sm font-bold text-slate-500 ml-0.5 mr-2">h</span>`;
+            html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${m}</span><span class="text-sm font-bold text-slate-500 ml-0.5">m</span>`;
+        } else if (m > 0) {
+            html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${m}</span><span class="text-sm font-bold text-slate-500 ml-0.5 mr-2">m</span>`;
+            html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${s}</span><span class="text-sm font-bold text-slate-500 ml-0.5">s</span>`;
+        } else {
+            html += `<span class="text-3xl font-black text-slate-800 tracking-tight">${s}</span><span class="text-sm font-bold text-slate-500 ml-0.5">s</span>`;
+        }
+        return html;
+    };
+
+    const renderMicroCharts = () => {
+        // Velocity Chart Memory Leak Fix
+        if(document.getElementById('chart-velocity')) {
+            if(velocityChart) {
+                velocityChart.updateSeries([{ data: [12, 28, 15, 35, 20, 45, 52] }]);
+            } else {
+                const options1 = {
+                    series: [{ data: [12, 28, 15, 35, 20, 45, 52] }],
+                    chart: { type: 'area', height: 70, sparkline: { enabled: true } },
+                    stroke: { curve: 'smooth', width: 2.5 },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0, stops: [0, 100] } },
+                    colors: ['#0d9488'], tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: () => '' } }, marker: { show: false } }
+                };
+                velocityChart = new ApexCharts(document.querySelector("#chart-velocity"), options1);
+                velocityChart.render();
+            }
+        }
+        
+        // Focus Chart Memory Leak Fix
+        if(document.getElementById('chart-focus')) {
+            // 🔥 APPLYING SAFE PARSER HERE
+            let localDailyTime = getSafeLocalInt('vp_daily_sec');
+            let goalPercentage = Math.floor((localDailyTime / 600) * 100);
+            
+            if(focusChart) {
+                focusChart.updateSeries([Math.min(goalPercentage, 100)]);
+            } else {
+                const options2 = {
+                    series: [Math.min(goalPercentage, 100)], 
+                    chart: { type: 'radialBar', height: 160, sparkline: { enabled: true } },
+                    plotOptions: { radialBar: { 
+                        startAngle: -135, endAngle: 135, 
+                        hollow: { size: '68%' }, 
+                        track: { background: '#f1f5f9', strokeWidth: '100%', margin: 0 },
+                        dataLabels: { show: false }
+                    }},
+                    fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', gradientToColors: ['#2dd4bf'], stops: [0, 100] } },
+                    colors: ['#0d9488'], stroke: { lineCap: 'round' }
+                };
+                focusChart = new ApexCharts(document.querySelector("#chart-focus"), options2);
+                focusChart.render();
+            }
+        }
+    };
+
+    // --- AUTH AND SYNC FLOW ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById('profile-initial').innerText = user.email.charAt(0).toUpperCase();
+            document.getElementById('profile-email').innerText = user.email;
+            document.getElementById('welcome-text').innerText = `Welcome, ${user.displayName || user.email.split('@')[0]}!`;
+
+            try {
+                // 🔥 FIX: Firebase JWT for RLS bypass!
+                const firebaseToken = await user.getIdToken();
+                const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
+
+                const response = await fetch(`https://ukbkyyfvjvdurnvfdwur.supabase.co/rest/v1/user_analytics?uid=eq.${user.uid}&select=*`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPA_KEY,
+                        'Authorization': `Bearer ${firebaseToken}` // Pass exact Firebase Token
+                    }
+                });
+
+                if (!response.ok) throw new Error("Supabase Auth Restrict");
+                const analyticsData = await response.json();
+
+                let totalSeconds = 0;
+                let dailySeconds = 0;
+                let streakDays = 0;
+
+                if (analyticsData && analyticsData.length > 0) {
+                    const serverStats = analyticsData[0];
+                    totalSeconds = parseInt(serverStats.total_watch_seconds) || 0;
+                    dailySeconds = parseInt(serverStats.daily_watch_seconds) || 0;
+                    streakDays = parseInt(serverStats.streak_count) || 0;
+
+                    // ✅ IST Timezone Conversion
+                    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                    
+                    // 🔥 THE FIX: ALWAYS trust the server! "if/else" removed.
+                    localStorage.setItem('vp_daily_sec', dailySeconds);
+                    localStorage.setItem('vp_active_date', todayStr);
+                    localStorage.setItem('vp_total_sec', totalSeconds);
+                }
+
+                // 🔥 APPLYING SAFE PARSER HERE
+                const localPendingTime = getSafeLocalInt('vp_pending_sec');
+
+                let currentCalculatedTotal = totalSeconds + localPendingTime;
+                const displayDaily = dailySeconds + localPendingTime;
+                
+                document.getElementById('stat-watchtime-advanced').innerHTML = formatTimeAdvanced(currentCalculatedTotal);
+                document.getElementById('stat-dailytime-val').innerHTML = formatTimeAdvanced(displayDaily);
+                document.getElementById('stat-streak-advanced').innerText = streakDays;
+                
+                let goalPercentage = Math.floor((displayDaily / 600) * 100);
+                if(focusChart) focusChart.updateSeries([Math.min(goalPercentage, 100)]);
+
+            } catch(e) { 
+                console.warn("[Dashboard Sync] Fetch bypassed. Using offline cache.", e); 
+                // 🔥 APPLYING SAFE PARSER HERE
+                const localTotalTime = getSafeLocalInt('vp_total_sec');
+                const localDailyTime = getSafeLocalInt('vp_daily_sec');
+
+                document.getElementById('stat-watchtime-advanced').innerHTML = formatTimeAdvanced(localTotalTime);
+                document.getElementById('stat-dailytime-val').innerHTML = formatTimeAdvanced(localDailyTime);
+                
+                let localPercent = Math.floor((localDailyTime / 600) * 100);
+                if(focusChart) focusChart.updateSeries([Math.min(localPercent, 100)]);
+            }
+
+            globalLoader.style.opacity = '0';
+            setTimeout(() => globalLoader.style.display = 'none', 500);
+
+            // 🔥 FIX: Parallel Data Fetching for Dashboard Speed!
+            await Promise.all([
+                fetchEnrolledBatches(user.uid),
+                fetchTestAnalytics(user.uid)
+            ]);
+
+        } else {
+            window.location.replace("login.html");
+        }
+    });
+            
+    // 🔥 FIX: Batched Promise Fetch (Resolves sequential N+1 delay)
+    const fetchEnrolledBatches = async (uid) => {
+        batchGrid.innerHTML = Array(3).fill(`<div class="pro-card p-4"><div class="skeleton-loader h-32 w-full mb-4"></div><div class="skeleton-loader h-4 w-2/3 mb-2"></div><div class="skeleton-loader h-4 w-1/3 mb-4"></div><div class="skeleton-loader h-10 w-full"></div></div>`).join('');
+        try {
+            const enrollmentsRef = collection(db, "users", uid, "enrollments");
+            const enrollmentsSnap = await getDocs(enrollmentsRef);
+            let enrolledIds = []; 
+            
+            enrollmentsSnap.forEach(doc => enrolledIds.push(doc.id));
+            
+            document.getElementById('stat-enrolled-badge').innerText = `${enrolledIds.length} Active`;
+            batchGrid.innerHTML = '';
+            
+            if (enrolledIds.length > 0) {
+                // Execute all document reads in parallel rather than sequentially
+                const fetchPromises = enrolledIds.map(batchId => getDoc(doc(db, "batches", batchId)));
+                const batchSnaps = await Promise.all(fetchPromises);
+                
+                batchSnaps.forEach(batchSnap => {
+                    if (batchSnap.exists()) renderBatchCard(batchSnap.id, batchSnap.data());
+                });
+            } else {
+                batchGrid.innerHTML = `<div class="col-span-full py-16 text-center border border-dashed border-slate-300 rounded-2xl"><i class="fas fa-folder-open text-3xl text-slate-300 mb-2"></i><p class="text-sm font-semibold text-slate-600">No Batches Found</p></div>`;
+            }
+        } catch (err) { 
+            batchGrid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg text-sm">System DB Error.</div>`; 
+        }
+    };
+
+    const renderBatchCard = (id, batch) => {
+        const imgUrl = batch.imageUrl || batch.thumbnailUrl || "";
+        const imgHTML = imgUrl ? `<img src="${imgUrl}" class="w-full h-full object-cover rounded-t-[0.9rem]">` : `<div class="w-full h-full flex flex-col justify-center items-center bg-slate-800 text-slate-400 rounded-t-[0.9rem]"><i class="fas fa-laptop-code text-2xl mb-1"></i></div>`;
+        
+        // 🔥 APPLYING ESCAPE HTML HERE TO PREVENT XSS
+        const safeTitle = escapeHTML(batch.title || 'Untitled');
+        
+        const cardHTML = `<div class="pro-card flex flex-col h-full cursor-pointer group" onclick="window.location.href='study.html?batch=${id}'"><div class="h-40 relative shrink-0 p-1"><div class="absolute top-3 left-3 bg-white/95 text-slate-800 px-2 py-1 rounded shadow-sm text-[10px] font-bold tracking-wide uppercase z-10">Enrolled</div>${imgHTML}</div><div class="p-5 flex-1 flex flex-col"><span class="text-brand-600 text-[10px] font-bold uppercase tracking-wider mb-2">${batch.classLevel || 'Class'} • ${batch.stream || 'Gen'}</span><h3 class="text-base font-bold text-slate-900 leading-tight mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">${safeTitle}</h3><div class="mt-auto pt-4 border-t border-slate-100"><button class="w-full py-2 bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-lg group-hover:bg-brand-50 group-hover:text-brand-700 group-hover:border-brand-200 transition-colors">Go to Classroom</button></div></div></div>`;
+        batchGrid.insertAdjacentHTML('beforeend', cardHTML);
+    };
+
+    const fetchTestAnalytics = async (uid) => {
+        const tableBodyOverview = document.getElementById('overview-test-table');
+        const tableBodyDetails = document.getElementById('analytics-table-body');
+        let testHistory = [], chartScores = [], chartLabels = [];
+        
+        try {
+            const examResultsRef = collection(db, `users/${uid}/exam_results`);
+            const examsSnap = await getDocs(examResultsRef);
+            
+            if (examsSnap.empty) { renderEmptyState(tableBodyOverview, tableBodyDetails); return; }
+            
+            examsSnap.forEach(examDoc => {
+                const testId = examDoc.id; 
+                const data = examDoc.data();
+                
+                testHistory.push({
+                    testId: testId, 
+                    attemptId: data.latestAttemptId || testId,
+                    // 🔥 APPLYING ESCAPE HTML HERE TO PREVENT XSS
+                    title: escapeHTML(data.testTitle || `Mock Test`), 
+                    batch: data.batchName || 'Standard Assessment',
+                    attemptNo: data.totalAttempts || 1, 
+                    score: data.latestScore !== undefined ? data.latestScore : (data.score || 0), 
+                    maxMarks: data.maxMarks || 0, 
+                    accuracy: data.overallAccuracy || (data.maxMarks ? Math.round(((data.latestScore || data.score || 0) / data.maxMarks) * 100) : 0),
+                    dateStr: data.submittedAt ? new Date(data.submittedAt.toMillis()).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : 'Recently',
+                    dateMs: data.submittedAt ? data.submittedAt.toMillis() : Date.now()
+                });
+            });
+            
+            testHistory.sort((a, b) => b.dateMs - a.dateMs);
+            tableBodyOverview.innerHTML = ''; tableBodyDetails.innerHTML = '';
+            
+            testHistory.forEach((record, index) => {
+                if(index < 10) { chartScores.unshift(record.score); chartLabels.unshift(record.title.substring(0,8) + '..'); }
+                let percentile = (record.accuracy + (Math.random() * 5)).toFixed(1); if(percentile > 99.9) percentile = 99.9;
+                const rowHTML = `<tr class="group hover:bg-slate-50 transition-colors cursor-default"><td class="px-5 py-4"><p class="font-semibold text-slate-800">${record.title}</p><p class="text-[10px] text-slate-500 mt-0.5">Attempt #${record.attemptNo}</p></td><td class="px-5 py-4 text-xs font-medium text-slate-600">${record.batch}</td><td class="px-5 py-4 text-xs font-medium text-slate-600">${record.dateStr}</td><td class="px-5 py-4 font-bold text-slate-900">${record.score}<span class="text-slate-400 font-normal text-xs">/${record.maxMarks}</span></td><td class="px-5 py-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-bold">${record.accuracy}%</span></td><td class="px-5 py-4 text-xs font-bold text-slate-700">${percentile} PR</td><td class="px-5 py-4 text-right"><a href="analytics.html?testId=${record.testId}&attemptId=${record.attemptId}" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 transition"><i class="fas fa-file-alt"></i> Report</a></td></tr>`;
+                if(index < 3) tableBodyOverview.insertAdjacentHTML('beforeend', rowHTML); 
+                tableBodyDetails.insertAdjacentHTML('beforeend', rowHTML);
+            });
+            
+            if (chartLabels.length > 0) renderMainChart(chartLabels, chartScores); else renderMainChart(['No Data'], [0]);
+        } catch (e) { 
+            console.error("Test Analytics Fetch Error:", e); 
+            renderEmptyState(tableBodyOverview, tableBodyDetails); 
+        }
+    };
+
+    // Replace dummy scores with a clean empty state
+    const renderEmptyState = (ov, dt) => {
+        const emptyHTML = `<tr><td colspan="7" class="px-5 py-8 text-center text-slate-500 text-sm">No assessments taken yet.</td></tr>`;
+        ov.innerHTML = emptyHTML; 
+        dt.innerHTML = emptyHTML;
+        renderMainChart(['No Data'], [0]);
+    };
+
+    // 🔥 FIX: Chart Memory Leak Resolved (updateSeries / updateOptions)
+    const renderMainChart = (labels, scores) => {
+        if(dashboardChartInstance) {
+            dashboardChartInstance.updateOptions({ xaxis: { categories: labels } });
+            dashboardChartInstance.updateSeries([{ name: 'Score', data: scores }]);
+        } else {
+            const options = { 
+                series: [{ name: 'Score', data: scores }], 
+                chart: { type: 'area', height: 250, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' }, 
+                colors: ['#0d9488'], 
+                stroke: { curve: 'smooth', width: 2 }, 
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0, stops: [0, 100] } }, 
+                dataLabels: { enabled: false }, 
+                xaxis: { categories: labels, axisBorder: { show: false }, axisTicks: { show: false } }, 
+                grid: { borderColor: '#f1f5f9', strokeDashArray: 4 } 
+            };
+            dashboardChartInstance = new ApexCharts(document.querySelector("#dashboard-analytics-chart"), options);
+            dashboardChartInstance.render();
+        }
+    };
+    </script>
+</body>
+</html>
