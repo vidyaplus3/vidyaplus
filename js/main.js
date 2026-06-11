@@ -108,13 +108,22 @@ window.skipVideo = VideoPlayer.skipVideo;
 window.setSpeed = VideoPlayer.setSpeed;
 window.closeClassroom = VideoPlayer.closeVideo;
 window.openVideo = (vidUrl, title, pdfUrl) => {
-    // SECURE APPROACH: Data ko URL ki jagah browser ki secure session memory mein save karein
-    sessionStorage.setItem('vp_secure_vid', vidUrl);
-    sessionStorage.setItem('vp_secure_title', title);
-    sessionStorage.setItem('vp_secure_pdf', pdfUrl || '');
-    
-    // Bina kisi data ke clean URL par redirect karein
-    window.location.href = 'player.html';
+    if (window.location.pathname.includes('player.html')) {
+        VideoPlayer.openVideo(vidUrl, title, pdfUrl); 
+        window.switchClassroomTab('comments'); 
+    } else {
+        // SECURE STORAGE APPROACH (No URL Leakage 🛡️)
+        sessionStorage.setItem('vp_secure_vid', vidUrl);
+        sessionStorage.setItem('vp_secure_title', title);
+        sessionStorage.setItem('vp_secure_pdf', pdfUrl || '');
+        
+        // Active chapter context ko bhi save karein taaki comments accurate load hon
+        if (typeof AppState !== 'undefined' && AppState.currentChapter) {
+            sessionStorage.setItem('vp_secure_chapter', AppState.currentChapter);
+        }
+        
+        window.location.href = 'player.html';
+    }
 };
 
 window.showUI = VideoPlayer.showUI;
