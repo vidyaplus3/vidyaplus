@@ -3,130 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Classroom Hub | VidyaPlus Secure</title>
+    <title>VidyaPlus Classroom</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-
-    <link rel="stylesheet" href="css/classroom-production.css">
     
-    <link rel="stylesheet" href="css/base.css"> 
-</head>
-    
-<body class="classroom-production-body">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/classroom.css">
+    <link rel="stylesheet" href="css/player.css">
 
-    <header class="classroom-secure-header">
-        <div class="nav-left-group">
-            <button id="close-classroom-btn" class="back-action-circle" aria-label="Exit Classroom">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="title-meta-block">
-                <h1 id="classroom-dynamic-title" class="truncate-text">Loading Lecture...</h1>
-                <span id="classroom-subject-badge" class="secure-badge">SYNCING CONTEXT</span>
-            </div>
-        </div>
-        <div class="nav-right-group">
-            <div class="security-status-indicator">
-                <i class="fas fa-shield-alt text-emerald-500"></i>
-                <span class="desktop-only">DRM Protected Stream</span>
-            </div>
-        </div>
-    </header>
-
-    <main class="classroom-split-viewport">
+    <style>
+        /* Sirf page ko full screen karne ki setting */
+        body { margin: 0; padding: 0; background: var(--bg-color); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .classroom-overlay { position: relative; height: 100vh; display: flex !important; z-index: 1; background: var(--bg-color); flex-direction: column; }
         
-        <section class="video-playback-container" id="video-canvas-box">
-            <div class="video-aspect-ratio-shield">
-                
-                <div id="player-canvas-wrapper" class="canvas-blackout">
-                    <div id="yt-player" class="player-instance"></div>
-                    </div>
-                
-                <div class="interactive-protection-shield" id="playback-shield"></div>
-                <div class="dynamic-watermark-overlay" id="secure-watermark-text">VidyaPlus Security Active</div>
+        @media (min-width: 768px) {
+            .classroom-overlay { flex-direction: row; padding: 30px; align-items: center; justify-content: center; gap: 30px; background: rgba(11, 17, 32, 0.98); }
+        }
 
-                <div class="gesture-indicator indicator-left" id="ripple-left"><i class="fas fa-undo"></i> 10s</div>
-                <div class="gesture-indicator indicator-right" id="ripple-right"><i class="fas fa-redo"></i> 10s</div>
+        /* Tumhare Video Fitting Hacks */
+        #yt-player { width: 300% !important; height: 100% !important; margin-left: -100% !important; border: none !important; }
+        #hls-player, .video-js, .vjs-tech { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: contain !important; z-index: 5 !important; background-color: transparent !important; }
+        #player-wrapper { background: #000 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="classroom-overlay active" id="classroom-mode">
+        <div class="video-fixed-box" id="video-container">
+            
+            <div class="close-classroom" onclick="window.location.href='study.html#classroom'"><i class="fas fa-arrow-left"></i></div>
+            
+            <div style="width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative;" id="player-wrapper">
+                <div id="yt-player" style="width: 100%; height: 100%;"></div>
+                <video id="hls-player" class="video-js vjs-default-skin" style="width: 100%; height: 100%; display: none;" playsinline></video>
             </div>
+            
+            <div class="tap-indicator left" id="tap-indicator-left"><i class="fas fa-undo"></i> 10s</div>
+            <div class="tap-indicator right" id="tap-indicator-right"><i class="fas fa-redo"></i> 10s</div>
 
-            <div class="custom-playback-dashboard" id="custom-controls-panel">
-                <div class="controls-timeline-row">
-                    <span class="playback-timestamp" id="time-current">0:00</span>
-                    <div class="timeline-slider-bg" id="progress-scrub-bar">
-                        <div class="timeline-progress-fill" id="progress-fill"></div>
-                        <div class="timeline-hover-tooltip" id="progress-tooltip">0:00</div>
+            <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
+            <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
+
+            <div class="custom-controls" id="custom-controls">
+                <div class="controls-row-top" style="display: flex; align-items: center; gap: 14px; width: 100%;">
+                    <div class="time-display" id="time-current">0:00</div>
+                    <div class="progress-bar-bg" id="progress-bg" 
+                         onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)"
+                         ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <div class="progress-tooltip" id="progress-tooltip">0:00</div>
                     </div>
-                    <span class="playback-timestamp" id="time-duration">0:00</span>
+                    <div class="time-display" id="time-duration">0:00</div>
                 </div>
 
-                <div class="controls-action-row">
-                    <div class="action-cluster-left">
-                        <button class="player-ctrl-icon-btn" id="play-pause-toggle"><i class="fas fa-play" id="play-icon"></i></button>
-                        <button class="player-ctrl-icon-btn" id="skip-back-btn"><i class="fas fa-undo"></i></button>
-                        <button class="player-ctrl-icon-btn" id="skip-forward-btn"><i class="fas fa-redo"></i></button>
-                        
-                        <div class="volume-integration-box">
-                            <button class="player-ctrl-icon-btn" id="mute-toggle"><i class="fas fa-volume-up" id="mute-icon"></i></button>
-                            <input type="range" class="volume-range-slider" id="volume-slider" min="0" max="1" step="0.05" value="0.8">
+                <div class="controls-row-bottom" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px;">
+                    <div class="ctrl-group-left" style="display: flex; align-items: center; gap: 20px;">
+                        <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
+                        <button class="ctrl-btn skip-btn" onclick="skipVideo(-10)"><i class="fas fa-undo"></i><span class="skip-label">10</span></button>
+                        <button class="ctrl-btn skip-btn" onclick="skipVideo(10)"><i class="fas fa-redo"></i><span class="skip-label">10</span></button>
+                        <div class="volume-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
+                            <div class="volume-slider-container" style="width: 75px; display: flex; align-items: center;">
+                                <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0" style="background: linear-gradient(to right, #FFFFFF 0%, rgba(255, 255, 255, 0.25) 0%);" oninput="window.setVolume && window.setVolume(this.value)">
+                            </div>
                         </div>
                     </div>
-
-                    <div class="action-cluster-right">
-                        <button class="player-ctrl-icon-btn" id="settings-menu-trigger"><i class="fas fa-cog"></i></button>
-                        <button class="player-ctrl-icon-btn" id="fullscreen-toggle"><i class="fas fa-expand"></i></button>
+                    <div class="ctrl-group-right" style="display: flex; align-items: center; gap: 20px;">
+                        <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
+                        <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
                     </div>
                 </div>
 
-                <div class="floating-settings-card" id="playback-settings-card">
-                    <div class="settings-option-row" id="trigger-speed-sub">
+                <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
+                    <div class="settings-menu-item" onclick="document.getElementById('speed-dropdown').classList.toggle('show'); document.getElementById('quality-dropdown').classList.remove('show');">
                         <span>Playback Speed</span>
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
                     </div>
-                    <div class="settings-sub-panel" id="speed-selection-box">
-                        <button class="speed-option-node" data-speed="0.75">0.75x</button>
-                        <button class="speed-option-node active-node" data-speed="1">Normal</button>
-                        <button class="speed-option-node" data-speed="1.25">1.25x</button>
-                        <button class="speed-option-node" data-speed="1.5">1.5x</button>
-                        <button class="speed-option-node" data-speed="2">2x</button>
+                    <div class="settings-submenu-list" id="speed-dropdown">
+                        <div class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</div>
+                        <div class="speed-opt active" id="spd-1" onclick="setSpeed(1)">Normal</div>
+                        <div class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</div>
+                        <div class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</div>
+                        <div class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</div>
                     </div>
-
-                    <div class="settings-option-row" id="trigger-quality-sub">
-                        <div>Quality <span class="active-quality-tag" id="current-quality-badge">AUTO</span></div>
-                        <i class="fas fa-chevron-right"></i>
+                    <div class="settings-menu-item" onclick="document.getElementById('quality-dropdown').classList.toggle('show'); document.getElementById('speed-dropdown').classList.remove('show');">
+                        <div>Quality <span class="badge-na" id="quality-badge" style="display:none;">AUTO</span></div>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
                     </div>
-                    <div class="settings-sub-panel" id="quality-selection-box">
-                        <button class="quality-option-node active-node" data-quality="auto">Auto</button>
-                        <button class="quality-option-node" data-quality="1080">1080p</button>
-                        <button class="quality-option-node" data-quality="720">720p</button>
-                        <button class="quality-option-node" data-quality="480">480p</button>
+                    <div class="settings-submenu-list" id="quality-dropdown">
+                        <div class="quality-opt active" onclick="window.setQuality && window.setQuality('auto')">Auto</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('1080')">1080p</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('720')">720p</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('480')">480p</div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div> 
 
-        <section class="workspace-interaction-hub">
-            <nav class="interaction-tabs-navigation" id="classroom-tabs-bar">
-                <button class="tab-navigation-link active" data-target="comments">
-                    <i class="fas fa-comments"></i> <span>Discussion</span>
-                </button>
-                <button class="tab-navigation-link" data-target="notes">
-                    <i class="fas fa-file-pdf"></i> <span>Notes</span>
-                </button>
-                <button class="tab-navigation-link" data-target="practice">
-                    <i class="fas fa-tasks"></i> <span>Practice</span>
-                </button>
-            </nav>
-            
-            <div class="dynamic-content-viewport" id="classroom-dynamic-viewport">
-                </div>
-        </section>
+        <div class="interaction-area">
+            <div class="classroom-tabs">
+                <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
+                <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
+                <div class="tab-pill" id="tab-dpp" onclick="switchClassroomTab('dpp')"><i class="fas fa-tasks"></i> Practice</div>
+            </div>
+            <div class="tab-content-area" id="classroom-dynamic-content"></div>
+        </div>
+    </div>
 
-    </main>
+    <div class="pdf-overlay" id="pdf-mode">
+        <div class="pdf-header">
+            <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
+            <div class="pdf-title-box">
+                <h3 id="pdf-dyn-title">Study Notes</h3>
+                <span class="pdf-badge">SECURE READER</span>
+            </div>
+            <div class="pdf-actions">
+                <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
+            </div>
+        </div>
+        <div class="pdf-container" id="pdf-viewer-container">
+            <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
+            <div class="pdf-shield" oncontextmenu="return false;"></div>
+            <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
+        </div>
+    </div>
 
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <script type="module" src="js/classroom-boot.js"></script>
-</body>
-  </html>
+    
+    <script type="module">
+        // TUMHARE JS ENGINE KO BIND KIYA GAYA HAI
+        import { VideoPlayer } from './js/player/index.js';
+        import { CommentEngine } from './js/comments.js';
+        import { PDFViewer } from './js/pdf.js';
+        import { AppState } from './js/auth.js'; 
+        import './js/analytics/engine.js';
 
+        window.togglePlay = VideoPlayer.togglePlay;
+        window.toggleMute = VideoPlayer.toggleMute;
+        window.toggleFullScreen = VideoPlayer.toggleFullScreen;
+        window.skipVideo = VideoPlayer.skipVideo;
+        window.setSpeed = VideoPlayer.setSpeed;
+        window.showUI = VideoPlayer.showUI;
+        window.handleShieldClick = VideoPlayer.handleShieldClick;
+        window.toggleSettings = VideoPlayer.toggleSettings;
+        window.startDrag = VideoPlayer.startDrag;
+        window.stopDrag = VideoPlayer.stopDrag;
+        window.doDrag = VideoPlayer.doDrag;
+
+        window.openPDF = PDFViewer.openPDF;
+        window.closePDF = PDFViewer.closePDF;
+        window.togglePDFFull = PDFViewer.togglePDFFull;
+
+        // TUMHARI PURANI TAB LOGIC
+        window.switchClassroomTab = (type) => {
+            const content = document.getElementById('classroom-dynamic-content');
+            if(!content) return;
+            
+            document.getElementById('tab-comments').classList.remove('active'); 
+            document.getElementById('tab-notes').classList.remove('active'); 
+            document.getElementById('tab-dpp').classList.remove('active'); 
+            document.getElementById('tab-' + type).classList.add('active');
+            
+            if (type === 'comments') {
+                let stableLectureId = "general_discussion";
+                if (AppState.currentChapter) {
+                    stableLectureId = "lec_" + AppState.currentChapter.replace(/\s+/g, '_');
+                }
+                CommentEngine.renderUI(content, stableLectureId);
+            } else if (type === 'notes') {
+                const pdf = VideoPlayer.currentClassroomData ? (VideoPlayer.currentClassroomData.attachedPdfUrl || VideoPlayer.currentClassroomData.pdfUrl) : '';
+                if (pdf && pdf !== 'undefined' && pdf !== '') {
+                    let safeTitle = VideoPlayer.currentClassroomData.title ? VideoPlayer.currentClassroomData.title.replace(/['"\\\\]/g, "") : "Study Notes"; 
+                    let safePdf = pdf.replace(/['"\\\\]/g, "");
+                    content.innerHTML = `<div style="margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Associated Documentation</div><div class="list-card" style="background: #fdf2f2; border-color: #fecaca;"><div class="card-icon" style="background: #ef4444; color: white;"><i class="fas fa-file-pdf"></i></div><div class="card-info"><div class="card-title">Class_Notes.pdf</div><div class="card-sub">Select to view</div></div><button onclick="openPDF('${safePdf}', '${safeTitle}')" style="background: #ef4444; border:none; padding: 8px 15px; color:white; border-radius:8px; font-weight:600; cursor:pointer;">Access</button></div>`;
+                } else { content.innerHTML = `<div class="empty-box"><i class="fas fa-file-excel"></i><h4>No supplementary materials attached.</h4></div>`; }
+            } else if (type === 'dpp') {
+                content.innerHTML = `<div class="empty-box"><i class="fas fa-tasks"></i><h4>Practice coming soon.</h4></div>`;
+            }
+        };
+
+        // ===========================================
+        // MAGIC ROUTER (AUTO START PLAYER FROM URL)
+        // ===========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const v = urlParams.get('v');
+            const title = urlParams.get('title') || 'Lecture';
+            const pdf = urlParams.get('pdf') || '';
+            const chapter = urlParams.get('chapter') || 'General';
+            
+            if(v) {
+                AppState.currentChapter = chapter; // Ye set hona zaruri hai taaki comments load ho sakein
+                setTimeout(() => {
+                    VideoPlayer.openVideo(v, title, pdf);
+                    window.switchClassroomTab('comments');
+                }, 500); 
+            }
+        });
+    </script>
+</body>
+</html>
