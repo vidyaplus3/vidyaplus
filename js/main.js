@@ -108,15 +108,13 @@ window.skipVideo = VideoPlayer.skipVideo;
 window.setSpeed = VideoPlayer.setSpeed;
 window.closeClassroom = VideoPlayer.closeVideo;
 window.openVideo = (vidUrl, title, pdfUrl) => {
-    // Agar hum pehle se player.html page par hi hain, toh bina rok-tok ke video chalao
-    if (window.location.pathname.includes('player.html')) {
-        VideoPlayer.openVideo(vidUrl, title, pdfUrl); 
-        window.switchClassroomTab('comments'); 
-    } else {
-        // Agar hum study.html par hain, toh saara data lekar naye page (player.html) par redirect kar jao
-        const url = `player.html?vidUrl=${encodeURIComponent(vidUrl)}&title=${encodeURIComponent(title)}&pdfUrl=${encodeURIComponent(pdfUrl || '')}`;
-        window.location.href = url;
-    }
+    // SECURE APPROACH: Data ko URL ki jagah browser ki secure session memory mein save karein
+    sessionStorage.setItem('vp_secure_vid', vidUrl);
+    sessionStorage.setItem('vp_secure_title', title);
+    sessionStorage.setItem('vp_secure_pdf', pdfUrl || '');
+    
+    // Bina kisi data ke clean URL par redirect karein
+    window.location.href = 'player.html';
 };
 
 window.showUI = VideoPlayer.showUI;
