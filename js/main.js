@@ -108,9 +108,17 @@ window.skipVideo = VideoPlayer.skipVideo;
 window.setSpeed = VideoPlayer.setSpeed;
 window.closeClassroom = VideoPlayer.closeVideo;
 window.openVideo = (vidUrl, title, pdfUrl) => {
-    VideoPlayer.openVideo(vidUrl, title, pdfUrl); 
-    window.switchClassroomTab('comments'); 
+    // Agar hum pehle se player.html page par hi hain, toh bina rok-tok ke video chalao
+    if (window.location.pathname.includes('player.html')) {
+        VideoPlayer.openVideo(vidUrl, title, pdfUrl); 
+        window.switchClassroomTab('comments'); 
+    } else {
+        // Agar hum study.html par hain, toh saara data lekar naye page (player.html) par redirect kar jao
+        const url = `player.html?vidUrl=${encodeURIComponent(vidUrl)}&title=${encodeURIComponent(title)}&pdfUrl=${encodeURIComponent(pdfUrl || '')}`;
+        window.location.href = url;
+    }
 };
+
 window.showUI = VideoPlayer.showUI;
 window.handleShieldClick = VideoPlayer.handleShieldClick;
 window.toggleSettings = VideoPlayer.toggleSettings;
