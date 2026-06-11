@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VidyaPlus Player</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/classroom.css">
+    <link rel="stylesheet" href="css/player.css">
+    
+    <style>
+        /* Dedicated page ke liye full-screen layout adjustments */
+        body { margin: 0; display: flex; flex-direction: column; height: 100vh; background: var(--bg-color); }
+        .player-page-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
+        @media (min-width: 768px) {
+            .player-page-container { flex-direction: row; padding: 20px; gap: 20px; align-items: stretch; }
+            .video-fixed-box { flex: 2.5; max-height: none; border-radius: 16px; }
+            .interaction-area { margin-top: 0; border-radius: 16px; height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-page-container" id="classroom-mode">
+        <div class="video-fixed-box" id="video-container">
+            <div class="close-classroom" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></div>
+            
+            <div style="width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative;" id="player-wrapper">
+                <div id="yt-player" style="width: 100%; height: 100%;"></div>
+                <video id="hls-player" class="video-js vjs-default-skin" style="width: 100%; height: 100%; display: none;" playsinline></video>
+            </div>
+            
+            <div class="tap-indicator left" id="tap-indicator-left"><i class="fas fa-undo"></i> 10s</div>
+            <div class="tap-indicator right" id="tap-indicator-right"><i class="fas fa-redo"></i> 10s</div>
+
+            <div class="security-shield" onclick="handleShieldClick()" oncontextmenu="return false;" style="position: absolute; inset: 0; z-index: 10; cursor: pointer;"></div>
+            <div id="video-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; color: rgba(255,255,255,0.2); font-weight: 800; font-size: 0.8rem; z-index: 50;">VidyaPlus Secure</div>
+
+            <div class="custom-controls" id="custom-controls">
+                <div class="controls-row-top" style="display: flex; align-items: center; gap: 14px; width: 100%;">
+                    <div class="time-display" id="time-current">0:00</div>
+                    <div class="progress-bar-bg" id="progress-bg" onmousedown="startDrag(event)" onmousemove="doDrag(event)" onmouseup="stopDrag(event)" onmouseleave="stopDrag(event)" ontouchstart="startDrag(event)" ontouchmove="doDrag(event)" ontouchend="stopDrag(event)"><div class="progress-fill" id="progress-fill"></div><div class="progress-tooltip" id="progress-tooltip">0:00</div></div>
+                    <div class="time-display" id="time-duration">0:00</div>
+                </div>
+                <div class="controls-row-bottom" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px;">
+                    <div class="ctrl-group-left" style="display: flex; align-items: center; gap: 20px;">
+                        <button class="ctrl-btn" onclick="togglePlay()"><i class="fas fa-play" id="play-icon"></i></button>
+                        <button class="ctrl-btn skip-btn" onclick="skipVideo(-10)"><i class="fas fa-undo"></i><span class="skip-label">10</span></button>
+                        <button class="ctrl-btn skip-btn" onclick="skipVideo(10)"><i class="fas fa-redo"></i><span class="skip-label">10</span></button>
+                        <div class="volume-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="ctrl-btn" onclick="toggleMute()"><i class="fas fa-volume-mute" id="mute-icon"></i></button>
+                            <div class="volume-slider-container" style="width: 75px; display: flex; align-items: center;"><input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0" style="background: linear-gradient(to right, #FFFFFF 0%, rgba(255, 255, 255, 0.25) 0%);" oninput="window.setVolume && window.setVolume(this.value)"></div>
+                        </div>
+                    </div>
+                    <div class="ctrl-group-right" style="display: flex; align-items: center; gap: 20px;">
+                        <button class="ctrl-btn" onclick="toggleSettings(event)"><i class="fas fa-cog"></i></button>
+                        <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+                </div>
+        </div> 
+        
+        <div class="interaction-area">
+            <div class="classroom-tabs">
+                <div class="tab-pill active" id="tab-comments" onclick="switchClassroomTab('comments')"><i class="fas fa-comments"></i> Discussion</div>
+                <div class="tab-pill" id="tab-notes" onclick="switchClassroomTab('notes')"><i class="fas fa-file-pdf"></i> Notes</div>
+                <div class="tab-pill" id="tab-dpp" onclick="switchClassroomTab('dpp')"><i class="fas fa-tasks"></i> Practice</div>
+            </div>
+            <div class="tab-content-area" id="classroom-dynamic-content"></div>
+        </div>
+    </div>
+
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+    
+    <script type="module">
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const vidUrl = params.get('vidUrl');
+            const title = params.get('title');
+            const pdfUrl = params.get('pdfUrl');
+            
+            if(vidUrl) {
+                // Thoda delay taaki main.js ke functions load ho jayein
+                setTimeout(() => {
+                    window.openVideo(vidUrl, title, pdfUrl);
+                }, 300); 
+            }
+        });
+    </script>
+</body>
+</html>
+
