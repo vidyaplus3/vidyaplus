@@ -12,8 +12,9 @@
     <link rel="stylesheet" href="css/classroom.css">
     <link rel="stylesheet" href="css/player.css">
     
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
     <style>
-        /* Dedicated page ke liye full-screen layout adjustments */
         body { margin: 0; display: flex; flex-direction: column; height: 100vh; background: var(--bg-color); }
         .player-page-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
         @media (min-width: 768px) {
@@ -24,7 +25,7 @@
     </style>
 </head>
 <body>
-    <div class="player-page-container" id="classroom-mode">
+    <div class="player-page-container classroom-overlay active" id="classroom-mode">
         <div class="video-fixed-box" id="video-container">
             <div class="close-classroom" onclick="window.history.back()"><i class="fas fa-arrow-left"></i></div>
             
@@ -60,7 +61,31 @@
                         <button class="ctrl-btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
                     </div>
                 </div>
+                
+                <div class="settings-menu" id="settings-menu" onclick="event.stopPropagation()">
+                    <div class="settings-menu-item" onclick="document.getElementById('speed-dropdown').classList.toggle('show'); document.getElementById('quality-dropdown').classList.remove('show');">
+                        <span>Playback Speed</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+                    </div>
+                    <div class="settings-submenu-list" id="speed-dropdown">
+                        <div class="speed-opt" id="spd-0.75" onclick="setSpeed(0.75)">0.75x</div>
+                        <div class="speed-opt active" id="spd-1" onclick="setSpeed(1)">Normal</div>
+                        <div class="speed-opt" id="spd-1.25" onclick="setSpeed(1.25)">1.25x</div>
+                        <div class="speed-opt" id="spd-1.5" onclick="setSpeed(1.5)">1.5x</div>
+                        <div class="speed-opt" id="spd-2" onclick="setSpeed(2)">2x</div>
+                    </div>
+                    <div class="settings-menu-item" onclick="document.getElementById('quality-dropdown').classList.toggle('show'); document.getElementById('speed-dropdown').classList.remove('show');">
+                        <div>Quality <span class="badge-na" id="quality-badge" style="display:none;">AUTO</span></div>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+                    </div>
+                    <div class="settings-submenu-list" id="quality-dropdown">
+                        <div class="quality-opt active" onclick="window.setQuality && window.setQuality('auto')">Auto</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('1080')">1080p</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('720')">720p</div>
+                        <div class="quality-opt" onclick="window.setQuality && window.setQuality('480')">480p</div>
+                    </div>
                 </div>
+            </div>
         </div> 
         
         <div class="interaction-area">
@@ -72,78 +97,74 @@
             <div class="tab-content-area" id="classroom-dynamic-content"></div>
         </div>
     </div>
-    
-    <script type="module">
-    import { VideoPlayer } from './js/player/index.js';
-    import { auth } from './js/firebase-init.js';
-    import { AppState } from './js/auth.js'; 
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const vidUrl = sessionStorage.getItem('vp_secure_vid');
-        const title = sessionStorage.getItem('vp_secure_title');
-        const pdfUrl = sessionStorage.getItem('vp_secure_pdf');
-        const chapter = sessionStorage.getItem('vp_secure_chapter');
-        
-        if (!vidUrl) {
-            window.location.replace('study.html');
-            return;
-        }
-
-        // 1. Pehle check karo ki Firebase Auth ready hai (No unauthorized or null token crashes)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Chapter context restore karein taaki sahi comments load hon
-                if (AppState && chapter) {
-                    AppState.currentChapter = chapter;
-                }
-
-                let attempts = 0;
-                function tryStartPlayer() {
-                    let isYoutube = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-                    
-                    if (isYoutube) {
-                        // 2. Check karo ki YouTube Engine active hua ya nahi
-                        if (typeof YT !== 'undefined' && YT.Player) {
-                            VideoPlayer.openVideo(vidUrl, title, pdfUrl);
-                            if (typeof window.switchClassroomTab === 'function') {
-                                window.switchClassroomTab('comments');
-                            }
-                        } else {
-                            attempts++;
-                            if (attempts < 50) { // Max 5 seconds polling
-                                setTimeout(tryStartPlayer, 100);
-                            } else {
-                                alert("Video engine loading timeout. Please refresh.");
-                            }
-                        }
-                    } else {
-                        // 3. Check karo ki Video.js (HLS) Engine ready hai ya nahi
-                        if (typeof videojs !== 'undefined') {
-                            VideoPlayer.openVideo(vidUrl, title, pdfUrl);
-                            if (typeof window.switchClassroomTab === 'function') {
-                                window.switchClassroomTab('comments');
-                            }
-                        } else {
-                            attempts++;
-                            if (attempts < 50) {
-                                setTimeout(tryStartPlayer, 100);
-                            }
-                        }
-                    }
-                }
-                tryStartPlayer();
-            } else {
-                // Agar user logged in nahi hai toh seedha login window bhej do
-                window.location.replace('/');
-            }
-        });
-    });
-    </script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script type="module" src="js/main.js"></script>
     
-    
+    <script type="module">
+        import { VideoPlayer } from './js/player/index.js';
+        import { auth } from './js/firebase-init.js';
+        import { AppState } from './js/auth.js'; 
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const vidUrl = sessionStorage.getItem('vp_secure_vid');
+            const title = sessionStorage.getItem('vp_secure_title');
+            const pdfUrl = sessionStorage.getItem('vp_secure_pdf');
+            const chapter = sessionStorage.getItem('vp_secure_chapter');
+            
+            if (!vidUrl) {
+                window.location.replace('study.html');
+                return;
+            }
+
+            // 1. Pehle Firebase Auth ka wait karein (Anti-Crash Security 🛡️)
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // Shuruat mein hi Chapter restore kar do taaki comments ka stable ID sahi bane
+                    if (AppState && chapter) {
+                        AppState.currentChapter = chapter;
+                    }
+
+                    let pollingAttempts = 0;
+                    function checkEnginesAndStart() {
+                        let isYoutube = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+                        
+                        if (isYoutube) {
+                            // 2. YouTube Engine ready hone ka wait karein
+                            if (typeof YT !== 'undefined' && YT.Player) {
+                                VideoPlayer.openVideo(vidUrl, title, pdfUrl);
+                                // Chhota sa layout paint delay taaki comments crash na hon
+                                setTimeout(() => {
+                                    if (typeof window.switchClassroomTab === 'function') {
+                                        window.switchClassroomTab('comments');
+                                    }
+                                }, 150);
+                            } else {
+                                pollingAttempts++;
+                                if (pollingAttempts < 50) setTimeout(checkEnginesAndStart, 100);
+                            }
+                        } else {
+                            // 3. HLS/Video.js ready hone ka wait karein
+                            if (typeof videojs !== 'undefined') {
+                                VideoPlayer.openVideo(vidUrl, title, pdfUrl);
+                                setTimeout(() => {
+                                    if (typeof window.switchClassroomTab === 'function') {
+                                        window.switchClassroomTab('comments');
+                                    }
+                                }, 150);
+                            } else {
+                                pollingAttempts++;
+                                if (pollingAttempts < 50) setTimeout(checkEnginesAndStart, 100);
+                            }
+                        }
+                    }
+                    checkEnginesAndStart();
+                } else {
+                    window.location.replace('/');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
-
