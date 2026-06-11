@@ -161,26 +161,21 @@ export const VideoPlayer = {
         }
     },
 
-    closeVideo: (isFromPopState) => {
+        closeVideo: () => {
         const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
         if (isFullscreen) {
             if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
             else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         }
-
-        const overlay = document.getElementById('classroom-mode');
-        if (overlay && overlay.classList.contains('active')) {
-            window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
-            PlayerUI.stopProgressTracking();
-            const engine = VideoPlayer.getEngine();
-            if(engine) engine.pause();
-            overlay.classList.remove('active'); 
-            
-            if (isFromPopState !== true) {
-                window.history.back(); 
-            }
-        }
+        window.dispatchEvent(new CustomEvent('vp-yt-pause')); 
+        PlayerUI.stopProgressTracking();
+        const engine = VideoPlayer.getEngine();
+        if(engine) engine.pause();
+        
+        // Seedha back bhej dein
+        window.history.back(); 
     },
+    
 
     togglePlay: () => {
         const engine = VideoPlayer.getEngine();
