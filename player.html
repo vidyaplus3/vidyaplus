@@ -8,7 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/classroom.css">
     <link rel="stylesheet" href="css/player.css">
     
@@ -98,6 +100,24 @@
         </div>
     </div>
 
+    <div class="pdf-overlay" id="pdf-mode">
+        <div class="pdf-header">
+            <div class="pdf-back" onclick="closePDF()"><i class="fas fa-arrow-left"></i></div>
+            <div class="pdf-title-box">
+                <h3 id="pdf-dyn-title">Study Notes</h3>
+                <span class="pdf-badge">SECURE READER</span>
+            </div>
+            <div class="pdf-actions">
+                <button class="pdf-action-btn" onclick="togglePDFFull()"><i class="fas fa-expand"></i></button>
+            </div>
+        </div>
+        <div class="pdf-container" id="pdf-viewer-container">
+            <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
+            <div class="pdf-shield" oncontextmenu="return false;"></div>
+            <div class="pdf-watermark" id="pdf-watermark-text">Vidyaplus Secure</div>
+        </div>
+    </div>
+
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-quality-levels@4.1.0/dist/videojs-contrib-quality-levels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.min.js"></script>
@@ -122,10 +142,9 @@
                 return;
             }
 
-            // 1. Pehle Firebase Auth ka wait karein (Anti-Crash Security 🛡️)
+            // 1. Pehle Firebase Auth ka wait karein
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // Shuruat mein hi Chapter restore kar do taaki comments ka stable ID sahi bane
                     if (AppState && chapter) {
                         AppState.currentChapter = chapter;
                     }
@@ -135,10 +154,8 @@
                         let isYoutube = vidUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
                         
                         if (isYoutube) {
-                            // 2. YouTube Engine ready hone ka wait karein
                             if (typeof YT !== 'undefined' && YT.Player) {
                                 VideoPlayer.openVideo(vidUrl, title, pdfUrl);
-                                // Chhota sa layout paint delay taaki comments crash na hon
                                 setTimeout(() => {
                                     if (typeof window.switchClassroomTab === 'function') {
                                         window.switchClassroomTab('comments');
@@ -149,7 +166,6 @@
                                 if (pollingAttempts < 50) setTimeout(checkEnginesAndStart, 100);
                             }
                         } else {
-                            // 3. HLS/Video.js ready hone ka wait karein
                             if (typeof videojs !== 'undefined') {
                                 VideoPlayer.openVideo(vidUrl, title, pdfUrl);
                                 setTimeout(() => {
