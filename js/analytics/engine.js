@@ -9,8 +9,8 @@ const CONFIG = Object.freeze({
     MAX_RETRIES: 3
 });
 
-const SUPA_URL = "https://ukbkyyfvjvdurnvfdwur.supabase.co";
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYmt5eWZ2anZkdXJudmZkd3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQzMjgsImV4cCI6MjA5NTM5MDMyOH0.Ex2duv8tgKe6YrnmlapY6g_bjReSl-x-3lb5QN9iNUA";
+// 🛡️ SECURITY FIX: Supabase keys removed from frontend. Routing through private backend.
+const BACKEND_URL = "https://vidyaplus-backend.vercel.app";
 
 const SecureState = Object.seal({
     validPendingSeconds: 0, 
@@ -19,13 +19,13 @@ const SecureState = Object.seal({
     syncTimerId: null
 });
 
-// 🔥 SAFE PARSER: LocalStorage se NaN / null values ko safely handle karega
+// 櫨 SAFE PARSER: LocalStorage se NaN / null values ko safely handle karega
 const getSafeLocalInt = (key) => {
     const val = parseInt(localStorage.getItem(key), 10);
     return isNaN(val) ? 0 : val;
 };
 
-// 🔥 Cross-Tab Communication Channel (Anti-Multi-Tab Tracking)
+// 櫨 Cross-Tab Communication Channel (Anti-Multi-Tab Tracking)
 const tabChannel = new BroadcastChannel('vp-analytics-channel');
 
 const workerCode = `
@@ -47,7 +47,7 @@ timerWorker.onmessage = (e) => {
         SecureState.validPendingSeconds += 1;
         SecureState.dailySessionSeconds += 1;
         
-        // 🔥 FIX: Using Safe Parser here
+        // 櫨 FIX: Using Safe Parser here
         let currentLocalTotal = getSafeLocalInt('vp_total_sec');
         localStorage.setItem('vp_total_sec', currentLocalTotal + 1);
         
@@ -88,7 +88,7 @@ const pauseStopwatch = () => {
     timerWorker.postMessage('STOP');
 };
 
-let isSyncInProgress = false; // 🔥 Global Lock flag to prevent duplicate calls
+let isSyncInProgress = false; // 櫨 Global Lock flag to prevent duplicate calls
 
 const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
     // Race Condition Prevention
@@ -119,7 +119,7 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
         const fetchOptions = {
             method: 'POST',
             headers: { 
-                'apikey': SUPA_KEY, 
+                // 🛡️ SECURITY FIX: Apikey yahan se hata di gayi hai.
                 'Authorization': `Bearer ${token}`, 
                 'Content-Type': 'application/json' 
             },
@@ -127,7 +127,8 @@ const syncToCloud = async (isClosingTab = false, retryCount = 0) => {
             keepalive: isClosingTab 
         };
 
-        const response = await fetch(`${SUPA_URL}/rest/v1/rpc/update_telemetry`, fetchOptions);
+        // 🛡️ SECURITY FIX: Request directly tumhare Vercel backend ko jayegi.
+        const response = await fetch(`${BACKEND_URL}/api/updateTelemetry`, fetchOptions);
         if(!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
         console.log(`[VidyaPlus Pro Engine] Synced +${finalSyncSeconds}s`);
@@ -159,7 +160,7 @@ const initializeDailySession = () => {
         localStorage.setItem('vp_daily_sec', 0);
         localStorage.setItem('vp_active_date', todayStr);
     } else {
-        // 🔥 FIX: Using Safe Parser here too
+        // 櫨 FIX: Using Safe Parser here too
         SecureState.dailySessionSeconds = getSafeLocalInt('vp_daily_sec');
     }
 };
