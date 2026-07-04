@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const audio = document.getElementById('bday-audio');
     
     // Typewriter Message (Yeh apne aap type hoga)
-    const specialMessage = "Happy Birthday Pooja! 🥳 Hamesha aise hi khush reh, mast reh, aur haan... party dena mat bhoolna! 🍕🎁 - Tera Dost, Sudhir.";
+    const specialMessage = "Happy Birthday Pooja! 🥳 Hamesha aise hi khush reh, mast reh, aur haan... party dena mat bhoolna! 🍕🎁 - your friend, Sudhir.";
     let i = 0;
     
     function typeWriter() {
