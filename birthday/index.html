@@ -3,24 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday, Dost! 🎉</title>
+    <title>Happy Birthday! 🎂</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card-container">
-        <div class="birthday-card">
-            <h1 class="title">Happy Birthday! 🎂</h1>
-            <p class="message">Story toh sabhi lagate hain, par tere liye poori website bana di! Yeh hai tera special digital surprise. 😉</p>
-            <button id="surpriseBtn">Click for Surprise! ✨</button>
-            <div id="hiddenMessage" class="hidden">
-                <h2>You are the best! 🥳</h2>
-                <p>Hamesha aise hi hanste-muskurate raho aur party dena mat bhoolna! 🍕🥤</p>
+    <!-- Background Moving Shapes -->
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+
+    <div class="glass-card">
+        <h1 class="glow-text">Happy Birthday! 🎉</h1>
+        <p class="subtitle">Story toh sabhi lagate hain, yeh tera VIP digital gift hai!</p>
+        
+        <div id="surprise-section" class="hidden">
+            <!-- Audio File (Apne gaane ka link yahan daalein) -->
+            <audio id="bday-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+            
+            <!-- Photo Slider -->
+            <div class="slider-container">
+                <img id="slider-img" src="https://via.placeholder.com/300x200?text=Your+Photo+1" alt="Memory 1">
             </div>
+
+            <h2 class="success-text">Cheers to more memories! 🍻</h2>
+            <p>Hamesha aise hi mast reh aur party dene ke liye taiyar reh! 🍕</p>
         </div>
+
+        <button id="start-btn">Tap to Unwrap Surprise 🎁</button>
     </div>
+
     <div id="confetti-container"></div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
