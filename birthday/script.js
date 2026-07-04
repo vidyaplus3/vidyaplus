@@ -1,34 +1,69 @@
-document.getElementById('surpriseBtn').addEventListener('click', function() {
-    // Hidden message dikhao
-    document.getElementById('hiddenMessage').classList.remove('hidden');
-    this.style.display = 'none'; // Button ko hide kar do
+// Apni photos ke links yahan daaliye
+const images = [
+    "https://via.placeholder.com/400x300?text=Pic+1", // Photo 1 link
+    "https://via.placeholder.com/400x300?text=Pic+2", // Photo 2 link
+    "https://via.placeholder.com/400x300?text=Pic+3"  // Photo 3 link
+];
 
-    // Confetti / Emoji burst effect
-    createConfetti();
+let currentImageIndex = 0;
+const sliderImg = document.getElementById('slider-img');
+const audio = document.getElementById('bday-audio');
+
+document.getElementById('start-btn').addEventListener('click', function() {
+    // UI changes
+    this.style.display = 'none';
+    document.getElementById('surprise-section').classList.remove('hidden');
+    
+    // Play Music
+    audio.play();
+
+    // Start Image Slider (Har 3 second mein photo change hogi)
+    setInterval(() => {
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        sliderImg.src = images[currentImageIndex];
+    }, 3000);
+
+    // Advanced Confetti
+    startConfetti();
 });
 
-function createConfetti() {
+function startConfetti() {
     const container = document.getElementById('confetti-container');
-    const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6'];
-    const emojis = ['🎉', '🎈', '🎂', '🥳', '✨'];
+    const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#ff69b4', '#ffd700'];
+    const emojis = ['🎈', '✨', '🎉', '🎊', '🎁'];
 
-    for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        
-        // Random style aur positions
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.animationDelay = Math.random() * 2 + 's';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        
-        // Kabhi kabhi emoji daal do color block ki jagah
-        if (Math.random() > 0.5) {
-            confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            confetti.style.background = 'none';
-            confetti.style.fontSize = '20px';
-        }
+    // Create 100 confetti pieces
+    for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // Random properties
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-5vh';
+            
+            // Mix of colors and emojis
+            if (Math.random() > 0.4) {
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                // Some square, some round
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            } else {
+                confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                confetti.style.background = 'transparent';
+                confetti.style.fontSize = Math.random() * 15 + 15 + 'px';
+            }
 
-        container.appendChild(confetti);
+            // Random animation duration
+            const duration = Math.random() * 3 + 2;
+            confetti.style.animationDuration = duration + 's';
+            
+            container.appendChild(confetti);
+
+            // Clean up DOM
+            setTimeout(() => {
+                confetti.remove();
+            }, duration * 1000);
+            
+        }, i * 50); // Staggered drop effect
     }
 }
-
