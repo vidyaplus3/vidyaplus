@@ -1,4 +1,5 @@
-// Apne images folder ke paths yahan
+// Apne images folder ke paths
+
 const images = [
     "images/pooja1.png",  // Pehli photo ka path
     "images/pooja2.png",  // Doosri photo ka path
