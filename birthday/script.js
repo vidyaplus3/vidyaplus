@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", function() {
     
-    const image = [
-        "images/pooja1.png",  
-        "images/pooja2.png",  
-        "images/pooja3.png",   
-        "images/pooja4.png",
-        "images/pooja5.png",
-        "images/pooja6.png"
+    const images = [
+        "image/pooja1.png",  
+        "image/pooja2.png",  
+        "image/pooja3.png",   
+        "image/pooja4.png",
+        "image/pooja5.png",
+        "image/pooja6.png"
     ];
 
     let currentImageIndex = 0;
