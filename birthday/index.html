@@ -7,14 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Background Moving Shapes -->
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-
     <div class="glass-card">
         <h1 class="glow-text">Happy Birthday Pooja! 🎉</h1>
-        <p class="subtitle"> some of your memories ! <br><b>~ From Sudhir ✨</b></p>
+        <p class="subtitle"> this is your digital gift ! <br><span class="highlight-text">~ From Sudhir ✨</span></p>
         
         <button id="start-btn" class="pulse-btn">Tap to Unwrap Surprise 🎁</button>
 
@@ -22,9 +17,9 @@
             <!-- Audio File -->
             <audio id="bday-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
             
-            <!-- Photo Slider -->
+            <!-- Optimized Photo Slider -->
             <div class="slider-container">
-                <img id="slider-img" src="image/pooja1.png" alt="Memory">
+                <img id="slider-img" src="image/pooja1.png" alt="Memory" class="fade-anim">
             </div>
 
             <!-- Typewriter Special Message -->
@@ -34,6 +29,7 @@
         </div>
     </div>
 
+    <!-- Hardware Accelerated Confetti Container -->
     <div id="confetti-container"></div>
 
     <script src="script.js"></script>
