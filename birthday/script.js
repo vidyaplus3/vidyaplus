@@ -1,3 +1,5 @@
+
+
 document.addEventListener("DOMContentLoaded", function() {
     
     // 1. Apne images folder ke paths (Commas fix kar diye gaye hain)
