@@ -1,11 +1,10 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
 body {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
+    background: linear-gradient(45deg, #0f2027, #203a43, #2c5364); /* Premium Dark Theme */
     background-size: 400% 400%;
     animation: gradientBG 10s ease infinite;
     height: 100vh;
@@ -28,104 +27,116 @@ body {
     z-index: -1;
     border-radius: 50%;
 }
-.shape-1 {
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.3);
-    top: -50px;
-    left: -50px;
-    animation: float 6s ease-in-out infinite;
-}
-.shape-2 {
-    width: 400px;
-    height: 400px;
-    background: rgba(253, 187, 45, 0.4);
-    bottom: -100px;
-    right: -100px;
-    animation: float 8s ease-in-out infinite reverse;
-}
+.shape-1 { width: 300px; height: 300px; background: rgba(255, 94, 98, 0.4); top: -50px; left: -50px; animation: float 6s ease-in-out infinite; }
+.shape-2 { width: 400px; height: 400px; background: rgba(46, 213, 115, 0.3); bottom: -100px; right: -100px; animation: float 8s ease-in-out infinite reverse; }
+.shape-3 { width: 200px; height: 200px; background: rgba(30, 144, 255, 0.4); top: 50%; left: 50%; animation: float 5s ease-in-out infinite; }
 
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(30px); }
-    100% { transform: translateY(0px); }
+    0% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(30px) scale(1.1); }
+    100% { transform: translateY(0px) scale(1); }
 }
 
-/* Glassmorphism Card */
+/* Glassmorphism Card (FRAME BADA KIYA HAI YAHAN) */
 .glass-card {
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 25px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     text-align: center;
-    max-width: 450px;
+    width: 90%; /* Mobile ke liye safe */
+    max-width: 650px; /* Pehle 450px tha, ab 650px kar diya */
     color: white;
     z-index: 10;
 }
 
 .glow-text {
-    font-size: 2.5rem;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px #fdbb2d;
+    font-size: 2.8rem;
+    color: #fff;
+    text-shadow: 0 0 10px #ff9966, 0 0 20px #ff5e62;
     margin-bottom: 10px;
 }
 
 .subtitle {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     margin-bottom: 30px;
     opacity: 0.9;
+    line-height: 1.5;
 }
 
-/* Button Styling */
-button {
+/* Pulsing Button Styling */
+.pulse-btn {
     background: linear-gradient(90deg, #ff9966, #ff5e62);
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 15px 35px;
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 800;
     border-radius: 50px;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(255, 94, 98, 0.5);
-    transition: transform 0.3s, box-shadow 0.3s;
+    animation: pulse 2s infinite;
+    transition: all 0.3s;
 }
 
-button:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 94, 98, 0.8);
+.pulse-btn:hover {
+    transform: scale(1.1);
+    animation: none;
+    box-shadow: 0 8px 30px rgba(255, 94, 98, 0.8);
 }
 
-.hidden {
-    display: none;
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 94, 98, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 94, 98, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 94, 98, 0); }
 }
 
-/* Slider */
+.hidden { display: none; }
+
+/* Photo Slider (PHOTO FRAME BADA KIYA HAI YAHAN) */
 .slider-container {
     width: 100%;
-    height: 200px;
+    height: 350px; /* Pehle 220px tha, ab 350px kar diya */
+    max-height: 45vh; /* Taaki chhote phone screen pe photo poori screen na gher le */
     border-radius: 15px;
     overflow: hidden;
     margin: 20px 0;
-    border: 3px solid rgba(255, 255, 255, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
 
 .slider-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    animation: fade 1s ease-in-out;
+    animation: fade 0.8s ease-in-out;
+}
+
+/* Message Box */
+.message-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 15px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .success-text {
     color: #ffd700;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.6;
     text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 @keyframes fade {
-    from { opacity: 0.4; }
-    to { opacity: 1; }
+    from { opacity: 0.5; transform: scale(1.05); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 /* Confetti */
