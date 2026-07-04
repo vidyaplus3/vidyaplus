@@ -1,14 +1,19 @@
-// Apni photos ke links yahan daaliye
+// Apne images folder ke paths yahan daaliye
 const images = [
-    "https://via.placeholder.com/400x300?text=Pic+1", // Photo 1 link
-    "https://via.placeholder.com/400x300?text=Pic+2", // Photo 2 link
-    "https://via.placeholder.com/400x300?text=Pic+3"  // Photo 3 link
+    "images/pooja1.png",  // Pehli photo ka path
+    "images/pooja2.png",  // Doosri photo ka path
+    "images/pooja3.png"   // Teesri photo ka path (agar png hai toh .png likhein)
+    "images/pooja4.png"
+"images/pooja5.png"
+"images/pooja6.png"
+
 ];
 
 let currentImageIndex = 0;
 const sliderImg = document.getElementById('slider-img');
 const audio = document.getElementById('bday-audio');
 
+// ... (Baaki ka poora code same rahega) ...
 document.getElementById('start-btn').addEventListener('click', function() {
     // UI changes
     this.style.display = 'none';
