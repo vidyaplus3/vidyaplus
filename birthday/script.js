@@ -1,3 +1,16 @@
+document.addEventListener("DOMContentLoaded", function() {
+    // Yahan se apna sara code start karo...
+    
+    // Example:
+    document.getElementById('start-btn').addEventListener('click', function() {
+        console.log("Button click hua!"); // Ye console mein check karne ke liye
+        this.style.display = 'none';
+        document.getElementById('surprise-section').classList.remove('hidden');
+        // Baaki code...
+    });
+
+    // ...baaki function (createConfetti etc.) yahan end mein band karo
+}); 
 // Apne images folder ke paths
 
 const images = [
