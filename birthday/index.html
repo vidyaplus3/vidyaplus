@@ -3,33 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday! 🎂</title>
+    <title>Happy Birthday Pooja! 🎂</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Background Moving Shapes -->
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
 
     <div class="glass-card">
-        <h1 class="glow-text">Happy Birthday! 🎉</h1>
-        <p class="subtitle">Story toh sabhi lagate hain, yeh tera VIP digital gift hai!</p>
+        <h1 class="glow-text">Happy Birthday Pooja! 🎉</h1>
+        <p class="subtitle">Story toh sab lagate hain, yeh tera VIP digital gift hai! <br><b>~ From Sudhir ✨</b></p>
         
+        <button id="start-btn" class="pulse-btn">Tap to Unwrap Surprise 🎁</button>
+
         <div id="surprise-section" class="hidden">
-            <!-- Audio File (Apne gaane ka link yahan daalein) -->
-            <audio id="bday-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+            <!-- Audio File -->
+            <audio id="bday-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
             
             <!-- Photo Slider -->
             <div class="slider-container">
-                <img id="slider-img" src="image/pooja1.png" alt="Memory 1">
-                
+                <img id="slider-img" src="image/pooja1.png" alt="Memory">
             </div>
 
-            <h2 class="success-text">Cheers to more memories! 🍻</h2>
-            <p>Hamesha aise hi mast reh aur party dene ke liye taiyar reh! 🍕</p>
+            <!-- Typewriter Special Message -->
+            <div class="message-box">
+                <p id="typewriter-text" class="success-text"></p>
+            </div>
         </div>
-
-        <button id="start-btn">Tap to Unwrap Surprise 🎁</button>
     </div>
 
     <div id="confetti-container"></div>
